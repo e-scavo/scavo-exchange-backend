@@ -1,0 +1,742 @@
+// // SCAVO Exchange Backend (Go) — Base Repo (nhooyr.io/websocket)
+// //
+// // ✅ Backend exclusivo para SCAVO Exchange (no comparte nada con otros proyectos)
+// // ✅ Stack: net/http + chi + nhooyr websocket + slog (JSON)
+// // ✅ Incluye: config por ENV, router con middleware, health/version, WS hub, protocolo base con correlation-id
+// // ✅ Repo/module: github.com/e-scavo/scavo-exchange-backend
+// //
+// // -----------------------------------------------------------------------------
+// // 0) Estructura de carpetas
+// // -----------------------------------------------------------------------------
+// // scavo-exchange-backend/
+// //   go.mod
+// //   cmd/
+// //     scavo-server/
+// //       main.go
+// //   internal/
+// //     app/
+// //       app.go
+// //       config.go
+// //     core/
+// //       logger/
+// //         logger.go
+// //       httpx/
+// //         middleware.go
+// //         router.go
+// //       ws/
+// //         hub.go
+// //         protocol.go
+// //         handler.go
+// //         client.go
+// //   Makefile
+// //   .gitignore
+// //   README.md
+// //
+// // -----------------------------------------------------------------------------
+// // 1) go.mod
+// // -----------------------------------------------------------------------------
+// // module github.com/e-scavo/scavo-exchange-backend
+// //
+// // go 1.23
+// //
+// // require (
+// //   github.com/go-chi/chi/v5 v5.0.12
+// //   github.com/go-chi/cors v1.2.1
+// //   github.com/google/uuid v1.6.0
+// //   nhooyr.io/websocket v1.8.10
+// // )
+// //
+// // -----------------------------------------------------------------------------
+// // 2) cmd/scavo-server/main.go
+// // -----------------------------------------------------------------------------
+// package main
+
+// import (
+// 	"context"
+// 	"log"
+// 	"os"
+// 	"os/signal"
+// 	"syscall"
+// 	"time"
+
+// 	"github.com/e-scavo/scavo-exchange-backend/internal/app"
+// )
+
+// func main() {
+// 	cfg, err := app.LoadConfigFromEnv()
+// 	if err != nil {
+// 		log.Fatalf("config error: %v", err)
+// 	}
+
+// 	a := app.New(cfg)
+
+// 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+// 	defer stop()
+
+// 	if err := a.Start(ctx); err != nil {
+// 		log.Fatalf("start error: %v", err)
+// 	}
+
+// 	<-ctx.Done()
+
+// 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+// 	defer cancel()
+
+// 	_ = a.Stop(shutdownCtx)
+// }
+
+// // -----------------------------------------------------------------------------
+// // 3) internal/app/config.go
+// // -----------------------------------------------------------------------------
+// package app
+
+// import (
+// 	"fmt"
+// 	"os"
+// 	"strconv"
+// 	"strings"
+// )
+
+// type Config struct {
+// 	Env           string // local|staging|prod
+// 	HTTPAddr      string // :8080
+// 	PublicBaseURL string // optional, e.g. https://api.scavo.exchange
+
+// 	// CORS
+// 	CORSAllowOrigins []string
+
+// 	// Build info (optional)
+// 	Version string
+// 	Commit  string
+// }
+
+// func LoadConfigFromEnv() (Config, error) {
+// 	c := Config{}
+
+// 	c.Env = getenv("SCAVO_ENV", "local")
+// 	c.HTTPAddr = getenv("SCAVO_HTTP_ADDR", ":8080")
+// 	c.PublicBaseURL = getenv("SCAVO_PUBLIC_BASE_URL", "")
+
+// 	allowOrigins := getenv("SCAVO_CORS_ALLOW_ORIGINS", "*")
+// 	c.CORSAllowOrigins = splitCSV(allowOrigins)
+
+// 	c.Version = getenv("SCAVO_VERSION", "dev")
+// 	c.Commit = getenv("SCAVO_COMMIT", "")
+
+// 	if !strings.HasPrefix(c.HTTPAddr, ":") && !strings.Contains(c.HTTPAddr, ":") {
+// 		// allow bare port: 8080
+// 		if _, err := strconv.Atoi(c.HTTPAddr); err == nil {
+// 			c.HTTPAddr = ":" + c.HTTPAddr
+// 		} else {
+// 			return c, fmt.Errorf("invalid SCAVO_HTTP_ADDR: %q", c.HTTPAddr)
+// 		}
+// 	}
+
+// 	return c, nil
+// }
+
+// func getenv(k, def string) string {
+// 	v := strings.TrimSpace(os.Getenv(k))
+// 	if v == "" {
+// 		return def
+// 	}
+// 	return v
+// }
+
+// func splitCSV(v string) []string {
+// 	parts := strings.Split(v, ",")
+// 	out := make([]string, 0, len(parts))
+// 	for _, p := range parts {
+// 		s := strings.TrimSpace(p)
+// 		if s == "" {
+// 			continue
+// 		}
+// 		out = append(out, s)
+// 	}
+// 	if len(out) == 0 {
+// 		return []string{"*"}
+// 	}
+// 	return out
+// }
+
+// // -----------------------------------------------------------------------------
+// // 4) internal/app/app.go
+// // -----------------------------------------------------------------------------
+// package app
+
+// import (
+// 	"context"
+// 	"net/http"
+
+// 	"github.com/e-scavo/scavo-exchange-backend/internal/core/httpx"
+// 	"github.com/e-scavo/scavo-exchange-backend/internal/core/logger"
+// 	"github.com/e-scavo/scavo-exchange-backend/internal/core/ws"
+// )
+
+// type App struct {
+// 	cfg    Config
+// 	log    *logger.Logger
+// 	server *http.Server
+
+// 	hub *ws.Hub
+// }
+
+// func New(cfg Config) *App {
+// 	lg := logger.New(cfg.Env)
+// 	hub := ws.NewHub(lg)
+
+// 	r := httpx.NewRouter(httpx.RouterParams{
+// 		Log:    lg,
+// 		Hub:    hub,
+// 		Config: cfg,
+// 	})
+
+// 	srv := &http.Server{
+// 		Addr:    cfg.HTTPAddr,
+// 		Handler: r,
+// 	}
+
+// 	return &App{cfg: cfg, log: lg, server: srv, hub: hub}
+// }
+
+// func (a *App) Start(ctx context.Context) error {
+// 	// Start WS hub
+// 	go a.hub.Run(ctx)
+
+// 	// Start HTTP server
+// 	a.log.Info("http server starting", "addr", a.cfg.HTTPAddr, "env", a.cfg.Env)
+
+// 	go func() {
+// 		if err := a.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+// 			a.log.Error("http server error", "err", err)
+// 		}
+// 	}()
+
+// 	return nil
+// }
+
+// func (a *App) Stop(ctx context.Context) error {
+// 	a.log.Info("http server stopping")
+// 	return a.server.Shutdown(ctx)
+// }
+
+// // -----------------------------------------------------------------------------
+// // 5) internal/core/logger/logger.go (slog JSON)
+// // -----------------------------------------------------------------------------
+// package logger
+
+// import (
+// 	"log/slog"
+// 	"os"
+// )
+
+// type Logger struct{ *slog.Logger }
+
+// func New(env string) *Logger {
+// 	level := slog.LevelInfo
+// 	if env == "local" {
+// 		level = slog.LevelDebug
+// 	}
+
+// 	h := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: level})
+// 	return &Logger{Logger: slog.New(h)}
+// }
+
+// // -----------------------------------------------------------------------------
+// // 6) internal/core/httpx/router.go
+// // -----------------------------------------------------------------------------
+// package httpx
+
+// import (
+// 	"net/http"
+// 	"time"
+
+// 	"github.com/go-chi/chi/v5"
+// 	"github.com/go-chi/cors"
+
+// 	"github.com/e-scavo/scavo-exchange-backend/internal/app"
+// 	"github.com/e-scavo/scavo-exchange-backend/internal/core/logger"
+// 	"github.com/e-scavo/scavo-exchange-backend/internal/core/ws"
+// )
+
+// type RouterParams struct {
+// 	Log    *logger.Logger
+// 	Hub    *ws.Hub
+// 	Config app.Config
+// }
+
+// func NewRouter(p RouterParams) http.Handler {
+// 	r := chi.NewRouter()
+
+// 	// CORS
+// 	r.Use(cors.Handler(cors.Options{
+// 		AllowedOrigins:   p.Config.CORSAllowOrigins,
+// 		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+// 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-Request-Id"},
+// 		ExposedHeaders:   []string{"X-Request-Id"},
+// 		AllowCredentials: true,
+// 		MaxAge:           300,
+// 	}))
+
+// 	// Middlewares
+// 	r.Use(RequestID())
+// 	r.Use(Recoverer(p.Log))
+// 	r.Use(AccessLog(p.Log))
+// 	r.Use(Timeout(30 * time.Second))
+
+// 	// Routes
+// 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
+// 		WriteJSON(w, http.StatusOK, map[string]any{"ok": true})
+// 	})
+
+// 	r.Get("/version", func(w http.ResponseWriter, r *http.Request) {
+// 		WriteJSON(w, http.StatusOK, map[string]any{
+// 			"version": p.Config.Version,
+// 			"commit":  p.Config.Commit,
+// 			"env":     p.Config.Env,
+// 		})
+// 	})
+
+// 	// WebSocket
+// 	r.Get("/ws", ws.NewHandler(ws.HandlerParams{
+// 		Log: p.Log,
+// 		Hub: p.Hub,
+// 	}))
+
+// 	return r
+// }
+
+// // -----------------------------------------------------------------------------
+// // 7) internal/core/httpx/middleware.go
+// // -----------------------------------------------------------------------------
+// package httpx
+
+// import (
+// 	"context"
+// 	"encoding/json"
+// 	"net/http"
+// 	"runtime/debug"
+// 	"time"
+
+// 	"github.com/google/uuid"
+
+// 	"github.com/e-scavo/scavo-exchange-backend/internal/core/logger"
+// )
+
+// type ctxKey string
+
+// const requestIDKey ctxKey = "request_id"
+
+// func RequestID() func(http.Handler) http.Handler {
+// 	return func(next http.Handler) http.Handler {
+// 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+// 			rid := r.Header.Get("X-Request-Id")
+// 			if rid == "" {
+// 				rid = uuid.NewString()
+// 			}
+// 			w.Header().Set("X-Request-Id", rid)
+// 			ctx := context.WithValue(r.Context(), requestIDKey, rid)
+// 			next.ServeHTTP(w, r.WithContext(ctx))
+// 		})
+// 	}
+// }
+
+// func AccessLog(log *logger.Logger) func(http.Handler) http.Handler {
+// 	return func(next http.Handler) http.Handler {
+// 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+// 			start := time.Now()
+// 			ww := &wrapWriter{ResponseWriter: w, status: 200}
+// 			next.ServeHTTP(ww, r)
+// 			dur := time.Since(start)
+
+// 			rid, _ := r.Context().Value(requestIDKey).(string)
+// 			log.Info("http_request",
+// 				"rid", rid,
+// 				"method", r.Method,
+// 				"path", r.URL.Path,
+// 				"status", ww.status,
+// 				"bytes", ww.bytes,
+// 				"dur_ms", dur.Milliseconds(),
+// 				"remote", r.RemoteAddr,
+// 			)
+// 		})
+// 	}
+// }
+
+// type wrapWriter struct {
+// 	http.ResponseWriter
+// 	status int
+// 	bytes  int
+// }
+
+// func (w *wrapWriter) WriteHeader(code int) {
+// 	w.status = code
+// 	w.ResponseWriter.WriteHeader(code)
+// }
+
+// func (w *wrapWriter) Write(b []byte) (int, error) {
+// 	n, err := w.ResponseWriter.Write(b)
+// 	w.bytes += n
+// 	return n, err
+// }
+
+// func Recoverer(log *logger.Logger) func(http.Handler) http.Handler {
+// 	return func(next http.Handler) http.Handler {
+// 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+// 			defer func() {
+// 				if rec := recover(); rec != nil {
+// 					rid, _ := r.Context().Value(requestIDKey).(string)
+// 					log.Error("panic",
+// 						"rid", rid,
+// 						"recover", rec,
+// 						"stack", string(debug.Stack()),
+// 					)
+// 					WriteJSON(w, http.StatusInternalServerError, map[string]any{"error": "internal_server_error"})
+// 				}
+// 			}()
+// 			next.ServeHTTP(w, r)
+// 		})
+// 	}
+// }
+
+// func Timeout(d time.Duration) func(http.Handler) http.Handler {
+// 	return func(next http.Handler) http.Handler {
+// 		return http.TimeoutHandler(next, d, `{"error":"timeout"}`)
+// 	}
+// }
+
+// func WriteJSON(w http.ResponseWriter, code int, v any) {
+// 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+// 	w.WriteHeader(code)
+// 	_ = json.NewEncoder(w).Encode(v)
+// }
+
+// // -----------------------------------------------------------------------------
+// // 8) internal/core/ws/protocol.go
+// // -----------------------------------------------------------------------------
+// package ws
+
+// import "encoding/json"
+
+// // Envelope: mensaje genérico SCAVO WS
+// // id: correlation id (client o server)
+// // type: req|res|evt
+// // action: nombre del comando (auth.login, system.ping, etc.)
+// // data: payload
+// // error: error (para res)
+
+// type MsgType string
+
+// const (
+// 	MsgTypeReq MsgType = "req"
+// 	MsgTypeRes MsgType = "res"
+// 	MsgTypeEvt MsgType = "evt"
+// )
+
+// type Envelope struct {
+// 	ID     string          `json:"id"`
+// 	Type   MsgType         `json:"type"`
+// 	Action string          `json:"action"`
+// 	Data   json.RawMessage `json:"data,omitempty"`
+// 	Error  *ErrPayload     `json:"error,omitempty"`
+// }
+
+// type ErrPayload struct {
+// 	Code string `json:"code"`
+// 	Msg  string `json:"msg"`
+// }
+
+// // -----------------------------------------------------------------------------
+// // 9) internal/core/ws/hub.go
+// // -----------------------------------------------------------------------------
+// package ws
+
+// import (
+// 	"context"
+
+// 	"github.com/e-scavo/scavo-exchange-backend/internal/core/logger"
+// )
+
+// type Hub struct {
+// 	log *logger.Logger
+
+// 	register   chan *Client
+// 	unregister chan *Client
+// 	broadcast  chan []byte
+
+// 	clients map[*Client]struct{}
+// }
+
+// func NewHub(log *logger.Logger) *Hub {
+// 	return &Hub{
+// 		log:        log,
+// 		register:   make(chan *Client, 32),
+// 		unregister: make(chan *Client, 32),
+// 		broadcast:  make(chan []byte, 256),
+// 		clients:    make(map[*Client]struct{}),
+// 	}
+// }
+
+// func (h *Hub) Run(ctx context.Context) {
+// 	h.log.Info("ws hub started")
+// 	for {
+// 		select {
+// 		case <-ctx.Done():
+// 			h.log.Info("ws hub stopped")
+// 			return
+// 		case c := <-h.register:
+// 			h.clients[c] = struct{}{}
+// 			h.log.Info("ws client registered", "clients", len(h.clients))
+// 		case c := <-h.unregister:
+// 			if _, ok := h.clients[c]; ok {
+// 				delete(h.clients, c)
+// 				h.log.Info("ws client unregistered", "clients", len(h.clients))
+// 			}
+// 		case msg := <-h.broadcast:
+// 			for c := range h.clients {
+// 				c.TrySend(msg)
+// 			}
+// 		}
+// 	}
+// }
+
+// func (h *Hub) Register(c *Client)   { h.register <- c }
+// func (h *Hub) Unregister(c *Client) { h.unregister <- c }
+// func (h *Hub) Broadcast(msg []byte) { h.broadcast <- msg }
+
+// // -----------------------------------------------------------------------------
+// // 10) internal/core/ws/client.go
+// // -----------------------------------------------------------------------------
+// package ws
+
+// import (
+// 	"context"
+// 	"sync"
+// 	"time"
+
+// 	"nhooyr.io/websocket"
+// )
+
+// type Client struct {
+// 	conn *websocket.Conn
+// 	send chan []byte
+
+// 	mu     sync.Mutex
+// 	closed bool
+// }
+
+// func NewClient(conn *websocket.Conn) *Client {
+// 	return &Client{
+// 		conn: conn,
+// 		send: make(chan []byte, 128),
+// 	}
+// }
+
+// func (c *Client) Close(status websocket.StatusCode, reason string) {
+// 	c.mu.Lock()
+// 	if c.closed {
+// 		c.mu.Unlock()
+// 		return
+// 	}
+// 	c.closed = true
+// 	c.mu.Unlock()
+
+// 	_ = c.conn.Close(status, reason)
+// 	close(c.send)
+// }
+
+// func (c *Client) TrySend(msg []byte) {
+// 	// Non-blocking send: si está lleno, se descarta para no trabar el hub.
+// 	select {
+// 	case c.send <- msg:
+// 	default:
+// 	}
+// }
+
+// func (c *Client) WriteLoop(ctx context.Context) {
+// 	for {
+// 		select {
+// 		case <-ctx.Done():
+// 			return
+// 		case msg, ok := <-c.send:
+// 			if !ok {
+// 				return
+// 			}
+// 			wctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+// 			_ = c.conn.Write(wctx, websocket.MessageText, msg)
+// 			cancel()
+// 		}
+// 	}
+// }
+
+// // -----------------------------------------------------------------------------
+// // 11) internal/core/ws/handler.go
+// // -----------------------------------------------------------------------------
+// package ws
+
+// import (
+// 	"context"
+// 	"encoding/json"
+// 	"net/http"
+// 	"time"
+
+// 	"github.com/google/uuid"
+// 	"nhooyr.io/websocket"
+
+// 	"github.com/e-scavo/scavo-exchange-backend/internal/core/logger"
+// )
+
+// type HandlerParams struct {
+// 	Log *logger.Logger
+// 	Hub *Hub
+// }
+
+// type Handler struct {
+// 	log *logger.Logger
+// 	hub *Hub
+// }
+
+// func NewHandler(p HandlerParams) http.HandlerFunc {
+// 	h := &Handler{log: p.Log, hub: p.Hub}
+// 	return h.serveWS
+// }
+
+// func (h *Handler) serveWS(w http.ResponseWriter, r *http.Request) {
+// 	// TODO: auth handshake con token en query/header.
+
+// 	conn, err := websocket.Accept(w, r, &websocket.AcceptOptions{
+// 		// En prod: validar Origin.
+// 		InsecureSkipVerify: true,
+// 	})
+// 	if err != nil {
+// 		return
+// 	}
+
+// 	client := NewClient(conn)
+// 	h.hub.Register(client)
+
+// 	ctx := r.Context()
+// 	writeCtx, cancelWrite := context.WithCancel(ctx)
+// 	defer cancelWrite()
+
+// 	go client.WriteLoop(writeCtx)
+
+// 	// Mensaje hello (evt)
+// 	hello := Envelope{
+// 		ID:     uuid.NewString(),
+// 		Type:   MsgTypeEvt,
+// 		Action: "system.hello",
+// 		Data:   mustJSON(map[string]any{"ts": time.Now().UTC().Format(time.RFC3339)}),
+// 	}
+// 	client.TrySend(mustMarshal(hello))
+
+// 	// Read loop
+// 	for {
+// 		// timeouts por lectura
+// 		rctx, cancel := context.WithTimeout(ctx, 60*time.Second)
+// 		typ, data, err := conn.Read(rctx)
+// 		cancel()
+
+// 		if err != nil {
+// 			client.Close(websocket.StatusNormalClosure, "bye")
+// 			h.hub.Unregister(client)
+// 			return
+// 		}
+
+// 		if typ != websocket.MessageText {
+// 			continue
+// 		}
+
+// 		var env Envelope
+// 		if err := json.Unmarshal(data, &env); err != nil {
+// 			res := Envelope{
+// 				ID:     uuid.NewString(),
+// 				Type:   MsgTypeRes,
+// 				Action: "system.error",
+// 				Error:  &ErrPayload{Code: "bad_json", Msg: "invalid json"},
+// 			}
+// 			client.TrySend(mustMarshal(res))
+// 			continue
+// 		}
+
+// 		// Manejo mínimo: ping
+// 		if env.Type == MsgTypeReq && env.Action == "system.ping" {
+// 			res := Envelope{
+// 				ID:     env.ID,
+// 				Type:   MsgTypeRes,
+// 				Action: "system.ping",
+// 				Data:   mustJSON(map[string]any{"pong": true, "ts": time.Now().UTC().Format(time.RFC3339)}),
+// 			}
+// 			client.TrySend(mustMarshal(res))
+// 			continue
+// 		}
+
+// 		// TODO: dispatcher a módulos (auth/users/etc)
+// 		// Por ahora: echo debug
+// 		res := Envelope{
+// 			ID:     env.ID,
+// 			Type:   MsgTypeRes,
+// 			Action: env.Action,
+// 			Data:   env.Data,
+// 		}
+// 		client.TrySend(mustMarshal(res))
+// 	}
+// }
+
+// func mustMarshal(v any) []byte {
+// 	b, _ := json.Marshal(v)
+// 	return b
+// }
+
+// func mustJSON(v any) json.RawMessage {
+// 	b, _ := json.Marshal(v)
+// 	return b
+// }
+
+// // -----------------------------------------------------------------------------
+// // 12) Makefile
+// // -----------------------------------------------------------------------------
+// .PHONY: tidy run test lint
+
+// tidy:
+// 	go mod tidy
+
+// run:
+// 	SCAVO_ENV=local SCAVO_HTTP_ADDR=:8080 go run ./cmd/scavo-server
+
+// test:
+// 	go test ./...
+
+// lint:
+// 	golangci-lint run
+
+// -----------------------------------------------------------------------------
+// 13) .gitignore
+// -----------------------------------------------------------------------------
+// /bin/
+// /.idea/
+// /.vscode/
+// *.log
+
+// // -----------------------------------------------------------------------------
+// // 14) README.md (mínimo)
+// // -----------------------------------------------------------------------------
+// # SCAVO Exchange Backend
+
+// ## Run
+//   SCAVO_ENV=local SCAVO_HTTP_ADDR=:8080 go run ./cmd/scavo-server
+
+// ## HTTP
+//   GET /health
+//   GET /version
+//   GET /ws (websocket)
+
+// ## WS protocol
+// Envelope: {"id":"...","type":"req|res|evt","action":"system.ping", "data":{...}}
+
+// Example ping:
+//   {"id":"1","type":"req","action":"system.ping"}
+
+// ## Test WS (websocat)
+//   websocat ws://localhost:8080/ws
+//   {"id":"1","type":"req","action":"system.ping"}
