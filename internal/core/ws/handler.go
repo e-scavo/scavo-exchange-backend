@@ -4,11 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
 	"nhooyr.io/websocket"
 
+	coreauth "github.com/e-scavo/scavo-exchange-backend/internal/core/auth"
 	"github.com/e-scavo/scavo-exchange-backend/internal/core/logger"
 )
 
@@ -16,12 +18,14 @@ type HandlerParams struct {
 	Log        *logger.Logger
 	Hub        *Hub
 	Dispatcher *Dispatcher
+	TokenSvc   *coreauth.TokenService
 }
 
 type Handler struct {
 	log        *logger.Logger
 	hub        *Hub
 	dispatcher *Dispatcher
+	tokenSvc   *coreauth.TokenService
 }
 
 func NewHandler(p HandlerParams) http.HandlerFunc {
@@ -29,15 +33,13 @@ func NewHandler(p HandlerParams) http.HandlerFunc {
 		log:        p.Log,
 		hub:        p.Hub,
 		dispatcher: p.Dispatcher,
+		tokenSvc:   p.TokenSvc,
 	}
 	return h.serveWS
 }
 
 func (h *Handler) serveWS(w http.ResponseWriter, r *http.Request) {
-	// TODO: auth handshake con token en query/header.
-
 	conn, err := websocket.Accept(w, r, &websocket.AcceptOptions{
-		// En prod: validar Origin.
 		InsecureSkipVerify: true,
 		CompressionMode:    websocket.CompressionDisabled,
 	})
@@ -54,16 +56,20 @@ func (h *Handler) serveWS(w http.ResponseWriter, r *http.Request) {
 
 	go client.WriteLoop(writeCtx)
 
-	// Mensaje hello (evt)
+	// ✅ auth opcional: setea session si token válido
+	h.tryAuth(r, client)
+
 	hello := Envelope{
 		ID:     uuid.NewString(),
 		Type:   MsgTypeEvt,
 		Action: "system.hello",
-		Data:   JSON(map[string]any{"ts": time.Now().UTC().Format(time.RFC3339)}),
+		Data: JSON(map[string]any{
+			"ts":   time.Now().UTC().Format(time.RFC3339),
+			"auth": client.Session() != nil,
+		}),
 	}
 	client.TrySend(mustMarshal(hello))
 
-	// Read loop
 	for {
 		rctx, cancel := context.WithTimeout(ctx, 60*time.Second)
 		typ, data, err := conn.Read(rctx)
@@ -74,7 +80,6 @@ func (h *Handler) serveWS(w http.ResponseWriter, r *http.Request) {
 			h.hub.Unregister(client)
 			return
 		}
-
 		if typ != websocket.MessageText {
 			continue
 		}
@@ -91,10 +96,36 @@ func (h *Handler) serveWS(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		// ✅ Dispatcher
 		res := h.dispatcher.Dispatch(ctx, client, env)
 		client.TrySend(mustMarshal(res))
 	}
+}
+
+func (h *Handler) tryAuth(r *http.Request, c *Client) {
+	if h.tokenSvc == nil {
+		return
+	}
+
+	token := strings.TrimSpace(r.URL.Query().Get("token"))
+	if token == "" {
+		authz := r.Header.Get("Authorization")
+		if strings.HasPrefix(strings.ToLower(authz), "bearer ") {
+			token = strings.TrimSpace(authz[7:])
+		}
+	}
+	if token == "" {
+		return
+	}
+
+	claims, err := h.tokenSvc.Parse(token)
+	if err != nil || claims == nil || claims.UserID == "" {
+		return
+	}
+
+	c.SetSession(Session{
+		UserID: claims.UserID,
+		Email:  claims.Email,
+	})
 }
 
 func mustMarshal(v any) []byte {

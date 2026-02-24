@@ -7,9 +7,11 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 
+	coreauth "github.com/e-scavo/scavo-exchange-backend/internal/core/auth"
 	"github.com/e-scavo/scavo-exchange-backend/internal/core/config"
 	"github.com/e-scavo/scavo-exchange-backend/internal/core/logger"
 	"github.com/e-scavo/scavo-exchange-backend/internal/core/ws"
+	authmod "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth"
 )
 
 type RouterParams struct {
@@ -17,12 +19,13 @@ type RouterParams struct {
 	Hub        *ws.Hub
 	Dispatcher *ws.Dispatcher
 	Config     config.Config
+
+	TokenService *coreauth.TokenService
 }
 
 func NewRouter(p RouterParams) http.Handler {
 	r := chi.NewRouter()
 
-	// CORS (OK para WS también)
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   p.Config.CORSAllowOrigins,
 		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
@@ -32,18 +35,18 @@ func NewRouter(p RouterParams) http.Handler {
 		MaxAge:           300,
 	}))
 
-	// Middlewares seguros para WS
 	r.Use(RequestID())
 	r.Use(Recoverer(p.Log))
 
-	// ✅ WS sin AccessLog ni Timeout
+	// ✅ WS sin AccessLog/Timeout (no romper Upgrade)
 	r.Get("/ws", ws.NewHandler(ws.HandlerParams{
 		Log:        p.Log,
 		Hub:        p.Hub,
 		Dispatcher: p.Dispatcher,
+		TokenSvc:   p.TokenService,
 	}))
 
-	// ✅ HTTP normal con AccessLog + Timeout
+	// ✅ HTTP normal
 	r.Group(func(r chi.Router) {
 		r.Use(AccessLog(p.Log))
 		r.Use(Timeout(30 * time.Second))
@@ -59,6 +62,12 @@ func NewRouter(p RouterParams) http.Handler {
 				"env":     p.Config.Env,
 			})
 		})
+
+		handlers := authmod.HTTPHandlers{
+			Tokens: p.TokenService,
+			TTL:    time.Duration(p.Config.JWTTTLHrs) * time.Hour,
+		}
+		r.Post("/auth/login", handlers.Login)
 	})
 
 	return r

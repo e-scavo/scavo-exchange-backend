@@ -12,8 +12,9 @@ type Client struct {
 	conn *websocket.Conn
 	send chan []byte
 
-	mu     sync.Mutex
-	closed bool
+	mu      sync.Mutex
+	closed  bool
+	session *Session
 }
 
 func NewClient(conn *websocket.Conn) *Client {
@@ -37,7 +38,6 @@ func (c *Client) Close(status websocket.StatusCode, reason string) {
 }
 
 func (c *Client) TrySend(msg []byte) {
-	// Non-blocking send: si está lleno, se descarta para no trabar el hub.
 	select {
 	case c.send <- msg:
 	default:

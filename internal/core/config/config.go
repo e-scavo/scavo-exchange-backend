@@ -8,16 +8,19 @@ import (
 )
 
 type Config struct {
-	Env           string // local|staging|prod
-	HTTPAddr      string // :8080
-	PublicBaseURL string // optional, e.g. https://api.scavo.exchange
+	Env           string
+	HTTPAddr      string
+	PublicBaseURL string
 
-	// CORS
 	CORSAllowOrigins []string
 
-	// Build info (optional)
 	Version string
 	Commit  string
+
+	// JWT
+	JWTSecret string
+	JWTIssuer string
+	JWTTTLHrs int
 }
 
 func LoadFromEnv() (Config, error) {
@@ -33,8 +36,17 @@ func LoadFromEnv() (Config, error) {
 	c.Version = getenv("SCAVO_VERSION", "dev")
 	c.Commit = getenv("SCAVO_COMMIT", "")
 
+	c.JWTSecret = getenv("SCAVO_JWT_SECRET", "dev_dev_dev_dev_dev_dev_dev_dev")
+	c.JWTIssuer = getenv("SCAVO_JWT_ISSUER", "scavo-exchange-backend")
+
+	ttlH := getenv("SCAVO_JWT_TTL_HOURS", "24")
+	n, _ := strconv.Atoi(ttlH)
+	if n <= 0 {
+		n = 24
+	}
+	c.JWTTTLHrs = n
+
 	if !strings.HasPrefix(c.HTTPAddr, ":") && !strings.Contains(c.HTTPAddr, ":") {
-		// allow bare port: 8080
 		if _, err := strconv.Atoi(c.HTTPAddr); err == nil {
 			c.HTTPAddr = ":" + c.HTTPAddr
 		} else {
