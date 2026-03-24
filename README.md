@@ -17,3 +17,4 @@ Example ping:
 ## Test WS (websocat)
   websocat ws://localhost:8080/ws
   {"id":"1","type":"req","action":"system.ping"}
+

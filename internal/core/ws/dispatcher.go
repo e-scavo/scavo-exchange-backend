@@ -62,3 +62,14 @@ func (d *Dispatcher) Dispatch(ctx context.Context, c *Client, env Envelope) Enve
 
 	return res
 }
+func RequireAuth(fn HandlerFunc) HandlerFunc {
+	return func(ctx context.Context, c *Client, env Envelope) Envelope {
+		if c.Session() == nil || c.Session().UserID == "" {
+			return Envelope{
+				ID: env.ID, Type: MsgTypeRes, Action: env.Action,
+				Error: &ErrPayload{Code: "unauthorized", Msg: "auth required"},
+			}
+		}
+		return fn(ctx, c, env)
+	}
+}
