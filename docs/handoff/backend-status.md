@@ -96,11 +96,16 @@ Not implemented yet:
 
 ## Recommended Next Step
 
-Phase 0.3.2 - Migration Bootstrap and Local Infrastructure Layout
+## Phase 0.3.2 - Migration and Local Infrastructure Bootstrap
 
-Recommended scope:
+This phase introduced:
 
-- create migrations directory baseline
-- define migration execution workflow
-- prepare local Docker stack direction
-- keep current bootstrap stable while making persistence reproducible
+- migrations directory baseline
+- migration execution script
+- goose as migration tool
+- docker-compose local infrastructure
+- PostgreSQL and Redis local services
+- environment example file
+- Makefile for local workflow
+
+The backend is now capable of running with a reproducible local infrastructure baseline.

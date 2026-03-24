@@ -1,10 +1,7 @@
-.PHONY: tidy run test lint
+.PHONY: tidy test link run up down migrate migrate-down
 
 tidy:
 	go mod tidy
-
-run:
-	SCAVO_ENV=local SCAVO_HTTP_ADDR=:8080 go run ./cmd/scavo-server
 
 test:
 	go test ./...
@@ -12,3 +9,17 @@ test:
 lint:
 	golangci-lint run
 
+run:
+	go run ./cmd/scavo-server
+
+up:
+	docker-compose up -d
+
+down:
+	docker-compose down
+
+migrate:
+	SCAVO_POSTGRES_URL=$$SCAVO_POSTGRES_URL ./scripts/migrate.sh up
+
+migrate-down:
+	SCAVO_POSTGRES_URL=$$SCAVO_POSTGRES_URL ./scripts/migrate.sh down
