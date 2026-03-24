@@ -2,19 +2,36 @@
 
 ## Flow 1 - Current HTTP Development Login
 
-This flow represents the current minimal login bootstrap already present in the backend.
+This flow represents the current stabilized development login baseline.
 
 1. client calls `POST /auth/login`
-2. backend validates the development payload
-3. backend issues JWT
-4. client stores token
-5. token can later be used in authenticated flows
+2. HTTP handler decodes the request
+3. auth service validates the development credentials
+4. auth service resolves or creates the development user
+5. auth service issues JWT
+6. backend returns token metadata and resolved user id
+7. client stores token
 
-This flow is temporary and will evolve in later phases.
+This flow is still temporary and intentionally bootstrap-oriented.
 
 ---
 
-## Flow 2 - Current WebSocket Session Attachment
+## Flow 2 - Current Authenticated Identity Read
+
+This flow represents the first minimal authenticated REST identity path.
+
+1. client calls `GET /auth/me`
+2. client sends bearer token in `Authorization`
+3. HTTP handler extracts the token
+4. auth service parses and validates JWT
+5. auth service resolves current user through the `user` module
+6. backend returns the current authenticated user payload
+
+This flow helps stabilize transport and module boundaries before wallet auth is introduced.
+
+---
+
+## Flow 3 - Current WebSocket Session Attachment
 
 1. client connects to `/ws`
 2. backend upgrades the connection
@@ -27,7 +44,7 @@ This flow is already reflected in the current project baseline.
 
 ---
 
-## Flow 3 - Future Wallet Signature Login
+## Flow 4 - Future Wallet Signature Login
 
 1. client requests wallet auth challenge
 2. backend generates challenge
@@ -41,7 +58,7 @@ This is the preferred authentication direction for the DEX-first product model.
 
 ---
 
-## Flow 4 - Wallet Portfolio Read
+## Flow 5 - Wallet Portfolio Read
 
 1. client requests portfolio for a linked wallet
 2. backend resolves supported assets
@@ -54,7 +71,7 @@ This flow becomes important once chain and asset modules are introduced.
 
 ---
 
-## Flow 5 - DEX Quote Request
+## Flow 6 - DEX Quote Request
 
 1. client requests a quote for token swap
 2. backend validates asset pair and amount
@@ -68,7 +85,7 @@ The backend does not execute the swap here. It only prepares decision-quality in
 
 ---
 
-## Flow 6 - DEX Swap Execution
+## Flow 7 - DEX Swap Execution
 
 1. client requests swap preparation data
 2. backend validates route and current assumptions
@@ -84,7 +101,7 @@ Settlement is on-chain. The backend supports the flow but does not sign for the 
 
 ---
 
-## Flow 7 - Add Liquidity
+## Flow 8 - Add Liquidity
 
 1. client requests liquidity addition parameters
 2. backend validates pool and token pair
@@ -97,7 +114,7 @@ Settlement is on-chain. The backend supports the flow but does not sign for the 
 
 ---
 
-## Flow 8 - Indexed Transaction Tracking
+## Flow 9 - Indexed Transaction Tracking
 
 1. a user-originated DEX transaction is submitted
 2. backend stores or registers tracking intent
@@ -109,7 +126,7 @@ This flow is critical for frontend usability and operational traceability.
 
 ---
 
-## Flow 9 - Future Hybrid Deposit Flow
+## Flow 10 - Future Hybrid Deposit Flow
 
 This is not part of the initial implementation, but the architecture must preserve space for it.
 

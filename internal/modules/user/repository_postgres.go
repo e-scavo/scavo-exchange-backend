@@ -2,11 +2,15 @@ package user
 
 import (
 	"context"
+	"errors"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/e-scavo/scavo-exchange-backend/internal/core/logger"
 )
+
+var ErrUserNotFound = errors.New("user not found")
 
 type PostgresRepository struct {
 	pool *pgxpool.Pool
@@ -61,6 +65,38 @@ RETURNING
 		&u.LastLoginAt,
 	)
 	if err != nil {
+		return nil, err
+	}
+
+	return u, nil
+}
+
+func (r *PostgresRepository) GetByID(ctx context.Context, id string) (*User, error) {
+	const q = `
+SELECT
+    id,
+    email,
+    display_name,
+    created_at,
+    updated_at,
+    last_login_at
+FROM users
+WHERE id = $1
+`
+
+	u := &User{}
+	err := r.pool.QueryRow(ctx, q, id).Scan(
+		&u.ID,
+		&u.Email,
+		&u.DisplayName,
+		&u.CreatedAt,
+		&u.UpdatedAt,
+		&u.LastLoginAt,
+	)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, ErrUserNotFound
+		}
 		return nil, err
 	}
 

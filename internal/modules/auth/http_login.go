@@ -2,6 +2,7 @@ package auth
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strings"
 	"time"
@@ -22,6 +23,10 @@ type LoginResponse struct {
 	UserID      string `json:"user_id"`
 }
 
+type MeResponse struct {
+	User *usermod.User `json:"user"`
+}
+
 type HTTPHandlers struct {
 	Tokens *coreauth.TokenService
 	TTL    time.Duration
@@ -35,39 +40,62 @@ func (h HTTPHandlers) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	req.Email = strings.TrimSpace(strings.ToLower(req.Email))
-	if req.Email == "" || req.Password != "dev" {
-		writeJSON(w, http.StatusUnauthorized, map[string]any{"error": "invalid_credentials"})
-		return
-	}
-
-	userID := "u_" + strings.ReplaceAll(req.Email, "@", "_")
-	if h.Users != nil {
-		u, err := h.Users.ResolveOrCreateDevUser(r.Context(), req.Email)
-		if err != nil {
-			writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "user_persistence_error"})
-			return
-		}
-		userID = u.ID
-	}
-
-	token, err := h.Tokens.Mint(userID, req.Email)
+	svc := NewService(h.Tokens, h.Users, h.TTL)
+	result, err := svc.LoginDev(r.Context(), req.Email, req.Password)
 	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "token_error"})
+		switch {
+		case errors.Is(err, ErrInvalidCredentials):
+			writeJSON(w, http.StatusUnauthorized, map[string]any{"error": "invalid_credentials"})
+		default:
+			writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "auth_service_error"})
+		}
 		return
 	}
 
-	exp := h.TTL
-	if exp <= 0 {
-		exp = 24 * time.Hour
+	userID := ""
+	if result.User != nil {
+		userID = result.User.ID
 	}
 
 	writeJSON(w, http.StatusOK, LoginResponse{
-		AccessToken: token,
-		TokenType:   "Bearer",
-		ExpiresIn:   int64(exp.Seconds()),
+		AccessToken: result.AccessToken,
+		TokenType:   result.TokenType,
+		ExpiresIn:   result.ExpiresIn,
 		UserID:      userID,
 	})
+}
+
+func (h HTTPHandlers) Me(w http.ResponseWriter, r *http.Request) {
+	token := bearerTokenFromRequest(r)
+	if token == "" {
+		writeJSON(w, http.StatusUnauthorized, map[string]any{"error": "missing_bearer_token"})
+		return
+	}
+
+	svc := NewService(h.Tokens, h.Users, h.TTL)
+	user, err := svc.ResolveCurrentUser(r.Context(), token)
+	if err != nil {
+		switch {
+		case errors.Is(err, ErrUnauthorized):
+			writeJSON(w, http.StatusUnauthorized, map[string]any{"error": "unauthorized"})
+		default:
+			writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "auth_service_error"})
+		}
+		return
+	}
+
+	writeJSON(w, http.StatusOK, MeResponse{User: user})
+}
+
+func bearerTokenFromRequest(r *http.Request) string {
+	authz := strings.TrimSpace(r.Header.Get("Authorization"))
+	if authz == "" {
+		return ""
+	}
+	if !strings.HasPrefix(strings.ToLower(authz), "bearer ") {
+		return ""
+	}
+	return strings.TrimSpace(authz[7:])
 }
 
 func writeJSON(w http.ResponseWriter, code int, v any) {

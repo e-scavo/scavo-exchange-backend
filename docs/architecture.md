@@ -67,6 +67,7 @@ Current implementation already includes:
 - `/health`
 - `/version`
 - `/auth/login`
+- `/auth/me`
 - `/ws`
 
 ---
@@ -84,6 +85,7 @@ Responsibilities:
 - dispatcher registration
 - module registration
 - server boot and shutdown lifecycle
+- repository/service wiring across modules
 
 Current implementation:
 
@@ -104,8 +106,8 @@ Current and planned responsibilities:
 - JWT/token services
 - HTTP helpers and middleware
 - WebSocket protocol and routing
-- future database helpers
-- future cache helpers
+- database helpers
+- cache helpers
 - future queue/worker helpers
 - future observability helpers
 
@@ -116,6 +118,9 @@ Current implementation:
 - `internal/core/httpx`
 - `internal/core/auth`
 - `internal/core/ws`
+- `internal/core/db`
+- `internal/core/cache`
+- `internal/core/status`
 
 This layer must remain domain-agnostic.
 
@@ -129,10 +134,10 @@ Current modules:
 
 - `system`
 - `auth`
+- `user`
 
 Planned modules:
 
-- `user`
 - `wallet`
 - `chain`
 - `asset`
@@ -156,6 +161,29 @@ Each module should expose:
 - repository contracts
 - DTOs or transport payloads
 - internal module-specific helpers
+
+---
+
+## Current Auth/User Boundary
+
+At the current stage:
+
+- the `auth` module owns token-oriented login orchestration
+- the `user` module owns user persistence and user identity reads
+- HTTP handlers remain thin and delegate to auth services
+- persisted development login remains enabled
+- authenticated identity read is now available through `GET /auth/me`
+
+This is intentionally still a bootstrap auth model.
+
+The project is not yet implementing:
+
+- refresh token persistence
+- wallet signature login
+- role/permission enforcement
+- full auth middleware strategy
+
+Those will come later.
 
 ---
 
@@ -218,129 +246,3 @@ Future hybrid scope includes:
 - internal ledger
 - deposit and withdrawal orchestration
 - P2P support
-- fiat ramps
-- optional order-book trading
-
-These future capabilities must be added without breaking the DEX-first architecture.
-
----
-
-## Persistence
-
-Persistence is not fully implemented yet, but the target model is:
-
-- PostgreSQL as primary relational database
-- Redis for cache, locks, short-lived coordination, and future queue support
-
-The persistence layer will support:
-
-- users
-- linked wallets
-- asset metadata
-- indexed blockchain events
-- transaction tracking
-- liquidity and pool metadata
-- future custodial ledger entries
-- audit events
-- operational state
-
----
-
-## Communication Model
-
-The backend exposes two primary communication models:
-
-### REST
-Used for:
-
-- request/response operations
-- reads
-- session creation
-- metadata retrieval
-- quote requests
-- portfolio data
-- admin operations
-
-### WebSocket
-Used for:
-
-- real-time status
-- user session awareness
-- live transaction updates
-- quote stream possibilities
-- pool updates
-- internal product interactivity
-
----
-
-## Observability and Validation
-
-Observability is a first-class architectural concern.
-
-The backend must evolve with explicit support for:
-
-- structured logs
-- request correlation
-- recoverable operational diagnostics
-- health and readiness boundaries
-- metrics
-- future tracing
-- testable infrastructure seams
-- validation across unit, integration, and end-to-end layers
-
-This is required because the project will later depend on:
-
-- blockchain integrations
-- persistent state
-- event ingestion
-- background jobs
-- hybrid growth paths
-
-Without early observability and test structure, those phases would become fragile and difficult to operate.
-
----
-
-## Security Model
-
-The architecture is designed around explicit security boundaries.
-
-Current and planned security controls include:
-
-- JWT authentication
-- wallet-signature-based authentication
-- CORS control
-- request ID propagation
-- panic recovery
-- structured logging
-- future rate limiting
-- future abuse prevention
-- future role and permission controls
-- future audit trail enforcement
-
----
-
-## Deployment Model
-
-The deployment model is intentionally simple at the start:
-
-- single backend process
-- container-friendly
-- environment-driven configuration
-- future support for worker modes if needed
-
-This keeps development and internal testing fast while preserving room for later operational separation.
-
----
-
-## Architectural Direction
-
-The architecture is deliberately optimized for:
-
-- fast initial delivery
-- safe iterative growth
-- low operational complexity
-- strong documentation alignment
-- backend/frontend contract clarity
-- future hybrid expansion without premature overengineering
-- early operational visibility
-- testable growth across infrastructure and domain phases

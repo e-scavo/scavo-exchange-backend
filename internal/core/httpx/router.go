@@ -88,7 +88,9 @@ func NewRouter(p RouterParams) http.Handler {
 			TTL:    time.Duration(p.Config.JWTTTLHrs) * time.Hour,
 			Users:  p.UserService,
 		}
+
 		r.Post("/auth/login", handlers.Login)
+		r.Get("/auth/me", handlers.Me)
 	})
 
 	return r

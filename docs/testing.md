@@ -16,6 +16,7 @@ At the current stage, the project should already support the following validatio
 - unit validation for readiness/status logic
 - integration validation for PostgreSQL-backed repositories
 - smoke validation for HTTP login baseline
+- smoke validation for authenticated identity read baseline
 - migration status validation through the migration workflow
 
 This is the first practical validation baseline for the project.
@@ -70,6 +71,7 @@ Scope:
 - small isolated helpers
 - deterministic service logic with mocked dependencies
 - readiness logic and dependency evaluation
+- auth service orchestration
 
 Purpose:
 
@@ -162,6 +164,7 @@ Scope:
 - minimal dependency checks
 - internal environment sanity
 - development login path
+- authenticated identity read path
 
 Purpose:
 
@@ -173,15 +176,24 @@ Purpose:
 
 Recommended commands at the current stage:
 
-go test ./...
+    go test ./...
 
-SCAVO_TEST_POSTGRES_URL=postgres://postgres:postgres@localhost:5432/scavo_exchange?sslmode=disable \
-go test ./internal/modules/user -run TestPostgresRepository_UpsertDevUser -v
+    SCAVO_TEST_POSTGRES_URL=postgres://postgres:postgres@localhost:5432/scavo_exchange?sslmode=disable \
+    go test ./internal/modules/user -run TestPostgresRepository_UpsertDevUser -v
 
-SCAVO_POSTGRES_URL=postgres://postgres:postgres@localhost:5432/scavo_exchange?sslmode=disable \
-./scripts/migrate.sh status
+    SCAVO_POSTGRES_URL=postgres://postgres:postgres@localhost:5432/scavo_exchange?sslmode=disable \
+    ./scripts/migrate.sh status
 
-./scripts/smoke_login.sh
+    ./scripts/smoke_login.sh
+
+Example authenticated identity smoke after login:
+
+    TOKEN=$(curl -s -X POST http://localhost:8080/auth/login \
+      -H 'Content-Type: application/json' \
+      -d '{"email":"test@scavo.exchange","password":"dev"}' | jq -r '.access_token')
+
+    curl -s http://localhost:8080/auth/me \
+      -H "Authorization: Bearer $TOKEN"
 
 ---
 
@@ -208,6 +220,7 @@ Before heavy product features are introduced, the backend should gain validation
 - config loading
 - handler wiring
 - auth baseline behavior
+- current-user authenticated read behavior
 - health endpoint behavior
 - readiness behavior
 - dependency failure visibility
@@ -269,6 +282,7 @@ A minimal smoke layer should verify:
 - /version responds
 - auth baseline wiring works
 - persistent login path works when PostgreSQL is enabled
+- authenticated identity read works with a valid token
 - WebSocket endpoint is reachable at a basic level
 
 This is a practical baseline for local development and internal testing.
@@ -312,6 +326,6 @@ Those may come later as implementation matures.
 
 The next recommended step is:
 
-Phase 0.4.1 - Auth and User Module Stabilization
+Phase 0.4.2 - Token Lifecycle and Auth Transport Hardening
 
-That phase should build on the first persisted user module by improving domain ownership, validation boundaries, and persisted auth-related flows.
+That phase should build on the stabilized auth-user boundary by preparing token extraction, transport consistency, and future auth evolution without jumping prematurely into wallet-signature flows.

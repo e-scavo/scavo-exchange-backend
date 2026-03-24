@@ -36,6 +36,28 @@ func (s *Service) ResolveOrCreateDevUser(ctx context.Context, email string) (*Us
 	return s.repo.UpsertDevUser(ctx, email)
 }
 
+func (s *Service) GetByID(ctx context.Context, id string, emailHint string) (*User, error) {
+	id = strings.TrimSpace(id)
+	emailHint = normalizeEmail(emailHint)
+
+	if id == "" {
+		return nil, fmt.Errorf("empty user id")
+	}
+
+	if s == nil || s.repo == nil {
+		now := time.Now().UTC()
+		return &User{
+			ID:          id,
+			Email:       emailHint,
+			DisplayName: "",
+			CreatedAt:   now,
+			UpdatedAt:   now,
+		}, nil
+	}
+
+	return s.repo.GetByID(ctx, id)
+}
+
 func normalizeEmail(email string) string {
 	return strings.TrimSpace(strings.ToLower(email))
 }

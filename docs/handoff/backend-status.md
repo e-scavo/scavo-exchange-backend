@@ -12,11 +12,11 @@ Stage 0 - Foundation
 
 ## Current Phase
 
-Phase 0.3 - Infrastructure Bootstrap
+Phase 0.4 - Auth and User Stabilization
 
 ## Current Subphase
 
-Phase 0.3.4 - Repository Validation and Migration Workflow Hardening
+Phase 0.4.1 - Auth and User Module Stabilization
 
 ---
 
@@ -32,6 +32,8 @@ The backend now includes:
 - WebSocket handler, hub, client, dispatcher, protocol
 - JWT token service
 - development HTTP login
+- auth service boundary for development login orchestration
+- current authenticated identity resolution through bearer token
 - system WebSocket handler
 - auth WebSocket handler registration
 - PostgreSQL core scaffolding
@@ -40,7 +42,9 @@ The backend now includes:
 - readiness-aware router wiring
 - first migration-backed domain table
 - first repository-backed domain service
+- minimal authenticated REST identity read path through `GET /auth/me`
 - unit and integration validation baseline for first persistence path
+- auth and user regression coverage expanded
 
 ---
 
@@ -69,12 +73,13 @@ The backend now includes:
 
 This subphase implemented:
 
-- unit tests for user service behavior
-- integration test for PostgreSQL-backed user repository
-- unit tests for readiness/status behavior
-- hardened migration script command handling
-- smoke login script for local validation
-- Makefile targets for test and migration status flows
+- extraction of development login orchestration into an auth service
+- formalized auth-to-user interaction through service boundaries
+- `user` identity retrieval path through repository and service expansion
+- `GET /auth/me` as the first minimal authenticated REST identity endpoint
+- auth service tests for login and current-user resolution
+- HTTP handler tests for login and current-user responses
+- additional user service tests for identity retrieval behavior
 
 ---
 
@@ -82,11 +87,13 @@ This subphase implemented:
 
 Not implemented yet:
 
-- repository tests for other modules
-- migration execution integrated into app lifecycle
-- docker-compose validation notes expanded
 - refresh token persistence
-- Redis-backed features
+- token revocation
+- session persistence
+- wallet challenge generation
+- wallet signature verification
+- role/permission model
+- Redis-backed auth/session coordination
 - metrics endpoint
 - tracing
 - chain client
@@ -110,18 +117,21 @@ The project now supports:
 - readiness validation with dependency awareness
 - migration workflow execution and inspection
 - smoke-level validation of login flow
+- unit validation of auth login orchestration
+- unit validation of current-user resolution from JWT
+- HTTP handler validation for `/auth/login` and `/auth/me`
 
-The backend is no longer only structurally valid - it is now partially behaviorally validated.
+The backend now has a clearer auth-user boundary and a minimal authenticated read path, while remaining in controlled development-bootstrap mode.
 
 ---
 
 ## Recommended Next Step
 
-Phase 0.4.1 - Auth and User Module Stabilization
+Phase 0.4.2 - Token Lifecycle and Auth Transport Hardening
 
 Recommended scope:
 
-- formalize user domain ownership
-- refine auth and user boundaries
-- introduce better validation model
-- prepare persisted auth-related evolution without leaving development bootstrap mode too early
+- formalize token extraction/parsing helpers for HTTP
+- prepare auth middleware strategy without overcommitting too early
+- define token lifecycle expectations before refresh-token persistence
+- keep wallet auth deferred until the bootstrap auth boundary is fully stable

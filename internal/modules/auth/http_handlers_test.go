@@ -1,0 +1,120 @@
+package auth
+
+import (
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+	"time"
+
+	coreauth "github.com/e-scavo/scavo-exchange-backend/internal/core/auth"
+	usermod "github.com/e-scavo/scavo-exchange-backend/internal/modules/user"
+)
+
+func mustTokenService(t *testing.T) *coreauth.TokenService {
+	t.Helper()
+
+	ts, err := coreauth.NewTokenService("dev_dev_dev_dev_dev_dev_dev_dev", "scavo-exchange-backend", time.Hour)
+	if err != nil {
+		t.Fatalf("NewTokenService error: %v", err)
+	}
+
+	return ts
+}
+
+func TestHTTPHandlers_Login_Success(t *testing.T) {
+	h := HTTPHandlers{
+		Tokens: mustTokenService(t),
+		TTL:    time.Hour,
+		Users:  usermod.NewService(nil),
+	}
+
+	req := httptest.NewRequest(http.MethodPost, "/auth/login", strings.NewReader(`{"email":"test@example.com","password":"dev"}`))
+	rec := httptest.NewRecorder()
+
+	h.Login(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+
+	var payload LoginResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("decode error: %v", err)
+	}
+
+	if payload.AccessToken == "" {
+		t.Fatal("expected access token")
+	}
+
+	if payload.UserID != "u_test_example_com" {
+		t.Fatalf("unexpected user id: %q", payload.UserID)
+	}
+}
+
+func TestHTTPHandlers_Login_InvalidBody(t *testing.T) {
+	h := HTTPHandlers{
+		Tokens: mustTokenService(t),
+		TTL:    time.Hour,
+		Users:  usermod.NewService(nil),
+	}
+
+	req := httptest.NewRequest(http.MethodPost, "/auth/login", strings.NewReader(`{"email":`))
+	rec := httptest.NewRecorder()
+
+	h.Login(rec, req)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("unexpected status: %d", rec.Code)
+	}
+}
+
+func TestHTTPHandlers_Me_Success(t *testing.T) {
+	h := HTTPHandlers{
+		Tokens: mustTokenService(t),
+		TTL:    time.Hour,
+		Users:  usermod.NewService(nil),
+	}
+
+	token, err := h.Tokens.Mint("u_test_example_com", "test@example.com")
+	if err != nil {
+		t.Fatalf("Mint error: %v", err)
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/auth/me", nil)
+	req.Header.Set("Authorization", "Bearer "+token)
+	rec := httptest.NewRecorder()
+
+	h.Me(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+
+	var payload MeResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("decode error: %v", err)
+	}
+
+	if payload.User == nil || payload.User.ID != "u_test_example_com" {
+		t.Fatalf("unexpected user payload: %#v", payload.User)
+	}
+}
+
+func TestHTTPHandlers_Me_MissingToken(t *testing.T) {
+	h := HTTPHandlers{
+		Tokens: mustTokenService(t),
+		TTL:    time.Hour,
+		Users:  usermod.NewService(nil),
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/auth/me", nil)
+	rec := httptest.NewRecorder()
+
+	h.Me(rec, req)
+
+	if rec.Code != http.StatusUnauthorized {
+		t.Fatalf("unexpected status: %d", rec.Code)
+	}
+}
