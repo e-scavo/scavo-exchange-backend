@@ -8,6 +8,20 @@ Its purpose is to ensure that validation grows together with the architecture so
 
 ---
 
+## Current Validation Baseline
+
+At the current stage, the project should already support the following validation categories:
+
+- unit validation for domain services
+- unit validation for readiness/status logic
+- integration validation for PostgreSQL-backed repositories
+- smoke validation for HTTP login baseline
+- migration status validation through the migration workflow
+
+This is the first practical validation baseline for the project.
+
+---
+
 ## Why Testing Starts Early
 
 The backend will gradually introduce:
@@ -48,12 +62,14 @@ The goal is reliable growth.
 The backend should evolve through multiple testing layers.
 
 ### Unit Tests
+
 Scope:
 
 - pure functions
 - validation logic
 - small isolated helpers
 - deterministic service logic with mocked dependencies
+- readiness logic and dependency evaluation
 
 Purpose:
 
@@ -61,7 +77,10 @@ Purpose:
 - low-cost regression prevention
 - isolated rule validation
 
+---
+
 ### Service Tests
+
 Scope:
 
 - module service behavior
@@ -73,19 +92,26 @@ Purpose:
 
 - validate real business flows without requiring full transport or real infrastructure for every case
 
+---
+
 ### Repository Tests
+
 Scope:
 
 - persistence behavior
 - SQL mapping correctness
 - transaction behavior
 - query correctness
+- migration-backed repository behavior
 
 Purpose:
 
 - validate DB-facing logic once repositories are introduced
 
+---
+
 ### Integration Tests
+
 Scope:
 
 - interactions between application layers
@@ -96,7 +122,10 @@ Purpose:
 
 - validate wiring and environment behavior
 
+---
+
 ### Chain Integration Tests
+
 Scope:
 
 - RPC interactions
@@ -108,7 +137,10 @@ Purpose:
 
 - validate that blockchain-related infrastructure works against expected SCAVIUM behavior
 
+---
+
 ### Contract/Backend End-to-End Tests
+
 Scope:
 
 - interaction between deployed contracts and backend logic
@@ -119,17 +151,37 @@ Purpose:
 
 - validate DEX behavior across system boundaries
 
+---
+
 ### Smoke Tests
+
 Scope:
 
 - startup
 - basic route availability
 - minimal dependency checks
 - internal environment sanity
+- development login path
 
 Purpose:
 
 - fast validation for local and internal testing environments
+
+---
+
+## Current Practical Commands
+
+Recommended commands at the current stage:
+
+go test ./...
+
+SCAVO_TEST_POSTGRES_URL=postgres://postgres:postgres@localhost:5432/scavo_exchange?sslmode=disable \
+go test ./internal/modules/user -run TestPostgresRepository_UpsertDevUser -v
+
+SCAVO_POSTGRES_URL=postgres://postgres:postgres@localhost:5432/scavo_exchange?sslmode=disable \
+./scripts/migrate.sh status
+
+./scripts/smoke_login.sh
 
 ---
 
@@ -157,10 +209,10 @@ Before heavy product features are introduced, the backend should gain validation
 - handler wiring
 - auth baseline behavior
 - health endpoint behavior
-- future readiness behavior
+- readiness behavior
 - dependency failure visibility
-- migration reproducibility later
-- repository readiness later
+- migration reproducibility
+- first repository readiness
 
 These validations are part of making Stage 0 useful in practice.
 
@@ -192,11 +244,12 @@ Examples:
 - unit tests should run quickly without DB or Redis
 - service tests should avoid unnecessary real dependencies where mocks or test doubles are sufficient
 
-Other test layers will intentionally depend on infrastructure later.
+Other test layers intentionally depend on infrastructure.
 
 Examples:
 
 - repository tests with PostgreSQL
+- migration validation with PostgreSQL
 - integration tests with running services
 - chain integration tests with SCAVIUM-compatible endpoints
 
@@ -208,13 +261,14 @@ The project should keep these categories distinct.
 
 Smoke validation is especially important for this project.
 
-A minimal smoke layer should eventually verify:
+A minimal smoke layer should verify:
 
 - app starts successfully
 - config loads successfully
-- `/health` responds
-- `/version` responds
+- /health responds
+- /version responds
 - auth baseline wiring works
+- persistent login path works when PostgreSQL is enabled
 - WebSocket endpoint is reachable at a basic level
 
 This is a practical baseline for local development and internal testing.
@@ -258,6 +312,6 @@ Those may come later as implementation matures.
 
 The next recommended step is:
 
-Phase 0.3.1 - Implementation Bootstrap for Persistence and Health Infrastructure
+Phase 0.4.1 - Auth and User Module Stabilization
 
-That phase should prepare the codebase for practical validation by introducing infrastructure-aware seams that can later be tested more easily.
+That phase should build on the first persisted user module by improving domain ownership, validation boundaries, and persisted auth-related flows.

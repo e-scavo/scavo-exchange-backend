@@ -16,7 +16,7 @@ Phase 0.3 - Infrastructure Bootstrap
 
 ## Current Subphase
 
-Phase 0.3.3 - Repository and First Persistence Module
+Phase 0.3.4 - Repository Validation and Migration Workflow Hardening
 
 ---
 
@@ -40,23 +40,28 @@ The backend now includes:
 - readiness-aware router wiring
 - first migration-backed domain table
 - first repository-backed domain service
+- unit and integration validation baseline for first persistence path
 
-Current real modules:
+---
 
-- `system`
-- `auth`
-- `user`
+## Current Modules
 
-Current real core packages:
+- system
+- auth
+- user
 
-- `config`
-- `logger`
-- `httpx`
-- `auth`
-- `ws`
-- `db`
-- `cache`
-- `status`
+---
+
+## Current Core Packages
+
+- config
+- logger
+- httpx
+- auth
+- ws
+- db
+- cache
+- status
 
 ---
 
@@ -64,11 +69,12 @@ Current real core packages:
 
 This subphase implemented:
 
-- first real domain migration: `users`
-- first repository contract and PostgreSQL repository
-- first persistence-backed domain service
-- safe integration between auth login and persisted users
-- fallback compatibility when PostgreSQL is not configured
+- unit tests for user service behavior
+- integration test for PostgreSQL-backed user repository
+- unit tests for readiness/status behavior
+- hardened migration script command handling
+- smoke login script for local validation
+- Makefile targets for test and migration status flows
 
 ---
 
@@ -76,10 +82,10 @@ This subphase implemented:
 
 Not implemented yet:
 
-- refresh tokens persistence
-- repository test suite
-- migrations runner integration in app lifecycle
-- docker-compose validation
+- repository tests for other modules
+- migration execution integrated into app lifecycle
+- docker-compose validation notes expanded
+- refresh token persistence
 - Redis-backed features
 - metrics endpoint
 - tracing
@@ -95,13 +101,27 @@ Not implemented yet:
 
 ---
 
+## Validation Status
+
+The project now supports:
+
+- unit validation of core domain logic
+- integration validation of PostgreSQL repository layer
+- readiness validation with dependency awareness
+- migration workflow execution and inspection
+- smoke-level validation of login flow
+
+The backend is no longer only structurally valid — it is now partially behaviorally validated.
+
+---
+
 ## Recommended Next Step
 
-Phase 0.3.4 - Repository Validation and Migration Workflow Hardening
+Phase 0.4.1 - Auth and User Module Stabilization
 
 Recommended scope:
 
-- validate migration flow end to end
-- add repository tests
-- add local execution notes for DB-backed login
-- prepare the codebase for the next real persisted module
+- formalize user domain ownership
+- refine auth and user boundaries
+- introduce better validation model
+- prepare persisted auth-related evolution without leaving development bootstrap mode too early
