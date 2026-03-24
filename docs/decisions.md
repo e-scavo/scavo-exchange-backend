@@ -184,3 +184,48 @@ Jumping directly into DEX features, contracts, or chain-heavy logic before core 
 - Phase 0.2 remains mandatory
 - major DEX features are deferred until infrastructure is ready
 - implementation order remains disciplined and safer
+
+---
+
+## ADR-0013 - PostgreSQL as Durable Source of Truth
+
+### Decision
+Durable backend state must live in PostgreSQL unless there is a strong reason otherwise.
+
+### Reason
+The project will need durable operational state, reproducible environments, auditable records, and survivable data across restarts and deployments.
+
+### Impact
+- durable module state must not be Redis-only
+- long-lived operational truth belongs in relational persistence
+- Redis usage must remain clearly secondary
+
+---
+
+## ADR-0014 - Redis for Ephemeral and Coordination State
+
+### Decision
+Redis usage is limited to ephemeral, cache, or coordination-oriented concerns.
+
+### Reason
+This keeps the persistence model clean and avoids accidental business dependence on non-authoritative state.
+
+### Impact
+- Redis is optional for some flows
+- cached values must remain reconstructable
+- critical business truth should not depend on Redis persistence semantics
+
+---
+
+## ADR-0015 - Environment-Driven Local Infrastructure Baseline
+
+### Decision
+The project must support a reproducible local environment driven by explicit configuration.
+
+### Reason
+The backend will require DB, cache, and chain-oriented setup. Reproducible local environments reduce onboarding friction and prevent hidden configuration drift.
+
+### Impact
+- environment variables become part of the formal project contract
+- Docker-based local infrastructure is recommended
+- local development setup must be documented and repeatable

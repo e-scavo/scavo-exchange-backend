@@ -38,22 +38,20 @@ This is the correct foundation for the chosen modular monolith architecture.
 
 ---
 
-## Phase 0.2.1 Scope
+## Phase 0.2.2 Scope
 
-This phase defines the official technical growth layout for the backend.
+This phase defines the official persistence and local environment direction for the backend.
 
-It does not require immediate implementation of all directories or modules, but it locks the intended structure so that future code can be added without architectural drift.
+The purpose of this phase is to lock:
 
-The objective is to preserve the current bootstrap while introducing a stable structural direction for:
+- persistence roles
+- storage boundaries
+- migration workflow
+- local infrastructure expectations
+- environment configuration baseline
+- repository preparation rules
 
-- persistence
-- repositories
-- chain integrations
-- shared services
-- module growth
-- local infrastructure
-- future workers
-- observability
+This phase does not yet require the full implementation of DB access or cache integration, but it establishes the official structure those implementations must follow.
 
 ---
 
@@ -81,7 +79,7 @@ Rules:
 - no business logic
 - no persistence logic
 - no blockchain logic
-- no transport payload decisions beyond application wiring
+- no environment-specific branching outside startup concerns
 
 ---
 
@@ -260,271 +258,272 @@ The backend should gradually evolve toward the following structure:
 
 This structure is the official architectural direction.
 
-It does not mean every directory must be created immediately, but it defines where future work belongs.
-
----
-
-## Module Boundaries
-
-### auth
-Scope:
-
-- current development login
-- future production login
-- JWT issuance
-- refresh and session evolution
-- wallet signature authentication in later phases
-
-### system
-Scope:
-
-- health
-- version
-- diagnostics
-- operational sanity checks
-
-### user
-Scope:
-
-- user identity
-- profile metadata
-- linked entities
-- future permissions and roles
-
-### wallet
-Scope:
-
-- self-custody wallet linking
-- ownership verification
-- wallet preferences
-- multi-wallet support
-
-### chain
-Scope:
-
-- RPC coordination
-- network awareness
-- gas estimation
-- native balance reads
-- token balance reads
-- allowance reads
-
-### asset
-Scope:
-
-- asset registry
-- token metadata
-- decimals
-- symbols
-- chain-native asset definitions
-
-### portfolio
-Scope:
-
-- aggregated wallet balances
-- allowance summaries
-- frontend-ready portfolio view
-- token holdings snapshots
-
-### dex
-Scope:
-
-- contract-facing DEX backend logic
-- pool discovery
-- pair state reads
-- swap preparation support
-
-### liquidity
-Scope:
-
-- add liquidity support
-- remove liquidity support
-- LP position reads
-- pool share calculations
-
-### quote
-Scope:
-
-- quote generation
-- min-out modeling
-- fee estimation
-- slippage-aware responses
-
-### routing
-Scope:
-
-- path selection
-- single-hop first
-- multi-hop expansion later
-- deterministic route selection
-
-### txtracking
-Scope:
-
-- transaction lifecycle registration
-- pending/confirmed/failed state tracking
-- receipt status updates
-
-### indexer
-Scope:
-
-- contract event ingestion
-- chain cursor tracking
-- local read-model updates
-- reorg-aware evolution later
-
-### audit
-Scope:
-
-- auditable operational events
-- sensitive action traceability
-- structured internal event records
-
-### admin
-Scope:
-
-- operational internal endpoints
-- maintenance controls
-- protected internal actions
-
-### ledger
-Future hybrid scope:
-
-- custodial balances
-- reservations
-- internal settlement entries
-- future exchange-controlled accounting
-
-### p2p
-Future hybrid scope:
-
-- offers
-- escrow abstractions
-- disputes
-- fiat-adjacent coordination
-
-### compliance
-Future hybrid scope:
-
-- KYC hooks
-- AML hooks
-- reporting/export boundaries
-- address screening integration points
-
----
-
-## Platform and Adapter Direction
-
-Some integrations are too specific to belong directly inside domain modules.
-
-To avoid coupling every module to low-level protocol code, the project should introduce platform-specific packages such as:
-
-- `internal/platform/scavium`
-- `internal/platform/contracts`
-
-These packages are intended for:
-
-- RPC clients
-- contract call helpers
-- ABI-based integrations
-- chain-specific retry and failover logic
-- event decoding helpers
-
-Modules should consume these through explicit interfaces whenever possible.
-
 ---
 
 ## Persistence Direction
 
-PostgreSQL is the target primary datastore.
+The persistence model is intentionally split into two roles.
 
-Redis is the target secondary infrastructure store.
+### PostgreSQL
 
-### PostgreSQL responsibilities
+PostgreSQL is the primary system of record.
 
-- user records
+It is responsible for durable, queryable, and auditable data.
+
+Primary persistence targets:
+
+- users
 - linked wallets
+- sessions or future refresh token state if persisted
 - assets metadata
-- chain sync cursors
-- indexed on-chain events
+- chain cursors
+- indexed blockchain events
 - tracked transactions
+- quote-related persistent metadata if needed later
 - audit records
-- future internal ledger entities
+- future ledger entities
 - future P2P entities
+- operational state that must survive restarts
 
-### Redis responsibilities
+PostgreSQL is the source of truth for critical backend state.
+
+### Redis
+
+Redis is the secondary infrastructure store.
+
+It is responsible for short-lived and coordination-oriented state.
+
+Primary Redis targets:
 
 - short-lived cache
-- coordination keys
 - rate-limit counters
-- temporary quote cache if needed
-- optional worker coordination
-- optional lock support
+- temporary coordination keys
+- optional locks
+- optional quote cache
+- optional WebSocket-related ephemeral support
+- optional job coordination
+- optional chain polling coordination
 
 Redis is not the system of record.
 
+Persistence-critical or audit-critical data must not rely exclusively on Redis.
+
 ---
 
-## Migrations Direction
+## Persistence Boundary Rules
 
-The project should formally adopt a migration-based persistence workflow.
+The following rules are official:
 
-A dedicated `migrations/` directory should exist and become the source of truth for schema evolution.
+- durable data belongs in PostgreSQL
+- ephemeral data belongs in Redis only when necessary
+- no critical state should exist only in memory if it must survive process restart
+- no critical business truth should exist only in Redis
+- repositories must make storage ownership explicit
+- cache use must remain optional and replaceable
 
-Migration rules:
+These boundaries are important to avoid architectural confusion later.
 
-- no undocumented schema drift
-- no manual production-only schema edits
-- all structural DB changes must be versioned
-- migrations must align with repository behavior and documentation
+---
+
+## Repository Direction
+
+The project should prepare for repository-based persistence.
+
+Repository responsibilities include:
+
+- persistence reads and writes
+- query isolation
+- transaction handling
+- storage-specific mapping
+
+Repository boundaries should remain module-oriented.
+
+Example direction:
+
+- user repositories belong to the user module
+- wallet repositories belong to the wallet module
+- chain cursor repositories belong to chain or indexer
+- audit repositories belong to audit
+
+Common DB wiring should remain inside reusable core infrastructure.
+
+The project should avoid one giant shared repository package that centralizes all domain persistence in a single place.
+
+---
+
+## Migration Direction
+
+Schema evolution will be controlled through versioned migrations.
+
+A dedicated `migrations/` directory is part of the official repository structure.
+
+Migration principles:
+
+- all schema changes are versioned
+- environments must be reproducible
+- manual schema drift is discouraged
+- migrations must be reviewable
+- migrations must be aligned with repository evolution
+- migration history becomes part of the project record
+
+The migration system should support:
+
+- up migrations
+- down migrations when safe and practical
+- local development usage
+- CI usage later
+- internal testing environment setup later
+
+---
+
+## Configuration Direction
+
+The backend configuration must remain explicit and environment-driven.
+
+The configuration baseline should include at least:
+
+- application environment
+- HTTP bind configuration
+- JWT settings
+- PostgreSQL settings
+- Redis settings
+- SCAVIUM RPC settings
+- CORS-related settings if needed
+- development flags where appropriate
+
+Configuration should distinguish between:
+
+- local development
+- internal testing
+- production-oriented environments later
+
+No environment-specific behavior should depend on undocumented constants in code.
+
+---
+
+## Expected Base Environment Variables
+
+The exact implementation may evolve, but the baseline configuration model should reserve space for variables such as:
+
+- `APP_ENV`
+- `APP_NAME`
+- `HTTP_ADDR`
+- `JWT_SECRET`
+- `JWT_ISSUER`
+- `JWT_TTL_MINUTES`
+- `POSTGRES_HOST`
+- `POSTGRES_PORT`
+- `POSTGRES_DB`
+- `POSTGRES_USER`
+- `POSTGRES_PASSWORD`
+- `POSTGRES_SSLMODE`
+- `REDIS_ADDR`
+- `REDIS_PASSWORD`
+- `REDIS_DB`
+- `SCAVIUM_RPC_URL`
+- `SCAVIUM_CHAIN_ID`
+- `LOG_LEVEL`
+
+These names define the configuration direction and may later be expanded with more granular settings.
+
+---
+
+## Local Environment Direction
+
+The project should support a consistent local development baseline.
+
+The minimum local environment target is:
+
+- backend app
+- PostgreSQL
+- Redis
+
+Optional later additions may include:
+
+- migration runner
+- local contract deployment tooling
+- seeded development data
+- local observability helpers
+
+The first local environment goal is not maximum completeness.
+
+The first goal is deterministic development setup.
+
+---
+
+## Docker and Local Infrastructure Direction
+
+The project should support Docker-based local infrastructure.
+
+The target local infrastructure direction includes:
+
+- a backend service
+- a PostgreSQL service
+- a Redis service
+- optional bind-mounted config or environment file support
+- optional one-shot migration service later
+
+Docker support is intended for:
+
+- reproducible onboarding
+- consistent local setup
+- future CI alignment
+- easier internal testing preparation
+
+A Docker-based development environment is recommended even if developers can also run services manually.
 
 ---
 
 ## Observability Direction
 
-Observability will become part of the infrastructure baseline.
+Observability remains part of the infrastructure baseline.
 
-Planned observability components:
+Planned observability components include:
 
 - structured logs
 - request correlation
-- internal domain event logging
-- metrics
-- health and readiness signals
-- future tracing
+- health and readiness visibility
+- metrics later
+- tracing later
 
-Observability support should live in reusable technical infrastructure, not inside each module ad hoc.
+Persistence-related observability should eventually make it possible to identify:
+
+- DB connection failures
+- migration failures
+- Redis connectivity problems
+- chain integration degradation
+- queue or worker issues later
 
 ---
 
 ## Job and Background Processing Direction
 
-The system is initially single-process, but it must remain ready for background work.
+The backend is initially single-process, but it must remain ready for background work.
 
-Future job categories may include:
+Persistence and cache definitions should preserve room for future jobs such as:
 
 - chain polling
 - event indexing
 - receipt tracking
-- cache refresh
-- operational cleanup
-- notifications
+- quote cache refresh
+- cleanup tasks
+- notification dispatch later
 
-The initial direction is to keep jobs inside the same codebase, with the option to split process roles later if needed.
+Redis may support coordination for some of these jobs, but durable execution state should not depend on Redis alone when long-lived traceability is required.
 
 ---
 
 ## Request Flow Direction
 
-The standard backend flow should be:
+The standard backend flow remains:
 
 transport -> service -> repository and client adapters -> result mapping -> response
 
-This must remain valid for REST and WebSocket flows.
+For persistence-aware write operations, the direction becomes:
 
-The standard write flow should be:
+transport -> service -> repository transaction and external coordination -> audit event when applicable -> response
 
-transport -> service -> transactional persistence and external coordination -> audit/event record -> response
+This flow is important for future database-backed modules.
 
 ---
 
@@ -560,14 +559,15 @@ The architecture must evolve safely in this order:
 1. documentation and alignment
 2. infrastructure layout and shared foundation
 3. persistence and environment baseline
-4. identity and wallet support
-5. chain reads and indexing baseline
-6. DEX contracts
-7. DEX backend logic
-8. frontend-ready contract stabilization
-9. hybrid expansion preparation
+4. observability and test bootstrap
+5. identity and wallet support
+6. chain reads and indexing baseline
+7. DEX contracts
+8. DEX backend logic
+9. frontend-ready contract stabilization
+10. hybrid expansion preparation
 
-This order is intentional and should only change for a strong technical reason.
+This order is intentional.
 
 ---
 
@@ -575,13 +575,15 @@ This order is intentional and should only change for a strong technical reason.
 
 This stage does not require:
 
+- full SQL schema design
+- full repository implementation
+- Redis-based features in production form
+- Docker orchestration implementation
 - microservices
-- Kubernetes-first design
 - matching engine
-- order-book implementation
 - custodial ledger implementation
 - fiat operations
 - compliance implementation
 - production-grade indexing yet
 
-This phase only defines the structure required to support those later if the project grows into them.
+This phase only locks the persistence and environment model that future implementation must follow.

@@ -16,7 +16,7 @@ Phase 0.2 - Core Infrastructure
 
 ## Current Subphase
 
-Phase 0.2.1 - Core Infrastructure Layout and Foundation
+Phase 0.2.2 - Persistence and Environment Baseline
 
 ---
 
@@ -66,6 +66,9 @@ The following decisions are officially locked at this point:
 - migrations as schema source of truth
 - platform adapters for chain and contract integrations
 - infrastructure baseline before major feature expansion
+- PostgreSQL as durable source of truth
+- Redis for ephemeral and coordination state
+- environment-driven local infrastructure baseline
 
 ---
 
@@ -73,14 +76,13 @@ The following decisions are officially locked at this point:
 
 This subphase formally defined:
 
-- target technical repository layout
-- growth direction for `internal/core`
-- growth direction for `internal/modules`
-- future `internal/platform` adapter role
-- migration-based persistence direction
-- observability direction
-- jobs/background processing direction
-- explicit development rules for safe expansion
+- persistence role separation between PostgreSQL and Redis
+- migration workflow direction
+- local environment baseline
+- base environment variable direction
+- repository preparation rules
+- Docker-oriented local infrastructure recommendation
+- persistence boundary rules for future implementation
 
 ---
 
@@ -94,6 +96,7 @@ Not implemented yet:
 - Redis wiring
 - repository scaffolding
 - local Docker environment
+- migration runner
 - chain client
 - asset registry
 - portfolio aggregation
@@ -110,34 +113,26 @@ Not implemented yet:
 
 ## Recommended Next Step
 
-Phase 0.2.2 - Persistence and Environment Baseline
+Phase 0.2.3 - Observability and Test Bootstrap
 
 Recommended scope:
 
-- introduce DB and cache scaffolding direction into the project
-- define migration workflow
-- define initial local infrastructure workflow
-- prepare repository-ready technical base
-- keep current bootstrap stable while introducing infrastructure support
+- define observability baseline in more detail
+- define health, readiness, and operational visibility direction
+- define testing structure and initial harness direction
+- prepare the project for safe infrastructure implementation after the documentation baseline is complete
 
 ---
 
 ## Notes for Next Chat
 
-The next step should remain infrastructure-oriented.
+The project should still remain in foundation mode.
 
-The project should still avoid jumping into:
+The next step should continue preparing the backend before entering implementation-heavy stages.
 
-- chain-heavy implementation
-- DEX contracts
-- quote logic
-- wallet linking
-- indexer logic
+The current order remains:
 
-Before those, the backend should gain a stable baseline for:
-
-- database
-- migrations
-- cache
-- repository structure
-- local environment
+- define foundation
+- define persistence and environment
+- define observability and testing baseline
+- then move into implementation-oriented infrastructure work

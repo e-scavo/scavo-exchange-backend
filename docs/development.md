@@ -14,8 +14,9 @@ Current project status:
 
 - foundation and documentation phases
 - minimal backend bootstrap already exists
-- architecture and target structure are now formally defined
-- persistence and infrastructure implementation are still pending
+- architecture and target structure are formally defined
+- persistence and environment direction are now formally defined
+- implementation of DB, cache, and migrations is still pending
 
 The current goal is to expand the backend safely without destabilizing the existing bootstrap.
 
@@ -142,6 +143,13 @@ Repositories must not:
 - format API responses
 - implement business policy that belongs in services
 
+Repository organization rule:
+
+- repositories should remain module-owned
+- shared DB primitives may live under core infrastructure
+- repository interfaces should be explicit
+- storage mechanics should not leak into transport layer
+
 ---
 
 ## Integration Rule
@@ -170,6 +178,44 @@ Rules:
 - secrets must come from environment or secret managers later
 - defaults may exist for local development only when clearly documented
 - config changes must remain discoverable and auditable
+
+The project should gradually standardize environment configuration around:
+
+- application settings
+- auth settings
+- PostgreSQL settings
+- Redis settings
+- RPC settings
+- logging settings
+
+---
+
+## Migration Rule
+
+Database schema changes must be versioned.
+
+Rules:
+
+- no undocumented schema drift
+- no silent structural DB changes
+- migrations should live under `migrations/`
+- repository changes and migrations should evolve together
+- local development should be able to reproduce schema state deterministically
+
+This rule becomes mandatory once persistence implementation starts.
+
+---
+
+## Cache Rule
+
+Redis is a supporting infrastructure store, not the system of record.
+
+Rules:
+
+- do not place critical durable state only in Redis
+- cache usage must remain explicit
+- cache invalidation responsibility must be clear
+- Redis-backed coordination should remain optional where possible
 
 ---
 
@@ -201,6 +247,8 @@ Rules:
 - transport layer should map domain and infrastructure errors responsibly
 - future error catalog should remain aligned across REST and WebSocket
 
+Infrastructure errors should remain distinguishable from domain errors where possible.
+
 ---
 
 ## Documentation Rule
@@ -222,6 +270,8 @@ At minimum, the following should stay aligned:
 - `docs/architecture-deep.md`
 - `docs/flows.md`
 - `docs/decisions.md`
+- `docs/development.md`
+- `docs/development-environment.md`
 - `docs/handoff/backend-status.md`
 - `docs/phase-status.md`
 
@@ -240,7 +290,7 @@ Commit messages should be:
 
 Examples:
 
-- `docs(phase-0.2.1): define infrastructure layout and repository direction`
+- `docs(phase-0.2.2): define persistence and environment baseline`
 - `refactor(core): prepare application structure for persistence bootstrap`
 - `feat(auth): add wallet challenge generation endpoint`
 
@@ -284,6 +334,8 @@ Before adding large product features, the project should stabilize:
 - layout
 - config
 - persistence direction
+- migration direction
+- environment baseline
 - module boundaries
 - local environment rules
 
@@ -293,13 +345,13 @@ This principle is especially important for the current stage.
 
 ## Current Recommended Next Step
 
-After this structural phase, the recommended next move is:
+After this phase, the recommended next move is:
 
-Phase 0.2.2 - Persistence and Environment Baseline
+Phase 0.2.3 - Observability and Test Bootstrap
 
 This should introduce:
 
-- database wiring direction
-- migration strategy
-- initial local infrastructure setup
-- repository-ready technical scaffolding
+- observability baseline
+- health and readiness direction
+- test scaffolding direction
+- preparation for infrastructure implementation phases that follow
