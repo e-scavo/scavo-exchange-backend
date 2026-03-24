@@ -12,11 +12,11 @@ Stage 0 - Foundation
 
 ## Current Phase
 
-Phase 0.1 - Baseline and Documentation
+Phase 0.2 - Core Infrastructure
 
 ## Current Subphase
 
-Phase 0.1.2 - Architecture Definition
+Phase 0.2.1 - Core Infrastructure Layout and Foundation
 
 ---
 
@@ -52,7 +52,7 @@ Current real core packages:
 
 ## Decisions Locked
 
-The following decisions are now considered officially locked for the current project direction:
+The following decisions are officially locked at this point:
 
 - modular monolith architecture
 - DEX-first product strategy
@@ -63,6 +63,9 @@ The following decisions are now considered officially locked for the current pro
 - Redis as secondary infrastructure store
 - REST and WebSocket as first-class transports
 - matching engine out of initial scope
+- migrations as schema source of truth
+- platform adapters for chain and contract integrations
+- infrastructure baseline before major feature expansion
 
 ---
 
@@ -70,14 +73,14 @@ The following decisions are now considered officially locked for the current pro
 
 This subphase formally defined:
 
-- architecture style
-- internal layer boundaries
-- present and future domain modules
-- backend role relative to smart contracts
-- hybrid expansion compatibility
-- request flow direction
-- DEX execution boundary
-- persistence direction
+- target technical repository layout
+- growth direction for `internal/core`
+- growth direction for `internal/modules`
+- future `internal/platform` adapter role
+- migration-based persistence direction
+- observability direction
+- jobs/background processing direction
+- explicit development rules for safe expansion
 
 ---
 
@@ -87,9 +90,10 @@ Not implemented yet:
 
 - database integration
 - migrations
-- repositories
-- users domain
-- wallet linking
+- PostgreSQL wiring
+- Redis wiring
+- repository scaffolding
+- local Docker environment
 - chain client
 - asset registry
 - portfolio aggregation
@@ -97,38 +101,43 @@ Not implemented yet:
 - DEX contracts
 - quote engine
 - routing engine
-- liquidity flows
 - tx tracking
 - audit persistence
-- Redis integration
-- observability stack
+- metrics and readiness support
 - test harness
 
 ---
 
 ## Recommended Next Step
 
-Phase 0.2.1 - Core Infrastructure Layout and Foundation
+Phase 0.2.2 - Persistence and Environment Baseline
 
 Recommended scope:
 
-- formalize target project structure
-- introduce database and persistence direction scaffolding
-- prepare shared application wiring for future modules
-- keep the current bootstrap stable while expanding safely
+- introduce DB and cache scaffolding direction into the project
+- define migration workflow
+- define initial local infrastructure workflow
+- prepare repository-ready technical base
+- keep current bootstrap stable while introducing infrastructure support
 
 ---
 
 ## Notes for Next Chat
 
-The next implementation-oriented step should remain conservative.
+The next step should remain infrastructure-oriented.
 
-The project should not jump directly into DEX contracts or chain integration before the core infrastructure baseline exists.
+The project should still avoid jumping into:
 
-The safest next move is to establish:
+- chain-heavy implementation
+- DEX contracts
+- quote logic
+- wallet linking
+- indexer logic
 
-- structure
-- DB foundation
-- migration path
-- shared technical interfaces
-- environment-ready local stack
+Before those, the backend should gain a stable baseline for:
+
+- database
+- migrations
+- cache
+- repository structure
+- local environment

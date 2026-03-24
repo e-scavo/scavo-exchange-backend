@@ -139,3 +139,48 @@ They add major domain, operational, reconciliation, and custodial complexity tha
 - no internal execution engine in early phases
 - no internal balance matching in early phases
 - hybrid expansion remains possible later
+
+---
+
+## ADR-0010 - Migrations as Schema Source of Truth
+
+### Decision
+Database schema evolution will be managed through versioned migrations.
+
+### Reason
+The project needs reproducible environments, auditable schema changes, and a safe way to evolve persistence without undocumented drift.
+
+### Impact
+- schema changes must be versioned
+- manual environment-only schema drift is discouraged
+- repository evolution must remain aligned with migration history
+
+---
+
+## ADR-0011 - Platform Adapters for Chain and Contract Integration
+
+### Decision
+Chain-specific and contract-specific integrations should be isolated into dedicated platform packages or adapters.
+
+### Reason
+This reduces low-level protocol leakage into domain services and keeps blockchain integrations testable, replaceable, and easier to evolve.
+
+### Impact
+- domain services should not directly embed raw RPC logic everywhere
+- chain integrations can evolve independently
+- smart contract wiring remains more maintainable
+
+---
+
+## ADR-0012 - Infrastructure Before Feature Expansion
+
+### Decision
+Persistence and infrastructure baseline work must be completed before major product feature implementation begins.
+
+### Reason
+Jumping directly into DEX features, contracts, or chain-heavy logic before core infrastructure is stable would create architectural drift and rework.
+
+### Impact
+- Phase 0.2 remains mandatory
+- major DEX features are deferred until infrastructure is ready
+- implementation order remains disciplined and safer

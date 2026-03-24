@@ -38,6 +38,25 @@ This is the correct foundation for the chosen modular monolith architecture.
 
 ---
 
+## Phase 0.2.1 Scope
+
+This phase defines the official technical growth layout for the backend.
+
+It does not require immediate implementation of all directories or modules, but it locks the intended structure so that future code can be added without architectural drift.
+
+The objective is to preserve the current bootstrap while introducing a stable structural direction for:
+
+- persistence
+- repositories
+- chain integrations
+- shared services
+- module growth
+- local infrastructure
+- future workers
+- observability
+
+---
+
 ## Layer Model
 
 The backend should evolve through the following internal layers.
@@ -60,9 +79,9 @@ Primary location:
 Rules:
 
 - no business logic
-- no transport-specific branching beyond startup concerns
 - no persistence logic
 - no blockchain logic
+- no transport payload decisions beyond application wiring
 
 ---
 
@@ -85,12 +104,14 @@ Current and planned packages:
 - future `internal/core/cache`
 - future `internal/core/observability`
 - future `internal/core/jobs`
+- future `internal/core/clock`
+- future `internal/core/ids`
 
 Rules:
 
 - must not depend on business modules
 - must remain reusable
-- must not embed exchange domain decisions
+- must not encode exchange domain workflows
 
 ---
 
@@ -99,22 +120,22 @@ Rules:
 Primary responsibility:
 
 - translate external requests into internal module calls
-- serialize responses
-- validate input at transport boundary
-- preserve correlation and security context
+- validate transport input
+- serialize output
+- preserve request and security context
 
 Transport forms:
 
 - REST handlers
 - WebSocket actions
-- future admin endpoints
-- future internal job triggers
+- future internal admin routes
+- future internal operational endpoints
 
 Rules:
 
-- should be thin
-- should not contain domain workflows
-- should call services, not repositories directly unless explicitly justified
+- thin by default
+- transport-only validation at the boundary
+- no repository orchestration directly from handlers unless explicitly justified
 
 ---
 
@@ -124,22 +145,23 @@ Primary responsibility:
 
 - business rules
 - orchestration inside each domain module
+- interaction with repositories and integrations
 - consistency validation
-- interaction with repositories and external clients
 
-Each module should converge toward this pattern:
+Each module should converge toward this structure:
 
 - transport
 - service
 - repository contracts
-- models / DTOs
-- adapters if needed
+- DTOs or transport payloads
+- internal helpers
+- module models
 
 Rules:
 
-- service layer owns domain rules
-- transport does not decide business outcomes
-- service can coordinate multiple repositories and external integrations
+- service layer owns business decisions
+- transport layer does not own workflows
+- services may combine persistence and blockchain integrations when necessary
 
 ---
 
@@ -149,27 +171,26 @@ Primary responsibility:
 
 - persistence access
 - query composition
-- transactional boundaries
-- isolation of storage mechanics
+- transaction boundaries
+- storage isolation
 
-Planned repository targets:
+Repository layer targets:
 
 - users
-- wallets
+- linked wallets
 - assets
 - chain cursors
 - indexed events
 - tracked transactions
-- quotes cache
-- liquidity metadata
-- audit events
+- audit entries
 - future ledger entries
+- operational state
 
 Rules:
 
-- repositories should not contain transport logic
-- repositories should not format API responses
-- repositories should remain storage-specific
+- repositories must not format API responses
+- repositories must not contain transport logic
+- repositories should remain storage-specific and testable
 
 ---
 
@@ -184,24 +205,33 @@ Primary external systems:
 - SCAVIUM RPC
 - DEX smart contracts
 - token contracts
-- Redis
 - PostgreSQL
-- future third-party compliance or notification providers
+- Redis
+- future compliance providers
+- future notification providers
 
 Rules:
 
-- external integration code should be isolated behind clients or adapters
-- module services must not embed raw low-level protocol details everywhere
+- external integrations should be isolated behind clients or adapters
+- raw low-level protocol code should not spread across services
 
 ---
 
-## Target Package Direction
+## Official Target Layout
 
-The project should gradually evolve toward a structure conceptually similar to:
+The backend should gradually evolve toward the following structure:
 
 - `cmd/scavo-server`
 - `internal/app`
-- `internal/core/...`
+- `internal/core/config`
+- `internal/core/logger`
+- `internal/core/httpx`
+- `internal/core/auth`
+- `internal/core/ws`
+- `internal/core/db`
+- `internal/core/cache`
+- `internal/core/observability`
+- `internal/core/jobs`
 - `internal/modules/auth`
 - `internal/modules/system`
 - `internal/modules/user`
@@ -220,53 +250,64 @@ The project should gradually evolve toward a structure conceptually similar to:
 - future `internal/modules/ledger`
 - future `internal/modules/p2p`
 - future `internal/modules/compliance`
+- `internal/platform/scavium`
+- `internal/platform/contracts`
+- future `internal/platform/notifications`
+- `migrations`
+- `deployments`
+- `scripts`
+- `docs`
 
-This does not require immediate creation of all directories. It defines the official growth direction.
+This structure is the official architectural direction.
+
+It does not mean every directory must be created immediately, but it defines where future work belongs.
 
 ---
 
-## Module Responsibilities
-
-### system
-Scope:
-
-- health-like system actions
-- connectivity sanity checks
-- simple operational diagnostics
+## Module Boundaries
 
 ### auth
 Scope:
 
 - current development login
-- future real login
+- future production login
 - JWT issuance
-- refresh/session evolution
-- wallet-signature-based auth in later phase
+- refresh and session evolution
+- wallet signature authentication in later phases
+
+### system
+Scope:
+
+- health
+- version
+- diagnostics
+- operational sanity checks
 
 ### user
 Scope:
 
 - user identity
+- profile metadata
 - linked entities
-- account profile metadata
-- future roles and permissions
+- future permissions and roles
 
 ### wallet
 Scope:
 
-- linked self-custody wallets
-- wallet ownership verification
-- primary wallet selection
+- self-custody wallet linking
+- ownership verification
+- wallet preferences
 - multi-wallet support
 
 ### chain
 Scope:
 
-- SCAVIUM RPC client coordination
-- chain health
-- latest block awareness
-- gas estimation helpers
-- allowance and balance reads
+- RPC coordination
+- network awareness
+- gas estimation
+- native balance reads
+- token balance reads
+- allowance reads
 
 ### asset
 Scope:
@@ -275,173 +316,121 @@ Scope:
 - token metadata
 - decimals
 - symbols
-- icons and external metadata references if needed later
+- chain-native asset definitions
 
 ### portfolio
 Scope:
 
-- wallet balances
-- token balances
-- allowance views
-- portfolio snapshots
-- aggregated read model for frontend use
+- aggregated wallet balances
+- allowance summaries
+- frontend-ready portfolio view
+- token holdings snapshots
 
 ### dex
 Scope:
 
-- DEX protocol-facing backend logic
-- pool reads
-- pair discovery
-- swap preparation
-- on-chain contract coordination
+- contract-facing DEX backend logic
+- pool discovery
+- pair state reads
+- swap preparation support
 
 ### liquidity
 Scope:
 
-- add/remove liquidity support
-- LP position read model
-- liquidity calculations and projections
+- add liquidity support
+- remove liquidity support
+- LP position reads
+- pool share calculations
 
 ### quote
 Scope:
 
-- swap quote generation
-- slippage projections
-- fee projection
-- min-out or max-in modeling
+- quote generation
+- min-out modeling
+- fee estimation
+- slippage-aware responses
 
 ### routing
 Scope:
 
-- single-hop path support first
+- path selection
+- single-hop first
 - multi-hop expansion later
-- path scoring
 - deterministic route selection
 
 ### txtracking
 Scope:
 
-- track submitted on-chain operations
-- monitor receipts
-- expose pending/confirmed/failed states
+- transaction lifecycle registration
+- pending/confirmed/failed state tracking
+- receipt status updates
 
 ### indexer
 Scope:
 
-- ingest contract events
-- maintain cursors
-- handle reorg-safe synchronization in later phase
-- build queryable local read models
+- contract event ingestion
+- chain cursor tracking
+- local read-model updates
+- reorg-aware evolution later
 
 ### audit
 Scope:
 
-- operational event logging
-- security-sensitive actions
-- traceable state changes
+- auditable operational events
+- sensitive action traceability
+- structured internal event records
 
 ### admin
 Scope:
 
-- internal operational endpoints
-- future maintenance controls
-- controlled access actions
+- operational internal endpoints
+- maintenance controls
+- protected internal actions
 
 ### ledger
 Future hybrid scope:
 
 - custodial balances
-- movements
 - reservations
-- settlement entries
+- internal settlement entries
+- future exchange-controlled accounting
 
 ### p2p
 Future hybrid scope:
 
 - offers
 - escrow abstractions
-- dispute-oriented flows
-- fiat interaction placeholders
+- disputes
+- fiat-adjacent coordination
 
 ### compliance
 Future hybrid scope:
 
 - KYC hooks
-- AML event points
-- risk controls
-- reporting/export preparation
+- AML hooks
+- reporting/export boundaries
+- address screening integration points
 
 ---
 
-## Request Flow Direction
+## Platform and Adapter Direction
 
-The standard backend request direction should be:
+Some integrations are too specific to belong directly inside domain modules.
 
-transport -> service -> repository/client -> result mapping -> transport response
+To avoid coupling every module to low-level protocol code, the project should introduce platform-specific packages such as:
 
-This rule should remain valid for both REST and WebSocket flows.
+- `internal/platform/scavium`
+- `internal/platform/contracts`
 
----
+These packages are intended for:
 
-## WebSocket Direction
+- RPC clients
+- contract call helpers
+- ABI-based integrations
+- chain-specific retry and failover logic
+- event decoding helpers
 
-The current WebSocket architecture already follows a good pattern:
-
-- handler accepts connection
-- hub manages clients
-- dispatcher routes actions
-- session is attached if token exists
-- module-specific actions are registered externally
-
-This pattern should remain.
-
-Future additions may include:
-
-- authenticated subscriptions
-- user channel routing
-- tx status push
-- quote stream push
-- pool event push
-
----
-
-## DEX Backend Role
-
-The backend does not replace smart contracts.
-
-Its role is to provide:
-
-- contract-aware reads
-- quote generation
-- route calculation
-- allowance inspection
-- portfolio views
-- transaction preparation inputs
-- transaction lifecycle tracking
-- frontend-ready aggregation
-
-The backend should not initially hold private keys for DEX users.
-
----
-
-## Smart Contract Boundary
-
-DEX settlement will happen on-chain.
-
-Therefore the backend boundary is:
-
-- prepare
-- inform
-- validate
-- observe
-- index
-- track
-
-But not:
-
-- sign user transactions
-- custody user DEX funds by default
-- internally settle DEX swaps off-chain
+Modules should consume these through explicit interfaces whenever possible.
 
 ---
 
@@ -451,22 +440,116 @@ PostgreSQL is the target primary datastore.
 
 Redis is the target secondary infrastructure store.
 
-### PostgreSQL should hold:
-- users
-- wallets
-- assets
-- chain state
+### PostgreSQL responsibilities
+
+- user records
+- linked wallets
+- assets metadata
+- chain sync cursors
+- indexed on-chain events
 - tracked transactions
-- indexed events
 - audit records
 - future internal ledger entities
+- future P2P entities
 
-### Redis should hold:
-- cache
-- rate limit counters
-- short-lived coordination
-- optional ephemeral quote cache
-- optional job coordination
+### Redis responsibilities
+
+- short-lived cache
+- coordination keys
+- rate-limit counters
+- temporary quote cache if needed
+- optional worker coordination
+- optional lock support
+
+Redis is not the system of record.
+
+---
+
+## Migrations Direction
+
+The project should formally adopt a migration-based persistence workflow.
+
+A dedicated `migrations/` directory should exist and become the source of truth for schema evolution.
+
+Migration rules:
+
+- no undocumented schema drift
+- no manual production-only schema edits
+- all structural DB changes must be versioned
+- migrations must align with repository behavior and documentation
+
+---
+
+## Observability Direction
+
+Observability will become part of the infrastructure baseline.
+
+Planned observability components:
+
+- structured logs
+- request correlation
+- internal domain event logging
+- metrics
+- health and readiness signals
+- future tracing
+
+Observability support should live in reusable technical infrastructure, not inside each module ad hoc.
+
+---
+
+## Job and Background Processing Direction
+
+The system is initially single-process, but it must remain ready for background work.
+
+Future job categories may include:
+
+- chain polling
+- event indexing
+- receipt tracking
+- cache refresh
+- operational cleanup
+- notifications
+
+The initial direction is to keep jobs inside the same codebase, with the option to split process roles later if needed.
+
+---
+
+## Request Flow Direction
+
+The standard backend flow should be:
+
+transport -> service -> repository and client adapters -> result mapping -> response
+
+This must remain valid for REST and WebSocket flows.
+
+The standard write flow should be:
+
+transport -> service -> transactional persistence and external coordination -> audit/event record -> response
+
+---
+
+## DEX Backend Boundary
+
+The backend does not replace smart contracts.
+
+Its role is to provide:
+
+- contract-aware reads
+- pool discovery
+- quote generation
+- routing assistance
+- allowance inspection
+- portfolio aggregation
+- transaction preparation support
+- transaction lifecycle tracking
+- frontend-ready state views
+
+The backend should not initially:
+
+- hold user private keys for DEX usage
+- internally settle DEX swaps
+- execute matching-engine style trades
+- replace wallet signing authority
 
 ---
 
@@ -475,28 +558,30 @@ Redis is the target secondary infrastructure store.
 The architecture must evolve safely in this order:
 
 1. documentation and alignment
-2. core infrastructure foundation
-3. identity and wallet support
-4. chain reads and indexing
-5. DEX contracts
-6. DEX backend logic
-7. frontend contract stabilization
-8. hybrid expansion preparation
+2. infrastructure layout and shared foundation
+3. persistence and environment baseline
+4. identity and wallet support
+5. chain reads and indexing baseline
+6. DEX contracts
+7. DEX backend logic
+8. frontend-ready contract stabilization
+9. hybrid expansion preparation
 
-This ordering is intentional and must be preserved unless there is a strong technical reason to change it.
+This order is intentional and should only change for a strong technical reason.
 
 ---
 
 ## Non-Goals for This Stage
 
-At this stage, the architecture does not require:
+This stage does not require:
 
 - microservices
 - Kubernetes-first design
-- full event-driven architecture
 - matching engine
+- order-book implementation
 - custodial ledger implementation
-- fiat processing
-- compliance subsystem implementation
+- fiat operations
+- compliance implementation
+- production-grade indexing yet
 
-Those may come later, but they are not part of the current architectural baseline.
+This phase only defines the structure required to support those later if the project grows into them.
