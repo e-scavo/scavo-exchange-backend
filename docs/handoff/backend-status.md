@@ -111,7 +111,7 @@ The project now supports:
 - migration workflow execution and inspection
 - smoke-level validation of login flow
 
-The backend is no longer only structurally valid — it is now partially behaviorally validated.
+The backend is no longer only structurally valid - it is now partially behaviorally validated.
 
 ---
 
