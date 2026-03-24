@@ -16,7 +16,7 @@ Phase 0.3 - Infrastructure Bootstrap
 
 ## Current Subphase
 
-Phase 0.3.1 - Implementation Bootstrap for Persistence and Health Infrastructure
+Phase 0.3.3 - Repository and First Persistence Module
 
 ---
 
@@ -38,11 +38,14 @@ The backend now includes:
 - Redis core scaffolding
 - status service for health and readiness
 - readiness-aware router wiring
+- first migration-backed domain table
+- first repository-backed domain service
 
 Current real modules:
 
 - `system`
 - `auth`
+- `user`
 
 Current real core packages:
 
@@ -61,13 +64,11 @@ Current real core packages:
 
 This subphase implemented:
 
-- infrastructure-oriented config expansion
-- PostgreSQL bootstrap client scaffolding
-- Redis bootstrap client scaffolding
-- explicit health versus readiness separation
-- reusable dependency checker model
-- readiness endpoint wiring
-- startup visibility for enabled infrastructure
+- first real domain migration: `users`
+- first repository contract and PostgreSQL repository
+- first persistence-backed domain service
+- safe integration between auth login and persisted users
+- fallback compatibility when PostgreSQL is not configured
 
 ---
 
@@ -75,11 +76,11 @@ This subphase implemented:
 
 Not implemented yet:
 
-- migrations
-- repository scaffolding
-- docker-compose local stack
-- real DB-backed modules
-- real Redis-backed coordination
+- refresh tokens persistence
+- repository test suite
+- migrations runner integration in app lifecycle
+- docker-compose validation
+- Redis-backed features
 - metrics endpoint
 - tracing
 - chain client
@@ -96,16 +97,11 @@ Not implemented yet:
 
 ## Recommended Next Step
 
-## Phase 0.3.2 - Migration and Local Infrastructure Bootstrap
+Phase 0.3.4 - Repository Validation and Migration Workflow Hardening
 
-This phase introduced:
+Recommended scope:
 
-- migrations directory baseline
-- migration execution script
-- goose as migration tool
-- docker-compose local infrastructure
-- PostgreSQL and Redis local services
-- environment example file
-- Makefile for local workflow
-
-The backend is now capable of running with a reproducible local infrastructure baseline.
+- validate migration flow end to end
+- add repository tests
+- add local execution notes for DB-backed login
+- prepare the codebase for the next real persisted module

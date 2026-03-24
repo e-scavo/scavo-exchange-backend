@@ -10,5 +10,6 @@
 | 0 | 0.2 | 0.2.2 - Persistence and Environment Baseline | Done | PostgreSQL and Redis roles, migration direction, and local environment baseline documented |
 | 0 | 0.2 | 0.2.3 - Observability and Test Bootstrap | Done | Observability baseline, health/readiness direction, and testing model documented |
 | 0 | 0.3 | 0.3.1 - Implementation Bootstrap for Persistence and Health Infrastructure | Done | DB/cache scaffolding, readiness model, config expansion, router wiring |
-| 0 | 0.3 | 0.3.2 - Migration Bootstrap and Local Infrastructure Layout | Done | migrations, docker-compose, env baseline, local reproducibility |
-| 0 | 0.3 | 0.3.3 - Repository and First Persistence Module | Next | first real DB usage |
+| 0 | 0.3 | 0.3.2 - Migration Bootstrap and Local Infrastructure Layout | Done | Migrations baseline, local infra direction, env example and workflow |
+| 0 | 0.3 | 0.3.3 - Repository and First Persistence Module | Done | First persisted user module integrated into dev login |
+| 0 | 0.3 | 0.3.4 - Repository Validation and Migration Workflow Hardening | Next | Migration validation, repository tests, local persistence verification |

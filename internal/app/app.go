@@ -15,6 +15,7 @@ import (
 	"github.com/e-scavo/scavo-exchange-backend/internal/core/ws"
 	authmod "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth"
 	"github.com/e-scavo/scavo-exchange-backend/internal/modules/system"
+	usermod "github.com/e-scavo/scavo-exchange-backend/internal/modules/user"
 )
 
 type App struct {
@@ -29,6 +30,8 @@ type App struct {
 	dbClient    *db.Client
 	cacheClient *cache.Client
 	statusSvc   *status.Service
+
+	userService *usermod.Service
 }
 
 func New(cfg config.Config) *App {
@@ -58,6 +61,14 @@ func New(cfg config.Config) *App {
 	cacheClient, cacheErr := cache.New(cfg, lg)
 	if cacheErr != nil {
 		lg.Error("redis init failed", "err", cacheErr)
+	}
+
+	var userService *usermod.Service
+	if dbClient != nil && dbClient.Enabled() && dbClient.Pool() != nil {
+		userRepo := usermod.NewPostgresRepository(dbClient.Pool(), lg)
+		userService = usermod.NewService(userRepo)
+	} else {
+		userService = usermod.NewService(nil)
 	}
 
 	statusSvc := status.New(
@@ -100,6 +111,7 @@ func New(cfg config.Config) *App {
 		Config:       cfg,
 		TokenService: tokens,
 		Status:       statusSvc,
+		UserService:  userService,
 	})
 
 	srv := &http.Server{
@@ -117,6 +129,7 @@ func New(cfg config.Config) *App {
 		dbClient:    dbClient,
 		cacheClient: cacheClient,
 		statusSvc:   statusSvc,
+		userService: userService,
 	}
 }
 

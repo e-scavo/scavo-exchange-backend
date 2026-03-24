@@ -7,6 +7,7 @@ import (
 	"time"
 
 	coreauth "github.com/e-scavo/scavo-exchange-backend/internal/core/auth"
+	usermod "github.com/e-scavo/scavo-exchange-backend/internal/modules/user"
 )
 
 type LoginRequest struct {
@@ -24,6 +25,7 @@ type LoginResponse struct {
 type HTTPHandlers struct {
 	Tokens *coreauth.TokenService
 	TTL    time.Duration
+	Users  *usermod.Service
 }
 
 func (h HTTPHandlers) Login(w http.ResponseWriter, r *http.Request) {
@@ -40,6 +42,14 @@ func (h HTTPHandlers) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userID := "u_" + strings.ReplaceAll(req.Email, "@", "_")
+	if h.Users != nil {
+		u, err := h.Users.ResolveOrCreateDevUser(r.Context(), req.Email)
+		if err != nil {
+			writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "user_persistence_error"})
+			return
+		}
+		userID = u.ID
+	}
 
 	token, err := h.Tokens.Mint(userID, req.Email)
 	if err != nil {
