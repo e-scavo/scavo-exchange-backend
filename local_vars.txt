@@ -1,0 +1,7 @@
+SCAVO_POSTGRES_URL=postgres://postgres:postgres@localhost:5432/scavo_exchange?sslmode=disable
+SCAVO_REDIS_ADDR=localhost:6379
+SCAVO_REDIS_PASSWORD=
+SCAVO_REDIS_DB=0
+
+SCAVO_READINESS_REQUIRE_POSTGRES=false
+SCAVO_READINESS_REQUIRE_REDIS=false
