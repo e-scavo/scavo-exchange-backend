@@ -8,8 +8,9 @@
 | 0 | 0.1 | 0.1.2 - Architecture Definition | Done | Architecture style, module boundaries, and DEX-first direction documented |
 | 0 | 0.2 | 0.2.1 - Core Infrastructure Layout and Foundation | Done | Repository growth direction, adapter model, migration direction, and development rules documented |
 | 0 | 0.2 | 0.2.2 - Persistence and Environment Baseline | Done | PostgreSQL and Redis roles, migration direction, and local environment baseline documented |
-| 0 | 0.2 | 0.2.3 - Observability and Test Bootstrap | Next | Observability, health/readiness, and testing baseline |
-| 0 | 1.0 | Phase 1 preparation | Planned | Identity and wallet phases begin after Stage 0 foundation is complete |
+| 0 | 0.2 | 0.2.3 - Observability and Test Bootstrap | Done | Observability baseline, health/readiness direction, and testing model documented |
+| 0 | 0.3 | 0.3.1 - Implementation Bootstrap for Persistence and Health Infrastructure | Next | DB/cache scaffolding, migration structure, health and readiness baseline |
+| 0 | 1.0 | Phase 1 preparation | Planned | Identity and wallet phases begin after Stage 0 foundation and initial infrastructure bootstrap |
 
 ---
 
@@ -17,7 +18,7 @@
 
 Current recommended focus is:
 
-Phase 0.2.3 - Observability and Test Bootstrap
+Phase 0.3.1 - Implementation Bootstrap for Persistence and Health Infrastructure
 
 ---
 
@@ -36,3 +37,6 @@ The project is currently locked to the following strategic direction:
 - infrastructure before major feature implementation
 - migration-driven persistence evolution
 - reproducible local environment direction
+- explicit health and readiness separation
+- observability-first infrastructure growth
+- testing that grows with the system

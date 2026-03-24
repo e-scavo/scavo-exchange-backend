@@ -16,7 +16,7 @@ Phase 0.2 - Core Infrastructure
 
 ## Current Subphase
 
-Phase 0.2.2 - Persistence and Environment Baseline
+Phase 0.2.3 - Observability and Test Bootstrap
 
 ---
 
@@ -69,6 +69,9 @@ The following decisions are officially locked at this point:
 - PostgreSQL as durable source of truth
 - Redis for ephemeral and coordination state
 - environment-driven local infrastructure baseline
+- health and readiness must be separated
+- observability is a first-class infrastructure concern
+- testing must grow with the architecture
 
 ---
 
@@ -76,13 +79,13 @@ The following decisions are officially locked at this point:
 
 This subphase formally defined:
 
-- persistence role separation between PostgreSQL and Redis
-- migration workflow direction
-- local environment baseline
-- base environment variable direction
-- repository preparation rules
-- Docker-oriented local infrastructure recommendation
-- persistence boundary rules for future implementation
+- observability direction
+- logging baseline expectations
+- health versus readiness distinction
+- metrics direction
+- testing layer model
+- validation baseline before heavy implementation
+- diagnostic expectations for future infrastructure phases
 
 ---
 
@@ -97,6 +100,10 @@ Not implemented yet:
 - repository scaffolding
 - local Docker environment
 - migration runner
+- health/readiness expanded endpoints
+- metrics endpoint
+- tracing
+- test harness
 - chain client
 - asset registry
 - portfolio aggregation
@@ -106,33 +113,33 @@ Not implemented yet:
 - routing engine
 - tx tracking
 - audit persistence
-- metrics and readiness support
-- test harness
 
 ---
 
 ## Recommended Next Step
 
-Phase 0.2.3 - Observability and Test Bootstrap
+Phase 0.3.1 - Implementation Bootstrap for Persistence and Health Infrastructure
 
 Recommended scope:
 
-- define observability baseline in more detail
-- define health, readiness, and operational visibility direction
-- define testing structure and initial harness direction
-- prepare the project for safe infrastructure implementation after the documentation baseline is complete
+- introduce core DB scaffolding
+- introduce core cache scaffolding
+- prepare migration structure
+- prepare health and readiness baseline implementation
+- keep current bootstrap stable while making infrastructure integration possible
 
 ---
 
 ## Notes for Next Chat
 
-The project should still remain in foundation mode.
+Stage 0 documentation foundation is now materially complete enough to begin conservative implementation-oriented infrastructure work.
 
-The next step should continue preparing the backend before entering implementation-heavy stages.
+The next step should still avoid:
 
-The current order remains:
+- DEX feature implementation
+- chain-heavy module implementation
+- wallet linking
+- quote logic
+- indexer logic
 
-- define foundation
-- define persistence and environment
-- define observability and testing baseline
-- then move into implementation-oriented infrastructure work
+The safest next move is infrastructure bootstrap with health-aware design.

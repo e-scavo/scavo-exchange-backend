@@ -15,8 +15,9 @@ Current project status:
 - foundation and documentation phases
 - minimal backend bootstrap already exists
 - architecture and target structure are formally defined
-- persistence and environment direction are now formally defined
-- implementation of DB, cache, and migrations is still pending
+- persistence and environment direction are formally defined
+- observability and testing direction are now formally defined
+- implementation of DB, cache, migrations, metrics, and test scaffolding is still pending
 
 The current goal is to expand the backend safely without destabilizing the existing bootstrap.
 
@@ -230,8 +231,54 @@ Rules:
 - do not leak secrets
 - preserve correlation context where possible
 - keep logs consistent across modules
+- infrastructure and dependency failures should be clearly distinguishable
 
 Logging must support both local debugging and future operational observability.
+
+---
+
+## Health and Readiness Rule
+
+The project must distinguish between health and readiness.
+
+### Health
+Represents whether the backend process is alive and able to answer basic status requests.
+
+### Readiness
+Represents whether the backend is actually ready to serve its intended workload, including infrastructure dependencies when required.
+
+This distinction becomes important once the project includes:
+
+- PostgreSQL
+- Redis
+- chain integrations
+- migrations
+- background jobs
+
+The backend should not treat "process is up" as equivalent to "system is ready."
+
+---
+
+## Testing Rule
+
+Testing must grow together with the system.
+
+The project should evolve through multiple testing layers:
+
+- unit tests
+- service tests
+- repository tests
+- integration tests
+- chain integration tests
+- contract/backend end-to-end tests
+- internal environment smoke tests
+
+Rules:
+
+- tests should be phase-appropriate
+- new infrastructure should become testable as it is introduced
+- tests should validate behavior, not only implementation details
+- critical flows should gain regression coverage as soon as they stabilize
 
 ---
 
@@ -272,6 +319,8 @@ At minimum, the following should stay aligned:
 - `docs/decisions.md`
 - `docs/development.md`
 - `docs/development-environment.md`
+- `docs/observability.md`
+- `docs/testing.md`
 - `docs/handoff/backend-status.md`
 - `docs/phase-status.md`
 
@@ -290,9 +339,9 @@ Commit messages should be:
 
 Examples:
 
-- `docs(phase-0.2.2): define persistence and environment baseline`
-- `refactor(core): prepare application structure for persistence bootstrap`
-- `feat(auth): add wallet challenge generation endpoint`
+- `docs(phase-0.2.3): define observability and testing baseline`
+- `refactor(core): prepare health and readiness structure`
+- `test(auth): add service-level login coverage`
 
 ---
 
@@ -310,20 +359,18 @@ This will be introduced incrementally and documented as the project advances.
 
 ---
 
-## Testing Direction
+## Validation Baseline
 
-Testing will also evolve incrementally.
+Before major product features are added, the backend should gain a minimum validation baseline for:
 
-Planned test layers include:
+- startup behavior
+- configuration loading
+- dependency failure visibility
+- endpoint smoke validation
+- future repository readiness
+- future chain integration readiness
 
-- unit tests
-- service tests
-- repository tests
-- chain integration tests
-- contract/backend integration tests
-- internal environment smoke tests
-
-Testing support should grow together with the infrastructure baseline.
+This reduces drift and makes infrastructure work safer.
 
 ---
 
@@ -336,6 +383,8 @@ Before adding large product features, the project should stabilize:
 - persistence direction
 - migration direction
 - environment baseline
+- observability baseline
+- testing direction
 - module boundaries
 - local environment rules
 
@@ -347,11 +396,12 @@ This principle is especially important for the current stage.
 
 After this phase, the recommended next move is:
 
-Phase 0.2.3 - Observability and Test Bootstrap
+Phase 0.3.1 - Implementation Bootstrap for Persistence and Health Infrastructure
 
 This should introduce:
 
-- observability baseline
-- health and readiness direction
-- test scaffolding direction
-- preparation for infrastructure implementation phases that follow
+- DB core scaffolding
+- cache core scaffolding
+- migration workflow bootstrap
+- health/readiness baseline implementation
+- testable infrastructure wiring direction

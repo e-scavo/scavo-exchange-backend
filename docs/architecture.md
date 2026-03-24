@@ -45,6 +45,7 @@ The backend is logically divided into the following layers:
 5. Persistence and External Integrations
 6. Blockchain and Contract Integration
 7. Background Jobs and Internal Processing
+8. Observability and Validation Layer
 
 ---
 
@@ -272,6 +273,33 @@ Used for:
 
 ---
 
+## Observability and Validation
+
+Observability is a first-class architectural concern.
+
+The backend must evolve with explicit support for:
+
+- structured logs
+- request correlation
+- recoverable operational diagnostics
+- health and readiness boundaries
+- metrics
+- future tracing
+- testable infrastructure seams
+- validation across unit, integration, and end-to-end layers
+
+This is required because the project will later depend on:
+
+- blockchain integrations
+- persistent state
+- event ingestion
+- background jobs
+- hybrid growth paths
+
+Without early observability and test structure, those phases would become fragile and difficult to operate.
+
+---
+
 ## Security Model
 
 The architecture is designed around explicit security boundaries.
@@ -314,3 +342,5 @@ The architecture is deliberately optimized for:
 - strong documentation alignment
 - backend/frontend contract clarity
 - future hybrid expansion without premature overengineering
+- early operational visibility
+- testable growth across infrastructure and domain phases

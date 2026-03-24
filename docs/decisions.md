@@ -229,3 +229,48 @@ The backend will require DB, cache, and chain-oriented setup. Reproducible local
 - environment variables become part of the formal project contract
 - Docker-based local infrastructure is recommended
 - local development setup must be documented and repeatable
+
+---
+
+## ADR-0016 - Health and Readiness Must Be Explicitly Separated
+
+### Decision
+The backend must distinguish liveness from readiness as infrastructure and integrations are introduced.
+
+### Reason
+A running process is not necessarily capable of serving intended workloads once the application depends on DB, cache, chain RPC, migrations, and background coordination.
+
+### Impact
+- health endpoints and readiness checks should evolve separately
+- operational diagnostics become clearer
+- rollout and internal testing behavior become safer
+
+---
+
+## ADR-0017 - Observability Is a First-Class Infrastructure Concern
+
+### Decision
+Observability must be treated as part of the core backend foundation rather than an optional later add-on.
+
+### Reason
+The system will depend on blockchain integrations, persistence, background processing, and hybrid growth paths that are difficult to diagnose without structured visibility.
+
+### Impact
+- logging, correlation, and metrics are part of the architecture
+- new infrastructure work should remain diagnosable
+- failures should become visible earlier in development
+
+---
+
+## ADR-0018 - Testing Must Grow with the Architecture
+
+### Decision
+Testing strategy must evolve incrementally alongside infrastructure and domain growth.
+
+### Reason
+Delaying test structure until late stages would create fragile integrations and make regression control much harder once DB, chain, contracts, and real-time behavior are introduced.
+
+### Impact
+- test layers are defined early
+- infrastructure work should become testable as introduced
+- critical flows should gain regression protection as they stabilize
