@@ -21,6 +21,18 @@ type Config struct {
 	JWTSecret string
 	JWTIssuer string
 	JWTTTLHrs int
+
+	// PostgreSQL
+	PostgresURL string
+
+	// Redis
+	RedisAddr     string
+	RedisPassword string
+	RedisDB       int
+
+	// Readiness requirements
+	ReadinessRequirePostgres bool
+	ReadinessRequireRedis    bool
 }
 
 func LoadFromEnv() (Config, error) {
@@ -46,6 +58,20 @@ func LoadFromEnv() (Config, error) {
 	}
 	c.JWTTTLHrs = n
 
+	c.PostgresURL = getenv("SCAVO_POSTGRES_URL", "")
+
+	c.RedisAddr = getenv("SCAVO_REDIS_ADDR", "")
+	c.RedisPassword = getenv("SCAVO_REDIS_PASSWORD", "")
+
+	redisDB, _ := strconv.Atoi(getenv("SCAVO_REDIS_DB", "0"))
+	if redisDB < 0 {
+		redisDB = 0
+	}
+	c.RedisDB = redisDB
+
+	c.ReadinessRequirePostgres = getenvBool("SCAVO_READINESS_REQUIRE_POSTGRES", false)
+	c.ReadinessRequireRedis = getenvBool("SCAVO_READINESS_REQUIRE_REDIS", false)
+
 	if !strings.HasPrefix(c.HTTPAddr, ":") && !strings.Contains(c.HTTPAddr, ":") {
 		if _, err := strconv.Atoi(c.HTTPAddr); err == nil {
 			c.HTTPAddr = ":" + c.HTTPAddr
@@ -63,6 +89,22 @@ func getenv(k, def string) string {
 		return def
 	}
 	return v
+}
+
+func getenvBool(k string, def bool) bool {
+	v := strings.TrimSpace(strings.ToLower(os.Getenv(k)))
+	if v == "" {
+		return def
+	}
+
+	switch v {
+	case "1", "true", "yes", "y", "on":
+		return true
+	case "0", "false", "no", "n", "off":
+		return false
+	default:
+		return def
+	}
 }
 
 func splitCSV(v string) []string {

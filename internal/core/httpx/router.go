@@ -1,6 +1,7 @@
 package httpx
 
 import (
+	"context"
 	"net/http"
 	"time"
 
@@ -10,6 +11,7 @@ import (
 	coreauth "github.com/e-scavo/scavo-exchange-backend/internal/core/auth"
 	"github.com/e-scavo/scavo-exchange-backend/internal/core/config"
 	"github.com/e-scavo/scavo-exchange-backend/internal/core/logger"
+	"github.com/e-scavo/scavo-exchange-backend/internal/core/status"
 	"github.com/e-scavo/scavo-exchange-backend/internal/core/ws"
 	authmod "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth"
 )
@@ -21,6 +23,7 @@ type RouterParams struct {
 	Config     config.Config
 
 	TokenService *coreauth.TokenService
+	Status       *status.Service
 }
 
 func NewRouter(p RouterParams) http.Handler {
@@ -38,7 +41,6 @@ func NewRouter(p RouterParams) http.Handler {
 	r.Use(RequestID())
 	r.Use(Recoverer(p.Log))
 
-	// ✅ WS sin AccessLog/Timeout (no romper Upgrade)
 	r.Get("/ws", ws.NewHandler(ws.HandlerParams{
 		Log:        p.Log,
 		Hub:        p.Hub,
@@ -46,13 +48,29 @@ func NewRouter(p RouterParams) http.Handler {
 		TokenSvc:   p.TokenService,
 	}))
 
-	// ✅ HTTP normal
 	r.Group(func(r chi.Router) {
 		r.Use(AccessLog(p.Log))
 		r.Use(Timeout(30 * time.Second))
 
 		r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
-			WriteJSON(w, http.StatusOK, map[string]any{"ok": true})
+			if p.Status == nil {
+				WriteJSON(w, http.StatusOK, map[string]any{"ok": true, "status": "up"})
+				return
+			}
+			WriteJSON(w, http.StatusOK, p.Status.Health())
+		})
+
+		r.Get("/readiness", func(w http.ResponseWriter, r *http.Request) {
+			if p.Status == nil {
+				WriteJSON(w, http.StatusOK, map[string]any{"ok": true, "status": "ready"})
+				return
+			}
+
+			ctx, cancel := context.WithTimeout(r.Context(), 3*time.Second)
+			defer cancel()
+
+			code, payload := p.Status.Readiness(ctx)
+			WriteJSON(w, code, payload)
 		})
 
 		r.Get("/version", func(w http.ResponseWriter, r *http.Request) {

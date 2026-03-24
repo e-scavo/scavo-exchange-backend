@@ -12,17 +12,17 @@ Stage 0 - Foundation
 
 ## Current Phase
 
-Phase 0.2 - Core Infrastructure
+Phase 0.3 - Infrastructure Bootstrap
 
 ## Current Subphase
 
-Phase 0.2.3 - Observability and Test Bootstrap
+Phase 0.3.1 - Implementation Bootstrap for Persistence and Health Infrastructure
 
 ---
 
 ## Real Current Code Baseline
 
-The current backend already includes:
+The backend now includes:
 
 - application bootstrap
 - config loading
@@ -34,6 +34,10 @@ The current backend already includes:
 - development HTTP login
 - system WebSocket handler
 - auth WebSocket handler registration
+- PostgreSQL core scaffolding
+- Redis core scaffolding
+- status service for health and readiness
+- readiness-aware router wiring
 
 Current real modules:
 
@@ -47,45 +51,23 @@ Current real core packages:
 - `httpx`
 - `auth`
 - `ws`
+- `db`
+- `cache`
+- `status`
 
 ---
 
-## Decisions Locked
+## What This Subphase Implemented
 
-The following decisions are officially locked at this point:
+This subphase implemented:
 
-- modular monolith architecture
-- DEX-first product strategy
-- AMM v1 as the initial DEX model
-- SCAVIUM as the primary chain
-- self-custody first for initial DEX scope
-- PostgreSQL as primary database target
-- Redis as secondary infrastructure store
-- REST and WebSocket as first-class transports
-- matching engine out of initial scope
-- migrations as schema source of truth
-- platform adapters for chain and contract integrations
-- infrastructure baseline before major feature expansion
-- PostgreSQL as durable source of truth
-- Redis for ephemeral and coordination state
-- environment-driven local infrastructure baseline
-- health and readiness must be separated
-- observability is a first-class infrastructure concern
-- testing must grow with the architecture
-
----
-
-## What This Subphase Added
-
-This subphase formally defined:
-
-- observability direction
-- logging baseline expectations
-- health versus readiness distinction
-- metrics direction
-- testing layer model
-- validation baseline before heavy implementation
-- diagnostic expectations for future infrastructure phases
+- infrastructure-oriented config expansion
+- PostgreSQL bootstrap client scaffolding
+- Redis bootstrap client scaffolding
+- explicit health versus readiness separation
+- reusable dependency checker model
+- readiness endpoint wiring
+- startup visibility for enabled infrastructure
 
 ---
 
@@ -93,17 +75,13 @@ This subphase formally defined:
 
 Not implemented yet:
 
-- database integration
 - migrations
-- PostgreSQL wiring
-- Redis wiring
 - repository scaffolding
-- local Docker environment
-- migration runner
-- health/readiness expanded endpoints
+- docker-compose local stack
+- real DB-backed modules
+- real Redis-backed coordination
 - metrics endpoint
 - tracing
-- test harness
 - chain client
 - asset registry
 - portfolio aggregation
@@ -118,28 +96,11 @@ Not implemented yet:
 
 ## Recommended Next Step
 
-Phase 0.3.1 - Implementation Bootstrap for Persistence and Health Infrastructure
+Phase 0.3.2 - Migration Bootstrap and Local Infrastructure Layout
 
 Recommended scope:
 
-- introduce core DB scaffolding
-- introduce core cache scaffolding
-- prepare migration structure
-- prepare health and readiness baseline implementation
-- keep current bootstrap stable while making infrastructure integration possible
-
----
-
-## Notes for Next Chat
-
-Stage 0 documentation foundation is now materially complete enough to begin conservative implementation-oriented infrastructure work.
-
-The next step should still avoid:
-
-- DEX feature implementation
-- chain-heavy module implementation
-- wallet linking
-- quote logic
-- indexer logic
-
-The safest next move is infrastructure bootstrap with health-aware design.
+- create migrations directory baseline
+- define migration execution workflow
+- prepare local Docker stack direction
+- keep current bootstrap stable while making persistence reproducible
