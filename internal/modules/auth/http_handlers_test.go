@@ -9,6 +9,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
+
 	coreauth "github.com/e-scavo/scavo-exchange-backend/internal/core/auth"
 	usermod "github.com/e-scavo/scavo-exchange-backend/internal/modules/user"
 )
@@ -71,6 +73,22 @@ func TestHTTPHandlers_Login_InvalidBody(t *testing.T) {
 	}
 }
 
+func sessionClaims() *coreauth.Claims {
+	now := time.Now().UTC()
+
+	return &coreauth.Claims{
+		UserID: "u_test_example_com",
+		Email:  "test@example.com",
+		RegisteredClaims: jwt.RegisteredClaims{
+			Issuer:    "scavo-exchange-backend",
+			Subject:   "u_test_example_com",
+			IssuedAt:  jwt.NewNumericDate(now),
+			NotBefore: jwt.NewNumericDate(now),
+			ExpiresAt: jwt.NewNumericDate(now.Add(time.Hour)),
+		},
+	}
+}
+
 func TestHTTPHandlers_Me_Success(t *testing.T) {
 	ts := mustTokenService(t)
 
@@ -80,13 +98,8 @@ func TestHTTPHandlers_Me_Success(t *testing.T) {
 		Users:  usermod.NewService(nil),
 	}
 
-	claims := &coreauth.Claims{
-		UserID: "u_test_example_com",
-		Email:  "test@example.com",
-	}
-
 	req := httptest.NewRequest(http.MethodGet, "/auth/me", nil)
-	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, claims))
+	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, sessionClaims()))
 	rec := httptest.NewRecorder()
 
 	h.Me(rec, req)
@@ -119,5 +132,41 @@ func TestHTTPHandlers_Me_MissingClaims(t *testing.T) {
 
 	if rec.Code != http.StatusUnauthorized {
 		t.Fatalf("unexpected status: %d", rec.Code)
+	}
+}
+
+func TestHTTPHandlers_Session_Success(t *testing.T) {
+	h := HTTPHandlers{
+		Tokens: mustTokenService(t),
+		TTL:    time.Hour,
+		Users:  usermod.NewService(nil),
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/auth/session", nil)
+	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	rec := httptest.NewRecorder()
+
+	h.Session(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+
+	var payload SessionResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("decode error: %v", err)
+	}
+
+	if payload.Session == nil {
+		t.Fatal("expected session payload")
+	}
+	if !payload.Session.Authenticated {
+		t.Fatal("expected authenticated session")
+	}
+	if payload.Session.UserID != "u_test_example_com" {
+		t.Fatalf("unexpected session user id: %q", payload.Session.UserID)
+	}
+	if payload.Session.User == nil || payload.Session.User.Email != "test@example.com" {
+		t.Fatalf("unexpected session user payload: %#v", payload.Session.User)
 	}
 }

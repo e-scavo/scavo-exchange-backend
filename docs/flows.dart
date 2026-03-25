@@ -18,33 +18,58 @@ This flow is still temporary and intentionally bootstrap-oriented.
 
 ## Flow 2 - Current Authenticated Identity Read
 
-This flow represents the first minimal authenticated REST identity path.
+This flow represents the minimal authenticated REST identity path.
 
 1. client calls `GET /auth/me`
 2. client sends bearer token in `Authorization`
-3. HTTP handler extracts the token
-4. auth service parses and validates JWT
-5. auth service resolves current user through the `user` module
+3. HTTP auth middleware extracts and validates the token
+4. middleware injects claims into request context
+5. auth handler resolves current user through the `auth` and `user` modules
 6. backend returns the current authenticated user payload
-
-This flow helps stabilize transport and module boundaries before wallet auth is introduced.
 
 ---
 
-## Flow 3 - Current WebSocket Session Attachment
+## Flow 3 - Current Authenticated Session Read
+
+This flow represents the current session-oriented REST path.
+
+1. client calls `GET /auth/session`
+2. client sends bearer token in `Authorization`
+3. HTTP auth middleware extracts and validates the token
+4. middleware injects claims into request context
+5. auth handler resolves a shared session view
+6. backend returns authenticated session metadata plus resolved user information
+
+This flow is the preparation bridge toward wallet-native authentication.
+
+---
+
+## Flow 4 - Current WebSocket Session Attachment
 
 1. client connects to `/ws`
 2. backend upgrades the connection
-3. backend optionally parses token from request context or handshake path
-4. client is attached to hub
-5. dispatcher routes incoming action messages
-6. if the token is valid, session context can be attached to the client
+3. backend extracts token from `Authorization` header or `token` query parameter
+4. backend validates JWT if a token is present
+5. backend enriches the client session with user id, email, subject, issuer, and expiration
+6. client is attached to hub
+7. dispatcher routes incoming action messages
 
 This flow is already reflected in the current project baseline.
 
 ---
 
-## Flow 4 - Future Wallet Signature Login
+## Flow 5 - Current WebSocket Auth Session Read
+
+1. authenticated client sends `auth.session`
+2. WebSocket auth guard checks that the client has a session
+3. auth module resolves a shared session view from stored claims
+4. backend returns session metadata and resolved user information
+
+This flow keeps WebSocket aligned with REST session semantics.
+
+---
+
+## Flow 6 - Future Wallet Signature Login
 
 1. client requests wallet auth challenge
 2. backend generates challenge
@@ -58,7 +83,7 @@ This is the preferred authentication direction for the DEX-first product model.
 
 ---
 
-## Flow 5 - Wallet Portfolio Read
+## Flow 7 - Wallet Portfolio Read
 
 1. client requests portfolio for a linked wallet
 2. backend resolves supported assets
@@ -71,7 +96,7 @@ This flow becomes important once chain and asset modules are introduced.
 
 ---
 
-## Flow 6 - DEX Quote Request
+## Flow 8 - DEX Quote Request
 
 1. client requests a quote for token swap
 2. backend validates asset pair and amount
@@ -85,7 +110,7 @@ The backend does not execute the swap here. It only prepares decision-quality in
 
 ---
 
-## Flow 7 - DEX Swap Execution
+## Flow 9 - DEX Swap Execution
 
 1. client requests swap preparation data
 2. backend validates route and current assumptions
@@ -101,7 +126,7 @@ Settlement is on-chain. The backend supports the flow but does not sign for the 
 
 ---
 
-## Flow 8 - Add Liquidity
+## Flow 10 - Add Liquidity
 
 1. client requests liquidity addition parameters
 2. backend validates pool and token pair
@@ -114,7 +139,7 @@ Settlement is on-chain. The backend supports the flow but does not sign for the 
 
 ---
 
-## Flow 9 - Indexed Transaction Tracking
+## Flow 11 - Indexed Transaction Tracking
 
 1. a user-originated DEX transaction is submitted
 2. backend stores or registers tracking intent
@@ -126,7 +151,7 @@ This flow is critical for frontend usability and operational traceability.
 
 ---
 
-## Flow 10 - Future Hybrid Deposit Flow
+## Flow 12 - Future Hybrid Deposit Flow
 
 This is not part of the initial implementation, but the architecture must preserve space for it.
 

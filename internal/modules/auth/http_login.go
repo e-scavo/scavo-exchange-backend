@@ -26,6 +26,10 @@ type MeResponse struct {
 	User *usermod.User `json:"user"`
 }
 
+type SessionResponse struct {
+	Session *SessionView `json:"session"`
+}
+
 type HTTPHandlers struct {
 	Tokens *coreauth.TokenService
 	TTL    time.Duration
@@ -84,6 +88,28 @@ func (h HTTPHandlers) Me(w http.ResponseWriter, r *http.Request) {
 	}
 
 	writeJSON(w, http.StatusOK, MeResponse{User: user})
+}
+
+func (h HTTPHandlers) Session(w http.ResponseWriter, r *http.Request) {
+	claims, ok := coreauth.ClaimsFromContext(r.Context())
+	if !ok {
+		writeJSON(w, http.StatusUnauthorized, map[string]any{"error": "unauthorized"})
+		return
+	}
+
+	svc := NewService(h.Tokens, h.Users, h.TTL)
+	session, err := svc.ResolveSessionClaims(r.Context(), claims)
+	if err != nil {
+		switch {
+		case errors.Is(err, ErrUnauthorized):
+			writeJSON(w, http.StatusUnauthorized, map[string]any{"error": "unauthorized"})
+		default:
+			writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "auth_service_error"})
+		}
+		return
+	}
+
+	writeJSON(w, http.StatusOK, SessionResponse{Session: session})
 }
 
 func writeJSON(w http.ResponseWriter, code int, v any) {

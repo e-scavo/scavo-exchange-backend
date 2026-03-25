@@ -1,8 +1,18 @@
 package ws
 
+import (
+	"time"
+
+	coreauth "github.com/e-scavo/scavo-exchange-backend/internal/core/auth"
+)
+
 type Session struct {
-	UserID string
-	Email  string
+	Claims    *coreauth.Claims
+	UserID    string
+	Email     string
+	Subject   string
+	Issuer    string
+	ExpiresAt *time.Time
 }
 
 func (c *Client) SetSession(s Session) {

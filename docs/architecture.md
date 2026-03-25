@@ -69,6 +69,7 @@ Current implementation already includes:
 - `/version`
 - `/auth/login`
 - `/auth/me`
+- `/auth/session`
 - `/ws`
 
 ---
@@ -109,6 +110,7 @@ Current and planned responsibilities:
 - auth claims context helpers
 - HTTP helpers and middleware
 - WebSocket protocol and routing
+- WebSocket session attachment
 - database helpers
 - cache helpers
 - future queue/worker helpers
@@ -178,8 +180,9 @@ At the current stage:
 - authenticated claims travel through request context
 - token extraction is shared instead of duplicated across transports
 - WebSocket auth attachment follows the same extraction strategy
+- authenticated session metadata is now represented explicitly
+- REST and WebSocket both expose authenticated identity/session surfaces
 - persisted development login remains enabled
-- authenticated identity read is available through `GET /auth/me`
 
 This is intentionally still a bootstrap auth model.
 
@@ -192,6 +195,34 @@ The project is not yet implementing:
 - full session persistence
 
 Those will come later.
+
+---
+
+## Session Shape Direction
+
+The backend now distinguishes two related but different concepts:
+
+1. **Current user identity**
+2. **Current authenticated session**
+
+Current user identity is exposed through:
+
+- `GET /auth/me`
+
+Current authenticated session is exposed through:
+
+- `GET /auth/session`
+- `auth.session` over WebSocket
+
+This distinction is important because future wallet-auth flows will need session-oriented metadata such as:
+
+- subject
+- issuer
+- expiration
+- nonce/challenge linkage later
+- wallet binding later
+
+This separation is the architectural bridge toward wallet-native authentication.
 
 ---
 

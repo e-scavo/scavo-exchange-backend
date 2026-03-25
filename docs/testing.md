@@ -17,6 +17,7 @@ At the current stage, the project should already support the following validatio
 - integration validation for PostgreSQL-backed repositories
 - smoke validation for HTTP login baseline
 - smoke validation for authenticated identity read baseline
+- smoke validation for authenticated session read baseline
 - migration status validation through the migration workflow
 
 This is the first practical validation baseline for the project.
@@ -74,6 +75,7 @@ Scope:
 - auth service orchestration
 - auth transport helper behavior
 - auth claims context behavior
+- auth session view behavior
 
 Purpose:
 
@@ -167,6 +169,7 @@ Scope:
 - internal environment sanity
 - development login path
 - authenticated identity read path
+- authenticated session read path
 
 Purpose:
 
@@ -202,6 +205,15 @@ Example authenticated identity smoke after login:
     curl -s http://localhost:8080/auth/me \
       -H "Authorization: Bearer $TOKEN"
 
+Example authenticated session smoke after login:
+
+    TOKEN=$(curl -s -X POST http://localhost:8080/auth/login \
+      -H 'Content-Type: application/json' \
+      -d '{"email":"test@scavo.exchange","password":"dev"}' | jq -r '.access_token')
+
+    curl -s http://localhost:8080/auth/session \
+      -H "Authorization: Bearer $TOKEN"
+
 ---
 
 ## Testing Growth Direction
@@ -228,6 +240,7 @@ Before heavy product features are introduced, the backend should gain validation
 - handler wiring
 - auth baseline behavior
 - current-user authenticated read behavior
+- current-session authenticated read behavior
 - token extraction consistency
 - auth claims propagation
 - health endpoint behavior
@@ -292,6 +305,7 @@ A minimal smoke layer should verify:
 - auth baseline wiring works
 - persistent login path works when PostgreSQL is enabled
 - authenticated identity read works with a valid token
+- authenticated session read works with a valid token
 - WebSocket endpoint is reachable at a basic level
 
 This is a practical baseline for local development and internal testing.
@@ -335,6 +349,6 @@ Those may come later as implementation matures.
 
 The next recommended step is:
 
-Phase 0.4.3 - Session Evolution and Wallet Auth Preparation
+Phase 0.4.4 - Wallet Challenge Contract and Nonce Bootstrap
 
-That phase should define how authenticated identity should evolve across HTTP and WebSocket surfaces before refresh persistence or wallet-signature flows are introduced.
+That phase should define nonce and challenge contracts for wallet-oriented authentication while keeping real signature verification for the following step.

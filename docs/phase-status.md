@@ -15,4 +15,5 @@
 | 0 | 0.3 | 0.3.4 - Repository Validation and Migration Workflow Hardening | Done | Unit and integration validation baseline for first persistent flow |
 | 0 | 0.4 | 0.4.1 - Auth and User Module Stabilization | Done | Auth service extracted, current-user path introduced, user identity reads expanded |
 | 0 | 0.4 | 0.4.2 - Token Lifecycle and Auth Transport Hardening | Done | Shared token extraction, auth claims context, HTTP middleware, HTTP/WS auth transport alignment |
-| 0 | 0.4 | 0.4.3 - Session Evolution and Wallet Auth Preparation | Next | Define session representation and prepare wallet-oriented auth evolution without implementing signature auth yet |
+| 0 | 0.4 | 0.4.3 - Session Evolution and Wallet Auth Preparation | Done | Shared session view, authenticated session endpoint, enriched WS session metadata, new auth.session action |
+| 0 | 0.4 | 0.4.4 - Wallet Challenge Contract and Nonce Bootstrap | Next | Define nonce/challenge contracts and transport shape for wallet-based authentication without enabling full signature login yet |

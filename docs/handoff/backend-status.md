@@ -16,7 +16,7 @@ Phase 0.4 - Auth and User Stabilization
 
 ## Current Subphase
 
-Phase 0.4.2 - Token Lifecycle and Auth Transport Hardening
+Phase 0.4.3 - Session Evolution and Wallet Auth Preparation
 
 ---
 
@@ -34,11 +34,13 @@ The backend now includes:
 - centralized auth service for development login orchestration
 - development HTTP login
 - authenticated current-user REST path through `GET /auth/me`
+- authenticated session REST path through `GET /auth/session`
 - reusable HTTP auth middleware
 - shared token extraction utilities for HTTP and WebSocket transports
 - auth claims context utilities in the core auth layer
+- enriched WebSocket session metadata derived from JWT claims
+- authenticated WebSocket actions `auth.whoami` and `auth.session`
 - system WebSocket handler
-- auth WebSocket handler registration
 - PostgreSQL core scaffolding
 - Redis core scaffolding
 - status service for health and readiness
@@ -75,13 +77,13 @@ The backend now includes:
 
 This subphase implemented:
 
-- shared token extraction helpers for transport consistency
-- auth claims storage and retrieval through request context
-- reusable HTTP auth middleware with claims injection
-- `GET /auth/me` protection through middleware instead of local token parsing
-- WebSocket auth alignment using the same token extraction strategy
-- removal of transport coupling that caused cyclic dependency risk
-- rescue and stabilization of the 0.4.2 implementation until build and tests were both green
+- a formal shared session representation through `SessionView`
+- an authenticated REST session introspection endpoint at `GET /auth/session`
+- richer WebSocket session state including issuer, subject, and expiration metadata
+- a new authenticated WebSocket action `auth.session`
+- preservation of `auth.whoami` while expanding it with more session-aware fields
+- WebSocket auth registration with access to the real auth service
+- preparation for future wallet challenge and signature flows without coupling the system to them prematurely
 
 ---
 
@@ -112,27 +114,28 @@ Not implemented yet:
 
 ## Validation Status
 
-The project now supports:
+The project should now support validation for:
 
 - successful `go build ./...`
 - successful `go test ./...`
 - unit validation of auth login orchestration
 - unit validation of current-user resolution
+- unit validation of session view resolution
 - unit validation of user service behavior
 - unit validation of status/readiness logic
 - integration validation baseline for PostgreSQL-backed user repository
-- middleware-protected authenticated identity flow through the current transport model
+- authenticated session introspection through both REST and WebSocket transport surfaces
 
-The backend now has a coherent minimal auth transport layer without prematurely introducing session persistence or wallet-signature authentication.
+The backend now has a coherent session-shaped auth surface that is still bootstrap-safe and ready for the first wallet-auth contract design step.
 
 ---
 
 ## Recommended Next Step
 
-Phase 0.4.3 - Session Evolution and Wallet Auth Preparation
+Phase 0.4.4 - Wallet Challenge Contract and Nonce Bootstrap
 
 Recommended scope:
 
-- define a stable authenticated session model across HTTP and WebSocket surfaces
-- prepare the backend for future wallet-based authentication flows
-- avoid refresh/revocation persistence until session shape and auth lifecycle expectations are clearer
+- define request and response contracts for wallet challenge creation
+- introduce nonce/challenge generation rules and lifecycle expectations
+- keep signature verification for the next step after nonce contracts are stable

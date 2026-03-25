@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
+
 	coreauth "github.com/e-scavo/scavo-exchange-backend/internal/core/auth"
 	usermod "github.com/e-scavo/scavo-exchange-backend/internal/modules/user"
 )
@@ -130,5 +132,49 @@ func TestService_ResolveCurrentUser_UserNotFound(t *testing.T) {
 
 	if err != ErrUnauthorized {
 		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestService_ResolveSessionClaims_Success(t *testing.T) {
+	repo := &stubUserRepo{
+		getByIDFn: func(ctx context.Context, id string) (*usermod.User, error) {
+			return &usermod.User{
+				ID:    id,
+				Email: "dev@example.com",
+			}, nil
+		},
+	}
+
+	svc := NewService(newTokenServiceForTest(t), usermod.NewService(repo), time.Hour)
+
+	now := time.Now().UTC()
+	claims := &coreauth.Claims{
+		UserID: "u_persisted",
+		Email:  "dev@example.com",
+		RegisteredClaims: jwt.RegisteredClaims{
+			Issuer:    "scavo-exchange-backend",
+			Subject:   "u_persisted",
+			IssuedAt:  jwt.NewNumericDate(now),
+			NotBefore: jwt.NewNumericDate(now),
+			ExpiresAt: jwt.NewNumericDate(now.Add(time.Hour)),
+		},
+	}
+
+	view, err := svc.ResolveSessionClaims(context.Background(), claims)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if view == nil {
+		t.Fatal("expected session view")
+	}
+	if !view.Authenticated {
+		t.Fatal("expected authenticated session view")
+	}
+	if view.User == nil || view.User.ID != "u_persisted" {
+		t.Fatalf("unexpected user in session view: %#v", view.User)
+	}
+	if view.ExpiresAt == nil {
+		t.Fatal("expected expires_at in session view")
 	}
 }

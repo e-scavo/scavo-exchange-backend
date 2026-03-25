@@ -32,6 +32,7 @@ type App struct {
 	statusSvc   *status.Service
 
 	userService *usermod.Service
+	authService *authmod.Service
 }
 
 func New(cfg config.Config) *App {
@@ -41,7 +42,6 @@ func New(cfg config.Config) *App {
 	dispatcher := ws.NewDispatcher()
 
 	system.Register(dispatcher)
-	authmod.RegisterWS(dispatcher)
 
 	ttl := time.Duration(cfg.JWTTTLHrs) * time.Hour
 	tokens, err := coreauth.NewTokenService(cfg.JWTSecret, cfg.JWTIssuer, ttl)
@@ -70,6 +70,9 @@ func New(cfg config.Config) *App {
 	} else {
 		userService = usermod.NewService(nil)
 	}
+
+	authService := authmod.NewService(tokens, userService, ttl)
+	authmod.RegisterWS(dispatcher, authService)
 
 	statusSvc := status.New(
 		"scavo-exchange-backend",
@@ -130,6 +133,7 @@ func New(cfg config.Config) *App {
 		cacheClient: cacheClient,
 		statusSvc:   statusSvc,
 		userService: userService,
+		authService: authService,
 	}
 }
 

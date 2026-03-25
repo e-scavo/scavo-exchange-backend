@@ -55,7 +55,6 @@ func (h *Handler) serveWS(w http.ResponseWriter, r *http.Request) {
 
 	go client.WriteLoop(writeCtx)
 
-	// ✅ auth opcional: setea session si token válido
 	h.tryAuth(r, client)
 
 	hello := Envelope{
@@ -99,6 +98,7 @@ func (h *Handler) serveWS(w http.ResponseWriter, r *http.Request) {
 		client.TrySend(mustMarshal(res))
 	}
 }
+
 func (h *Handler) tryAuth(r *http.Request, c *Client) {
 	if h.tokenSvc == nil {
 		return
@@ -114,9 +114,19 @@ func (h *Handler) tryAuth(r *http.Request, c *Client) {
 		return
 	}
 
+	var expiresAt *time.Time
+	if claims.ExpiresAt != nil {
+		ts := claims.ExpiresAt.Time.UTC()
+		expiresAt = &ts
+	}
+
 	c.SetSession(Session{
-		UserID: claims.UserID,
-		Email:  claims.Email,
+		Claims:    claims,
+		UserID:    claims.UserID,
+		Email:     claims.Email,
+		Subject:   claims.Subject,
+		Issuer:    claims.Issuer,
+		ExpiresAt: expiresAt,
 	})
 }
 

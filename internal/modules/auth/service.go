@@ -29,6 +29,17 @@ type LoginResult struct {
 	User        *usermod.User
 }
 
+type SessionView struct {
+	Authenticated bool          `json:"authenticated"`
+	TokenType     string        `json:"token_type"`
+	UserID        string        `json:"user_id"`
+	Email         string        `json:"email,omitempty"`
+	Subject       string        `json:"subject,omitempty"`
+	Issuer        string        `json:"issuer,omitempty"`
+	ExpiresAt     *time.Time    `json:"expires_at,omitempty"`
+	User          *usermod.User `json:"user,omitempty"`
+}
+
 func NewService(tokens *coreauth.TokenService, users *usermod.Service, ttl time.Duration) *Service {
 	if ttl <= 0 {
 		ttl = 24 * time.Hour
@@ -118,6 +129,54 @@ func (s *Service) ResolveCurrentUserClaims(ctx context.Context, claims *coreauth
 	}
 
 	return user, nil
+}
+
+func (s *Service) ResolveSession(ctx context.Context, token string) (*SessionView, error) {
+	if s == nil || s.tokens == nil {
+		return nil, ErrUnauthorized
+	}
+
+	token = strings.TrimSpace(token)
+	if token == "" {
+		return nil, ErrUnauthorized
+	}
+
+	claims, err := s.tokens.Parse(token)
+	if err != nil || claims == nil || strings.TrimSpace(claims.UserID) == "" {
+		return nil, ErrUnauthorized
+	}
+
+	return s.ResolveSessionClaims(ctx, claims)
+}
+
+func (s *Service) ResolveSessionClaims(ctx context.Context, claims *coreauth.Claims) (*SessionView, error) {
+	user, err := s.ResolveCurrentUserClaims(ctx, claims)
+	if err != nil {
+		return nil, err
+	}
+
+	var expiresAt *time.Time
+	if claims != nil && claims.ExpiresAt != nil {
+		ts := claims.ExpiresAt.Time.UTC()
+		expiresAt = &ts
+	}
+
+	view := &SessionView{
+		Authenticated: true,
+		TokenType:     "Bearer",
+		UserID:        strings.TrimSpace(claims.UserID),
+		Email:         normalizeEmail(claims.Email),
+		Subject:       strings.TrimSpace(claims.Subject),
+		Issuer:        strings.TrimSpace(claims.Issuer),
+		ExpiresAt:     expiresAt,
+		User:          user,
+	}
+
+	if view.Subject == "" {
+		view.Subject = view.UserID
+	}
+
+	return view, nil
 }
 
 func normalizeEmail(email string) string {
