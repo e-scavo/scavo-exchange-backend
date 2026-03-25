@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -100,19 +99,12 @@ func (h *Handler) serveWS(w http.ResponseWriter, r *http.Request) {
 		client.TrySend(mustMarshal(res))
 	}
 }
-
 func (h *Handler) tryAuth(r *http.Request, c *Client) {
 	if h.tokenSvc == nil {
 		return
 	}
 
-	token := strings.TrimSpace(r.URL.Query().Get("token"))
-	if token == "" {
-		authz := r.Header.Get("Authorization")
-		if strings.HasPrefix(strings.ToLower(authz), "bearer ") {
-			token = strings.TrimSpace(authz[7:])
-		}
-	}
+	token := coreauth.ExtractTokenFromRequest(r, true)
 	if token == "" {
 		return
 	}

@@ -91,6 +91,14 @@ func (s *Service) ResolveCurrentUser(ctx context.Context, token string) (*usermo
 		return nil, ErrUnauthorized
 	}
 
+	return s.ResolveCurrentUserClaims(ctx, claims)
+}
+
+func (s *Service) ResolveCurrentUserClaims(ctx context.Context, claims *coreauth.Claims) (*usermod.User, error) {
+	if claims == nil || strings.TrimSpace(claims.UserID) == "" {
+		return nil, ErrUnauthorized
+	}
+
 	if s.users == nil {
 		now := time.Now().UTC()
 		return &usermod.User{

@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -71,19 +72,21 @@ func TestHTTPHandlers_Login_InvalidBody(t *testing.T) {
 }
 
 func TestHTTPHandlers_Me_Success(t *testing.T) {
+	ts := mustTokenService(t)
+
 	h := HTTPHandlers{
-		Tokens: mustTokenService(t),
+		Tokens: ts,
 		TTL:    time.Hour,
 		Users:  usermod.NewService(nil),
 	}
 
-	token, err := h.Tokens.Mint("u_test_example_com", "test@example.com")
-	if err != nil {
-		t.Fatalf("Mint error: %v", err)
+	claims := &coreauth.Claims{
+		UserID: "u_test_example_com",
+		Email:  "test@example.com",
 	}
 
 	req := httptest.NewRequest(http.MethodGet, "/auth/me", nil)
-	req.Header.Set("Authorization", "Bearer "+token)
+	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, claims))
 	rec := httptest.NewRecorder()
 
 	h.Me(rec, req)
@@ -102,7 +105,7 @@ func TestHTTPHandlers_Me_Success(t *testing.T) {
 	}
 }
 
-func TestHTTPHandlers_Me_MissingToken(t *testing.T) {
+func TestHTTPHandlers_Me_MissingClaims(t *testing.T) {
 	h := HTTPHandlers{
 		Tokens: mustTokenService(t),
 		TTL:    time.Hour,

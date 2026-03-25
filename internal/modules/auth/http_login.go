@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"strings"
 	"time"
 
 	coreauth "github.com/e-scavo/scavo-exchange-backend/internal/core/auth"
@@ -66,14 +65,14 @@ func (h HTTPHandlers) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h HTTPHandlers) Me(w http.ResponseWriter, r *http.Request) {
-	token := bearerTokenFromRequest(r)
-	if token == "" {
-		writeJSON(w, http.StatusUnauthorized, map[string]any{"error": "missing_bearer_token"})
+	claims, ok := coreauth.ClaimsFromContext(r.Context())
+	if !ok {
+		writeJSON(w, http.StatusUnauthorized, map[string]any{"error": "unauthorized"})
 		return
 	}
 
 	svc := NewService(h.Tokens, h.Users, h.TTL)
-	user, err := svc.ResolveCurrentUser(r.Context(), token)
+	user, err := svc.ResolveCurrentUserClaims(r.Context(), claims)
 	if err != nil {
 		switch {
 		case errors.Is(err, ErrUnauthorized):
@@ -85,17 +84,6 @@ func (h HTTPHandlers) Me(w http.ResponseWriter, r *http.Request) {
 	}
 
 	writeJSON(w, http.StatusOK, MeResponse{User: user})
-}
-
-func bearerTokenFromRequest(r *http.Request) string {
-	authz := strings.TrimSpace(r.Header.Get("Authorization"))
-	if authz == "" {
-		return ""
-	}
-	if !strings.HasPrefix(strings.ToLower(authz), "bearer ") {
-		return ""
-	}
-	return strings.TrimSpace(authz[7:])
 }
 
 func writeJSON(w http.ResponseWriter, code int, v any) {

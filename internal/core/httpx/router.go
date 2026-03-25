@@ -90,7 +90,7 @@ func NewRouter(p RouterParams) http.Handler {
 		}
 
 		r.Post("/auth/login", handlers.Login)
-		r.Get("/auth/me", handlers.Me)
+		r.With(RequireAuth(p.TokenService, false)).Get("/auth/me", handlers.Me)
 	})
 
 	return r
