@@ -70,6 +70,7 @@ Current implementation already includes:
 - `/auth/login`
 - `/auth/me`
 - `/auth/session`
+- `/auth/wallet/challenge`
 - `/ws`
 
 ---
@@ -180,16 +181,18 @@ At the current stage:
 - authenticated claims travel through request context
 - token extraction is shared instead of duplicated across transports
 - WebSocket auth attachment follows the same extraction strategy
-- authenticated session metadata is now represented explicitly
-- REST and WebSocket both expose authenticated identity/session surfaces
+- authenticated session metadata is represented explicitly
+- REST and WebSocket expose authenticated identity and session surfaces
+- wallet-auth bootstrap now has a challenge issuance contract
 - persisted development login remains enabled
 
 This is intentionally still a bootstrap auth model.
 
 The project is not yet implementing:
 
+- wallet signature verification
+- wallet-based token issuance
 - refresh token persistence
-- wallet signature login
 - role/permission enforcement
 - revocation flows
 - full session persistence
@@ -198,31 +201,25 @@ Those will come later.
 
 ---
 
-## Session Shape Direction
+## Wallet Auth Bootstrap Direction
 
-The backend now distinguishes two related but different concepts:
+Wallet authentication is being introduced in controlled steps.
 
-1. **Current user identity**
-2. **Current authenticated session**
+The backend now supports:
 
-Current user identity is exposed through:
+- challenge creation
+- nonce generation
+- signable message construction
+- challenge TTL
 
-- `GET /auth/me`
+The backend does not yet support:
 
-Current authenticated session is exposed through:
+- signature verification
+- replay protection persistence beyond bootstrap memory storage
+- wallet-to-user linking
+- token issuance from wallet-auth flows
 
-- `GET /auth/session`
-- `auth.session` over WebSocket
-
-This distinction is important because future wallet-auth flows will need session-oriented metadata such as:
-
-- subject
-- issuer
-- expiration
-- nonce/challenge linkage later
-- wallet binding later
-
-This separation is the architectural bridge toward wallet-native authentication.
+This separation is intentional and reduces implementation risk.
 
 ---
 

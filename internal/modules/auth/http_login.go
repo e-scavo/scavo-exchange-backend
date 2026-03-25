@@ -31,9 +31,12 @@ type SessionResponse struct {
 }
 
 type HTTPHandlers struct {
-	Tokens *coreauth.TokenService
-	TTL    time.Duration
-	Users  *usermod.Service
+	Tokens        *coreauth.TokenService
+	TTL           time.Duration
+	Users         *usermod.Service
+	PublicBaseURL string
+	ChallengeTTL  time.Duration
+	Challenges    WalletChallengeStore
 }
 
 func (h HTTPHandlers) Login(w http.ResponseWriter, r *http.Request) {

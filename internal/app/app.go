@@ -31,8 +31,9 @@ type App struct {
 	cacheClient *cache.Client
 	statusSvc   *status.Service
 
-	userService *usermod.Service
-	authService *authmod.Service
+	userService          *usermod.Service
+	authService          *authmod.Service
+	walletChallengeStore authmod.WalletChallengeStore
 }
 
 func New(cfg config.Config) *App {
@@ -74,6 +75,8 @@ func New(cfg config.Config) *App {
 	authService := authmod.NewService(tokens, userService, ttl)
 	authmod.RegisterWS(dispatcher, authService)
 
+	walletChallengeStore := authmod.NewInMemoryWalletChallengeStore()
+
 	statusSvc := status.New(
 		"scavo-exchange-backend",
 		cfg.Env,
@@ -108,13 +111,16 @@ func New(cfg config.Config) *App {
 	)
 
 	r := httpx.NewRouter(httpx.RouterParams{
-		Log:          lg,
-		Hub:          hub,
-		Dispatcher:   dispatcher,
-		Config:       cfg,
-		TokenService: tokens,
-		Status:       statusSvc,
-		UserService:  userService,
+		Log:            lg,
+		Hub:            hub,
+		Dispatcher:     dispatcher,
+		Config:         cfg,
+		TokenService:   tokens,
+		Status:         statusSvc,
+		UserService:    userService,
+		ChallengeStore: walletChallengeStore,
+		ChallengeTTL:   time.Duration(cfg.AuthChallengeTTLMinutes) * time.Minute,
+		PublicBaseURL:  cfg.PublicBaseURL,
 	})
 
 	srv := &http.Server{
@@ -123,17 +129,18 @@ func New(cfg config.Config) *App {
 	}
 
 	return &App{
-		cfg:         cfg,
-		log:         lg,
-		server:      srv,
-		hub:         hub,
-		dispatcher:  dispatcher,
-		tokens:      tokens,
-		dbClient:    dbClient,
-		cacheClient: cacheClient,
-		statusSvc:   statusSvc,
-		userService: userService,
-		authService: authService,
+		cfg:                  cfg,
+		log:                  lg,
+		server:               srv,
+		hub:                  hub,
+		dispatcher:           dispatcher,
+		tokens:               tokens,
+		dbClient:             dbClient,
+		cacheClient:          cacheClient,
+		statusSvc:            statusSvc,
+		userService:          userService,
+		authService:          authService,
+		walletChallengeStore: walletChallengeStore,
 	}
 }
 

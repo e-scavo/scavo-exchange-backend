@@ -18,6 +18,7 @@ At the current stage, the project should already support the following validatio
 - smoke validation for HTTP login baseline
 - smoke validation for authenticated identity read baseline
 - smoke validation for authenticated session read baseline
+- smoke validation for wallet challenge bootstrap baseline
 - migration status validation through the migration workflow
 
 This is the first practical validation baseline for the project.
@@ -76,6 +77,7 @@ Scope:
 - auth transport helper behavior
 - auth claims context behavior
 - auth session view behavior
+- wallet challenge generation behavior
 
 Purpose:
 
@@ -170,6 +172,7 @@ Scope:
 - development login path
 - authenticated identity read path
 - authenticated session read path
+- wallet challenge bootstrap path
 
 Purpose:
 
@@ -214,6 +217,12 @@ Example authenticated session smoke after login:
     curl -s http://localhost:8080/auth/session \
       -H "Authorization: Bearer $TOKEN"
 
+Example wallet challenge bootstrap smoke:
+
+    curl -s -X POST http://localhost:8080/auth/wallet/challenge \
+      -H 'Content-Type: application/json' \
+      -d '{"address":"0x1111111111111111111111111111111111111111","chain":"scavium"}'
+
 ---
 
 ## Testing Growth Direction
@@ -241,6 +250,7 @@ Before heavy product features are introduced, the backend should gain validation
 - auth baseline behavior
 - current-user authenticated read behavior
 - current-session authenticated read behavior
+- wallet challenge bootstrap behavior
 - token extraction consistency
 - auth claims propagation
 - health endpoint behavior
@@ -306,6 +316,7 @@ A minimal smoke layer should verify:
 - persistent login path works when PostgreSQL is enabled
 - authenticated identity read works with a valid token
 - authenticated session read works with a valid token
+- wallet challenge bootstrap works with a valid EVM address
 - WebSocket endpoint is reachable at a basic level
 
 This is a practical baseline for local development and internal testing.
@@ -318,8 +329,8 @@ As flows stabilize, they should gain regression protection.
 
 Examples later in the roadmap:
 
-- wallet challenge generation
 - wallet signature verification
+- wallet-auth token issuance
 - portfolio read flow
 - quote generation
 - transaction tracking
@@ -349,6 +360,6 @@ Those may come later as implementation matures.
 
 The next recommended step is:
 
-Phase 0.4.4 - Wallet Challenge Contract and Nonce Bootstrap
+Phase 0.4.5 - Wallet Signature Verification and Token Issuance
 
-That phase should define nonce and challenge contracts for wallet-oriented authentication while keeping real signature verification for the following step.
+That phase should verify EVM signatures against issued challenges and mint authenticated tokens from wallet-authenticated flows.

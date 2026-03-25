@@ -1,0 +1,138 @@
+package auth
+
+import (
+	"context"
+	"crypto/rand"
+	"encoding/base64"
+	"errors"
+	"fmt"
+	"net/url"
+	"regexp"
+	"strings"
+	"time"
+
+	"github.com/google/uuid"
+)
+
+var (
+	ErrInvalidWalletAddress = errors.New("invalid wallet address")
+	ErrChallengeStore       = errors.New("wallet challenge store error")
+)
+
+var evmAddressRE = regexp.MustCompile(`^0x[0-9a-fA-F]{40}$`)
+
+type WalletChallenge struct {
+	ID        string     `json:"id"`
+	Address   string     `json:"address"`
+	Chain     string     `json:"chain"`
+	Nonce     string     `json:"nonce"`
+	Message   string     `json:"message"`
+	IssuedAt  time.Time  `json:"issued_at"`
+	ExpiresAt time.Time  `json:"expires_at"`
+	UsedAt    *time.Time `json:"used_at,omitempty"`
+}
+
+type WalletChallengeStore interface {
+	Save(ctx context.Context, challenge *WalletChallenge) error
+	GetByID(ctx context.Context, id string) (*WalletChallenge, error)
+}
+
+type WalletChallengeService struct {
+	store         WalletChallengeStore
+	publicBaseURL string
+	ttl           time.Duration
+}
+
+func NewWalletChallengeService(store WalletChallengeStore, publicBaseURL string, ttl time.Duration) *WalletChallengeService {
+	if ttl <= 0 {
+		ttl = 5 * time.Minute
+	}
+
+	return &WalletChallengeService{
+		store:         store,
+		publicBaseURL: strings.TrimSpace(publicBaseURL),
+		ttl:           ttl,
+	}
+}
+
+func (s *WalletChallengeService) Create(ctx context.Context, address, chain string) (*WalletChallenge, error) {
+	address = strings.TrimSpace(address)
+	if !evmAddressRE.MatchString(address) {
+		return nil, ErrInvalidWalletAddress
+	}
+
+	chain = normalizeChain(chain)
+	now := time.Now().UTC()
+	expiresAt := now.Add(s.ttl)
+
+	nonce, err := randomToken(24)
+	if err != nil {
+		return nil, err
+	}
+
+	challenge := &WalletChallenge{
+		ID:        uuid.NewString(),
+		Address:   address,
+		Chain:     chain,
+		Nonce:     nonce,
+		IssuedAt:  now,
+		ExpiresAt: expiresAt,
+	}
+	challenge.Message = s.buildMessage(challenge)
+
+	if s.store != nil {
+		if err := s.store.Save(ctx, challenge); err != nil {
+			return nil, fmt.Errorf("%w: %v", ErrChallengeStore, err)
+		}
+	}
+
+	return challenge, nil
+}
+
+func (s *WalletChallengeService) buildMessage(ch *WalletChallenge) string {
+	domain := "SCAVO Exchange"
+	uri := "http://localhost"
+
+	if s.publicBaseURL != "" {
+		if u, err := url.Parse(s.publicBaseURL); err == nil {
+			if host := strings.TrimSpace(u.Host); host != "" {
+				domain = host
+			}
+			uri = s.publicBaseURL
+		}
+	}
+
+	return strings.Join([]string{
+		fmt.Sprintf("%s wants you to sign in with your wallet.", domain),
+		"",
+		fmt.Sprintf("Address: %s", ch.Address),
+		fmt.Sprintf("Chain: %s", ch.Chain),
+		fmt.Sprintf("Nonce: %s", ch.Nonce),
+		fmt.Sprintf("Issued At: %s", ch.IssuedAt.Format(time.RFC3339)),
+		fmt.Sprintf("Expiration Time: %s", ch.ExpiresAt.Format(time.RFC3339)),
+		fmt.Sprintf("URI: %s", uri),
+		"",
+		"Purpose: SCAVO Exchange wallet authentication bootstrap.",
+	}, "\n")
+}
+
+func normalizeChain(chain string) string {
+	chain = strings.TrimSpace(strings.ToLower(chain))
+	if chain == "" {
+		return "scavium"
+	}
+	return chain
+}
+
+func randomToken(numBytes int) (string, error) {
+	if numBytes <= 0 {
+		numBytes = 24
+	}
+
+	b := make([]byte, numBytes)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+
+	return base64.RawURLEncoding.EncodeToString(b), nil
+}

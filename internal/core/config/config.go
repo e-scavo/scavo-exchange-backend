@@ -22,6 +22,9 @@ type Config struct {
 	JWTIssuer string
 	JWTTTLHrs int
 
+	// Auth challenge
+	AuthChallengeTTLMinutes int
+
 	// PostgreSQL
 	PostgresURL string
 
@@ -57,6 +60,13 @@ func LoadFromEnv() (Config, error) {
 		n = 24
 	}
 	c.JWTTTLHrs = n
+
+	challengeTTL := getenv("SCAVO_AUTH_CHALLENGE_TTL_MINUTES", "5")
+	challengeMinutes, _ := strconv.Atoi(challengeTTL)
+	if challengeMinutes <= 0 {
+		challengeMinutes = 5
+	}
+	c.AuthChallengeTTLMinutes = challengeMinutes
 
 	c.PostgresURL = getenv("SCAVO_POSTGRES_URL", "")
 

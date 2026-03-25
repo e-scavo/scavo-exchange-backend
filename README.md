@@ -91,18 +91,17 @@ Current phase after this subphase update:
 
 **Stage 0 - Foundation**  
 **Phase 0.4 - Auth and User Stabilization**  
-**Subphase 0.4.3 - Session Evolution and Wallet Auth Preparation**
+**Subphase 0.4.4 - Wallet Challenge Contract and Nonce Bootstrap**
 
 Implemented in this subphase:
 
-- shared auth transport from 0.4.2 kept intact
-- session representation formalized through a shared auth session view
-- new authenticated endpoint `GET /auth/session`
-- WebSocket session metadata enriched with issuer, subject, and expiration
-- new authenticated WebSocket action `auth.session`
-- existing `auth.whoami` preserved and expanded for compatibility
-- auth WebSocket registration now receives real auth service dependencies
-- backend prepared for future wallet-auth flows without implementing signature login yet
+- wallet challenge request and response contracts introduced
+- nonce generation bootstrap added with cryptographically secure randomness
+- challenge message format stabilized for future wallet signature verification
+- challenge TTL introduced through environment configuration
+- in-memory wallet challenge store added as a bootstrap implementation
+- new endpoint `POST /auth/wallet/challenge`
+- backend prepared for real wallet-signature verification in the next step
 
 ## Workflow Rules
 
@@ -131,4 +130,4 @@ This backend is designed to be:
 
 ## Next Step
 
-Phase 0.4.4 - Wallet Challenge Contract and Nonce Bootstrap
+Phase 0.4.5 - Wallet Signature Verification and Token Issuance

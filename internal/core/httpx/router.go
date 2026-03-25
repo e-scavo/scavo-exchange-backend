@@ -23,9 +23,12 @@ type RouterParams struct {
 	Dispatcher *ws.Dispatcher
 	Config     config.Config
 
-	TokenService *coreauth.TokenService
-	Status       *status.Service
-	UserService  *usermod.Service
+	TokenService   *coreauth.TokenService
+	Status         *status.Service
+	UserService    *usermod.Service
+	ChallengeStore authmod.WalletChallengeStore
+	ChallengeTTL   time.Duration
+	PublicBaseURL  string
 }
 
 func NewRouter(p RouterParams) http.Handler {
@@ -84,12 +87,16 @@ func NewRouter(p RouterParams) http.Handler {
 		})
 
 		handlers := authmod.HTTPHandlers{
-			Tokens: p.TokenService,
-			TTL:    time.Duration(p.Config.JWTTTLHrs) * time.Hour,
-			Users:  p.UserService,
+			Tokens:        p.TokenService,
+			TTL:           time.Duration(p.Config.JWTTTLHrs) * time.Hour,
+			Users:         p.UserService,
+			PublicBaseURL: p.PublicBaseURL,
+			ChallengeTTL:  p.ChallengeTTL,
+			Challenges:    p.ChallengeStore,
 		}
 
 		r.Post("/auth/login", handlers.Login)
+		r.Post("/auth/wallet/challenge", handlers.WalletChallenge)
 		r.With(RequireAuth(p.TokenService, false)).Get("/auth/me", handlers.Me)
 		r.With(RequireAuth(p.TokenService, false)).Get("/auth/session", handlers.Session)
 	})

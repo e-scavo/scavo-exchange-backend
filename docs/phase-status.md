@@ -16,4 +16,5 @@
 | 0 | 0.4 | 0.4.1 - Auth and User Module Stabilization | Done | Auth service extracted, current-user path introduced, user identity reads expanded |
 | 0 | 0.4 | 0.4.2 - Token Lifecycle and Auth Transport Hardening | Done | Shared token extraction, auth claims context, HTTP middleware, HTTP/WS auth transport alignment |
 | 0 | 0.4 | 0.4.3 - Session Evolution and Wallet Auth Preparation | Done | Shared session view, authenticated session endpoint, enriched WS session metadata, new auth.session action |
-| 0 | 0.4 | 0.4.4 - Wallet Challenge Contract and Nonce Bootstrap | Next | Define nonce/challenge contracts and transport shape for wallet-based authentication without enabling full signature login yet |
+| 0 | 0.4 | 0.4.4 - Wallet Challenge Contract and Nonce Bootstrap | Done | Wallet challenge contract, nonce generation, stable signing message, in-memory bootstrap challenge store |
+| 0 | 0.4 | 0.4.5 - Wallet Signature Verification and Token Issuance | Next | Verify signatures against issued challenges and mint authenticated tokens from wallet-based login |
