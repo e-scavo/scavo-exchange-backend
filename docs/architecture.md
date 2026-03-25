@@ -65,6 +65,7 @@ Initial responsibilities:
 Current implementation already includes:
 
 - `/health`
+- `/readiness`
 - `/version`
 - `/auth/login`
 - `/auth/me`
@@ -104,6 +105,8 @@ Current and planned responsibilities:
 - configuration
 - structured logging
 - JWT/token services
+- auth transport helpers
+- auth claims context helpers
 - HTTP helpers and middleware
 - WebSocket protocol and routing
 - database helpers
@@ -170,9 +173,13 @@ At the current stage:
 
 - the `auth` module owns token-oriented login orchestration
 - the `user` module owns user persistence and user identity reads
-- HTTP handlers remain thin and delegate to auth services
+- HTTP handlers remain thin
+- HTTP auth enforcement is handled through reusable middleware
+- authenticated claims travel through request context
+- token extraction is shared instead of duplicated across transports
+- WebSocket auth attachment follows the same extraction strategy
 - persisted development login remains enabled
-- authenticated identity read is now available through `GET /auth/me`
+- authenticated identity read is available through `GET /auth/me`
 
 This is intentionally still a bootstrap auth model.
 
@@ -181,7 +188,8 @@ The project is not yet implementing:
 - refresh token persistence
 - wallet signature login
 - role/permission enforcement
-- full auth middleware strategy
+- revocation flows
+- full session persistence
 
 Those will come later.
 

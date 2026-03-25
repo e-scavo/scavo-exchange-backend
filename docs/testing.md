@@ -72,6 +72,8 @@ Scope:
 - deterministic service logic with mocked dependencies
 - readiness logic and dependency evaluation
 - auth service orchestration
+- auth transport helper behavior
+- auth claims context behavior
 
 Purpose:
 
@@ -176,10 +178,15 @@ Purpose:
 
 Recommended commands at the current stage:
 
+    go build ./...
+
     go test ./...
 
     SCAVO_TEST_POSTGRES_URL=postgres://postgres:postgres@localhost:5432/scavo_exchange?sslmode=disable \
     go test ./internal/modules/user -run TestPostgresRepository_UpsertDevUser -v
+
+    SCAVO_TEST_POSTGRES_URL=postgres://postgres:postgres@localhost:5432/scavo_exchange?sslmode=disable \
+    go test ./internal/modules/user -run TestPostgresRepository_GetByID -v
 
     SCAVO_POSTGRES_URL=postgres://postgres:postgres@localhost:5432/scavo_exchange?sslmode=disable \
     ./scripts/migrate.sh status
@@ -221,6 +228,8 @@ Before heavy product features are introduced, the backend should gain validation
 - handler wiring
 - auth baseline behavior
 - current-user authenticated read behavior
+- token extraction consistency
+- auth claims propagation
 - health endpoint behavior
 - readiness behavior
 - dependency failure visibility
@@ -326,6 +335,6 @@ Those may come later as implementation matures.
 
 The next recommended step is:
 
-Phase 0.4.2 - Token Lifecycle and Auth Transport Hardening
+Phase 0.4.3 - Session Evolution and Wallet Auth Preparation
 
-That phase should build on the stabilized auth-user boundary by preparing token extraction, transport consistency, and future auth evolution without jumping prematurely into wallet-signature flows.
+That phase should define how authenticated identity should evolve across HTTP and WebSocket surfaces before refresh persistence or wallet-signature flows are introduced.

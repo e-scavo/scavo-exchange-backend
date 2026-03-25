@@ -13,5 +13,6 @@
 | 0 | 0.3 | 0.3.2 - Migration Bootstrap and Local Infrastructure Layout | Done | Migrations baseline, local infra direction, env example and workflow |
 | 0 | 0.3 | 0.3.3 - Repository and First Persistence Module | Done | First persisted user module integrated into dev login |
 | 0 | 0.3 | 0.3.4 - Repository Validation and Migration Workflow Hardening | Done | Unit and integration validation baseline for first persistent flow |
-| 0 | 0.4 | 0.4.1 - Auth and User Module Stabilization | Done | Auth service boundary extracted, /auth/me added, user identity read path introduced |
-| 0 | 0.4 | 0.4.2 - Token Lifecycle and Auth Transport Hardening | Next | Prepare auth evolution beyond bootstrap without introducing wallet auth yet |
+| 0 | 0.4 | 0.4.1 - Auth and User Module Stabilization | Done | Auth service extracted, current-user path introduced, user identity reads expanded |
+| 0 | 0.4 | 0.4.2 - Token Lifecycle and Auth Transport Hardening | Done | Shared token extraction, auth claims context, HTTP middleware, HTTP/WS auth transport alignment |
+| 0 | 0.4 | 0.4.3 - Session Evolution and Wallet Auth Preparation | Next | Define session representation and prepare wallet-oriented auth evolution without implementing signature auth yet |

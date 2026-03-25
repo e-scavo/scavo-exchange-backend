@@ -16,7 +16,7 @@ Phase 0.4 - Auth and User Stabilization
 
 ## Current Subphase
 
-Phase 0.4.1 - Auth and User Module Stabilization
+Phase 0.4.2 - Token Lifecycle and Auth Transport Hardening
 
 ---
 
@@ -31,9 +31,12 @@ The backend now includes:
 - middleware
 - WebSocket handler, hub, client, dispatcher, protocol
 - JWT token service
+- centralized auth service for development login orchestration
 - development HTTP login
-- auth service boundary for development login orchestration
-- current authenticated identity resolution through bearer token
+- authenticated current-user REST path through `GET /auth/me`
+- reusable HTTP auth middleware
+- shared token extraction utilities for HTTP and WebSocket transports
+- auth claims context utilities in the core auth layer
 - system WebSocket handler
 - auth WebSocket handler registration
 - PostgreSQL core scaffolding
@@ -42,8 +45,7 @@ The backend now includes:
 - readiness-aware router wiring
 - first migration-backed domain table
 - first repository-backed domain service
-- minimal authenticated REST identity read path through `GET /auth/me`
-- unit and integration validation baseline for first persistence path
+- user identity retrieval through repository and service expansion
 - auth and user regression coverage expanded
 
 ---
@@ -73,13 +75,13 @@ The backend now includes:
 
 This subphase implemented:
 
-- extraction of development login orchestration into an auth service
-- formalized auth-to-user interaction through service boundaries
-- `user` identity retrieval path through repository and service expansion
-- `GET /auth/me` as the first minimal authenticated REST identity endpoint
-- auth service tests for login and current-user resolution
-- HTTP handler tests for login and current-user responses
-- additional user service tests for identity retrieval behavior
+- shared token extraction helpers for transport consistency
+- auth claims storage and retrieval through request context
+- reusable HTTP auth middleware with claims injection
+- `GET /auth/me` protection through middleware instead of local token parsing
+- WebSocket auth alignment using the same token extraction strategy
+- removal of transport coupling that caused cyclic dependency risk
+- rescue and stabilization of the 0.4.2 implementation until build and tests were both green
 
 ---
 
@@ -112,26 +114,25 @@ Not implemented yet:
 
 The project now supports:
 
-- unit validation of core domain logic
-- integration validation of PostgreSQL repository layer
-- readiness validation with dependency awareness
-- migration workflow execution and inspection
-- smoke-level validation of login flow
+- successful `go build ./...`
+- successful `go test ./...`
 - unit validation of auth login orchestration
-- unit validation of current-user resolution from JWT
-- HTTP handler validation for `/auth/login` and `/auth/me`
+- unit validation of current-user resolution
+- unit validation of user service behavior
+- unit validation of status/readiness logic
+- integration validation baseline for PostgreSQL-backed user repository
+- middleware-protected authenticated identity flow through the current transport model
 
-The backend now has a clearer auth-user boundary and a minimal authenticated read path, while remaining in controlled development-bootstrap mode.
+The backend now has a coherent minimal auth transport layer without prematurely introducing session persistence or wallet-signature authentication.
 
 ---
 
 ## Recommended Next Step
 
-Phase 0.4.2 - Token Lifecycle and Auth Transport Hardening
+Phase 0.4.3 - Session Evolution and Wallet Auth Preparation
 
 Recommended scope:
 
-- formalize token extraction/parsing helpers for HTTP
-- prepare auth middleware strategy without overcommitting too early
-- define token lifecycle expectations before refresh-token persistence
-- keep wallet auth deferred until the bootstrap auth boundary is fully stable
+- define a stable authenticated session model across HTTP and WebSocket surfaces
+- prepare the backend for future wallet-based authentication flows
+- avoid refresh/revocation persistence until session shape and auth lifecycle expectations are clearer

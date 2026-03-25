@@ -91,16 +91,17 @@ Current phase after this subphase update:
 
 **Stage 0 - Foundation**  
 **Phase 0.4 - Auth and User Stabilization**  
-**Subphase 0.4.1 - Auth and User Module Stabilization**
+**Subphase 0.4.2 - Token Lifecycle and Auth Transport Hardening**
 
 Implemented in this subphase:
 
-- auth service boundary extracted from HTTP handler
-- persisted development login flow kept intact
-- current-user resolution added through token parsing
-- `GET /auth/me` added
-- `user` repository/service expanded with identity read path
-- auth and user regression coverage expanded
+- auth service boundary preserved from 0.4.1
+- shared token extraction introduced for HTTP and WebSocket transports
+- auth claims context formalized in core auth layer
+- reusable HTTP auth middleware introduced
+- `GET /auth/me` now protected through middleware
+- WebSocket auth attachment aligned with the same token extraction rules
+- auth transport responsibility clarified without introducing session persistence yet
 
 ## Workflow Rules
 
@@ -129,4 +130,4 @@ This backend is designed to be:
 
 ## Next Step
 
-Phase 0.4.2 - Token Lifecycle and Auth Transport Hardening
+Phase 0.4.3 - Session Evolution and Wallet Auth Preparation
