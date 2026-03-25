@@ -1,66 +1,99 @@
-# Architecture Overview
+# Architecture
 
-## Objective
+## Current Architectural Direction
 
-The SCAVO Exchange backend is designed as a modular monolith that can evolve from an initial DEX-first backend into a broader hybrid exchange platform.
-
-The system must support:
-
-- DEX-first non-custodial trading
-- Direct SCAVIUM blockchain integration
-- Wallet-native user flows
-- Future custodial and hybrid trading models
-- REST and WebSocket APIs
-- Background processing
-- Strong observability and security boundaries
-
----
-
-## Architecture Style
-
-The official architecture style is:
-
-**Modular Monolith**
+The backend follows a **modular monolith** architecture.
 
 This means:
 
-- a single deployable backend binary
-- clear domain module boundaries
-- shared core infrastructure
-- internal package-level composition
-- no early microservice fragmentation
+- a single deployable backend application
+- clear internal module boundaries
+- shared core infrastructure packages
+- independent domain growth inside the same repository
+- the ability to extract services later only if justified
 
-This approach is intentionally chosen to maximize delivery speed, simplify local development, reduce operational overhead, and preserve the ability to split services later if the product requires it.
-
----
-
-## High-Level Structure
-
-The backend is logically divided into the following layers:
-
-1. Entry Layer
-2. Application Composition Layer
-3. Core Infrastructure Layer
-4. Domain Modules
-5. Persistence and External Integrations
-6. Blockchain and Contract Integration
-7. Background Jobs and Internal Processing
-8. Observability and Validation Layer
+This is appropriate for the current maturity stage of the project.
 
 ---
 
-## Entry Layer
+## Current High-Level Layers
 
-This layer exposes the backend to clients and external systems.
+The project is currently structured around these layers:
 
-Initial responsibilities:
+### 1. Application Layer
 
-- HTTP routing
-- REST endpoints
-- WebSocket upgrade and session handling
-- request middleware
-- response serialization
-- request correlation and recovery
+Responsible for wiring the system together.
+
+Examples:
+
+- startup
+- shutdown
+- config loading
+- dependency initialization
+- module registration
+- router creation
+
+### 2. Core Infrastructure Layer
+
+Shared technical capabilities used across modules.
+
+Examples:
+
+- logging
+- config
+- HTTP helpers
+- WebSocket transport
+- auth/token utilities
+- PostgreSQL client
+- Redis client
+- readiness/health status
+
+### 3. Module Layer
+
+Business capabilities live inside modules.
+
+Current modules:
+
+- `system`
+- `auth`
+- `user`
+
+This keeps business logic away from transport and infrastructure details.
+
+---
+
+## Current Transport Style
+
+The backend supports two transport modes:
+
+- REST HTTP
+- WebSocket
+
+REST is used for:
+
+- health and readiness
+- version information
+- login and wallet-auth bootstrap
+- authenticated session inspection
+
+WebSocket is used for:
+
+- persistent bidirectional communication
+- session-aware actions
+- future real-time exchange features
+
+---
+
+## Current HTTP Layer Responsibilities
+
+The HTTP layer is responsible for:
+
+- route registration
+- middleware chaining
+- auth extraction and validation
+- handler dispatch
+- JSON response behavior
+- readiness exposure
 
 Current implementation already includes:
 
@@ -71,6 +104,7 @@ Current implementation already includes:
 - `/auth/me`
 - `/auth/session`
 - `/auth/wallet/challenge`
+- `/auth/wallet/verify`
 - `/ws`
 
 ---
@@ -94,191 +128,148 @@ Current implementation:
 
 - `internal/app`
 
-This layer must remain orchestration-only and must not contain domain business logic.
+---
+
+## Core Package Direction
+
+Current core packages and their roles:
+
+### `internal/core/config`
+Configuration loading and normalization.
+
+### `internal/core/logger`
+Structured logging for application and request-level events.
+
+### `internal/core/httpx`
+HTTP router setup, middleware, auth middleware, and response helpers.
+
+### `internal/core/ws`
+WebSocket handler, dispatcher, client session attachment, and hub behavior.
+
+### `internal/core/auth`
+JWT minting/parsing, auth claims transport helpers, and shared claims context.
+
+### `internal/core/db`
+PostgreSQL bootstrap and connection health logic.
+
+### `internal/core/cache`
+Redis bootstrap and connectivity validation.
+
+### `internal/core/status`
+Health/readiness model and dependency checks.
 
 ---
 
-## Core Infrastructure Layer
+## Module Direction
 
-This layer contains reusable technical building blocks used by domain modules.
+### `system`
+Lightweight baseline endpoints and system-level transport behavior.
 
-Current and planned responsibilities:
+### `auth`
+Authentication orchestration, token issuance, current-session resolution, wallet challenge issuance, wallet signature verification, and wallet-auth bootstrap flow handling.
 
-- configuration
-- structured logging
-- JWT/token services
-- auth transport helpers
-- auth claims context helpers
-- HTTP helpers and middleware
-- WebSocket protocol and routing
+### `user`
+User model, repository, and service logic used by auth flows.
+
+---
+
+## Current Persistence Direction
+
+Persistence is currently mixed by maturity level.
+
+### Already persisted
+
+- users through PostgreSQL
+
+### Still bootstrap / non-durable
+
+- wallet auth challenges
+- wallet-auth identity bootstrap linkage
+- refresh tokens
+- session persistence
+
+This is acceptable for the current stage because wallet-auth is still being introduced in controlled steps.
+
+---
+
+## Current Auth Direction
+
+The project currently supports two authentication shapes:
+
+### Development login
+
+- email + fixed development password
+- JWT issuance
+- persisted or fallback user resolution
+
+### Wallet-auth bootstrap login
+
+- challenge issuance through `POST /auth/wallet/challenge`
+- EVM-style signed message verification through `POST /auth/wallet/verify`
+- one-time challenge consumption with replay rejection
+- wallet-auth JWT enriched with wallet metadata
+- fallback wallet identity view without durable wallet persistence yet
+
+This staged approach keeps implementation safe while gradually moving toward production-grade wallet authentication.
+
+---
+
+## Current Session Model
+
+A valid JWT currently provides enough information to resolve:
+
+- user id
+- email when present
+- wallet address when present
+- auth method
+- chain value
+- issuer
+- subject
+- expiration metadata
+
+The same claims model now feeds both:
+
+- REST authenticated endpoints
 - WebSocket session attachment
-- database helpers
-- cache helpers
-- future queue/worker helpers
-- future observability helpers
 
-Current implementation:
-
-- `internal/core/config`
-- `internal/core/logger`
-- `internal/core/httpx`
-- `internal/core/auth`
-- `internal/core/ws`
-- `internal/core/db`
-- `internal/core/cache`
-- `internal/core/status`
-
-This layer must remain domain-agnostic.
+This reduces duplicated auth-state logic across transports.
 
 ---
 
-## Domain Modules
+## Readiness Philosophy
 
-Domain modules contain business logic and represent functional areas of the exchange.
+Readiness is dependency-aware.
 
-Current modules:
+The backend can be configured to require:
 
-- `system`
-- `auth`
-- `user`
+- PostgreSQL
+- Redis
 
-Planned modules:
-
-- `wallet`
-- `chain`
-- `asset`
-- `portfolio`
-- `dex`
-- `liquidity`
-- `quote`
-- `routing`
-- `txtracking`
-- `indexer`
-- `ledger`
-- `p2p`
-- `admin`
-- `audit`
-- `compliance`
-
-Each module should expose:
-
-- handlers or transport adapters
-- service layer
-- repository contracts
-- DTOs or transport payloads
-- internal module-specific helpers
+This allows the project to remain flexible in local development while still supporting stricter deployment expectations later.
 
 ---
 
-## Current Auth/User Boundary
+## Why This Architecture Still Fits
 
-At the current stage:
+At the current stage, this architecture remains the correct choice because it provides:
 
-- the `auth` module owns token-oriented login orchestration
-- the `user` module owns user persistence and user identity reads
-- HTTP handlers remain thin
-- HTTP auth enforcement is handled through reusable middleware
-- authenticated claims travel through request context
-- token extraction is shared instead of duplicated across transports
-- WebSocket auth attachment follows the same extraction strategy
-- authenticated session metadata is represented explicitly
-- REST and WebSocket expose authenticated identity and session surfaces
-- wallet-auth bootstrap now has a challenge issuance contract
-- persisted development login remains enabled
+- fast iteration speed
+- low operational complexity
+- strong internal structure
+- room for safe growth
+- good testability potential
 
-This is intentionally still a bootstrap auth model.
-
-The project is not yet implementing:
-
-- wallet signature verification
-- wallet-based token issuance
-- refresh token persistence
-- role/permission enforcement
-- revocation flows
-- full session persistence
-
-Those will come later.
+There is no current need to split the backend into microservices.
 
 ---
 
-## Wallet Auth Bootstrap Direction
+## Recommended Architectural Next Step
 
-Wallet authentication is being introduced in controlled steps.
+The next architectural step should focus on improving durability rather than increasing distribution complexity.
 
-The backend now supports:
+Priority areas:
 
-- challenge creation
-- nonce generation
-- signable message construction
-- challenge TTL
-
-The backend does not yet support:
-
-- signature verification
-- replay protection persistence beyond bootstrap memory storage
-- wallet-to-user linking
-- token issuance from wallet-auth flows
-
-This separation is intentional and reduces implementation risk.
-
----
-
-## Blockchain Integration
-
-SCAVIUM is the primary chain for the exchange backend.
-
-The backend will interact directly with:
-
-- SCAVIUM RPC endpoints
-- deployed DEX contracts
-- token contracts
-- indexed chain data
-- transaction receipts and logs
-
-The blockchain integration layer must support:
-
-- direct read operations
-- quote assistance
-- allowance checks
-- gas estimation
-- transaction tracking
-- event ingestion
-- future failover across multiple RPC endpoints
-
-The backend does not initially custody keys for DEX users.
-
----
-
-## DEX Model
-
-The initial product focus is DEX-first and non-custodial.
-
-The first protocol model will be:
-
-**AMM v1**
-
-This includes:
-
-- pools
-- liquidity provisioning
-- swaps
-- quote generation
-- routing support
-- allowance inspection
-- settlement through on-chain contracts
-
-The backend will prepare and expose trading intelligence, but the user wallet remains the signing authority.
-
----
-
-## Hybrid Growth Model
-
-Although the initial implementation is DEX-first, the system is intentionally designed to support future hybrid expansion.
-
-Future hybrid scope includes:
-
-- custodial accounts
-- internal balances
-- internal ledger
-- deposit and withdrawal orchestration
-- P2P support
+- durable wallet challenge persistence
+- wallet identity persistence direction
+- stronger session lifecycle management
+- continued auth and transport hardening

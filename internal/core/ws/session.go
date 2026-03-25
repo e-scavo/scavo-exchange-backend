@@ -7,12 +7,15 @@ import (
 )
 
 type Session struct {
-	Claims    *coreauth.Claims
-	UserID    string
-	Email     string
-	Subject   string
-	Issuer    string
-	ExpiresAt *time.Time
+	Claims        *coreauth.Claims
+	UserID        string
+	Email         string
+	WalletAddress string
+	AuthMethod    string
+	Chain         string
+	Subject       string
+	Issuer        string
+	ExpiresAt     *time.Time
 }
 
 func (c *Client) SetSession(s Session) {

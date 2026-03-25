@@ -23,10 +23,13 @@ type Service struct {
 }
 
 type LoginResult struct {
-	AccessToken string
-	TokenType   string
-	ExpiresIn   int64
-	User        *usermod.User
+	AccessToken   string
+	TokenType     string
+	ExpiresIn     int64
+	User          *usermod.User
+	WalletAddress string
+	Chain         string
+	AuthMethod    string
 }
 
 type SessionView struct {
@@ -34,6 +37,9 @@ type SessionView struct {
 	TokenType     string        `json:"token_type"`
 	UserID        string        `json:"user_id"`
 	Email         string        `json:"email,omitempty"`
+	WalletAddress string        `json:"wallet_address,omitempty"`
+	AuthMethod    string        `json:"auth_method,omitempty"`
+	Chain         string        `json:"chain,omitempty"`
 	Subject       string        `json:"subject,omitempty"`
 	Issuer        string        `json:"issuer,omitempty"`
 	ExpiresAt     *time.Time    `json:"expires_at,omitempty"`
@@ -84,6 +90,41 @@ func (s *Service) LoginDev(ctx context.Context, email, password string) (*LoginR
 		TokenType:   "Bearer",
 		ExpiresIn:   int64(s.ttl.Seconds()),
 		User:        user,
+		AuthMethod:  "password_dev",
+	}, nil
+}
+
+func (s *Service) LoginWallet(ctx context.Context, address, chain string) (*LoginResult, error) {
+	if s == nil || s.tokens == nil {
+		return nil, fmt.Errorf("token service not configured")
+	}
+
+	address = normalizeWalletAddress(address)
+	if !evmAddressRE.MatchString(address) {
+		return nil, ErrInvalidWalletAddress
+	}
+	chain = normalizeChain(chain)
+
+	user := walletUser(address)
+	token, err := s.tokens.MintWithOptions(coreauth.MintOptions{
+		UserID:        user.ID,
+		WalletAddress: address,
+		AuthMethod:    "wallet_evm",
+		Chain:         chain,
+		Subject:       address,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &LoginResult{
+		AccessToken:   token,
+		TokenType:     "Bearer",
+		ExpiresIn:     int64(s.ttl.Seconds()),
+		User:          user,
+		WalletAddress: address,
+		Chain:         chain,
+		AuthMethod:    "wallet_evm",
 	}, nil
 }
 
@@ -108,6 +149,10 @@ func (s *Service) ResolveCurrentUser(ctx context.Context, token string) (*usermo
 func (s *Service) ResolveCurrentUserClaims(ctx context.Context, claims *coreauth.Claims) (*usermod.User, error) {
 	if claims == nil || strings.TrimSpace(claims.UserID) == "" {
 		return nil, ErrUnauthorized
+	}
+
+	if strings.TrimSpace(claims.WalletAddress) != "" {
+		return walletUser(claims.WalletAddress), nil
 	}
 
 	if s.users == nil {
@@ -166,6 +211,9 @@ func (s *Service) ResolveSessionClaims(ctx context.Context, claims *coreauth.Cla
 		TokenType:     "Bearer",
 		UserID:        strings.TrimSpace(claims.UserID),
 		Email:         normalizeEmail(claims.Email),
+		WalletAddress: normalizeWalletAddress(claims.WalletAddress),
+		AuthMethod:    strings.TrimSpace(claims.AuthMethod),
+		Chain:         normalizeChain(claims.Chain),
 		Subject:       strings.TrimSpace(claims.Subject),
 		Issuer:        strings.TrimSpace(claims.Issuer),
 		ExpiresAt:     expiresAt,
@@ -175,10 +223,27 @@ func (s *Service) ResolveSessionClaims(ctx context.Context, claims *coreauth.Cla
 	if view.Subject == "" {
 		view.Subject = view.UserID
 	}
+	if view.AuthMethod == "" {
+		view.AuthMethod = "password_dev"
+	}
+	if view.WalletAddress == "" {
+		view.Chain = ""
+	}
 
 	return view, nil
 }
 
 func normalizeEmail(email string) string {
 	return strings.TrimSpace(strings.ToLower(email))
+}
+
+func walletUser(address string) *usermod.User {
+	now := time.Now().UTC()
+	address = normalizeWalletAddress(address)
+	return &usermod.User{
+		ID:          walletUserID(address),
+		DisplayName: address,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+	}
 }

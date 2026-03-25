@@ -121,12 +121,15 @@ func (h *Handler) tryAuth(r *http.Request, c *Client) {
 	}
 
 	c.SetSession(Session{
-		Claims:    claims,
-		UserID:    claims.UserID,
-		Email:     claims.Email,
-		Subject:   claims.Subject,
-		Issuer:    claims.Issuer,
-		ExpiresAt: expiresAt,
+		Claims:        claims,
+		UserID:        claims.UserID,
+		Email:         claims.Email,
+		WalletAddress: claims.WalletAddress,
+		AuthMethod:    claims.AuthMethod,
+		Chain:         claims.Chain,
+		Subject:       claims.Subject,
+		Issuer:        claims.Issuer,
+		ExpiresAt:     expiresAt,
 	})
 }
 

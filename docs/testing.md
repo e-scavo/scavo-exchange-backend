@@ -251,6 +251,9 @@ Before heavy product features are introduced, the backend should gain validation
 - current-user authenticated read behavior
 - current-session authenticated read behavior
 - wallet challenge bootstrap behavior
+- wallet signature verification behavior
+- wallet-auth token issuance behavior
+- challenge replay rejection behavior
 - token extraction consistency
 - auth claims propagation
 - health endpoint behavior
@@ -317,6 +320,8 @@ A minimal smoke layer should verify:
 - authenticated identity read works with a valid token
 - authenticated session read works with a valid token
 - wallet challenge bootstrap works with a valid EVM address
+- wallet challenge verification works with a valid signature
+- challenge replay is rejected after successful verification
 - WebSocket endpoint is reachable at a basic level
 
 This is a practical baseline for local development and internal testing.
@@ -360,6 +365,6 @@ Those may come later as implementation matures.
 
 The next recommended step is:
 
-Phase 0.4.5 - Wallet Signature Verification and Token Issuance
+Phase 0.4.6 - Wallet Identity Persistence and Durable Challenge Storage
 
-That phase should verify EVM signatures against issued challenges and mint authenticated tokens from wallet-authenticated flows.
+That phase should move wallet challenges out of process memory and introduce durable wallet-identity persistence without breaking the new wallet-auth verification contract.

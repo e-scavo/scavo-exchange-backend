@@ -2,6 +2,7 @@ package auth
 
 import (
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -14,9 +15,21 @@ type TokenService struct {
 }
 
 type Claims struct {
-	UserID string `json:"uid"`
-	Email  string `json:"email,omitempty"`
+	UserID        string `json:"uid"`
+	Email         string `json:"email,omitempty"`
+	WalletAddress string `json:"wallet_address,omitempty"`
+	AuthMethod    string `json:"auth_method,omitempty"`
+	Chain         string `json:"chain,omitempty"`
 	jwt.RegisteredClaims
+}
+
+type MintOptions struct {
+	UserID        string
+	Email         string
+	WalletAddress string
+	AuthMethod    string
+	Chain         string
+	Subject       string
 }
 
 func NewTokenService(secret string, issuer string, ttl time.Duration) (*TokenService, error) {
@@ -33,13 +46,29 @@ func NewTokenService(secret string, issuer string, ttl time.Duration) (*TokenSer
 }
 
 func (s *TokenService) Mint(userID, email string) (string, error) {
+	return s.MintWithOptions(MintOptions{
+		UserID:     userID,
+		Email:      email,
+		AuthMethod: "password_dev",
+	})
+}
+
+func (s *TokenService) MintWithOptions(opts MintOptions) (string, error) {
 	now := time.Now().UTC()
+	subject := strings.TrimSpace(opts.Subject)
+	if subject == "" {
+		subject = strings.TrimSpace(opts.UserID)
+	}
+
 	claims := Claims{
-		UserID: userID,
-		Email:  email,
+		UserID:        strings.TrimSpace(opts.UserID),
+		Email:         strings.TrimSpace(opts.Email),
+		WalletAddress: strings.TrimSpace(opts.WalletAddress),
+		AuthMethod:    strings.TrimSpace(opts.AuthMethod),
+		Chain:         strings.TrimSpace(opts.Chain),
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    s.issuer,
-			Subject:   userID,
+			Subject:   subject,
 			IssuedAt:  jwt.NewNumericDate(now),
 			NotBefore: jwt.NewNumericDate(now),
 			ExpiresAt: jwt.NewNumericDate(now.Add(s.ttl)),

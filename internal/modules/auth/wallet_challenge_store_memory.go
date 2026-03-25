@@ -48,6 +48,30 @@ func (s *InMemoryWalletChallengeStore) GetByID(ctx context.Context, id string) (
 	return cloneWalletChallenge(challenge), nil
 }
 
+func (s *InMemoryWalletChallengeStore) Use(ctx context.Context, id string, usedAt time.Time) (*WalletChallenge, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	now := time.Now().UTC()
+	s.cleanupLocked(now)
+
+	challenge, ok := s.items[id]
+	if !ok {
+		return nil, ErrWalletChallengeNotFound
+	}
+	if challenge.UsedAt != nil {
+		return nil, ErrChallengeUsed
+	}
+	if now.After(challenge.ExpiresAt) {
+		delete(s.items, id)
+		return nil, ErrChallengeExpired
+	}
+
+	ts := usedAt.UTC()
+	challenge.UsedAt = &ts
+	return cloneWalletChallenge(challenge), nil
+}
+
 func (s *InMemoryWalletChallengeStore) cleanupLocked(now time.Time) {
 	for id, ch := range s.items {
 		if ch == nil {

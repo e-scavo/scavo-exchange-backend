@@ -17,6 +17,8 @@ import (
 var (
 	ErrInvalidWalletAddress = errors.New("invalid wallet address")
 	ErrChallengeStore       = errors.New("wallet challenge store error")
+	ErrChallengeExpired     = errors.New("wallet challenge expired")
+	ErrChallengeUsed        = errors.New("wallet challenge already used")
 )
 
 var evmAddressRE = regexp.MustCompile(`^0x[0-9a-fA-F]{40}$`)
@@ -35,6 +37,7 @@ type WalletChallenge struct {
 type WalletChallengeStore interface {
 	Save(ctx context.Context, challenge *WalletChallenge) error
 	GetByID(ctx context.Context, id string) (*WalletChallenge, error)
+	Use(ctx context.Context, id string, usedAt time.Time) (*WalletChallenge, error)
 }
 
 type WalletChallengeService struct {
@@ -56,7 +59,7 @@ func NewWalletChallengeService(store WalletChallengeStore, publicBaseURL string,
 }
 
 func (s *WalletChallengeService) Create(ctx context.Context, address, chain string) (*WalletChallenge, error) {
-	address = strings.TrimSpace(address)
+	address = normalizeWalletAddress(address)
 	if !evmAddressRE.MatchString(address) {
 		return nil, ErrInvalidWalletAddress
 	}
@@ -86,6 +89,43 @@ func (s *WalletChallengeService) Create(ctx context.Context, address, chain stri
 		}
 	}
 
+	return challenge, nil
+}
+
+func (s *WalletChallengeService) Get(ctx context.Context, id string) (*WalletChallenge, error) {
+	if s == nil || s.store == nil {
+		return nil, ErrChallengeStore
+	}
+
+	challenge, err := s.store.GetByID(ctx, strings.TrimSpace(id))
+	if err != nil {
+		return nil, err
+	}
+	if challenge == nil {
+		return nil, ErrWalletChallengeNotFound
+	}
+	if challenge.UsedAt != nil {
+		return nil, ErrChallengeUsed
+	}
+	if time.Now().UTC().After(challenge.ExpiresAt) {
+		return nil, ErrChallengeExpired
+	}
+
+	return challenge, nil
+}
+
+func (s *WalletChallengeService) MarkUsed(ctx context.Context, id string, usedAt time.Time) (*WalletChallenge, error) {
+	if s == nil || s.store == nil {
+		return nil, ErrChallengeStore
+	}
+
+	challenge, err := s.store.Use(ctx, strings.TrimSpace(id), usedAt.UTC())
+	if err != nil {
+		return nil, err
+	}
+	if challenge == nil {
+		return nil, ErrWalletChallengeNotFound
+	}
 	return challenge, nil
 }
 

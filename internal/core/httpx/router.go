@@ -97,6 +97,7 @@ func NewRouter(p RouterParams) http.Handler {
 
 		r.Post("/auth/login", handlers.Login)
 		r.Post("/auth/wallet/challenge", handlers.WalletChallenge)
+		r.Post("/auth/wallet/verify", handlers.WalletVerify)
 		r.With(RequireAuth(p.TokenService, false)).Get("/auth/me", handlers.Me)
 		r.With(RequireAuth(p.TokenService, false)).Get("/auth/session", handlers.Session)
 	})

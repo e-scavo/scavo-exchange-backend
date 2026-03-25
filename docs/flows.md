@@ -54,17 +54,29 @@ This flow represents the first wallet-auth bootstrap contract.
 6. backend stores the challenge in bootstrap memory storage
 7. backend returns challenge id, nonce, message, issue time, and expiration time
 
-This flow does not yet verify a signature.
+---
+
+## Flow 5 - Wallet Signature Verification and Token Issuance
+
+1. client signs the issued wallet challenge message with the requested wallet
+2. client calls `POST /auth/wallet/verify`
+3. request includes challenge id, wallet address, and signature
+4. backend loads the issued challenge and validates expiration and replay state
+5. backend recovers the signer address from the signed message
+6. backend compares the recovered address with the requested wallet address
+7. backend marks the challenge as used
+8. backend mints a JWT enriched with wallet-auth metadata
+9. backend returns the access token plus wallet-authenticated session identity data
 
 ---
 
-## Flow 5 - Current WebSocket Session Attachment
+## Flow 6 - Current WebSocket Session Attachment
 
 1. client connects to `/ws`
 2. backend upgrades the connection
 3. backend extracts token from `Authorization` header or `token` query parameter
 4. backend validates JWT if a token is present
-5. backend enriches the client session with user id, email, subject, issuer, and expiration
+5. backend enriches the client session with user id, email, wallet address, auth method, chain, subject, issuer, and expiration
 6. client is attached to hub
 7. dispatcher routes incoming action messages
 
@@ -72,7 +84,7 @@ This flow is already reflected in the current project baseline.
 
 ---
 
-## Flow 6 - Current WebSocket Auth Session Read
+## Flow 7 - Current WebSocket Auth Session Read
 
 1. authenticated client sends `auth.session`
 2. WebSocket auth guard checks that the client has a session
@@ -83,7 +95,7 @@ This flow keeps WebSocket aligned with REST session semantics.
 
 ---
 
-## Flow 7 - Future Wallet Signature Login
+## Flow 8 - Future Wallet Signature Login
 
 1. client requests wallet auth challenge
 2. backend generates challenge
@@ -97,7 +109,7 @@ This is the preferred authentication direction for the DEX-first product model.
 
 ---
 
-## Flow 8 - Wallet Portfolio Read
+## Flow 9 - Wallet Portfolio Read
 
 1. client requests portfolio for a linked wallet
 2. backend resolves supported assets
@@ -110,7 +122,7 @@ This flow becomes important once chain and asset modules are introduced.
 
 ---
 
-## Flow 9 - DEX Quote Request
+## Flow 10 - DEX Quote Request
 
 1. client requests a quote for token swap
 2. backend validates asset pair and amount
@@ -124,7 +136,7 @@ The backend does not execute the swap here. It only prepares decision-quality in
 
 ---
 
-## Flow 10 - DEX Swap Execution
+## Flow 11 - DEX Swap Execution
 
 1. client requests swap preparation data
 2. backend validates route and current assumptions
@@ -140,7 +152,7 @@ Settlement is on-chain. The backend supports the flow but does not sign for the 
 
 ---
 
-## Flow 11 - Add Liquidity
+## Flow 12 - Add Liquidity
 
 1. client requests liquidity addition parameters
 2. backend validates pool and token pair
@@ -153,7 +165,7 @@ Settlement is on-chain. The backend supports the flow but does not sign for the 
 
 ---
 
-## Flow 12 - Indexed Transaction Tracking
+## Flow 13 - Indexed Transaction Tracking
 
 1. a user-originated DEX transaction is submitted
 2. backend stores or registers tracking intent

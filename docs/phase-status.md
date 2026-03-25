@@ -17,4 +17,4 @@
 | 0 | 0.4 | 0.4.2 - Token Lifecycle and Auth Transport Hardening | Done | Shared token extraction, auth claims context, HTTP middleware, HTTP/WS auth transport alignment |
 | 0 | 0.4 | 0.4.3 - Session Evolution and Wallet Auth Preparation | Done | Shared session view, authenticated session endpoint, enriched WS session metadata, new auth.session action |
 | 0 | 0.4 | 0.4.4 - Wallet Challenge Contract and Nonce Bootstrap | Done | Wallet challenge contract, nonce generation, stable signing message, in-memory bootstrap challenge store |
-| 0 | 0.4 | 0.4.5 - Wallet Signature Verification and Token Issuance | Next | Verify signatures against issued challenges and mint authenticated tokens from wallet-based login |
+| 0 | 0.4 | 0.4.5 - Wallet Signature Verification and Token Issuance | Done | Verify EVM-style signatures, consume issued challenges, mint wallet-auth JWT, expose wallet-auth session metadata |

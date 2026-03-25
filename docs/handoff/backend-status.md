@@ -16,7 +16,7 @@ Phase 0.4 - Auth and User Stabilization
 
 ## Current Subphase
 
-Phase 0.4.4 - Wallet Challenge Contract and Nonce Bootstrap
+Phase 0.4.5 - Wallet Signature Verification and Token Issuance
 
 ---
 
@@ -36,6 +36,7 @@ The backend now includes:
 - authenticated current-user REST path through `GET /auth/me`
 - authenticated session REST path through `GET /auth/session`
 - wallet challenge bootstrap REST path through `POST /auth/wallet/challenge`
+- wallet challenge verification REST path through `POST /auth/wallet/verify`
 - reusable HTTP auth middleware
 - shared token extraction utilities for HTTP and WebSocket transports
 - auth claims context utilities in the core auth layer
@@ -44,6 +45,10 @@ The backend now includes:
 - wallet challenge service with stable message generation
 - cryptographically secure nonce generation
 - in-memory wallet challenge store with TTL cleanup behavior
+- EVM wallet signature recovery and address verification
+- replay-safe challenge consumption for successful wallet sign-in
+- wallet-authenticated JWT issuance with wallet metadata claims
+- wallet-aware REST and WebSocket session metadata
 - PostgreSQL core scaffolding
 - Redis core scaffolding
 - status service for health and readiness
@@ -80,14 +85,12 @@ The backend now includes:
 
 This subphase implemented:
 
-- the first wallet-auth bootstrap contract through `POST /auth/wallet/challenge`
-- wallet challenge request and response DTOs
-- secure nonce generation
-- stable signable challenge message construction
-- bootstrap challenge TTL configuration
-- bootstrap in-memory challenge storage
-- address-format validation for EVM-style wallet addresses
-- preparation for the next step where wallet signatures will actually be verified
+- EVM-style wallet signature verification through `POST /auth/wallet/verify`
+- wallet challenge consumption with replay prevention in the bootstrap memory store
+- wallet-auth JWT issuance after successful challenge verification
+- wallet metadata propagation in JWT claims, REST session responses, and WebSocket session metadata
+- wallet-auth fallback user resolution without prematurely requiring database persistence
+- regression coverage for signature recovery, successful verification, and replay rejection
 
 ---
 
@@ -95,10 +98,8 @@ This subphase implemented:
 
 Not implemented yet:
 
-- wallet signature verification
-- wallet-based JWT issuance
-- challenge consumption and replay prevention persistence
 - challenge persistence in PostgreSQL or Redis
+- durable wallet identity persistence and user-wallet linking
 - refresh token persistence
 - token revocation
 - session persistence
@@ -128,22 +129,23 @@ The project should now support validation for:
 - unit validation of current-user resolution
 - unit validation of session view resolution
 - unit validation of wallet challenge generation
-- unit validation of wallet challenge HTTP contract
+- unit validation of wallet challenge verification and replay protection
+- unit validation of wallet challenge HTTP contracts
 - unit validation of user service behavior
 - unit validation of status/readiness logic
 - integration validation baseline for PostgreSQL-backed user repository
 
-The backend now has a stable bootstrap contract for wallet-auth challenge issuance without prematurely enabling real signature-based authentication.
+The backend now exposes a complete bootstrap wallet-auth flow from challenge issuance to signature verification and JWT minting, while still keeping challenge and wallet identity storage in the current non-durable bootstrap layer.
 
 ---
 
 ## Recommended Next Step
 
-Phase 0.4.5 - Wallet Signature Verification and Token Issuance
+Phase 0.4.6 - Wallet Identity Persistence and Durable Challenge Storage
 
 Recommended scope:
 
-- verify EVM signatures against issued wallet challenges
-- consume valid challenges safely
-- resolve or create wallet-authenticated identities
-- mint JWT from wallet-authenticated flows
+- persist challenges beyond process memory using PostgreSQL or Redis
+- introduce durable wallet identity storage and wallet-to-user linking direction
+- preserve replay protection semantics across restarts
+- prepare the backend for multi-wallet account evolution

@@ -91,17 +91,17 @@ Current phase after this subphase update:
 
 **Stage 0 - Foundation**  
 **Phase 0.4 - Auth and User Stabilization**  
-**Subphase 0.4.4 - Wallet Challenge Contract and Nonce Bootstrap**
+**Subphase 0.4.5 - Wallet Signature Verification and Token Issuance**
 
 Implemented in this subphase:
 
-- wallet challenge request and response contracts introduced
-- nonce generation bootstrap added with cryptographically secure randomness
-- challenge message format stabilized for future wallet signature verification
-- challenge TTL introduced through environment configuration
-- in-memory wallet challenge store added as a bootstrap implementation
-- new endpoint `POST /auth/wallet/challenge`
-- backend prepared for real wallet-signature verification in the next step
+- wallet signature verification flow added for EVM-style sign-in messages
+- challenge consumption and replay protection added to the bootstrap store
+- wallet-auth JWT issuance added through `POST /auth/wallet/verify`
+- JWT claims expanded with wallet address, auth method, and chain metadata
+- authenticated session resolution now supports wallet-authenticated identities
+- WebSocket session attachment now propagates wallet-auth metadata
+- wallet-auth verification and replay regression tests added
 
 ## Workflow Rules
 
@@ -130,4 +130,4 @@ This backend is designed to be:
 
 ## Next Step
 
-Phase 0.4.5 - Wallet Signature Verification and Token Issuance
+Phase 0.4.6 - Wallet Identity Persistence and Durable Challenge Storage
