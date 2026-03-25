@@ -34,6 +34,7 @@ type App struct {
 	userService          *usermod.Service
 	authService          *authmod.Service
 	walletChallengeStore authmod.WalletChallengeStore
+	walletIdentityStore  authmod.WalletIdentityStore
 }
 
 func New(cfg config.Config) *App {
@@ -72,10 +73,19 @@ func New(cfg config.Config) *App {
 		userService = usermod.NewService(nil)
 	}
 
+	var walletChallengeStore authmod.WalletChallengeStore
+	var walletIdentityStore authmod.WalletIdentityStore
+
+	if dbClient != nil && dbClient.Enabled() && dbClient.Pool() != nil {
+		walletChallengeStore = authmod.NewWalletChallengeStorePG(dbClient.Pool())
+		walletIdentityStore = authmod.NewWalletIdentityStorePG(dbClient.Pool())
+	} else {
+		walletChallengeStore = authmod.NewInMemoryWalletChallengeStore()
+		walletIdentityStore = authmod.NewInMemoryWalletIdentityStore()
+	}
+
 	authService := authmod.NewService(tokens, userService, ttl)
 	authmod.RegisterWS(dispatcher, authService)
-
-	walletChallengeStore := authmod.NewInMemoryWalletChallengeStore()
 
 	statusSvc := status.New(
 		"scavo-exchange-backend",
@@ -111,16 +121,17 @@ func New(cfg config.Config) *App {
 	)
 
 	r := httpx.NewRouter(httpx.RouterParams{
-		Log:            lg,
-		Hub:            hub,
-		Dispatcher:     dispatcher,
-		Config:         cfg,
-		TokenService:   tokens,
-		Status:         statusSvc,
-		UserService:    userService,
-		ChallengeStore: walletChallengeStore,
-		ChallengeTTL:   time.Duration(cfg.AuthChallengeTTLMinutes) * time.Minute,
-		PublicBaseURL:  cfg.PublicBaseURL,
+		Log:                 lg,
+		Hub:                 hub,
+		Dispatcher:          dispatcher,
+		Config:              cfg,
+		TokenService:        tokens,
+		Status:              statusSvc,
+		UserService:         userService,
+		ChallengeStore:      walletChallengeStore,
+		WalletIdentityStore: walletIdentityStore,
+		ChallengeTTL:        time.Duration(cfg.AuthChallengeTTLMinutes) * time.Minute,
+		PublicBaseURL:       cfg.PublicBaseURL,
 	})
 
 	srv := &http.Server{
@@ -141,6 +152,7 @@ func New(cfg config.Config) *App {
 		userService:          userService,
 		authService:          authService,
 		walletChallengeStore: walletChallengeStore,
+		walletIdentityStore:  walletIdentityStore,
 	}
 }
 

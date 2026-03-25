@@ -1,151 +1,114 @@
-# Backend Status
+# 📦 Backend Status — Handoff
 
-## Project
+## Current Implementation State
 
-SCAVO Exchange - Backend
+The backend is currently operating with a stable authentication base that includes:
 
----
-
-## Current Stage
-
-Stage 0 - Foundation
-
-## Current Phase
-
-Phase 0.4 - Auth and User Stabilization
-
-## Current Subphase
-
-Phase 0.4.5 - Wallet Signature Verification and Token Issuance
+- JWT authentication
+- development login flow
+- EVM wallet-based authentication
+- wallet challenge persistence
+- wallet identity persistence
+- WebSocket auth session propagation
 
 ---
 
-## Real Current Code Baseline
+## Stage / Phase Reference
 
-The backend now includes:
-
-- application bootstrap
-- config loading
-- structured logger
-- HTTP router
-- middleware
-- WebSocket handler, hub, client, dispatcher, protocol
-- JWT token service
-- centralized auth service for development login orchestration
-- development HTTP login
-- authenticated current-user REST path through `GET /auth/me`
-- authenticated session REST path through `GET /auth/session`
-- wallet challenge bootstrap REST path through `POST /auth/wallet/challenge`
-- wallet challenge verification REST path through `POST /auth/wallet/verify`
-- reusable HTTP auth middleware
-- shared token extraction utilities for HTTP and WebSocket transports
-- auth claims context utilities in the core auth layer
-- enriched WebSocket session metadata derived from JWT claims
-- authenticated WebSocket actions `auth.whoami` and `auth.session`
-- wallet challenge service with stable message generation
-- cryptographically secure nonce generation
-- in-memory wallet challenge store with TTL cleanup behavior
-- EVM wallet signature recovery and address verification
-- replay-safe challenge consumption for successful wallet sign-in
-- wallet-authenticated JWT issuance with wallet metadata claims
-- wallet-aware REST and WebSocket session metadata
-- PostgreSQL core scaffolding
-- Redis core scaffolding
-- status service for health and readiness
-- readiness-aware router wiring
-- first migration-backed domain table
-- first repository-backed domain service
-- user identity retrieval through repository and service expansion
-- auth and user regression coverage expanded
+- **Stage:** 0 — Foundation
+- **Phase:** 0.4 — Auth and User Stabilization
+- **Current completed subphase:** 0.4.6 — Wallet Identity Persistence and Durable Challenge Storage
 
 ---
 
-## Current Modules
+## Wallet Authentication Status
 
-- system
-- auth
-- user
-
----
-
-## Current Core Packages
-
-- config
-- logger
-- httpx
-- auth
-- ws
-- db
-- cache
-- status
+| Capability | Status |
+|------------|--------|
+| Challenge issuance | ✅ |
+| Signature verification | ✅ |
+| Replay protection | ✅ |
+| Durable challenge storage | ✅ |
+| Persistent wallet identity creation | ✅ |
+| JWT issuance with wallet metadata | ✅ |
+| HTTP session exposure | ✅ |
+| WebSocket session exposure | ✅ |
 
 ---
 
-## What This Subphase Implemented
+## Persistence Model
 
-This subphase implemented:
+### Wallet Challenges
 
-- EVM-style wallet signature verification through `POST /auth/wallet/verify`
-- wallet challenge consumption with replay prevention in the bootstrap memory store
-- wallet-auth JWT issuance after successful challenge verification
-- wallet metadata propagation in JWT claims, REST session responses, and WebSocket session metadata
-- wallet-auth fallback user resolution without prematurely requiring database persistence
-- regression coverage for signature recovery, successful verification, and replay rejection
+Challenges are stored in PostgreSQL and contain:
 
----
+- unique ID
+- target address
+- chain
+- nonce
+- canonical signable message
+- issued timestamp
+- expiration timestamp
+- used timestamp
 
-## What Is Still Not Implemented
+Consumption is enforced through a DB-backed flow so the same challenge cannot be reused successfully.
 
-Not implemented yet:
+### Wallet Identities
 
-- challenge persistence in PostgreSQL or Redis
-- durable wallet identity persistence and user-wallet linking
-- refresh token persistence
-- token revocation
-- session persistence
-- role/permission model
-- Redis-backed auth/session coordination
-- metrics endpoint
-- tracing
-- chain client
-- asset registry
-- portfolio aggregation
-- indexer
-- DEX contracts
-- quote engine
-- routing engine
-- tx tracking
-- audit persistence
+Wallet identities are stored in PostgreSQL and resolved uniquely by normalized wallet address.
+
+This gives the backend a durable wallet-auth anchor that can be used later for:
+
+- wallet ↔ user linking
+- account ownership modeling
+- multi-wallet account expansion
 
 ---
 
-## Validation Status
+## Fallback Behavior
 
-The project should now support validation for:
+When PostgreSQL is not enabled, the backend still supports local development through in-memory fallback stores for:
 
-- successful `go build ./...`
-- successful `go test ./...`
-- unit validation of auth login orchestration
-- unit validation of current-user resolution
-- unit validation of session view resolution
-- unit validation of wallet challenge generation
-- unit validation of wallet challenge verification and replay protection
-- unit validation of wallet challenge HTTP contracts
-- unit validation of user service behavior
-- unit validation of status/readiness logic
-- integration validation baseline for PostgreSQL-backed user repository
+- wallet challenges
+- wallet identities
 
-The backend now exposes a complete bootstrap wallet-auth flow from challenge issuance to signature verification and JWT minting, while still keeping challenge and wallet identity storage in the current non-durable bootstrap layer.
+This preserves dev ergonomics without blocking durable production behavior when DB is available.
 
 ---
 
-## Recommended Next Step
+## Current Limitations
 
-Phase 0.4.6 - Wallet Identity Persistence and Durable Challenge Storage
+The following items are still pending after 0.4.6:
 
-Recommended scope:
+- no wallet ↔ user linking yet
+- no refresh-token lifecycle
+- no revocation support
+- no persistent session store
+- no unified account model
+- no multi-wallet ownership model
 
-- persist challenges beyond process memory using PostgreSQL or Redis
-- introduce durable wallet identity storage and wallet-to-user linking direction
-- preserve replay protection semantics across restarts
-- prepare the backend for multi-wallet account evolution
+---
+
+## Operational Readiness
+
+### Ready For
+
+- stable internal development
+- challenge/signature wallet auth validation
+- JWT-based session propagation
+- horizontally scalable auth storage assumptions once DB is enabled
+
+### Not Yet Ready For
+
+- complete exchange account ownership model
+- production-grade account recovery flows
+- wallet linking management UX/API
+- advanced auth lifecycle management
+
+---
+
+## Recommended Next Phase
+
+### 0.4.7 — Wallet ↔ User Linking and Unified Identity Model
+
+This should become the next focus area in order to connect wallet identities with durable platform users and prepare the backend for exchange account semantics.

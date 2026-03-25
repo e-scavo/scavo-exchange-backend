@@ -1,20 +1,82 @@
-# Phase Status
+# 📊 Phase Status
 
-## Stage 0 - Foundation
+## Stage 0 — Foundation
 
-| Stage | Phase | Subphase | Status | Notes |
-|---|---|---|---|---|
-| 0 | 0.1 | 0.1.1 - Baseline Audit and Documentation Foundation | Done | Initial project baseline documented |
-| 0 | 0.1 | 0.1.2 - Architecture Definition | Done | Architecture style, module boundaries, and DEX-first direction documented |
-| 0 | 0.2 | 0.2.1 - Core Infrastructure Layout and Foundation | Done | Repository growth direction, adapter model, migration direction, and development rules documented |
-| 0 | 0.2 | 0.2.2 - Persistence and Environment Baseline | Done | PostgreSQL and Redis roles, migration direction, and local environment baseline documented |
-| 0 | 0.2 | 0.2.3 - Observability and Test Bootstrap | Done | Observability baseline, health/readiness direction, and testing model documented |
-| 0 | 0.3 | 0.3.1 - Implementation Bootstrap for Persistence and Health Infrastructure | Done | DB/cache scaffolding, readiness model, router wiring |
-| 0 | 0.3 | 0.3.2 - Migration Bootstrap and Local Infrastructure Layout | Done | Migrations baseline, local infra direction, env example and workflow |
-| 0 | 0.3 | 0.3.3 - Repository and First Persistence Module | Done | First persisted user module integrated into dev login |
-| 0 | 0.3 | 0.3.4 - Repository Validation and Migration Workflow Hardening | Done | Unit and integration validation baseline for first persistent flow |
-| 0 | 0.4 | 0.4.1 - Auth and User Module Stabilization | Done | Auth service extracted, current-user path introduced, user identity reads expanded |
-| 0 | 0.4 | 0.4.2 - Token Lifecycle and Auth Transport Hardening | Done | Shared token extraction, auth claims context, HTTP middleware, HTTP/WS auth transport alignment |
-| 0 | 0.4 | 0.4.3 - Session Evolution and Wallet Auth Preparation | Done | Shared session view, authenticated session endpoint, enriched WS session metadata, new auth.session action |
-| 0 | 0.4 | 0.4.4 - Wallet Challenge Contract and Nonce Bootstrap | Done | Wallet challenge contract, nonce generation, stable signing message, in-memory bootstrap challenge store |
-| 0 | 0.4 | 0.4.5 - Wallet Signature Verification and Token Issuance | Done | Verify EVM-style signatures, consume issued challenges, mint wallet-auth JWT, expose wallet-auth session metadata |
+### Phase 0.1 — Initial Project Bootstrap
+Status: ✅ Completed
+
+### Phase 0.2 — Core Infrastructure
+Status: ✅ Completed
+
+### Phase 0.3 — User and Platform Base
+Status: ✅ Completed
+
+### Phase 0.4 — Auth and User Stabilization
+Status: 🟡 In Progress
+
+---
+
+## Phase 0.4 Subphase Status
+
+| Subphase | Description | Status |
+|----------|-------------|--------|
+| 0.4.1 | Auth base setup | ✅ Completed |
+| 0.4.2 | JWT implementation and auth normalization | ✅ Completed |
+| 0.4.3 | Auth endpoints stabilization | ✅ Completed |
+| 0.4.4 | Wallet challenge contract and nonce bootstrap | ✅ Completed |
+| 0.4.5 | Wallet signature verification and token issuance | ✅ Completed |
+| 0.4.6 | Wallet identity persistence and durable challenge storage | ✅ Completed |
+
+---
+
+## ✅ Phase 0.4.6 Closure Summary
+
+Phase 0.4.6 closes the gap between bootstrap wallet authentication and durable wallet-auth persistence.
+
+### Delivered in 0.4.6
+
+- PostgreSQL-backed wallet challenge storage
+- Durable wallet identity persistence
+- Transaction-safe challenge consumption
+- JWT enrichment with `wallet_id`
+- Session propagation of wallet identity metadata
+- In-memory fallback identity store for non-DB environments
+- Preservation of the existing wallet login flow introduced in 0.4.5
+
+---
+
+## 🔍 Functional Result
+
+The system now supports the following durable wallet-auth sequence:
+
+1. Challenge issuance
+2. Challenge persistence
+3. Signature verification
+4. Single-use challenge consumption
+5. Wallet identity resolution or creation
+6. JWT issuance with wallet metadata
+
+---
+
+## ❌ Not Included in 0.4.6
+
+The following items remain intentionally out of scope for this subphase:
+
+- Wallet ↔ user linking
+- Unified account model
+- Multi-wallet support
+- Refresh tokens
+- Revocation flows
+- Persistent authenticated session storage
+
+---
+
+## ⏭️ Next Phase
+
+### 0.4.7 — Wallet ↔ User Linking and Unified Identity Model
+
+Planned focus:
+
+- map persistent wallet identities to platform users
+- introduce the first unified account ownership model
+- prepare the auth domain for exchange-grade account logic

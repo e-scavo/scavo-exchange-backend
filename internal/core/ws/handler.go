@@ -124,6 +124,7 @@ func (h *Handler) tryAuth(r *http.Request, c *Client) {
 		Claims:        claims,
 		UserID:        claims.UserID,
 		Email:         claims.Email,
+		WalletID:      claims.WalletID,
 		WalletAddress: claims.WalletAddress,
 		AuthMethod:    claims.AuthMethod,
 		Chain:         claims.Chain,

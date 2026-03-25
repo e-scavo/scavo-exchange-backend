@@ -71,7 +71,8 @@ func TestWalletVerificationService_VerifyAndLogin_Success(t *testing.T) {
 		t.Fatalf("NewTokenService error: %v", err)
 	}
 	loginSvc := NewService(tokens, nil, time.Hour)
-	verifySvc := NewWalletVerificationService(challengeSvc, loginSvc)
+	identityStore := NewInMemoryWalletIdentityStore()
+	verifySvc := NewWalletVerificationService(challengeSvc, loginSvc, identityStore)
 
 	address := testWalletAddress()
 	challenge, err := challengeSvc.Create(context.Background(), address, "scavium")
@@ -111,7 +112,8 @@ func TestWalletVerificationService_VerifyAndLogin_RejectsReplay(t *testing.T) {
 	store := NewInMemoryWalletChallengeStore()
 	challengeSvc := NewWalletChallengeService(store, "https://api.scavo.exchange", 5*time.Minute)
 	loginSvc := NewService(newTokenServiceForTest(t), nil, time.Hour)
-	verifySvc := NewWalletVerificationService(challengeSvc, loginSvc)
+	identityStore := NewInMemoryWalletIdentityStore()
+	verifySvc := NewWalletVerificationService(challengeSvc, loginSvc, identityStore)
 
 	address := testWalletAddress()
 	challenge, err := challengeSvc.Create(context.Background(), address, "scavium")

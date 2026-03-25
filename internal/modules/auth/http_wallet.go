@@ -29,6 +29,7 @@ type WalletVerifyResponse struct {
 	TokenType     string           `json:"token_type"`
 	ExpiresIn     int64            `json:"expires_in"`
 	UserID        string           `json:"user_id"`
+	WalletID      string           `json:"wallet_id,omitempty"`
 	WalletAddress string           `json:"wallet_address"`
 	Chain         string           `json:"chain"`
 	AuthMethod    string           `json:"auth_method"`
@@ -77,7 +78,7 @@ func (h HTTPHandlers) WalletVerify(w http.ResponseWriter, r *http.Request) {
 
 	challengeSvc := NewWalletChallengeService(h.Challenges, h.PublicBaseURL, challengeTTL)
 	loginSvc := NewService(h.Tokens, h.Users, h.TTL)
-	verifySvc := NewWalletVerificationService(challengeSvc, loginSvc)
+	verifySvc := NewWalletVerificationService(challengeSvc, loginSvc, h.WalletIdentities)
 
 	result, challenge, err := verifySvc.VerifyAndLogin(r.Context(), req.ChallengeID, req.Address, req.Signature)
 	if err != nil {
@@ -110,6 +111,7 @@ func (h HTTPHandlers) WalletVerify(w http.ResponseWriter, r *http.Request) {
 		TokenType:     result.TokenType,
 		ExpiresIn:     result.ExpiresIn,
 		UserID:        userID,
+		WalletID:      result.WalletID,
 		WalletAddress: result.WalletAddress,
 		Chain:         result.Chain,
 		AuthMethod:    result.AuthMethod,

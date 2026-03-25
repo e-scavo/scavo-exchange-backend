@@ -33,6 +33,9 @@ func (h WSHandlers) whoami(ctx context.Context, c *ws.Client, env ws.Envelope) w
 		"user_id":       s.UserID,
 		"email":         s.Email,
 	}
+	if s.WalletID != "" {
+		data["wallet_id"] = s.WalletID
+	}
 	if s.WalletAddress != "" {
 		data["wallet_address"] = s.WalletAddress
 	}

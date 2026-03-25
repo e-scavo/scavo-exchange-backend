@@ -7,16 +7,25 @@ import (
 )
 
 type WalletVerificationService struct {
-	challenges *WalletChallengeService
+	challenges WalletChallengeService
 	login      *Service
+	identities WalletIdentityStore
 }
 
-func NewWalletVerificationService(challenges *WalletChallengeService, login *Service) *WalletVerificationService {
-	return &WalletVerificationService{challenges: challenges, login: login}
+func NewWalletVerificationService(
+	challenges *WalletChallengeService,
+	login *Service,
+	identities WalletIdentityStore,
+) *WalletVerificationService {
+	return &WalletVerificationService{
+		challenges: *challenges,
+		login:      login,
+		identities: identities,
+	}
 }
 
 func (s *WalletVerificationService) VerifyAndLogin(ctx context.Context, challengeID, address, signature string) (*LoginResult, *WalletChallenge, error) {
-	if s == nil || s.challenges == nil || s.login == nil {
+	if s == nil || s.login == nil || s.identities == nil {
 		return nil, nil, ErrUnauthorized
 	}
 
@@ -50,7 +59,12 @@ func (s *WalletVerificationService) VerifyAndLogin(ctx context.Context, challeng
 		return nil, nil, err
 	}
 
-	result, err := s.login.LoginWallet(ctx, address, challenge.Chain)
+	identity, err := s.identities.GetOrCreate(ctx, address)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	result, err := s.login.LoginWallet(ctx, identity.ID, address, challenge.Chain)
 	if err != nil {
 		return nil, nil, err
 	}

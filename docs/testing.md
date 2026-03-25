@@ -1,370 +1,104 @@
-# Testing
+# 🧪 Testing
 
-## Objective
+## Full Test Suite
 
-This document defines the testing direction for the SCAVO Exchange backend.
+Run the complete backend test suite with:
 
-Its purpose is to ensure that validation grows together with the architecture so that infrastructure and feature work do not become fragile as the project expands.
-
----
-
-## Current Validation Baseline
-
-At the current stage, the project should already support the following validation categories:
-
-- unit validation for domain services
-- unit validation for readiness/status logic
-- integration validation for PostgreSQL-backed repositories
-- smoke validation for HTTP login baseline
-- smoke validation for authenticated identity read baseline
-- smoke validation for authenticated session read baseline
-- smoke validation for wallet challenge bootstrap baseline
-- migration status validation through the migration workflow
-
-This is the first practical validation baseline for the project.
+```bash
+go test ./...
+```
 
 ---
 
-## Why Testing Starts Early
+## Wallet Authentication Manual Flow
 
-The backend will gradually introduce:
+### 1. Request a Wallet Challenge
 
-- persistence
-- cache
-- chain integration
-- smart contracts
-- indexing
-- real-time updates
-- background processing
-- hybrid growth paths
+```bash
+curl -s -X POST http://localhost:8080/auth/wallet/challenge \
+  -H 'Content-Type: application/json' \
+  -d '{"address":"0xYOURADDRESS","chain":"scavium"}'
+```
 
-If testing is postponed until those systems are already deeply integrated, regression control becomes much harder.
+Expected result:
 
-For this reason, testing direction is defined during the foundation stage.
-
----
-
-## Testing Philosophy
-
-Testing should be:
-
-- incremental
-- phase-appropriate
-- behavior-oriented
-- architecture-aware
-- useful for regression prevention
-
-The goal is not maximum test volume immediately.
-
-The goal is reliable growth.
+- HTTP 200
+- challenge payload returned
+- persisted challenge when PostgreSQL is enabled
 
 ---
 
-## Test Layer Model
+### 2. Sign the Challenge Message
 
-The backend should evolve through multiple testing layers.
+Use an EVM-compatible wallet or a controlled test script to sign the returned challenge message.
 
-### Unit Tests
+Expected result:
 
-Scope:
-
-- pure functions
-- validation logic
-- small isolated helpers
-- deterministic service logic with mocked dependencies
-- readiness logic and dependency evaluation
-- auth service orchestration
-- auth transport helper behavior
-- auth claims context behavior
-- auth session view behavior
-- wallet challenge generation behavior
-
-Purpose:
-
-- fast feedback
-- low-cost regression prevention
-- isolated rule validation
+- valid hex signature
+- signature tied to the original message and wallet address
 
 ---
 
-### Service Tests
+### 3. Verify the Signature
 
-Scope:
+```bash
+curl -s -X POST http://localhost:8080/auth/wallet/verify \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "challenge_id":"CHALLENGE_ID",
+    "address":"0xYOURADDRESS",
+    "signature":"0xYOUR_SIGNATURE"
+  }'
+```
 
-- module service behavior
-- orchestration logic
-- business decision boundaries
-- dependency interactions through interfaces
+Expected result:
 
-Purpose:
-
-- validate real business flows without requiring full transport or real infrastructure for every case
-
----
-
-### Repository Tests
-
-Scope:
-
-- persistence behavior
-- SQL mapping correctness
-- transaction behavior
-- query correctness
-- migration-backed repository behavior
-
-Purpose:
-
-- validate DB-facing logic once repositories are introduced
+- HTTP 200
+- access token returned
+- wallet metadata included in response
+- challenge marked as used
+- wallet identity created or reused
 
 ---
 
-### Integration Tests
+## Database Validation
 
-Scope:
+### Wallet Challenges
 
-- interactions between application layers
-- HTTP routes with infrastructure dependencies
-- basic end-to-end module behavior inside the backend
+```sql
+SELECT id, address, chain, issued_at, expires_at, used_at
+FROM auth_wallet_challenges
+ORDER BY created_at DESC;
+```
 
-Purpose:
+### Wallet Identities
 
-- validate wiring and environment behavior
-
----
-
-### Chain Integration Tests
-
-Scope:
-
-- RPC interactions
-- contract read helpers
-- gas estimation helpers
-- transaction state interactions where applicable
-
-Purpose:
-
-- validate that blockchain-related infrastructure works against expected SCAVIUM behavior
+```sql
+SELECT id, address, created_at
+FROM auth_wallet_identities
+ORDER BY created_at DESC;
+```
 
 ---
 
-### Contract/Backend End-to-End Tests
+## Expected Functional Outcomes for 0.4.6
 
-Scope:
-
-- interaction between deployed contracts and backend logic
-- quote-to-transaction flow support
-- liquidity and swap-support flows later
-
-Purpose:
-
-- validate DEX behavior across system boundaries
+- challenge persists durably when DB is enabled
+- reused challenge is rejected
+- expired challenge is rejected
+- wallet identity is created on first successful verification
+- wallet identity is reused on subsequent logins
+- JWT includes wallet-related claims
+- HTTP session and WebSocket session expose wallet metadata
 
 ---
 
-### Smoke Tests
-
-Scope:
-
-- startup
-- basic route availability
-- minimal dependency checks
-- internal environment sanity
-- development login path
-- authenticated identity read path
-- authenticated session read path
-- wallet challenge bootstrap path
-
-Purpose:
-
-- fast validation for local and internal testing environments
-
----
-
-## Current Practical Commands
-
-Recommended commands at the current stage:
-
-    go build ./...
-
-    go test ./...
-
-    SCAVO_TEST_POSTGRES_URL=postgres://postgres:postgres@localhost:5432/scavo_exchange?sslmode=disable \
-    go test ./internal/modules/user -run TestPostgresRepository_UpsertDevUser -v
-
-    SCAVO_TEST_POSTGRES_URL=postgres://postgres:postgres@localhost:5432/scavo_exchange?sslmode=disable \
-    go test ./internal/modules/user -run TestPostgresRepository_GetByID -v
-
-    SCAVO_POSTGRES_URL=postgres://postgres:postgres@localhost:5432/scavo_exchange?sslmode=disable \
-    ./scripts/migrate.sh status
-
-    ./scripts/smoke_login.sh
-
-Example authenticated identity smoke after login:
-
-    TOKEN=$(curl -s -X POST http://localhost:8080/auth/login \
-      -H 'Content-Type: application/json' \
-      -d '{"email":"test@scavo.exchange","password":"dev"}' | jq -r '.access_token')
-
-    curl -s http://localhost:8080/auth/me \
-      -H "Authorization: Bearer $TOKEN"
-
-Example authenticated session smoke after login:
-
-    TOKEN=$(curl -s -X POST http://localhost:8080/auth/login \
-      -H 'Content-Type: application/json' \
-      -d '{"email":"test@scavo.exchange","password":"dev"}' | jq -r '.access_token')
-
-    curl -s http://localhost:8080/auth/session \
-      -H "Authorization: Bearer $TOKEN"
-
-Example wallet challenge bootstrap smoke:
-
-    curl -s -X POST http://localhost:8080/auth/wallet/challenge \
-      -H 'Content-Type: application/json' \
-      -d '{"address":"0x1111111111111111111111111111111111111111","chain":"scavium"}'
-
----
-
-## Testing Growth Direction
-
-Testing should grow in roughly this order:
-
-1. unit and smoke validation
-2. service tests
-3. repository tests
-4. infrastructure-aware integration tests
-5. chain integration tests
-6. contract/backend end-to-end tests
-
-This order matches the project architecture growth.
-
----
-
-## What Should Be Validated Early
-
-Before heavy product features are introduced, the backend should gain validation for:
-
-- startup behavior
-- config loading
-- handler wiring
-- auth baseline behavior
-- current-user authenticated read behavior
-- current-session authenticated read behavior
-- wallet challenge bootstrap behavior
-- wallet signature verification behavior
-- wallet-auth token issuance behavior
-- challenge replay rejection behavior
-- token extraction consistency
-- auth claims propagation
-- health endpoint behavior
-- readiness behavior
-- dependency failure visibility
-- migration reproducibility
-- first repository readiness
-
-These validations are part of making Stage 0 useful in practice.
-
----
-
-## Testability Principles
-
-The architecture should support testing by design.
-
-Important principles:
-
-- services should depend on interfaces where appropriate
-- handlers should remain thin
-- repositories should isolate persistence details
-- external integrations should be wrapped behind clients or adapters
-- configuration should be injectable or overridable in controlled ways
-- side effects should be explicit
-
-These principles reduce friction when testing is implemented.
-
----
-
-## Environment-Aware Testing
-
-Some test layers should not depend on full local infrastructure.
-
-Examples:
-
-- unit tests should run quickly without DB or Redis
-- service tests should avoid unnecessary real dependencies where mocks or test doubles are sufficient
-
-Other test layers intentionally depend on infrastructure.
-
-Examples:
-
-- repository tests with PostgreSQL
-- migration validation with PostgreSQL
-- integration tests with running services
-- chain integration tests with SCAVIUM-compatible endpoints
-
-The project should keep these categories distinct.
-
----
-
-## Smoke Validation Direction
-
-Smoke validation is especially important for this project.
-
-A minimal smoke layer should verify:
-
-- app starts successfully
-- config loads successfully
-- /health responds
-- /version responds
-- auth baseline wiring works
-- persistent login path works when PostgreSQL is enabled
-- authenticated identity read works with a valid token
-- authenticated session read works with a valid token
-- wallet challenge bootstrap works with a valid EVM address
-- wallet challenge verification works with a valid signature
-- challenge replay is rejected after successful verification
-- WebSocket endpoint is reachable at a basic level
-
-This is a practical baseline for local development and internal testing.
-
----
-
-## Regression Coverage Direction
-
-As flows stabilize, they should gain regression protection.
-
-Examples later in the roadmap:
-
-- wallet signature verification
-- wallet-auth token issuance
-- portfolio read flow
-- quote generation
-- transaction tracking
-- liquidity support flows
-- indexer synchronization logic
-
-The project should not wait until the end to start protecting important flows.
-
----
-
-## Non-Goals for the Current Stage
-
-This stage does not yet require:
-
-- a complete test suite
-- CI-enforced full coverage thresholds
-- contract end-to-end automation
-- performance benchmarks
-- fuzzing
-- load testing
-
-Those may come later as implementation matures.
-
----
-
-## Recommended Next Step
-
-The next recommended step is:
-
-Phase 0.4.6 - Wallet Identity Persistence and Durable Challenge Storage
-
-That phase should move wallet challenges out of process memory and introduce durable wallet-identity persistence without breaking the new wallet-auth verification contract.
+## Recommended Validation Sequence
+
+1. run `go test ./...`
+2. request a wallet challenge
+3. sign the challenge with a test wallet
+4. verify the signature
+5. inspect DB rows
+6. call `/auth/session`
+7. connect to `/ws` using the issued JWT

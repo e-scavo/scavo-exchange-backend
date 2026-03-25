@@ -10,6 +10,7 @@ type Session struct {
 	Claims        *coreauth.Claims
 	UserID        string
 	Email         string
+	WalletID      string
 	WalletAddress string
 	AuthMethod    string
 	Chain         string

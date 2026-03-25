@@ -27,6 +27,7 @@ type LoginResult struct {
 	TokenType     string
 	ExpiresIn     int64
 	User          *usermod.User
+	WalletID      string
 	WalletAddress string
 	Chain         string
 	AuthMethod    string
@@ -37,6 +38,7 @@ type SessionView struct {
 	TokenType     string        `json:"token_type"`
 	UserID        string        `json:"user_id"`
 	Email         string        `json:"email,omitempty"`
+	WalletID      string        `json:"wallet_id,omitempty"`
 	WalletAddress string        `json:"wallet_address,omitempty"`
 	AuthMethod    string        `json:"auth_method,omitempty"`
 	Chain         string        `json:"chain,omitempty"`
@@ -94,7 +96,7 @@ func (s *Service) LoginDev(ctx context.Context, email, password string) (*LoginR
 	}, nil
 }
 
-func (s *Service) LoginWallet(ctx context.Context, address, chain string) (*LoginResult, error) {
+func (s *Service) LoginWallet(ctx context.Context, walletID, address, chain string) (*LoginResult, error) {
 	if s == nil || s.tokens == nil {
 		return nil, fmt.Errorf("token service not configured")
 	}
@@ -104,10 +106,12 @@ func (s *Service) LoginWallet(ctx context.Context, address, chain string) (*Logi
 		return nil, ErrInvalidWalletAddress
 	}
 	chain = normalizeChain(chain)
+	walletID = strings.TrimSpace(walletID)
 
 	user := walletUser(address)
 	token, err := s.tokens.MintWithOptions(coreauth.MintOptions{
 		UserID:        user.ID,
+		WalletID:      walletID,
 		WalletAddress: address,
 		AuthMethod:    "wallet_evm",
 		Chain:         chain,
@@ -122,6 +126,7 @@ func (s *Service) LoginWallet(ctx context.Context, address, chain string) (*Logi
 		TokenType:     "Bearer",
 		ExpiresIn:     int64(s.ttl.Seconds()),
 		User:          user,
+		WalletID:      walletID,
 		WalletAddress: address,
 		Chain:         chain,
 		AuthMethod:    "wallet_evm",
@@ -211,6 +216,7 @@ func (s *Service) ResolveSessionClaims(ctx context.Context, claims *coreauth.Cla
 		TokenType:     "Bearer",
 		UserID:        strings.TrimSpace(claims.UserID),
 		Email:         normalizeEmail(claims.Email),
+		WalletID:      strings.TrimSpace(claims.WalletID),
 		WalletAddress: normalizeWalletAddress(claims.WalletAddress),
 		AuthMethod:    strings.TrimSpace(claims.AuthMethod),
 		Chain:         normalizeChain(claims.Chain),
@@ -228,6 +234,7 @@ func (s *Service) ResolveSessionClaims(ctx context.Context, claims *coreauth.Cla
 	}
 	if view.WalletAddress == "" {
 		view.Chain = ""
+		view.WalletID = ""
 	}
 
 	return view, nil

@@ -7,8 +7,6 @@ import (
 	"time"
 )
 
-var ErrWalletChallengeNotFound = errors.New("wallet challenge not found")
-
 type InMemoryWalletChallengeStore struct {
 	mu    sync.RWMutex
 	items map[string]*WalletChallenge

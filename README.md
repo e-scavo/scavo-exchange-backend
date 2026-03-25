@@ -1,133 +1,192 @@
-# SCAVO Exchange - Backend
+# SCAVO Exchange — Backend
 
-## Overview
+## 🧠 Overview
 
-SCAVO Exchange is a hybrid exchange platform designed to combine decentralized (DEX) and centralized (CEX) models into a unified ecosystem.
+SCAVO Exchange Backend is a modular Go-based service that provides:
 
-This repository contains the backend system built in Go which powers:
+- JWT-based authentication
+- EVM wallet authentication
+- WebSocket real-time communication
+- PostgreSQL-backed persistence
+- Redis integration support
+- Modular services for auth, user, system, and infrastructure concerns
 
-* DEX (initial focus)
-* Future hybrid trading (DEX + CEX)
-* Wallet integration (self-custody first)
-* Blockchain interaction (SCAVIUM network)
-* Real-time communication (WebSocket)
+---
 
-## Current Focus
+## 🏗️ Current Stage
 
-The backend is currently in DEX-first mode prioritizing:
+**Stage 0 — Foundation**  
+**Phase 0.4 — Auth and User Stabilization**  
+**Current completed subphase: 0.4.6 — Wallet Identity Persistence and Durable Challenge Storage**
 
-* Non-custodial architecture
-* AMM-based trading (v1)
-* Direct blockchain interaction (SCAVIUM)
-* Wallet-native flows
+---
 
-## Architecture Style
+## 🔐 Authentication
 
-* Modular Monolith
-* Event-aware backend
-* REST and WebSocket APIs
-* Background workers
-* Blockchain-integrated services
+### Supported Methods
 
-## Tech Stack
+| Method        | Description |
+|---------------|-------------|
+| `password_dev` | Development-only email/password login |
+| `wallet_evm`   | Wallet signature-based login using EVM-compatible signing |
 
-Language: Go  
-API: REST and WebSocket  
-Database: PostgreSQL (baseline integrated)  
-Cache: Redis (scaffolded)  
-Blockchain: SCAVIUM (EVM)  
-Contracts: Solidity  
-Infrastructure: Docker Compose
+---
 
-## Core Principles
+## 🔗 Wallet Authentication Flow
 
-* Self-custody first
-* Security by design
-* Deterministic backend behavior
-* Observable systems
-* Phase-driven development
+The backend currently supports a wallet login flow based on challenge issuance and signature verification.
 
-## Project Structure (current)
+### Flow Summary
 
-- `cmd/`
-- `internal/app`
-- `internal/core`
-- `internal/modules`
-- `migrations`
-- `scripts`
-- `docs`
+1. Client requests a wallet challenge
+2. Backend generates a one-time challenge message
+3. Client signs the challenge using an EVM wallet
+4. Backend verifies the signature
+5. Backend consumes the challenge
+6. Backend resolves or creates a persistent wallet identity
+7. Backend issues a JWT access token
 
-## Roadmap
+---
 
-The project is structured in stages:
+## 🚀 HTTP Endpoints
 
-- Stage 0: Foundation
-- Stage 1: Identity and Wallets
-- Stage 2: Blockchain Integration
-- Stage 3: Smart Contracts (DEX)
-- Stage 4: DEX Backend Logic
-- Stage 5: APIs and Realtime
-- Stage 6: Hybrid Expansion
-- Stage 7: Security and Operations
-- Stage 8: Testing and Internal Release
+### Auth
 
-See full roadmap in `docs/roadmap.md`.
+#### `POST /auth/login`
+Development login endpoint.
 
-## Documentation
+#### `POST /auth/wallet/challenge`
+Creates a wallet signing challenge.
 
-All documentation is located in `/docs`:
+#### `POST /auth/wallet/verify`
+Verifies a wallet signature and returns a JWT token.
 
-* Architecture
-* Flows
-* Decisions
-* Development
-* Testing
-* Roadmap
-* Handoff
+#### `GET /auth/me`
+Returns the authenticated user context.
 
-## Development Status
+#### `GET /auth/session`
+Returns normalized session metadata derived from JWT claims.
 
-Current phase after this subphase update:
+---
 
-**Stage 0 - Foundation**  
-**Phase 0.4 - Auth and User Stabilization**  
-**Subphase 0.4.5 - Wallet Signature Verification and Token Issuance**
+## 🔌 WebSocket
 
-Implemented in this subphase:
+### Entry Point
 
-- wallet signature verification flow added for EVM-style sign-in messages
-- challenge consumption and replay protection added to the bootstrap store
-- wallet-auth JWT issuance added through `POST /auth/wallet/verify`
-- JWT claims expanded with wallet address, auth method, and chain metadata
-- authenticated session resolution now supports wallet-authenticated identities
-- WebSocket session attachment now propagates wallet-auth metadata
-- wallet-auth verification and replay regression tests added
+#### `GET /ws`
 
-## Workflow Rules
+The WebSocket layer supports authenticated sessions through the same JWT token used by the HTTP API.
 
-* The ZIP project is the source of truth
-* Documentation must always match implementation
-* Work is phase-driven
-* Each step includes a commit reference
+When a wallet-authenticated token is provided, the session includes:
 
-## Future Scope
+- `user_id`
+- `wallet_id`
+- `wallet_address`
+- `auth_method`
+- `chain`
+- `subject`
+- `issuer`
+- `expires_at`
 
-SCAVO Exchange will evolve into a hybrid system including:
+---
 
-* DEX (non-custodial)
-* CEX (custodial accounts)
-* P2P trading
-* Fiat ramps
+## 🗄️ Persistence
 
-## Notes
+### Wallet Challenges
 
-This backend is designed to be:
+Wallet challenges are now durably stored in PostgreSQL.
 
-* Frontend-ready
-* Scalable
-* Secure
-* Blockchain-native
+#### Table
+`auth_wallet_challenges`
 
-## Next Step
+#### Stored fields
 
-Phase 0.4.6 - Wallet Identity Persistence and Durable Challenge Storage
+- `id`
+- `address`
+- `chain`
+- `nonce`
+- `message`
+- `issued_at`
+- `expires_at`
+- `used_at`
+- `created_at`
+
+### Wallet Identities
+
+Wallet identities are now persisted and uniquely resolved per wallet address.
+
+#### Table
+`auth_wallet_identities`
+
+#### Stored fields
+
+- `id`
+- `address`
+- `created_at`
+
+---
+
+## 🔑 JWT Claims
+
+Wallet-authenticated sessions may include the following claims:
+
+| Claim | Description |
+|-------|-------------|
+| `uid` | Internal user identifier |
+| `wallet_id` | Persistent wallet identity ID |
+| `wallet_address` | EVM wallet address |
+| `auth_method` | Authentication method (`wallet_evm`, `password_dev`) |
+| `chain` | Logical blockchain identifier |
+
+---
+
+## 🧪 Testing
+
+Run the full backend test suite with:
+
+```bash
+go test ./...
+```
+
+---
+
+## ⚙️ Runtime Requirements
+
+- Go 1.25+
+- PostgreSQL recommended for durable auth persistence
+- Redis optional
+- Compatible EVM wallet/client for wallet-auth testing
+
+---
+
+## 📦 Current Status
+
+| Stage | Phase | Subphase | Status |
+|------|-------|----------|--------|
+| 0 | 0.4 | 0.4.6 | ✅ Completed |
+
+---
+
+## 🚧 What 0.4.6 Solves
+
+- Durable wallet challenge storage
+- Atomic challenge consumption
+- Persistent wallet identity creation
+- Wallet metadata propagation into JWT/session layers
+- In-memory fallback for non-DB development environments
+
+---
+
+## ❌ What 0.4.6 Does Not Solve Yet
+
+- Wallet ↔ user linking
+- Multi-wallet account model
+- Refresh tokens
+- Token revocation
+- Persistent session management
+
+---
+
+## ⏭️ Next Planned Phase
+
+**Phase 0.4.7 — Wallet ↔ User Linking and Unified Identity Model**

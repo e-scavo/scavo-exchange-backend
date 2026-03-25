@@ -17,6 +17,7 @@ type TokenService struct {
 type Claims struct {
 	UserID        string `json:"uid"`
 	Email         string `json:"email,omitempty"`
+	WalletID      string `json:"wallet_id,omitempty"`
 	WalletAddress string `json:"wallet_address,omitempty"`
 	AuthMethod    string `json:"auth_method,omitempty"`
 	Chain         string `json:"chain,omitempty"`
@@ -26,6 +27,7 @@ type Claims struct {
 type MintOptions struct {
 	UserID        string
 	Email         string
+	WalletID      string
 	WalletAddress string
 	AuthMethod    string
 	Chain         string
@@ -63,6 +65,7 @@ func (s *TokenService) MintWithOptions(opts MintOptions) (string, error) {
 	claims := Claims{
 		UserID:        strings.TrimSpace(opts.UserID),
 		Email:         strings.TrimSpace(opts.Email),
+		WalletID:      strings.TrimSpace(opts.WalletID),
 		WalletAddress: strings.TrimSpace(opts.WalletAddress),
 		AuthMethod:    strings.TrimSpace(opts.AuthMethod),
 		Chain:         strings.TrimSpace(opts.Chain),
