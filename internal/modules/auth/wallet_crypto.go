@@ -346,7 +346,15 @@ func publicKeyToAddress(x, y *big.Int) string {
 }
 
 func walletUserID(address string) string {
-	return "wallet:" + normalizeWalletAddress(address)
+	address = normalizeWalletAddress(address)
+	address = strings.TrimPrefix(address, "0x")
+	return "u_wallet_" + address
+}
+
+func walletUserEmail(address string) string {
+	address = normalizeWalletAddress(address)
+	address = strings.TrimPrefix(address, "0x")
+	return "wallet." + address + "@wallet.scavo.local"
 }
 
 func normalizeWalletAddress(address string) string {

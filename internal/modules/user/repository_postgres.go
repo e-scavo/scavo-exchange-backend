@@ -71,6 +71,55 @@ RETURNING
 	return u, nil
 }
 
+func (r *PostgresRepository) UpsertWalletUser(ctx context.Context, id, email, displayName string) (*User, error) {
+	const q = `
+INSERT INTO users (
+    id,
+    email,
+    display_name,
+    created_at,
+    updated_at,
+    last_login_at
+)
+VALUES (
+    $1,
+    $2,
+    $3,
+    NOW(),
+    NOW(),
+    NOW()
+)
+ON CONFLICT (id)
+DO UPDATE SET
+    email = EXCLUDED.email,
+    display_name = EXCLUDED.display_name,
+    updated_at = NOW(),
+    last_login_at = NOW()
+RETURNING
+    id,
+    email,
+    display_name,
+    created_at,
+    updated_at,
+    last_login_at
+`
+
+	u := &User{}
+	err := r.pool.QueryRow(ctx, q, id, email, displayName).Scan(
+		&u.ID,
+		&u.Email,
+		&u.DisplayName,
+		&u.CreatedAt,
+		&u.UpdatedAt,
+		&u.LastLoginAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return u, nil
+}
+
 func (r *PostgresRepository) GetByID(ctx context.Context, id string) (*User, error) {
 	const q = `
 SELECT

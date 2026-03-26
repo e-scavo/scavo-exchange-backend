@@ -10,6 +10,7 @@ Establish a robust, extensible authentication foundation for SCAVO Exchange Back
 - Wallet-based authentication (EVM)
 - Session normalization (HTTP + WebSocket)
 - Persistent wallet identity model
+- Durable wallet ↔ user linkage
 - Future-ready account linking architecture
 
 ---
@@ -23,6 +24,7 @@ At the beginning of Phase 0.4:
 - No JWT standardization
 - No wallet authentication
 - No persistent identity model
+- No durable link between wallet auth and platform users
 
 ---
 
@@ -34,7 +36,7 @@ The backend required a consistent authentication system capable of:
 - Generating secure and standardized tokens
 - Providing normalized user/session context
 - Enabling wallet-based login flows
-- Scaling toward a full exchange account model
+- Progressively converging toward a full exchange account model
 
 ---
 
@@ -48,17 +50,18 @@ The backend required a consistent authentication system capable of:
 - Wallet challenge mechanism
 - Wallet signature verification
 - Persistent wallet identity model
+- Durable wallet ↔ user linkage
 - WebSocket auth propagation
 - Session normalization
 - PostgreSQL integration for wallet auth
 
 ### Excluded
 
-- Wallet ↔ user linking
 - Multi-wallet account support
 - Refresh tokens
 - Revocation flows
 - Persistent sessions
+- Auth-method merge workflows
 
 ---
 
@@ -70,6 +73,7 @@ Prior to this phase:
 - No unified identity model existed
 - No support for wallet-based login
 - No durable storage for auth-related data
+- Wallet-authenticated users had no durable bridge into the platform user model
 
 ---
 
@@ -118,217 +122,100 @@ Prior to this phase:
 ### Result
 
 - Standardized REST auth layer
-- Consistent response models
-- Session extraction via middleware
+- Stable identity-read contract for authenticated clients
 
 ---
 
-## 0.4.4 — Wallet Challenge Bootstrap
+## 0.4.4 — Wallet Challenge Contract and Nonce Bootstrap
 
 ### Implemented
 
-- Wallet challenge generation
-- Nonce creation
-- Signable message construction
-- In-memory challenge storage
+- wallet challenge request/response contract
+- nonce generation
+- canonical wallet sign-in message
+- basic in-memory challenge storage
 
 ### Result
 
-- First functional wallet-auth flow
-- No persistence yet
+- first stable wallet-auth bootstrap contract
 
 ---
 
-## 0.4.5 — Wallet Signature Verification
+## 0.4.5 — Wallet Signature Verification and Token Issuance
 
 ### Implemented
 
-- EVM signature verification
-- Address recovery from signature
-- Challenge validation
-- Challenge consumption (memory)
-- JWT issuance for wallet login
+- wallet signature verification
+- address recovery from signed message
+- challenge consumption
+- wallet-auth JWT issuance
+- wallet session propagation across HTTP and WebSocket
 
 ### Result
 
-- Fully functional wallet authentication (volatile)
+- complete wallet login bootstrap path
 
 ---
 
-## 0.4.6 — Wallet Persistence and Identity Model
+## 0.4.6 — Wallet Identity Persistence and Durable Challenge Storage
 
 ### Implemented
 
-- PostgreSQL-backed challenge storage
-- Transaction-safe challenge consumption
-- Wallet identity persistence
-- `wallet_id` introduced in JWT claims
-- Session propagation (HTTP + WS)
-- In-memory fallback for dev environments
+- PostgreSQL-backed wallet challenge store
+- PostgreSQL-backed wallet identity store
+- transaction-safe challenge use semantics
+- durable `wallet_id` propagation into JWT/session layers
 
-### Database Tables
+### Result
 
-#### `auth_wallet_challenges`
-
-- id
-- address
-- chain
-- nonce
-- message
-- issued_at
-- expires_at
-- used_at
-- created_at
-
-#### `auth_wallet_identities`
-
-- id
-- address
-- created_at
+- wallet auth no longer depended on transient in-memory state when PostgreSQL was enabled
 
 ---
 
-## 🏗️ Final Architecture (After 0.4)
+## 0.4.7 — Wallet ↔ User Linking and Unified Identity Model
 
-### Core Components
+### Implemented
 
-- `Auth Service`
-- `TokenService`
-- `WalletChallengeService`
-- `WalletVerificationService`
-- `WalletChallengeStore` (memory + PostgreSQL)
-- `WalletIdentityStore` (memory + PostgreSQL)
+- `auth_wallet_identities.user_id` linkage model
+- automatic wallet-backed user provisioning in `users`
+- unified wallet-auth user resolution for `/auth/me` and `/auth/session`
+- wallet login token minting based on linked platform user identity
+- in-memory fallback linkage semantics for non-DB development
 
----
+### Result
 
-## 🔐 Authentication Methods
-
-| Method        | Description |
-|--------------|------------|
-| password_dev | Dev login |
-| wallet_evm   | Wallet signature login |
+- wallet-authenticated sessions now resolve to durable platform users instead of transient synthetic session-only identities
 
 ---
 
-## 🔁 Wallet Flow (Final)
+## ✅ Final Outcome of Phase 0.4
 
-```
-challenge → sign → verify → consume → identity → JWT
-```
+At the end of Phase 0.4, the backend provides:
 
----
-
-## 🔌 Session Model
-
-### HTTP
-
-- `/auth/session`
-- `/auth/me`
-
-### WebSocket
-
-- auto-auth via token
-- session attached to client
-
-### Session Fields
-
-- user_id
-- wallet_id
-- wallet_address
-- auth_method
-- chain
-- subject
-- issuer
-- expires_at
+- stable development login
+- stable JWT generation and validation
+- normalized REST and WebSocket session semantics
+- wallet challenge issuance and verification
+- durable wallet challenge persistence
+- durable wallet identity persistence
+- durable wallet ↔ user linkage
+- unified identity hydration across auth methods
 
 ---
 
-## 🔑 JWT Evolution
+## 🚫 What Phase 0.4 Still Does Not Solve
 
-### Initial
-
-- user-based claims
-
-### After 0.4.6
-
-- wallet-aware claims
-
-Added:
-
-- `wallet_id`
-- `wallet_address`
-- `auth_method`
-- `chain`
-
----
-
-## ✅ Validation
-
-### Automated
-
-```bash
-go test ./...
-```
-
-### Manual
-
-- challenge creation
-- signature verification
-- token issuance
-- DB validation
-- session validation
-- WS connection
-
----
-
-## 📉 Release Impact
-
-- Introduced DB dependency (optional fallback supported)
-- Improved security (challenge replay prevention)
-- Enabled horizontal scalability
-- Established identity persistence
-
----
-
-## ⚠️ Risks
-
-- DB dependency for full functionality
-- incorrect challenge lifecycle handling could break auth
-- signature validation must remain strict
-
----
-
-## ❌ What This Phase Does NOT Solve
-
-- wallet ↔ user linking
-- account ownership model
-- refresh tokens
+- user-managed wallet linking API
+- multi-wallet ownership model
+- refresh-token lifecycle
 - token revocation
-- persistent sessions
-- multi-wallet accounts
+- persistent session storage
+- account merge workflows across auth methods
 
 ---
 
-## 🧾 Conclusion
+## ⏭️ Suggested Next Phase
 
-Phase 0.4 successfully delivers a complete and extensible authentication layer:
+### 0.4.8 — Account Consolidation and Multi-Wallet Ownership Foundations
 
-- unified JWT system
-- wallet-based authentication
-- durable identity persistence
-- session normalization across HTTP and WebSocket
-
-The backend is now prepared to evolve into a full exchange-grade account system.
-
----
-
-## 🚀 Next Phase
-
-### Phase 0.4.7 — Wallet ↔ User Linking
-
-Focus:
-
-- unify wallet identities with users
-- introduce account ownership model
-- support multi-wallet structures
-- prepare for trading/account logic
+This next step should extend the current 1:1 wallet linkage model toward a broader exchange-ready account ownership architecture.

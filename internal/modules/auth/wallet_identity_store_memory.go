@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"strings"
 	"sync"
 )
 
@@ -38,4 +39,21 @@ func (s *InMemoryWalletIdentityStore) GetOrCreate(ctx context.Context, address s
 
 	cp := *identity
 	return &cp, nil
+}
+
+func (s *InMemoryWalletIdentityStore) AttachUser(ctx context.Context, walletID, userID string) (*WalletIdentity, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	for _, identity := range s.items {
+		if identity == nil || identity.ID != walletID {
+			continue
+		}
+
+		identity.UserID = strings.TrimSpace(userID)
+		cp := *identity
+		return &cp, nil
+	}
+
+	return nil, ErrWalletIdentityNotFound
 }

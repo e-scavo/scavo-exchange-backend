@@ -12,7 +12,7 @@ Status: ✅ Completed
 Status: ✅ Completed
 
 ### Phase 0.4 — Auth and User Stabilization
-Status: 🟡 In Progress
+Status: ✅ Completed
 
 ---
 
@@ -26,57 +26,60 @@ Status: 🟡 In Progress
 | 0.4.4 | Wallet challenge contract and nonce bootstrap | ✅ Completed |
 | 0.4.5 | Wallet signature verification and token issuance | ✅ Completed |
 | 0.4.6 | Wallet identity persistence and durable challenge storage | ✅ Completed |
+| 0.4.7 | Wallet ↔ user linking and unified identity model | ✅ Completed |
 
 ---
 
-## ✅ Phase 0.4.6 Closure Summary
+## ✅ Phase 0.4.7 Closure Summary
 
-Phase 0.4.6 closes the gap between bootstrap wallet authentication and durable wallet-auth persistence.
+Phase 0.4.7 closes the gap between durable wallet identities and durable platform users.
 
-### Delivered in 0.4.6
+### Delivered in 0.4.7
 
-- PostgreSQL-backed wallet challenge storage
-- Durable wallet identity persistence
-- Transaction-safe challenge consumption
-- JWT enrichment with `wallet_id`
-- Session propagation of wallet identity metadata
-- In-memory fallback identity store for non-DB environments
-- Preservation of the existing wallet login flow introduced in 0.4.5
+- durable wallet identity → user linkage through PostgreSQL
+- automatic wallet-backed user provisioning in `users`
+- unified user resolution for wallet-authenticated sessions
+- JWT enrichment with both wallet metadata and linked user identity
+- `auth_wallet_identities.user_id` persistence model
+- in-memory fallback linkage behavior for non-DB environments
+- preservation of the existing challenge / verify contract
 
 ---
 
 ## 🔍 Functional Result
 
-The system now supports the following durable wallet-auth sequence:
+The system now supports the following wallet-auth sequence:
 
 1. Challenge issuance
 2. Challenge persistence
 3. Signature verification
 4. Single-use challenge consumption
 5. Wallet identity resolution or creation
-6. JWT issuance with wallet metadata
+6. Linked platform user resolution or creation
+7. JWT issuance with unified identity metadata
+8. Stable session/user hydration across REST and WebSocket
 
 ---
 
-## ❌ Not Included in 0.4.6
+## ❌ Not Included in 0.4.7
 
 The following items remain intentionally out of scope for this subphase:
 
-- Wallet ↔ user linking
-- Unified account model
-- Multi-wallet support
-- Refresh tokens
-- Revocation flows
-- Persistent authenticated session storage
+- user-driven wallet management endpoints
+- multi-wallet account ownership
+- refresh tokens
+- revocation flows
+- persistent authenticated session storage
+- auth-method merge workflows
 
 ---
 
 ## ⏭️ Next Phase
 
-### 0.4.7 — Wallet ↔ User Linking and Unified Identity Model
+### 0.4.8 — Account Consolidation and Multi-Wallet Ownership Foundations
 
 Planned focus:
 
-- map persistent wallet identities to platform users
-- introduce the first unified account ownership model
-- prepare the auth domain for exchange-grade account logic
+- prepare a first account aggregation model beyond 1:1 wallet ownership
+- define safe primitives for future manual wallet linking and unlinking
+- introduce ownership semantics that can support exchange-grade account logic

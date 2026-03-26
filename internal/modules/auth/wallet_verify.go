@@ -2,8 +2,11 @@ package auth
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"time"
+
+	usermod "github.com/e-scavo/scavo-exchange-backend/internal/modules/user"
 )
 
 type WalletVerificationService struct {
@@ -64,10 +67,53 @@ func (s *WalletVerificationService) VerifyAndLogin(ctx context.Context, challeng
 		return nil, nil, err
 	}
 
-	result, err := s.login.LoginWallet(ctx, identity.ID, address, challenge.Chain)
+	user, identity, err := s.resolveLinkedUser(ctx, identity, address)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	result, err := s.login.LoginWalletForUser(ctx, user, identity.ID, address, challenge.Chain)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	return result, challenge, nil
+}
+
+func (s *WalletVerificationService) resolveLinkedUser(ctx context.Context, identity *WalletIdentity, address string) (*usermod.User, *WalletIdentity, error) {
+	if identity == nil {
+		return nil, nil, ErrUnauthorized
+	}
+
+	if strings.TrimSpace(identity.UserID) != "" {
+		if s.login == nil || s.login.users == nil {
+			return walletUser(address), identity, nil
+		}
+
+		user, err := s.login.users.GetByID(ctx, identity.UserID, walletUserEmail(address))
+		if err == nil {
+			return user, identity, nil
+		}
+		if !errors.Is(err, usermod.ErrUserNotFound) {
+			return nil, nil, err
+		}
+	}
+
+	if s.login == nil || s.login.users == nil {
+		linked := walletUser(address)
+		identity.UserID = linked.ID
+		return linked, identity, nil
+	}
+
+	user, err := s.login.users.ResolveOrCreateWalletUser(ctx, address)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	identity, err = s.identities.AttachUser(ctx, identity.ID, user.ID)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return user, identity, nil
 }

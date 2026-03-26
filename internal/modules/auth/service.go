@@ -97,6 +97,10 @@ func (s *Service) LoginDev(ctx context.Context, email, password string) (*LoginR
 }
 
 func (s *Service) LoginWallet(ctx context.Context, walletID, address, chain string) (*LoginResult, error) {
+	return s.LoginWalletForUser(ctx, walletUser(address), walletID, address, chain)
+}
+
+func (s *Service) LoginWalletForUser(ctx context.Context, user *usermod.User, walletID, address, chain string) (*LoginResult, error) {
 	if s == nil || s.tokens == nil {
 		return nil, fmt.Errorf("token service not configured")
 	}
@@ -108,9 +112,13 @@ func (s *Service) LoginWallet(ctx context.Context, walletID, address, chain stri
 	chain = normalizeChain(chain)
 	walletID = strings.TrimSpace(walletID)
 
-	user := walletUser(address)
+	if user == nil {
+		user = walletUser(address)
+	}
+
 	token, err := s.tokens.MintWithOptions(coreauth.MintOptions{
-		UserID:        user.ID,
+		UserID:        strings.TrimSpace(user.ID),
+		Email:         normalizeEmail(user.Email),
 		WalletID:      walletID,
 		WalletAddress: address,
 		AuthMethod:    "wallet_evm",
@@ -156,11 +164,11 @@ func (s *Service) ResolveCurrentUserClaims(ctx context.Context, claims *coreauth
 		return nil, ErrUnauthorized
 	}
 
-	if strings.TrimSpace(claims.WalletAddress) != "" {
-		return walletUser(claims.WalletAddress), nil
-	}
-
 	if s.users == nil {
+		if strings.TrimSpace(claims.WalletAddress) != "" {
+			return walletUser(claims.WalletAddress), nil
+		}
+
 		now := time.Now().UTC()
 		return &usermod.User{
 			ID:        claims.UserID,
@@ -173,6 +181,9 @@ func (s *Service) ResolveCurrentUserClaims(ctx context.Context, claims *coreauth
 	user, err := s.users.GetByID(ctx, claims.UserID, claims.Email)
 	if err != nil {
 		if errors.Is(err, usermod.ErrUserNotFound) {
+			if strings.TrimSpace(claims.WalletAddress) != "" {
+				return walletUser(claims.WalletAddress), nil
+			}
 			return nil, ErrUnauthorized
 		}
 		return nil, err
@@ -249,8 +260,10 @@ func walletUser(address string) *usermod.User {
 	address = normalizeWalletAddress(address)
 	return &usermod.User{
 		ID:          walletUserID(address),
+		Email:       walletUserEmail(address),
 		DisplayName: address,
 		CreatedAt:   now,
 		UpdatedAt:   now,
+		LastLoginAt: &now,
 	}
 }

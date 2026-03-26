@@ -96,6 +96,16 @@ func TestWalletVerificationService_VerifyAndLogin_Success(t *testing.T) {
 		t.Fatalf("unexpected auth method: %q", result.AuthMethod)
 	}
 
+	if result.User == nil {
+		t.Fatal("expected linked user")
+	}
+	if result.User.ID != walletUserID(address) {
+		t.Fatalf("unexpected linked user id: %q", result.User.ID)
+	}
+	if result.User.Email != walletUserEmail(address) {
+		t.Fatalf("unexpected linked user email: %q", result.User.Email)
+	}
+
 	claims, err := tokens.Parse(result.AccessToken)
 	if err != nil {
 		t.Fatalf("token parse error: %v", err)

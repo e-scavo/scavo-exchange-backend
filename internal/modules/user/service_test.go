@@ -17,6 +17,12 @@ func (s *stubRepo) UpsertDevUser(ctx context.Context, email string) (*User, erro
 	return s.result, s.err
 }
 
+func (s *stubRepo) UpsertWalletUser(ctx context.Context, id, email, displayName string) (*User, error) {
+	s.lastID = id
+	s.lastEmail = email
+	return s.result, s.err
+}
+
 func (s *stubRepo) GetByID(ctx context.Context, id string) (*User, error) {
 	s.lastID = id
 	return s.result, s.err

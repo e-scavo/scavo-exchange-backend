@@ -21,6 +21,14 @@ func (s *stubUserRepo) UpsertDevUser(ctx context.Context, email string) (*usermo
 	return s.upsertResult, s.upsertErr
 }
 
+func (s *stubUserRepo) UpsertWalletUser(ctx context.Context, id, email, displayName string) (*usermod.User, error) {
+	return &usermod.User{
+		ID:          id,
+		Email:       email,
+		DisplayName: displayName,
+	}, nil
+}
+
 func (s *stubUserRepo) GetByID(ctx context.Context, id string) (*usermod.User, error) {
 	if s.getByIDFn != nil {
 		return s.getByIDFn(ctx, id)
