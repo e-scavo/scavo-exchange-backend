@@ -97,6 +97,7 @@ the architecture now adds a second authenticated ownership operation that allows
 5. authenticated wallet linking adds secondary wallets only
 6. 0.4.9 does not switch primary ownership during linking
 7. 0.4.10 preserves the current target primary wallet when a merge occurs
+8. 0.4.11 allows explicit primary-wallet reassignment only within the current owner's wallet set
 
 ---
 
@@ -277,18 +278,16 @@ each subphase introduces one structural improvement while preserving previous be
 Still intentionally not supported:
 
 - wallet unlink
-- primary-wallet switching
 - arbitrary cross-user wallet transfer outside wallet-signed merge
 - multi-auth merge resolution
 - user-record archival after merge
 
 ---
 
-## 🚧 Future Evolution (Post 0.4.10)
+## 🚧 Future Evolution (Post 0.4.11)
 
-### 0.4.11
+### 0.4.12
 - wallet detach / unlink rules
-- primary-wallet switching contract
 - deeper post-merge identity progression
 
 ### Later phases
@@ -301,11 +300,12 @@ Still intentionally not supported:
 
 ## 🧩 Summary
 
-At the end of 0.4.10:
+At the end of 0.4.11:
 
 - wallet authentication is stable
 - durable identity is stable
 - wallet ownership is stable
 - authenticated wallet linking is implemented
 - wallet-owned account merge execution is implemented
-- the backend is structurally ready to move from ownership persistence into true account-level wallet management
+- explicit primary-wallet switching is implemented
+- the backend is structurally ready to move from ownership persistence into detach-safe account-level wallet management

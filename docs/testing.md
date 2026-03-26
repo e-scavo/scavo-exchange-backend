@@ -414,12 +414,11 @@ Key validations now include:
 
 ---
 
-## 🧭 Future Testing (Post 0.4.10)
+## 🧭 Future Testing (Post 0.4.11)
 
 Planned:
 
 - unlink scenarios
-- primary-wallet switching scenarios
 - cross-user ownership transfer edge cases
 - post-merge user archival testing
 - multi-auth merge preparation testing
@@ -428,11 +427,49 @@ Planned:
 
 ## 🧩 Summary
 
-Testing at Phase 0.4.10 guarantees:
+Testing at Phase 0.4.11 guarantees:
 
 - authentication correctness
 - identity persistence
 - ownership consistency
 - authenticated wallet linking correctness
 - authenticated wallet-owned account merge correctness
-- API stability across login, link, and merge flows
+- authenticated primary-wallet switching correctness
+- API stability across login, link, merge, and primary-switch flows
+
+## 0.4.11 — Primary Wallet Switching
+
+### API
+
+```bash
+curl -s -X POST http://localhost:8080/auth/wallets/primary \
+  -H "Authorization: Bearer <ACCESS_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "wallet_address": "0xYOUR_OWNED_SECONDARY_WALLET"
+  }'
+```
+
+### Expected Result
+
+- HTTP `200 OK`
+- response contains:
+  - `primary_wallet`
+  - refreshed `wallets`
+- the requested wallet becomes the only wallet with `is_primary = true`
+
+### SQL Verification
+
+```sql
+SELECT id, address, user_id, linked_at, is_primary
+FROM auth_wallet_identities
+WHERE user_id = 'u_test_example_com'
+ORDER BY is_primary DESC, linked_at ASC NULLS LAST, address ASC;
+```
+
+### Expected State
+
+- requested wallet is first
+- requested wallet has `is_primary = true`
+- previous primary wallet has `is_primary = false`
+- no ownership changes occurred

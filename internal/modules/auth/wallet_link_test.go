@@ -227,3 +227,68 @@ func TestWalletAccountMergeService_VerifyAndMerge_RequiresLinkedSource(t *testin
 		t.Fatalf("expected ErrWalletMergeSourceNotLinked, got %v", err)
 	}
 }
+
+func TestWalletPrimaryService_SetPrimary_Success(t *testing.T) {
+	identityStore := NewInMemoryWalletIdentityStore()
+	primarySvc := NewWalletPrimaryService(identityStore)
+
+	primaryAddress, _ := signWalletMessageForScalar(t, "primary", "10")
+	primaryIdentity, err := identityStore.GetOrCreate(context.Background(), primaryAddress)
+	if err != nil {
+		t.Fatalf("GetOrCreate primary error: %v", err)
+	}
+	_, err = identityStore.AttachUser(context.Background(), primaryIdentity.ID, "u_target", true)
+	if err != nil {
+		t.Fatalf("AttachUser primary error: %v", err)
+	}
+
+	secondaryAddress, _ := signWalletMessageForScalar(t, "secondary", "11")
+	secondaryIdentity, err := identityStore.GetOrCreate(context.Background(), secondaryAddress)
+	if err != nil {
+		t.Fatalf("GetOrCreate secondary error: %v", err)
+	}
+	_, err = identityStore.AttachUser(context.Background(), secondaryIdentity.ID, "u_target", false)
+	if err != nil {
+		t.Fatalf("AttachUser secondary error: %v", err)
+	}
+
+	result, err := primarySvc.SetPrimary(context.Background(), "u_target", secondaryAddress)
+	if err != nil {
+		t.Fatalf("SetPrimary error: %v", err)
+	}
+	if result.Primary == nil || result.Primary.Address != secondaryAddress {
+		t.Fatalf("unexpected primary wallet: %#v", result.Primary)
+	}
+	if !result.Primary.IsPrimary {
+		t.Fatal("expected switched wallet to be primary")
+	}
+	if len(result.Wallets) != 2 {
+		t.Fatalf("expected 2 wallets, got %d", len(result.Wallets))
+	}
+	if result.Wallets[0].Address != secondaryAddress || !result.Wallets[0].IsPrimary {
+		t.Fatal("expected switched wallet to be first and primary")
+	}
+	if result.Wallets[1].Address != primaryAddress || result.Wallets[1].IsPrimary {
+		t.Fatal("expected old primary to become secondary")
+	}
+}
+
+func TestWalletPrimaryService_SetPrimary_RejectsWalletNotOwnedByUser(t *testing.T) {
+	identityStore := NewInMemoryWalletIdentityStore()
+	primarySvc := NewWalletPrimaryService(identityStore)
+
+	otherAddress, _ := signWalletMessageForScalar(t, "other", "12")
+	otherIdentity, err := identityStore.GetOrCreate(context.Background(), otherAddress)
+	if err != nil {
+		t.Fatalf("GetOrCreate other error: %v", err)
+	}
+	_, err = identityStore.AttachUser(context.Background(), otherIdentity.ID, "u_other", true)
+	if err != nil {
+		t.Fatalf("AttachUser other error: %v", err)
+	}
+
+	_, err = primarySvc.SetPrimary(context.Background(), "u_target", otherAddress)
+	if err != ErrWalletNotOwnedByUser {
+		t.Fatalf("expected ErrWalletNotOwnedByUser, got %v", err)
+	}
+}

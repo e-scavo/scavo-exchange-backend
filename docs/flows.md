@@ -290,11 +290,10 @@ Defines how authenticated sessions are resolved.
 
 ---
 
-## 🧭 Future Flow Extensions (Post 0.4.10)
+## 🧭 Future Flow Extensions (Post 0.4.11)
 
-### Planned in 0.4.11
+### Planned in 0.4.12
 - wallet unlink flow
-- primary-wallet switching flow
 - deeper wallet-management contracts
 
 ### Later phases
@@ -306,14 +305,38 @@ Defines how authenticated sessions are resolved.
 
 ## 🧩 Summary
 
-At the end of Phase 0.4.10:
+At the end of Phase 0.4.11:
 
 - authentication is stable
 - identity is unified
 - ownership is enforced
 - user-driven wallet linking is implemented under authenticated control
 - wallet-owned account merge execution is implemented under authenticated control
+- primary-wallet switching is implemented under authenticated control
 
 The backend now transitions from:
 
 **authentication flows → ownership flows → authenticated wallet-management flows**
+
+### 6. Primary-Wallet Switching
+
+1. authenticated user calls `POST /auth/wallets/primary`
+2. backend extracts current authenticated `user_id`
+3. backend normalizes and validates `wallet_address`
+4. wallet identity store verifies:
+   - wallet exists
+   - wallet belongs to the current authenticated user
+5. backend clears `is_primary` from all other wallets owned by that user
+6. backend marks the requested wallet as `is_primary = true`
+7. backend returns the refreshed wallet inventory:
+   - primary first
+   - then by `linked_at`
+   - then by address
+
+#### Safety Rules
+
+- switching primary wallet never changes ownership
+- switching primary wallet never attaches or detaches wallets
+- switching primary wallet never bypasses authentication
+- exactly one primary wallet remains for the user after the operation
+

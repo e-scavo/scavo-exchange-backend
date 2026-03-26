@@ -27,6 +27,7 @@ var (
 	ErrWalletChallengePurpose      = errors.New("wallet challenge purpose mismatch")
 	ErrWalletMergeSourceNotLinked  = errors.New("wallet merge source wallet is not linked to another user")
 	ErrWalletMergeSameUser         = errors.New("wallet merge source already belongs to current user")
+	ErrWalletNotOwnedByUser        = errors.New("wallet identity does not belong to current user")
 )
 
 const (

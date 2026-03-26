@@ -30,54 +30,47 @@ Status: ✅ Completed
 | 0.4.8 | Account consolidation and multi-wallet ownership foundations | ✅ Completed |
 | 0.4.9 | User-driven wallet linking contract and protected account merge preparation | ✅ Completed |
 | 0.4.10 | User-driven wallet-owned account merge execution | ✅ Completed |
+| 0.4.11 | Primary wallet management and ownership safety hardening | ✅ Completed |
 
 ---
 
-## ✅ Phase 0.4.10 Closure Summary
+## ✅ Phase 0.4.11 Closure Summary
 
-Phase 0.4.10 executes the first protected wallet-owned account merge on top of the wallet-linking and ownership model delivered in 0.4.9.
+Phase 0.4.11 adds the first explicit post-merge wallet-ownership management operation on top of the linking and merge model delivered through 0.4.10.
 
-The backend can now accept an authenticated request from an already logged-in user, generate an account-merge challenge for a wallet that already belongs to another wallet-owned user, verify the signed challenge, and atomically reassign all wallets from that source wallet-owned account into the current authenticated user.
+The backend can now accept an authenticated request from an already logged-in user, validate ownership of an already linked wallet, and atomically reassign the `is_primary` flag so the requested owned wallet becomes the single primary wallet for that user.
 
-### Delivered in 0.4.10
+### Delivered in 0.4.11
 
-- authenticated account-merge challenge endpoint
-- authenticated account-merge verify endpoint
-- challenge purpose expansion:
-  - `auth_bootstrap`
-  - `wallet_link`
-  - `account_merge`
-- protected rejection when merge challenge is signed by the wrong wallet
-- protected rejection when the source wallet is unlinked
-- protected rejection when merge is not required because the wallet already belongs to the current user
-- atomic wallet-ownership consolidation from source user to current authenticated user
-- deterministic primary-wallet preservation rules during merge
-- updated wallet inventory returned after successful merge
+- authenticated primary-wallet switch endpoint: `POST /auth/wallets/primary`
+- store-level primary-wallet reassignment contract
+- protected rejection when the target wallet is missing
+- protected rejection when the wallet does not belong to the current authenticated user
+- deterministic single-primary enforcement during reassignment
+- refreshed owned-wallet inventory returned after successful primary switch
+- existing wallet-link and wallet-account-merge coverage preserved
 
 ---
 
 ## 🔍 Functional Result
 
-The system now supports the following wallet-owned account merge sequence under an existing authenticated session:
+The system now supports the following explicit primary-wallet reassignment sequence under an existing authenticated session:
 
 1. user authenticates normally
-2. user requests account-merge challenge for a wallet already linked elsewhere
-3. challenge is persisted with `account_merge` purpose and `requested_by_user_id`
-4. source wallet signs the merge challenge
-5. backend verifies signature and user-bound challenge
-6. source wallet identity is resolved
-7. source user is derived from wallet ownership
-8. all source-user wallets are reassigned to the authenticated target user
-9. updated owned-wallet list is returned
+2. user lists or already knows their owned wallets
+3. user requests `POST /auth/wallets/primary` with one owned wallet address
+4. backend validates that the wallet exists and belongs to the authenticated user
+5. backend atomically clears the previous primary flag for that user
+6. backend marks the requested wallet as the only primary wallet
+7. updated owned-wallet inventory is returned with the new primary wallet first
 
 ---
 
-## ❌ Not Included in 0.4.10
+## ❌ Not Included in 0.4.11
 
 The following items remain intentionally out of scope:
 
 - wallet unlink endpoint
-- primary-wallet switch endpoint
 - arbitrary cross-user wallet transfer
 - archival / alias records for merged source users
 - merge between wallet identities and future auth methods
@@ -89,11 +82,11 @@ The following items remain intentionally out of scope:
 
 ## ⏭️ Next Phase
 
-### 0.4.11 — Wallet Ownership Management and Primary-Control Progression
+### 0.4.12 — Wallet Ownership Detach Contract Preparation
 
 Planned focus:
 
 - introduce safe wallet detach / unlink semantics
-- define protected primary-wallet switching
+- preserve primary-wallet invariants during future detach operations
 - deepen merge-safe identity rules
 - continue progression from ownership model toward account-level management

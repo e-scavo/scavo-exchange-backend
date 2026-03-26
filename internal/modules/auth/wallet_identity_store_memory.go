@@ -202,6 +202,40 @@ func (s *InMemoryWalletIdentityStore) MergeUsers(ctx context.Context, sourceUser
 	return s.listByUserLocked(targetUserID), nil
 }
 
+func (s *InMemoryWalletIdentityStore) SetPrimary(ctx context.Context, userID, address string) (*WalletIdentity, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	userID = strings.TrimSpace(userID)
+	address = normalizeWalletAddress(address)
+	if userID == "" {
+		return nil, ErrUnauthorized
+	}
+	if !evmAddressRE.MatchString(address) {
+		return nil, ErrInvalidWalletAddress
+	}
+
+	target, ok := s.items[address]
+	if !ok || target == nil {
+		return nil, ErrWalletIdentityNotFound
+	}
+	if strings.TrimSpace(target.UserID) != userID {
+		return nil, ErrWalletNotOwnedByUser
+	}
+
+	for _, identity := range s.items {
+		if identity == nil {
+			continue
+		}
+		if strings.TrimSpace(identity.UserID) == userID {
+			identity.IsPrimary = identity.Address == address
+		}
+	}
+
+	cp := *target
+	return &cp, nil
+}
+
 func (s *InMemoryWalletIdentityStore) ListByUser(ctx context.Context, userID string) ([]*WalletIdentity, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()

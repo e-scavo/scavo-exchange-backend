@@ -426,3 +426,89 @@ func TestHTTPHandlers_WalletAccountMergeVerify_Success(t *testing.T) {
 		t.Fatalf("expected 2 wallets, got %d", len(payload.Wallets))
 	}
 }
+
+func TestHTTPHandlers_WalletSetPrimary_Success(t *testing.T) {
+	identityStore := NewInMemoryWalletIdentityStore()
+
+	primaryAddress, _ := signWalletMessageForScalar(t, "handler-primary", "21")
+	primaryIdentity, err := identityStore.GetOrCreate(context.Background(), primaryAddress)
+	if err != nil {
+		t.Fatalf("GetOrCreate primary error: %v", err)
+	}
+	_, err = identityStore.AttachUser(context.Background(), primaryIdentity.ID, "u_test_example_com", true)
+	if err != nil {
+		t.Fatalf("AttachUser primary error: %v", err)
+	}
+
+	secondaryAddress, _ := signWalletMessageForScalar(t, "handler-secondary", "22")
+	secondaryIdentity, err := identityStore.GetOrCreate(context.Background(), secondaryAddress)
+	if err != nil {
+		t.Fatalf("GetOrCreate secondary error: %v", err)
+	}
+	_, err = identityStore.AttachUser(context.Background(), secondaryIdentity.ID, "u_test_example_com", false)
+	if err != nil {
+		t.Fatalf("AttachUser secondary error: %v", err)
+	}
+
+	h := HTTPHandlers{
+		Tokens:           mustTokenService(t),
+		TTL:              time.Hour,
+		Users:            usermod.NewService(nil),
+		WalletIdentities: identityStore,
+	}
+
+	req := httptest.NewRequest(http.MethodPost, "/auth/wallets/primary", strings.NewReader(`{"wallet_address":"`+secondaryAddress+`"}`))
+	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	rec := httptest.NewRecorder()
+
+	h.WalletSetPrimary(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+
+	var payload WalletPrimarySetResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("decode error: %v", err)
+	}
+	if payload.PrimaryWallet == nil || payload.PrimaryWallet.Address != secondaryAddress {
+		t.Fatalf("unexpected primary wallet payload: %#v", payload.PrimaryWallet)
+	}
+	if len(payload.Wallets) != 2 {
+		t.Fatalf("expected 2 wallets, got %d", len(payload.Wallets))
+	}
+	if payload.Wallets[0].Address != secondaryAddress || !payload.Wallets[0].IsPrimary {
+		t.Fatal("expected switched wallet to be first and primary")
+	}
+}
+
+func TestHTTPHandlers_WalletSetPrimary_RejectsWalletNotOwnedByUser(t *testing.T) {
+	identityStore := NewInMemoryWalletIdentityStore()
+
+	otherAddress, _ := signWalletMessageForScalar(t, "handler-other", "23")
+	otherIdentity, err := identityStore.GetOrCreate(context.Background(), otherAddress)
+	if err != nil {
+		t.Fatalf("GetOrCreate other error: %v", err)
+	}
+	_, err = identityStore.AttachUser(context.Background(), otherIdentity.ID, "u_other", true)
+	if err != nil {
+		t.Fatalf("AttachUser other error: %v", err)
+	}
+
+	h := HTTPHandlers{
+		Tokens:           mustTokenService(t),
+		TTL:              time.Hour,
+		Users:            usermod.NewService(nil),
+		WalletIdentities: identityStore,
+	}
+
+	req := httptest.NewRequest(http.MethodPost, "/auth/wallets/primary", strings.NewReader(`{"wallet_address":"`+otherAddress+`"}`))
+	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	rec := httptest.NewRecorder()
+
+	h.WalletSetPrimary(rec, req)
+
+	if rec.Code != http.StatusForbidden {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+}

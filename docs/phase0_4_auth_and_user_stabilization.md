@@ -286,13 +286,13 @@ go test ./...
 - user-bound link challenge checks must not be bypassed
 - future unlink / transfer flows must preserve current ownership invariants
 - later merge flows must not weaken the explicitness introduced here
+- explicit primary-wallet reassignment must preserve single-primary invariants
 
 ---
 
 ## ❌ What This Phase Does NOT Solve
 
 - wallet unlink
-- primary-wallet switching
 - cross-user wallet transfer
 - arbitrary cross-user transfer outside wallet-signed merge execution
 - merged-source user archival or aliasing
@@ -306,15 +306,16 @@ go test ./...
 
 Phase 0.4 now establishes a strong identity and wallet-ownership foundation.
 
-With 0.4.10:
+With 0.4.11:
 
 - wallet authentication is stable
 - identity is durable
 - ownership is persisted
 - authenticated wallet linking is available
 - wallet-owned account merge execution is available
-- the backend is prepared for the next controlled step toward real account management
+- explicit primary-wallet switching is available
+- the backend is prepared for detach-safe ownership progression
 
 Next expected evolution:
 
-➡️ **0.4.11 — Wallet Ownership Management and Primary-Control Progression**
+➡️ **0.4.12 — Wallet Ownership Detach Contract Preparation**
