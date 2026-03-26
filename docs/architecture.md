@@ -2,28 +2,26 @@
 
 ## 🧠 Overview
 
-The SCAVO Exchange Backend is designed around a **wallet-first identity architecture**, progressively evolving toward a **unified account model** capable of supporting exchange-grade features.
+The SCAVO Exchange Backend is designed around a **wallet-first identity architecture** that progressively evolves into a **durable account model** suitable for exchange-grade ownership and future multi-auth identity operations.
 
-The system separates:
+The architecture intentionally separates:
 
-- Authentication mechanism (wallet / future methods)
-- Identity representation (wallet identity vs user)
-- Ownership model (introduced in 0.4.8)
+- authentication mechanism
+- wallet identity representation
+- durable platform user abstraction
+- persisted wallet ownership
+- authenticated wallet-management contracts
 
 ---
 
 ## 🧩 Core Layers
 
 ### 1. Transport Layer
-
 - HTTP API
 - JSON-based communication
-- Stateless request handling
-
----
+- stateless request handling
 
 ### 2. Auth Layer
-
 Located in:
 
 - `internal/modules/auth`
@@ -34,12 +32,10 @@ Responsibilities:
 - wallet signature verification
 - JWT issuance
 - identity resolution
-- ownership enforcement (since 0.4.8)
-
----
+- ownership enforcement
+- authenticated wallet-linking flows
 
 ### 3. User Layer
-
 Located in:
 
 - `internal/modules/user`
@@ -47,54 +43,43 @@ Located in:
 Responsibilities:
 
 - durable user creation
-- identity abstraction
-- future multi-auth support
-
----
+- durable user resolution
+- future auth-provider expansion
 
 ### 4. Persistence Layer
-
 - PostgreSQL (primary)
-- In-memory fallback (dev/testing)
+- in-memory fallback (dev/testing)
 
 ---
 
-## 🔐 Identity Model
+## 🔐 Identity Model Evolution
 
 ### Pre 0.4.6
-
-- Identity was session-based
-- No persistence
-
----
+- identity was session-oriented
+- wallet state was not durable
 
 ### 0.4.6 — Wallet Identity Persistence
-
-- Wallet identity stored in:
-  - `auth_wallet_identities`
-- Address becomes stable identifier
-
----
+- wallet identity stored in `auth_wallet_identities`
+- wallet address becomes a stable registry entry
 
 ### 0.4.7 — Unified Identity Model
-
-- Wallet identity linked to durable user
+- wallet identity linked to durable user
 - `user_id` introduced
-- JWT identity unified
-
----
+- JWT identity unified around durable platform user
 
 ### 0.4.8 — Ownership Model Introduction
-
-Wallet identity evolves into a **first-class ownership entity**.
-
-Each wallet identity includes:
+wallet identity becomes a first-class ownership entity with:
 
 - `id`
 - `address`
 - `user_id`
 - `linked_at`
 - `is_primary`
+
+### 0.4.9 — Authenticated Wallet Linking Contract
+the architecture adds a dedicated authenticated linking flow, still based on challenge + signature verification, but now explicitly bound to the current authenticated user.
+
+This is the first backend-managed wallet operation that acts on ownership under an existing session rather than during initial login bootstrap.
 
 ---
 
@@ -102,70 +87,96 @@ Each wallet identity includes:
 
 ### Core Rules
 
-1. A wallet belongs to exactly one user
-2. A user can own multiple wallets
-3. Only one wallet per user can be primary
-4. Wallet ownership cannot be reassigned across users
+1. a wallet belongs to exactly one user
+2. a user can own multiple wallets
+3. only one wallet per user can be primary
+4. wallet ownership cannot be reassigned across users
+5. authenticated wallet linking adds secondary wallets only
+6. 0.4.9 does not switch primary ownership
 
 ---
 
-### Ownership Metadata
+## 🏷️ Ownership Metadata
 
-| Field       | Description |
-|------------|------------|
-| user_id    | Owner user |
-| linked_at  | Timestamp of ownership |
-| is_primary | Primary wallet flag |
-
----
-
-### Ownership Semantics
-
-- Ownership is persisted at DB level
-- Ownership is independent from sessions
-- Ownership is enforced in store layer
-- Ownership conflicts are rejected
+| Field | Description |
+|------|-------------|
+| `user_id` | owning durable user |
+| `linked_at` | ownership creation timestamp |
+| `is_primary` | primary-wallet flag |
 
 ---
 
-## 🔄 Authentication Flow (Wallet)
+## 🧾 Challenge Model
 
-1. Client requests challenge
-2. Server creates challenge
-3. Client signs message
-4. Server verifies signature
-5. Challenge is consumed
-6. Wallet identity is resolved
-7. User is resolved or created
-8. Ownership is enforced
+### Pre 0.4.9
+wallet challenge was effectively used only for authentication bootstrap.
+
+### 0.4.9
+wallet challenges now include:
+
+- `purpose`
+- `requested_by_user_id`
+
+### Challenge purposes
+
+- `auth_bootstrap`
+- `wallet_link`
+
+This avoids reusing the same challenge semantics blindly across two very different operations.
+
+---
+
+## 🔄 Authentication Flow (Wallet Login)
+
+1. client requests login challenge
+2. backend persists challenge with `auth_bootstrap` purpose
+3. client signs message
+4. backend verifies signature
+5. challenge is consumed
+6. wallet identity is resolved
+7. durable user is resolved or created
+8. ownership is enforced
 9. JWT is issued
 
 ---
 
-## 🔄 Ownership Resolution Flow
+## 🔄 Authenticated Wallet Linking Flow
 
-When a wallet logs in:
-
-1. Retrieve wallet identity
-2. If not linked → create or link user
-3. If linked:
-   - validate ownership
-   - load user
-4. Ensure primary wallet semantics
-5. Return unified identity
+1. user already holds valid JWT
+2. client requests link challenge:
+   - `POST /auth/wallets/link/challenge`
+3. backend persists challenge with:
+   - `purpose = wallet_link`
+   - `requested_by_user_id = current user`
+4. user signs with the secondary wallet
+5. client submits:
+   - `POST /auth/wallets/link/verify`
+6. backend validates:
+   - challenge existence
+   - challenge freshness
+   - purpose correctness
+   - requesting user correctness
+   - signature correctness
+7. backend resolves wallet identity
+8. backend rejects ownership conflict if wallet belongs elsewhere
+9. backend attaches wallet as non-primary
+10. backend returns updated wallet inventory
 
 ---
 
 ## 🔌 API Layer
 
 ### Auth endpoints
-
 - `/auth/login`
 - `/auth/wallet/challenge`
 - `/auth/wallet/verify`
 - `/auth/me`
 - `/auth/session`
-- `/auth/wallets` ← introduced in 0.4.8
+
+### Wallet ownership endpoints
+- `/auth/wallets`
+- `/auth/wallets/link/challenge`
+- `/auth/wallets/link/verify`
 
 ---
 
@@ -173,32 +184,32 @@ When a wallet logs in:
 
 JWT tokens are:
 
-- Stateless
-- Short-lived
-- Self-contained
+- stateless
+- short-lived
+- self-contained
 
-### Claims include:
+Claims include:
 
 - `user_id`
 - `wallet_id`
 - `wallet_address`
 - `auth_method`
 
+Wallet linking does not mint a fresh token because it operates under an already authenticated durable session.
+
 ---
 
 ## 🗄️ Data Model
 
 ### `auth_wallet_challenges`
+stores challenge lifecycle and, from 0.4.9 onward, also stores operation metadata:
 
-- challenge lifecycle
-- expiration
-- single-use enforcement
-
----
+- `purpose`
+- `requested_by_user_id`
+- issued / expires / used lifecycle
 
 ### `auth_wallet_identities`
-
-Stores wallet registry and ownership:
+stores wallet registry and ownership:
 
 - `id`
 - `address`
@@ -206,85 +217,65 @@ Stores wallet registry and ownership:
 - `linked_at`
 - `is_primary`
 
----
-
 ### `users`
+stores durable user abstraction:
 
-- durable identity
-- auth-provider agnostic
-- future extensibility
+- login-independent identity
+- wallet-backed users now
+- future auth-provider aggregation later
 
 ---
 
 ## ⚙️ Design Decisions
 
 ### Wallet-first approach
-
-Chosen because:
-
-- aligns with crypto-native UX
-- avoids early complexity of email/password systems
-- simplifies initial identity layer
-
----
+chosen because it aligns with crypto-native UX and reduces early auth-surface complexity.
 
 ### Separation of identity and ownership
+wallet identity is not the same as durable user identity.
+Ownership is explicit rather than inferred.
 
-- wallet identity ≠ user
-- ownership is explicit, not implicit
-- allows future merging strategies
-
----
+### Challenge-purpose separation
+0.4.9 extends the challenge system rather than introducing a second parallel challenge subsystem, but still keeps semantic separation through `purpose`.
 
 ### Incremental evolution
-
-Each subphase introduces:
-
-- one structural improvement
-- backward compatibility
-- minimal breakage risk
+each subphase introduces one structural improvement while preserving previous behavior.
 
 ---
 
 ## ⚠️ Constraints
 
-- No wallet reassignment allowed
-- No multi-auth merge yet
-- No unlink operations
-- No ownership transfer
+Still intentionally not supported:
+
+- wallet unlink
+- primary-wallet switching
+- cross-user wallet transfer
+- automatic merge execution
+- multi-auth merge resolution
 
 ---
 
-## 🚧 Future Evolution (Post 0.4.8)
+## 🚧 Future Evolution (Post 0.4.9)
 
-The system is now prepared for:
-
-### 0.4.9
-
-- wallet linking API
-- ownership validation flows
-- controlled linking operations
-
----
+### 0.4.10
+- wallet detach / unlink rules
+- primary-wallet switching contract
+- deeper merge-safe identity progression
 
 ### Later phases
-
 - account consolidation
-- multi-auth merging (wallet + email)
+- multi-auth identity merging
 - recovery flows
-- compliance-ready identity
+- compliance-ready identity expansion
 
 ---
 
 ## 🧩 Summary
 
-At the end of 0.4.8:
+At the end of 0.4.9:
 
-- identity is durable
-- ownership is modeled
 - wallet authentication is stable
-- system is structurally ready for expansion
-
-The architecture successfully transitions from:
-
-**stateless auth → persistent identity → unified user → multi-wallet ownership → account-level foundation**
+- durable identity is stable
+- wallet ownership is stable
+- authenticated wallet linking is implemented
+- the backend is structurally ready to move from ownership persistence into true account-level wallet management

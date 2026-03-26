@@ -22,25 +22,40 @@ var (
 	ErrWalletChallengeNotFound     = errors.New("wallet challenge not found")
 	ErrWalletIdentityNotFound      = errors.New("wallet identity not found")
 	ErrWalletIdentityAlreadyLinked = errors.New("wallet identity already linked to another user")
+	ErrWalletAlreadyLinkedToUser   = errors.New("wallet identity already linked to current user")
+	ErrWalletLinkChallengeMismatch = errors.New("wallet link challenge does not belong to current user")
+	ErrWalletChallengePurpose      = errors.New("wallet challenge purpose mismatch")
+)
+
+const (
+	WalletChallengePurposeAuthBootstrap = "auth_bootstrap"
+	WalletChallengePurposeLinkWallet    = "wallet_link"
 )
 
 var evmAddressRE = regexp.MustCompile(`^0x[0-9a-fA-F]{40}$`)
 
 type WalletChallenge struct {
-	ID        string     `json:"id"`
-	Address   string     `json:"address"`
-	Chain     string     `json:"chain"`
-	Nonce     string     `json:"nonce"`
-	Message   string     `json:"message"`
-	IssuedAt  time.Time  `json:"issued_at"`
-	ExpiresAt time.Time  `json:"expires_at"`
-	UsedAt    *time.Time `json:"used_at,omitempty"`
+	ID                string     `json:"id"`
+	Address           string     `json:"address"`
+	Chain             string     `json:"chain"`
+	Nonce             string     `json:"nonce"`
+	Message           string     `json:"message"`
+	Purpose           string     `json:"purpose"`
+	RequestedByUserID string     `json:"requested_by_user_id,omitempty"`
+	IssuedAt          time.Time  `json:"issued_at"`
+	ExpiresAt         time.Time  `json:"expires_at"`
+	UsedAt            *time.Time `json:"used_at,omitempty"`
 }
 
 type WalletChallengeStore interface {
 	Save(ctx context.Context, challenge *WalletChallenge) error
 	GetByID(ctx context.Context, id string) (*WalletChallenge, error)
 	Use(ctx context.Context, id string, usedAt time.Time) (*WalletChallenge, error)
+}
+
+type WalletChallengeOptions struct {
+	Purpose           string
+	RequestedByUserID string
 }
 
 type WalletChallengeService struct {
@@ -62,12 +77,19 @@ func NewWalletChallengeService(store WalletChallengeStore, publicBaseURL string,
 }
 
 func (s *WalletChallengeService) Create(ctx context.Context, address, chain string) (*WalletChallenge, error) {
+	return s.CreateWithOptions(ctx, address, chain, WalletChallengeOptions{
+		Purpose: WalletChallengePurposeAuthBootstrap,
+	})
+}
+
+func (s *WalletChallengeService) CreateWithOptions(ctx context.Context, address, chain string, options WalletChallengeOptions) (*WalletChallenge, error) {
 	address = normalizeWalletAddress(address)
 	if !evmAddressRE.MatchString(address) {
 		return nil, ErrInvalidWalletAddress
 	}
 
 	chain = normalizeChain(chain)
+	purpose := normalizeWalletChallengePurpose(options.Purpose)
 	now := time.Now().UTC()
 	expiresAt := now.Add(s.ttl)
 
@@ -77,12 +99,14 @@ func (s *WalletChallengeService) Create(ctx context.Context, address, chain stri
 	}
 
 	challenge := &WalletChallenge{
-		ID:        uuid.NewString(),
-		Address:   address,
-		Chain:     chain,
-		Nonce:     nonce,
-		IssuedAt:  now,
-		ExpiresAt: expiresAt,
+		ID:                uuid.NewString(),
+		Address:           address,
+		Chain:             chain,
+		Nonce:             nonce,
+		Purpose:           purpose,
+		RequestedByUserID: strings.TrimSpace(options.RequestedByUserID),
+		IssuedAt:          now,
+		ExpiresAt:         expiresAt,
 	}
 	challenge.Message = s.buildMessage(challenge)
 
@@ -114,6 +138,9 @@ func (s *WalletChallengeService) Get(ctx context.Context, id string) (*WalletCha
 		return nil, ErrChallengeExpired
 	}
 
+	challenge.Purpose = normalizeWalletChallengePurpose(challenge.Purpose)
+	challenge.RequestedByUserID = strings.TrimSpace(challenge.RequestedByUserID)
+
 	return challenge, nil
 }
 
@@ -129,6 +156,10 @@ func (s *WalletChallengeService) MarkUsed(ctx context.Context, id string, usedAt
 	if challenge == nil {
 		return nil, ErrWalletChallengeNotFound
 	}
+
+	challenge.Purpose = normalizeWalletChallengePurpose(challenge.Purpose)
+	challenge.RequestedByUserID = strings.TrimSpace(challenge.RequestedByUserID)
+
 	return challenge, nil
 }
 
@@ -145,7 +176,12 @@ func (s *WalletChallengeService) buildMessage(ch *WalletChallenge) string {
 		}
 	}
 
-	return strings.Join([]string{
+	purposeLine := "Purpose: SCAVO Exchange wallet authentication bootstrap."
+	if normalizeWalletChallengePurpose(ch.Purpose) == WalletChallengePurposeLinkWallet {
+		purposeLine = "Purpose: SCAVO Exchange authenticated wallet linking confirmation."
+	}
+
+	lines := []string{
 		fmt.Sprintf("%s wants you to sign in with your wallet.", domain),
 		"",
 		fmt.Sprintf("Address: %s", ch.Address),
@@ -155,8 +191,25 @@ func (s *WalletChallengeService) buildMessage(ch *WalletChallenge) string {
 		fmt.Sprintf("Expiration Time: %s", ch.ExpiresAt.Format(time.RFC3339)),
 		fmt.Sprintf("URI: %s", uri),
 		"",
-		"Purpose: SCAVO Exchange wallet authentication bootstrap.",
-	}, "\n")
+		purposeLine,
+	}
+
+	if requestedBy := strings.TrimSpace(ch.RequestedByUserID); requestedBy != "" {
+		lines = append(lines, fmt.Sprintf("Requested By User ID: %s", requestedBy))
+	}
+
+	return strings.Join(lines, "\n")
+}
+
+func normalizeWalletChallengePurpose(purpose string) string {
+	switch strings.TrimSpace(strings.ToLower(purpose)) {
+	case "", WalletChallengePurposeAuthBootstrap:
+		return WalletChallengePurposeAuthBootstrap
+	case WalletChallengePurposeLinkWallet:
+		return WalletChallengePurposeLinkWallet
+	default:
+		return WalletChallengePurposeAuthBootstrap
+	}
 }
 
 func normalizeChain(chain string) string {

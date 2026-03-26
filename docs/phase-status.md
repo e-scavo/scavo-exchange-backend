@@ -27,59 +27,72 @@ Status: ✅ Completed
 | 0.4.5 | Wallet signature verification and token issuance | ✅ Completed |
 | 0.4.6 | Wallet identity persistence and durable challenge storage | ✅ Completed |
 | 0.4.7 | Wallet ↔ user linking and unified identity model | ✅ Completed |
+| 0.4.8 | Account consolidation and multi-wallet ownership foundations | ✅ Completed |
+| 0.4.9 | User-driven wallet linking contract and protected account merge preparation | ✅ Completed |
 
 ---
 
-## ✅ Phase 0.4.7 Closure Summary
+## ✅ Phase 0.4.9 Closure Summary
 
-Phase 0.4.7 closes the gap between durable wallet identities and durable platform users.
+Phase 0.4.9 introduces the first authenticated wallet-management contract on top of the durable identity and ownership model created in previous subphases.
 
-### Delivered in 0.4.7
+The backend can now accept an authenticated request from an already logged-in user, generate a wallet-linking challenge, verify the signed challenge, and attach a secondary wallet without issuing a new login session or performing risky account merge heuristics.
 
-- durable wallet identity → user linkage through PostgreSQL
-- automatic wallet-backed user provisioning in `users`
-- unified user resolution for wallet-authenticated sessions
-- JWT enrichment with both wallet metadata and linked user identity
-- `auth_wallet_identities.user_id` persistence model
-- in-memory fallback linkage behavior for non-DB environments
-- preservation of the existing challenge / verify contract
+### Delivered in 0.4.9
+
+- authenticated wallet-link challenge endpoint
+- authenticated wallet-link verify endpoint
+- challenge purpose separation:
+  - `auth_bootstrap`
+  - `wallet_link`
+- persisted challenge metadata:
+  - `purpose`
+  - `requested_by_user_id`
+- protected rejection of mismatched user-bound link challenges
+- protected rejection of linking a wallet already owned by another user
+- secondary-wallet attachment with `is_primary = false`
+- updated wallet inventory returned after successful linking
 
 ---
 
 ## 🔍 Functional Result
 
-The system now supports the following wallet-auth sequence:
+The system now supports the following linked-wallet sequence under an existing authenticated session:
 
-1. Challenge issuance
-2. Challenge persistence
-3. Signature verification
-4. Single-use challenge consumption
-5. Wallet identity resolution or creation
-6. Linked platform user resolution or creation
-7. JWT issuance with unified identity metadata
-8. Stable session/user hydration across REST and WebSocket
+1. user authenticates normally
+2. user requests wallet-link challenge
+3. challenge is persisted with `wallet_link` purpose and `requested_by_user_id`
+4. user signs with the secondary wallet
+5. backend verifies signature and user-bound challenge
+6. wallet identity is resolved
+7. ownership conflict is checked
+8. wallet is attached as a non-primary wallet
+9. updated owned-wallet list is returned
 
 ---
 
-## ❌ Not Included in 0.4.7
+## ❌ Not Included in 0.4.9
 
-The following items remain intentionally out of scope for this subphase:
+The following items remain intentionally out of scope:
 
-- user-driven wallet management endpoints
-- multi-wallet account ownership
+- wallet unlink endpoint
+- primary-wallet switch endpoint
+- cross-user wallet transfer
+- automatic account-merge execution
+- merge between wallet identities and future auth methods
 - refresh tokens
 - revocation flows
 - persistent authenticated session storage
-- auth-method merge workflows
 
 ---
 
 ## ⏭️ Next Phase
 
-### 0.4.8 — Account Consolidation and Multi-Wallet Ownership Foundations
+### 0.4.10 — Wallet Ownership Management and Merge-Safe Identity Progression
 
 Planned focus:
 
-- prepare a first account aggregation model beyond 1:1 wallet ownership
-- define safe primitives for future manual wallet linking and unlinking
-- introduce ownership semantics that can support exchange-grade account logic
+- introduce safe wallet detach / unlink semantics
+- define protected primary-wallet switching
+- deepen merge-safe identity rules
+- continue progression from ownership model toward account-level management

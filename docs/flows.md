@@ -2,14 +2,15 @@
 
 ## 🧠 Overview
 
-This document describes the operational flows of authentication, identity resolution, and wallet ownership within the SCAVO Exchange Backend.
+This document describes the operational flows of authentication, identity resolution, wallet ownership, and authenticated wallet linking within the SCAVO Exchange Backend.
 
-Flows are designed to reflect the evolution from:
+The flow evolution is:
 
 - stateless wallet login
 - → persistent wallet identity
-- → unified user identity
+- → unified durable user identity
 - → multi-wallet ownership model
+- → authenticated wallet-link contract
 
 ---
 
@@ -17,59 +18,46 @@ Flows are designed to reflect the evolution from:
 
 ### Description
 
-This is the primary authentication mechanism using EVM-compatible wallets.
-
----
+Primary authentication mechanism using EVM-compatible wallets.
 
 ### Flow
 
-1. Client requests a challenge:
-
+1. client requests challenge  
    `POST /auth/wallet/challenge`
 
-2. Backend:
-
+2. backend:
    - normalizes wallet address
-   - generates a unique challenge
-   - stores it with expiration
+   - generates unique challenge
+   - persists challenge with `purpose = auth_bootstrap`
 
-3. Client signs the challenge message
+3. client signs challenge message
 
-4. Client sends verification request:
-
+4. client sends verification request  
    `POST /auth/wallet/verify`
 
-5. Backend:
-
+5. backend:
    - validates challenge existence
    - checks expiration
+   - checks unused state
    - verifies signature
    - recovers wallet address
    - ensures address matches
 
-6. Challenge is marked as used (one-time use)
+6. challenge is marked as used
 
-7. Wallet identity is resolved:
+7. wallet identity is resolved:
+   - loaded if exists
+   - created if missing
 
-   - retrieved if exists
-   - created if not
+8. durable user is resolved:
+   - loaded if linked
+   - created if missing
 
-8. User is resolved:
+9. ownership is enforced:
+   - wallet linked if previously unowned
+   - ownership conflict rejected
 
-   - retrieved if linked
-   - created if not
-
-9. Ownership is enforced:
-
-   - wallet is linked to user if not already linked
-   - reassignment is rejected
-
-10. Primary wallet semantics are applied:
-
-   - first wallet becomes primary
-   - additional wallets remain non-primary (future expansion)
-
-11. JWT is issued with unified identity
+10. JWT is issued with unified identity
 
 ---
 
@@ -79,26 +67,16 @@ This is the primary authentication mechanism using EVM-compatible wallets.
 
 Defines how the system transitions from wallet identity to durable user identity.
 
----
-
 ### Flow
 
-1. Wallet identity is loaded
-2. Check `user_id`:
-
-   - if present:
-     - load user
-   - if missing:
-     - create user
-     - link identity → user
-
-3. Ensure ownership consistency:
-
-   - wallet cannot belong to multiple users
-
-4. Return unified identity:
-
-   - user + wallet context
+1. wallet identity is loaded
+2. backend checks `user_id`
+3. if `user_id` exists:
+   - load durable user
+4. if `user_id` is missing:
+   - create durable wallet-backed user
+   - attach wallet identity to user
+5. return unified identity
 
 ---
 
@@ -106,29 +84,20 @@ Defines how the system transitions from wallet identity to durable user identity
 
 ### Description
 
-Defines how wallet ownership is managed and enforced.
-
----
+Defines how wallet ownership is persisted and enforced.
 
 ### Flow
 
-1. Wallet identity exists or is created
-2. System evaluates ownership:
-
-   - if `user_id` is empty:
-     - assign to user
+1. wallet identity exists or is created
+2. system evaluates ownership:
+   - if `user_id` empty:
+     - assign user
      - set `linked_at`
-     - set `is_primary = true`
-
+     - set `is_primary = true` for first wallet
    - if `user_id` exists:
-     - verify ownership
-     - reject if mismatch
-
-3. Ownership metadata is persisted:
-
-   - `user_id`
-   - `linked_at`
-   - `is_primary`
+     - validate ownership
+     - reject mismatch
+3. ownership metadata persists independently of JWT session
 
 ---
 
@@ -138,20 +107,16 @@ Defines how wallet ownership is managed and enforced.
 
 Prevents invalid ownership transitions.
 
----
-
 ### Flow
 
-1. Wallet identity retrieved
-2. Incoming user ID compared against existing `user_id`
-3. If mismatch:
-
+1. wallet identity retrieved
+2. incoming user compared with persisted `user_id`
+3. if persisted owner differs:
    - reject operation
-   - return `ErrWalletIdentityAlreadyLinked`
-
-4. If match:
-
-   - allow operation
+   - return ownership conflict
+4. if same owner:
+   - allow read operations
+   - prevent unsafe duplicate-link semantics where required
 
 ---
 
@@ -159,45 +124,74 @@ Prevents invalid ownership transitions.
 
 ### Description
 
-Allows clients to retrieve all wallets linked to the authenticated user.
-
----
+Returns all wallets linked to the authenticated durable user.
 
 ### Flow
 
-1. Client sends request:
-
+1. client sends  
    `GET /auth/wallets`
+2. backend validates JWT
+3. backend extracts `user_id`
+4. backend loads all wallet identities for that user
+5. backend orders results:
+   - primary first
+   - then by `linked_at`
+   - then by address
+6. backend returns wallet list
 
-2. Backend:
+---
 
-   - extracts JWT from request
-   - validates token
-   - extracts `user_id` from claims
+## 🔗 Authenticated Wallet Linking Flow (0.4.9)
 
-3. Backend queries wallet identities:
+### Description
 
-   - filter by `user_id`
-   - order:
-     - primary wallet first
-     - then by `linked_at`
-     - then by address
+Allows an already authenticated user to attach a new secondary wallet to the current durable account.
 
-4. Backend returns:
+### Step A — Link challenge creation
 
-```json
-{
-  "wallets": [
-    {
-      "id": "...",
-      "address": "0x...",
-      "user_id": "...",
-      "linked_at": "...",
-      "is_primary": true
-    }
-  ]
-}
-```
+1. client sends  
+   `POST /auth/wallets/link/challenge`
+
+2. request includes:
+   - target wallet address
+   - chain
+
+3. backend validates JWT and extracts current `user_id`
+
+4. backend creates challenge with:
+   - `purpose = wallet_link`
+   - `requested_by_user_id = current user`
+
+5. backend returns challenge for signature
+
+---
+
+### Step B — Link verification
+
+1. client signs the link challenge with the target secondary wallet
+2. client sends  
+   `POST /auth/wallets/link/verify`
+
+3. backend validates:
+   - challenge existence
+   - unused state
+   - expiration
+   - challenge purpose
+   - challenge user binding
+   - signature correctness
+   - wallet address correctness
+
+4. backend resolves wallet identity
+
+5. backend enforces ownership:
+   - reject if wallet belongs to another user
+   - reject if wallet already linked to current user
+   - attach as secondary if unowned
+
+6. backend consumes challenge
+7. backend returns:
+   - linked wallet
+   - updated wallet inventory
 
 ---
 
@@ -207,66 +201,46 @@ Allows clients to retrieve all wallets linked to the authenticated user.
 
 Defines how authenticated sessions are resolved.
 
----
-
 ### Flow
 
-1. Client sends request with JWT:
-
-   `Authorization: Bearer <token>`
-
-2. Backend:
-
-   - validates token
-   - parses claims
-
-3. Backend resolves identity:
-
-   - loads user
-   - attaches wallet context
-
-4. Returns session:
-
-   `/auth/me` or `/auth/session`
+1. client sends request with JWT
+2. backend validates token
+3. backend parses claims
+4. backend resolves durable user
+5. backend attaches wallet context from claims
+6. backend returns session through:
+   - `/auth/me`
+   - `/auth/session`
 
 ---
 
 ## ⚙️ Error Handling Flow
 
 ### Wallet Challenge
-
 - invalid address → `invalid_wallet_address`
 - expired challenge → `wallet_challenge_expired`
 - reused challenge → `wallet_challenge_used`
 
----
-
 ### Wallet Verification
-
 - invalid signature → `invalid_wallet_signature`
 - challenge not found → `wallet_challenge_not_found`
 
----
-
-### Ownership
-
-- wallet already linked → `wallet_identity_already_linked`
-
----
-
-## 🧭 Future Flow Extensions (Post 0.4.8)
-
-### Planned in 0.4.9
-
-- user-driven wallet linking flow
-- ownership confirmation flows
-- conflict resolution flows
+### Wallet Linking
+- wrong challenge purpose → `wallet_challenge_purpose_mismatch`
+- challenge belongs to different authenticated user → `wallet_link_challenge_user_mismatch`
+- wallet already linked elsewhere → `wallet_identity_already_linked`
+- wallet already linked to current user → `wallet_identity_already_linked_to_user`
 
 ---
+
+## 🧭 Future Flow Extensions (Post 0.4.9)
+
+### Planned in 0.4.10
+- wallet unlink flow
+- primary-wallet switching flow
+- deeper wallet-management contracts
 
 ### Later phases
-
-- wallet unlink flow
 - multi-auth merge flow
 - account consolidation flow
 - recovery flow
@@ -275,13 +249,13 @@ Defines how authenticated sessions are resolved.
 
 ## 🧩 Summary
 
-At the end of Phase 0.4.8:
+At the end of Phase 0.4.9:
 
 - authentication is stable
 - identity is unified
 - ownership is enforced
-- multi-wallet support is structurally enabled
+- user-driven wallet linking is implemented under authenticated control
 
-The system is ready to transition from:
+The backend now transitions from:
 
-**authentication flows → ownership flows → account-level flows**
+**authentication flows → ownership flows → authenticated wallet-management flows**

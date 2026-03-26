@@ -217,3 +217,103 @@ func TestHTTPHandlers_Wallets_Success(t *testing.T) {
 		t.Fatal("expected primary wallet")
 	}
 }
+
+func TestHTTPHandlers_WalletLinkChallenge_Success(t *testing.T) {
+	store := NewInMemoryWalletChallengeStore()
+
+	h := HTTPHandlers{
+		Tokens:       mustTokenService(t),
+		TTL:          time.Hour,
+		Users:        usermod.NewService(nil),
+		Challenges:   store,
+		ChallengeTTL: 5 * time.Minute,
+	}
+
+	req := httptest.NewRequest(http.MethodPost, "/auth/wallets/link/challenge", strings.NewReader(`{"address":"0x1111111111111111111111111111111111111111","chain":"scavium"}`))
+	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	rec := httptest.NewRecorder()
+
+	h.WalletLinkChallenge(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+
+	var payload WalletLinkChallengeResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("decode error: %v", err)
+	}
+	if payload.Challenge == nil {
+		t.Fatal("expected challenge payload")
+	}
+	if payload.Challenge.Purpose != WalletChallengePurposeLinkWallet {
+		t.Fatalf("unexpected challenge purpose: %q", payload.Challenge.Purpose)
+	}
+	if payload.Challenge.RequestedByUserID != "u_test_example_com" {
+		t.Fatalf("unexpected requested user id: %q", payload.Challenge.RequestedByUserID)
+	}
+}
+
+func TestHTTPHandlers_WalletLinkVerify_Success(t *testing.T) {
+	challengeStore := NewInMemoryWalletChallengeStore()
+	identityStore := NewInMemoryWalletIdentityStore()
+
+	primaryAddress, _ := signWalletMessageForScalar(t, "bootstrap", "1")
+	primaryIdentity, err := identityStore.GetOrCreate(context.Background(), primaryAddress)
+	if err != nil {
+		t.Fatalf("GetOrCreate primary error: %v", err)
+	}
+	_, err = identityStore.AttachUser(context.Background(), primaryIdentity.ID, "u_test_example_com", true)
+	if err != nil {
+		t.Fatalf("AttachUser primary error: %v", err)
+	}
+
+	secondaryAddress, _ := signWalletMessageForScalar(t, "bootstrap2", "2")
+	challengeSvc := NewWalletChallengeService(challengeStore, "https://api.scavo.exchange", 5*time.Minute)
+	challenge, err := challengeSvc.CreateWithOptions(context.Background(), secondaryAddress, "scavium", WalletChallengeOptions{
+		Purpose:           WalletChallengePurposeLinkWallet,
+		RequestedByUserID: "u_test_example_com",
+	})
+	if err != nil {
+		t.Fatalf("CreateWithOptions error: %v", err)
+	}
+	_, signature := signWalletMessageForScalar(t, challenge.Message, "2")
+
+	h := HTTPHandlers{
+		Tokens:           mustTokenService(t),
+		TTL:              time.Hour,
+		Users:            usermod.NewService(nil),
+		Challenges:       challengeStore,
+		WalletIdentities: identityStore,
+		ChallengeTTL:     5 * time.Minute,
+		PublicBaseURL:    "https://api.scavo.exchange",
+	}
+
+	body := `{"challenge_id":"` + challenge.ID + `","address":"` + secondaryAddress + `","signature":"` + signature + `"}`
+	req := httptest.NewRequest(http.MethodPost, "/auth/wallets/link/verify", strings.NewReader(body))
+	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	rec := httptest.NewRecorder()
+
+	h.WalletLinkVerify(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+
+	var payload WalletLinkVerifyResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("decode error: %v", err)
+	}
+	if payload.LinkedWallet == nil {
+		t.Fatal("expected linked wallet")
+	}
+	if payload.LinkedWallet.UserID != "u_test_example_com" {
+		t.Fatalf("unexpected linked wallet user id: %q", payload.LinkedWallet.UserID)
+	}
+	if payload.LinkedWallet.IsPrimary {
+		t.Fatal("expected linked wallet to remain secondary")
+	}
+	if len(payload.Wallets) != 2 {
+		t.Fatalf("expected 2 wallets, got %d", len(payload.Wallets))
+	}
+}

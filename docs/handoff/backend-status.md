@@ -16,7 +16,7 @@ It is intended to:
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.4 — Auth and User Stabilization  
-**Latest Completed Subphase:** 0.4.8 — Account Consolidation and Multi-Wallet Ownership Foundations  
+**Latest Completed Subphase:** 0.4.9 — User-Driven Wallet Linking Contract and Protected Account Merge Preparation
 
 ---
 
@@ -24,16 +24,16 @@ It is intended to:
 
 ### Implemented
 
-- Password-based authentication (dev only)
-- Wallet-based authentication (EVM)
+- password-based authentication (dev only)
+- wallet-based authentication (EVM)
 
-Wallet flow:
+Wallet login flow supports:
 
 - challenge generation
 - signature verification
 - challenge consumption (one-time use)
 - wallet identity resolution
-- user resolution / creation
+- durable user resolution / creation
 - ownership enforcement
 - JWT issuance
 
@@ -41,64 +41,93 @@ Wallet flow:
 
 ## 🧩 Identity Model Status
 
-The system now uses a **unified identity model**:
+The system uses a **unified durable identity model**:
 
 - wallet identities are persisted
 - each wallet is linked to a durable user
-- JWT reflects unified identity
+- JWT reflects unified identity through `user_id`
+- wallet metadata remains available for wallet-authenticated sessions
 
 ---
 
-## 🏷️ Ownership Model Status (0.4.8)
+## 🏷️ Ownership Model Status
 
-Ownership is now a **first-class concept**.
+Ownership is a first-class persisted concept.
 
 ### Capabilities
 
 - one user can own multiple wallets
 - wallet ownership is persisted
-- ownership metadata:
+- ownership metadata includes:
   - `user_id`
   - `linked_at`
   - `is_primary`
-- primary wallet designation enforced
-- ownership reassignment is blocked
+- primary-wallet uniqueness enforced
+- wallet reassignment across users blocked
+
+---
+
+## 🔗 Authenticated Wallet Linking Status (0.4.9)
+
+The backend now supports an authenticated wallet-linking contract.
+
+### Capabilities
+
+- authenticated user can request wallet-link challenge
+- challenge is persisted with:
+  - `purpose = wallet_link`
+  - `requested_by_user_id`
+- authenticated user can verify link signature
+- secondary wallet attaches to current user
+- updated wallet inventory is returned after successful linking
+
+### Protections
+
+- link challenge must belong to current authenticated user
+- wrong-purpose challenge is rejected
+- wallet already owned by another user is rejected
+- wallet already linked to current user is rejected
+- successful link does not issue a new JWT and does not implicitly merge accounts
 
 ---
 
 ## 🗄️ Persistence Status
 
-### Tables
-
-#### `auth_wallet_challenges`
+### `auth_wallet_challenges`
 - persistent
 - expiration enforced
 - single-use enforced
+- now supports:
+  - `purpose`
+  - `requested_by_user_id`
 
----
-
-#### `auth_wallet_identities`
+### `auth_wallet_identities`
 - persistent wallet registry
 - ownership metadata included
+- multi-wallet ownership supported
 
----
-
-#### `users`
+### `users`
 - durable user representation
 - wallet-backed users supported
+- prepared for later multi-auth evolution
 
 ---
 
 ## 🔌 API Status
 
 ### Auth endpoints
-
 - `POST /auth/login`
 - `POST /auth/wallet/challenge`
 - `POST /auth/wallet/verify`
 - `GET /auth/me`
 - `GET /auth/session`
-- `GET /auth/wallets` ← introduced in 0.4.8
+
+### Ownership endpoints
+- `GET /auth/wallets`
+
+### Wallet-link endpoints
+- `POST /auth/wallets/link/challenge`
+- `POST /auth/wallets/link/verify`
 
 ---
 
@@ -117,6 +146,8 @@ Claims include:
 - `wallet_address`
 - `auth_method`
 
+Wallet linking uses the already authenticated JWT and does not mint a replacement token.
+
 ---
 
 ## ⚙️ Behavioral Guarantees
@@ -130,62 +161,56 @@ The backend guarantees:
 - ownership is consistent and enforced
 - wallets cannot be reassigned across users
 - primary wallet uniqueness is maintained
+- link challenges are user-bound
+- link and login challenge purposes are not interchangeable
 
 ---
 
 ## 🧪 Testing Status
 
-Validated through:
+Validated at the design and code level through:
 
 - `go test ./...`
-- manual API testing
+- manual API testing procedures
 - SQL verification queries
 
-Coverage includes:
+Coverage now includes:
 
 - wallet auth flow
 - identity linking
 - ownership enforcement
 - replay protection
+- wallet-link challenge flow
+- wallet-link verification flow
+- ownership conflict rejection during link operations
 
 ---
 
 ## ⚠️ Known Limitations
 
-The system intentionally does NOT yet support:
+The system intentionally does **not** yet support:
 
-- user-driven wallet linking API
 - wallet unlink operations
+- primary-wallet switching
 - cross-user wallet transfer
-- auth method merging (wallet + email)
+- automatic account merge execution
+- merge between wallet identities and future auth methods
 - refresh tokens
 - token revocation
-- persistent sessions
+- persistent authenticated sessions
 
 ---
 
 ## 🧭 Next Phase
 
-### 0.4.9 — User-Driven Wallet Linking Contract and Protected Account Merge Preparation
+### 0.4.10 — Wallet Ownership Management and Merge-Safe Identity Progression
 
-This phase will introduce:
+Expected next focus:
 
-- wallet linking endpoints
-- ownership validation flows
-- controlled linking operations
-- merge-safe identity model
-- preparation for account consolidation
-
----
-
-## 🧩 Long-Term Direction
-
-Future evolution includes:
-
-- multi-auth identity system
-- account consolidation
-- recovery flows
-- compliance-ready identity layer
+- detach / unlink semantics
+- primary-wallet switching
+- stronger account-level ownership management
+- deeper merge-safe identity preparation
 
 ---
 
@@ -195,21 +220,19 @@ When continuing development:
 
 - do not break ownership invariants
 - do not allow wallet reassignment
-- preserve backward compatibility
-- evolve identity model incrementally
+- do not bypass challenge-purpose checks
+- preserve backward compatibility of wallet login
+- keep challenge-to-user binding explicit in wallet-management flows
 - maintain documentation alignment with implementation
 
 ---
 
 ## 🧾 Summary
 
-At the end of Phase 0.4.8:
+At the end of Phase 0.4.9:
 
 - authentication is stable
 - identity is unified
-- ownership is implemented
-- multi-wallet support is structurally enabled
-
-The backend is now ready to transition into:
-
-➡️ **controlled identity expansion and account-level features**
+- ownership is implemented and protected
+- authenticated wallet linking is implemented
+- the backend is ready to move into deeper account-level wallet management

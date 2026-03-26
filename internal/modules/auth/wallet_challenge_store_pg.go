@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -32,17 +33,21 @@ func (s *WalletChallengeStorePG) Save(ctx context.Context, challenge *WalletChal
 			chain,
 			nonce,
 			message,
+			purpose,
+			requested_by_user_id,
 			issued_at,
 			expires_at,
 			used_at
 		)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 	`,
 		challenge.ID,
 		challenge.Address,
 		challenge.Chain,
 		challenge.Nonce,
 		challenge.Message,
+		normalizeWalletChallengePurpose(challenge.Purpose),
+		nilIfEmpty(challenge.RequestedByUserID),
 		challenge.IssuedAt.UTC(),
 		challenge.ExpiresAt.UTC(),
 		challenge.UsedAt,
@@ -62,6 +67,8 @@ func (s *WalletChallengeStorePG) GetByID(ctx context.Context, id string) (*Walle
 			chain,
 			nonce,
 			message,
+			COALESCE(purpose, 'auth_bootstrap'),
+			COALESCE(requested_by_user_id, ''),
 			issued_at,
 			expires_at,
 			used_at
@@ -78,6 +85,8 @@ func (s *WalletChallengeStorePG) GetByID(ctx context.Context, id string) (*Walle
 		&challenge.Chain,
 		&challenge.Nonce,
 		&challenge.Message,
+		&challenge.Purpose,
+		&challenge.RequestedByUserID,
 		&challenge.IssuedAt,
 		&challenge.ExpiresAt,
 		&usedAt,
@@ -94,9 +103,7 @@ func (s *WalletChallengeStorePG) GetByID(ctx context.Context, id string) (*Walle
 		challenge.UsedAt = &ts
 	}
 
-	challenge.IssuedAt = challenge.IssuedAt.UTC()
-	challenge.ExpiresAt = challenge.ExpiresAt.UTC()
-
+	normalizeWalletChallengeLoaded(&challenge)
 	return &challenge, nil
 }
 
@@ -120,6 +127,8 @@ func (s *WalletChallengeStorePG) Use(ctx context.Context, id string, usedAt time
 			chain,
 			nonce,
 			message,
+			COALESCE(purpose, 'auth_bootstrap'),
+			COALESCE(requested_by_user_id, ''),
 			issued_at,
 			expires_at,
 			used_at
@@ -137,6 +146,8 @@ func (s *WalletChallengeStorePG) Use(ctx context.Context, id string, usedAt time
 		&challenge.Chain,
 		&challenge.Nonce,
 		&challenge.Message,
+		&challenge.Purpose,
+		&challenge.RequestedByUserID,
 		&challenge.IssuedAt,
 		&challenge.ExpiresAt,
 		&currentUsedAt,
@@ -166,13 +177,31 @@ func (s *WalletChallengeStorePG) Use(ctx context.Context, id string, usedAt time
 		return nil, err
 	}
 
+	challenge.UsedAt = &ts
+	normalizeWalletChallengeLoaded(&challenge)
+
 	if err := tx.Commit(ctx); err != nil {
 		return nil, err
 	}
 
+	return &challenge, nil
+}
+
+func normalizeWalletChallengeLoaded(challenge *WalletChallenge) {
+	if challenge == nil {
+		return
+	}
+
 	challenge.IssuedAt = challenge.IssuedAt.UTC()
 	challenge.ExpiresAt = challenge.ExpiresAt.UTC()
-	challenge.UsedAt = &ts
+	challenge.Purpose = normalizeWalletChallengePurpose(challenge.Purpose)
+	challenge.RequestedByUserID = strings.TrimSpace(challenge.RequestedByUserID)
+}
 
-	return &challenge, nil
+func nilIfEmpty(v string) any {
+	v = strings.TrimSpace(v)
+	if v == "" {
+		return nil
+	}
+	return v
 }

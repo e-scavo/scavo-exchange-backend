@@ -10,10 +10,10 @@ Stabilize authentication, user identity, and wallet-based login flows, transitio
 
 At the beginning of Phase 0.4:
 
-- Authentication was partially implemented
-- Wallet login existed but lacked persistence
-- No durable relationship existed between wallets and platform users
-- Identity was fragmented across sessions
+- authentication was partially implemented
+- wallet login existed but lacked persistence
+- no durable relationship existed between wallets and platform users
+- identity was fragmented across sessions
 
 This phase progressively transforms the system into a consistent identity layer.
 
@@ -23,10 +23,12 @@ This phase progressively transforms the system into a consistent identity layer.
 
 The system required:
 
-- Deterministic authentication flows
-- Persistent identity representation
-- Wallet-based login suitable for production evolution
-- A unified identity model compatible with multiple auth methods
+- deterministic authentication flows
+- persistent identity representation
+- wallet-based login suitable for production evolution
+- a unified identity model compatible with multiple auth methods
+- explicit wallet ownership semantics
+- a safe bridge toward user-managed account expansion
 
 ---
 
@@ -34,144 +36,149 @@ The system required:
 
 Phase 0.4 focuses on:
 
-- Authentication stabilization
-- Wallet login correctness
-- Identity persistence
-- User abstraction
-- Session unification
-- Ownership foundations (introduced in 0.4.8)
+- authentication stabilization
+- wallet login correctness
+- identity persistence
+- user abstraction
+- session unification
+- ownership foundations
+- authenticated wallet-management primitives
 
 ---
 
 ## 🧩 Subphases Breakdown
 
----
-
 ### 0.4.1 — Auth Baseline Stabilization
 
 #### Implemented
-
-- Initial auth service structure
-- Token generation baseline
-- Basic login handling
+- initial auth service structure
+- token generation baseline
+- basic login handling
 
 #### Result
-
-- System capable of issuing JWT tokens
-- Still lacked identity consistency
+- system capable of issuing JWT tokens
+- identity consistency still incomplete
 
 ---
 
 ### 0.4.2 — Token Service Stabilization
 
 #### Implemented
-
-- Token service refactor
-- Claim normalization
-- Expiration handling
+- token service refactor
+- claim normalization
+- expiration handling
 
 #### Result
-
-- Reliable JWT issuance
-- Improved token parsing consistency
+- reliable JWT issuance
+- improved token parsing consistency
 
 ---
 
 ### 0.4.3 — Session Model Stabilization
 
 #### Implemented
-
-- Session abstraction
+- session abstraction
 - `/auth/me` and `/auth/session` endpoints
-- Claims hydration
+- claims hydration
 
 #### Result
-
-- Session identity accessible across requests
-- Still not tied to persistent entities
+- session identity accessible across requests
+- still not durably tied to persistent entities
 
 ---
 
 ### 0.4.4 — Wallet Challenge Flow
 
 #### Implemented
-
-- Wallet challenge creation
-- Message signing model
-- Expiration control
+- wallet challenge creation
+- message signing model
+- expiration control
 
 #### Result
-
-- Secure wallet authentication entry point
+- secure wallet-authentication entry point
 
 ---
 
 ### 0.4.5 — Wallet Verification Baseline
 
 #### Implemented
-
-- Signature verification
-- Address recovery
-- Challenge validation
+- signature verification
+- address recovery
+- challenge validation
 
 #### Result
-
-- Functional wallet login
-- Still stateless identity
+- functional wallet login
+- still stateless from the identity-model perspective
 
 ---
 
 ### 0.4.6 — Wallet Identity Persistence
 
 #### Implemented
-
 - `auth_wallet_identities` table
-- Wallet identity storage
-- Durable challenge store
+- wallet identity storage
+- durable challenge store
 
 #### Result
-
-- Wallet identity persisted
-- No user linkage yet
+- wallet identity persisted
+- no durable user linkage yet
 
 ---
 
 ### 0.4.7 — Wallet ↔ User Linking and Unified Identity Model
 
 #### Implemented
-
-- Durable user creation for wallet login
+- durable user creation for wallet login
 - `auth_wallet_identities.user_id`
-- Wallet identity linked to platform user
-- Unified JWT identity model
+- wallet identity linked to platform user
+- unified JWT identity model
 
 #### Result
-
-- Wallet login produces a durable user
+- wallet login produces a durable user
 - `/auth/me` resolves unified identity
-- System transitions from wallet identity → user identity
+- system transitions from wallet identity → user identity
 
 ---
 
 ### 0.4.8 — Account Consolidation and Multi-Wallet Ownership Foundations
 
 #### Implemented
-
-- Removal of 1:1 wallet-user restriction
-- Ownership metadata introduced:
+- removal of the 1:1 wallet-user restriction
+- ownership metadata introduced:
   - `linked_at`
   - `is_primary`
-- Safe attachment semantics:
-  - prevents reassignment of wallet to another user
-- Read-only ownership inspection:
-  - `GET /auth/wallets`
+- safe attachment semantics preventing reassignment to another user
+- authenticated read-only wallet listing via `GET /auth/wallets`
 
 #### Result
+- one durable platform user can own multiple wallets
+- primary wallet concept is established
+- ownership becomes a first-class persisted concern
 
-- One user can own multiple wallets
-- Primary wallet concept established
-- Ownership persistence becomes first-class concern
-- System ready for controlled identity expansion
+---
+
+### 0.4.9 — User-Driven Wallet Linking Contract and Protected Account Merge Preparation
+
+#### Implemented
+- authenticated linking challenge flow:
+  - `POST /auth/wallets/link/challenge`
+- authenticated linking verification flow:
+  - `POST /auth/wallets/link/verify`
+- challenge metadata extensions:
+  - `purpose`
+  - `requested_by_user_id`
+- challenge-purpose separation between:
+  - login bootstrap
+  - wallet linking
+- user-bound challenge validation for linking flows
+- protected rejection of linking wallets already owned by another user
+- protected rejection of relinking a wallet already owned by the current user
+- secondary-wallet attach behavior with `is_primary = false`
+- updated wallet inventory response after successful linking
+
+#### Result
+- the backend now supports the first controlled wallet-management operation under an authenticated user session
+- the system advances from ownership persistence toward account-level wallet control without introducing risky merge automation
 
 ---
 
@@ -179,43 +186,44 @@ Phase 0.4 focuses on:
 
 The initial architecture lacked:
 
-- Persistent identity boundaries
-- Clear ownership semantics
-- Separation between wallet identity and user identity
+- persistent identity boundaries
+- clear ownership semantics
+- separation between wallet identity and user identity
+- any authenticated contract for user-managed wallet expansion
 
-Each subphase incrementally addressed these gaps.
+Each subphase incrementally addressed one structural gap while preserving backward compatibility.
 
 ---
 
 ## 📂 Files Affected
 
 ### Core modules
-
 - `internal/modules/auth/*`
 - `internal/modules/user/*`
 - `internal/core/auth/*`
 
 ### Persistence
-
 - `auth_wallet_challenges`
 - `auth_wallet_identities`
 - `users`
 
 ### HTTP layer
-
 - wallet challenge handlers
 - wallet verify handlers
-- wallet listing endpoint (`/auth/wallets`)
+- wallet inventory endpoint
+- authenticated wallet-link handlers
 
 ---
 
 ## ⚙️ Implementation Characteristics
 
-- Backward compatible across subphases
-- Incremental persistence introduction
-- Stateless sessions with durable backing
-- In-memory fallback preserved
-- Ownership rules enforced at store level
+- backward-compatible with previous wallet login flow
+- incremental persistence evolution
+- stateless sessions with durable backing state
+- in-memory fallback preserved
+- challenge-purpose separation introduced without forking the entire challenge subsystem
+- ownership rules remain enforced at the store layer
+- link contract remains explicitly authenticated
 
 ---
 
@@ -228,54 +236,58 @@ go test ./...
 ```
 
 ### Behavioral
-
-- wallet login creates or resolves user
+- wallet login creates or resolves durable user
 - wallet identity is persisted
-- identity is linked to user
-- `/auth/me` returns unified identity
+- ownership is persisted
+- `/auth/me` resolves unified identity
 - `/auth/wallets` returns owned wallets
+- `/auth/wallets/link/challenge` creates user-bound link challenge
+- `/auth/wallets/link/verify` attaches a new secondary wallet
 
 ---
 
 ## 📈 Release Impact
 
-- Enables durable identity
-- Enables multi-wallet future
-- Stabilizes auth for frontend integration
-- Prepares system for account-level features
+- enables authenticated wallet linking without destabilizing login
+- keeps ownership model strict while expanding functionality
+- prepares backend for future account-level wallet operations
+- establishes safer preconditions for later merge-related work
 
 ---
 
 ## ⚠️ Risks
 
-- Ownership logic must remain strict
-- Incorrect linking could compromise identity integrity
-- Future merge flows must respect current constraints
+- challenge-purpose validation must remain strict
+- user-bound link challenge checks must not be bypassed
+- future unlink / transfer flows must preserve current ownership invariants
+- later merge flows must not weaken the explicitness introduced here
 
 ---
 
 ## ❌ What This Phase Does NOT Solve
 
-- Manual wallet linking
-- Wallet unlink
-- Multi-auth merge flows
-- Token revocation
-- Refresh tokens
-- Persistent sessions
+- wallet unlink
+- primary-wallet switching
+- cross-user wallet transfer
+- automatic account merge execution
+- token revocation
+- refresh tokens
+- persistent sessions
 
 ---
 
 ## 🧭 Conclusion
 
-Phase 0.4 establishes a **production-grade authentication and identity foundation**.
+Phase 0.4 now establishes a strong identity and wallet-ownership foundation.
 
-With 0.4.8:
+With 0.4.9:
 
+- wallet authentication is stable
 - identity is durable
-- ownership is modeled
-- wallet login is stable
-- system is ready for controlled account consolidation
+- ownership is persisted
+- authenticated wallet linking is available
+- the backend is prepared for the next controlled step toward real account management
 
-The backend is now prepared for the next evolution step:
+Next expected evolution:
 
-➡️ **0.4.9 — User-Driven Wallet Linking and Account Merge Preparation**
+➡️ **0.4.10 — Wallet Ownership Management and Merge-Safe Identity Progression**

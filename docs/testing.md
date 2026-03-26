@@ -2,14 +2,16 @@
 
 ## 🧠 Overview
 
-This document defines validation procedures for authentication, identity resolution, and wallet ownership within the SCAVO Exchange Backend.
+This document defines validation procedures for authentication, identity resolution, wallet ownership, and authenticated wallet linking within the SCAVO Exchange Backend.
 
-Testing is structured to validate:
+Testing validates:
 
 - functional correctness
 - persistence integrity
 - ownership enforcement
-- API behavior
+- challenge-purpose correctness
+- authenticated wallet-link behavior
+- API contract stability
 
 ---
 
@@ -26,12 +28,13 @@ Expected:
 - no compilation errors
 - all tests passing
 - auth and user modules validated
+- wallet-link flow tests passing
 
 ---
 
 ## 🔐 Wallet Authentication Validation
 
-### Step 1 — Create challenge
+### Step 1 — Create login challenge
 
 ```bash
 curl -s -X POST http://localhost:8080/auth/wallet/challenge \
@@ -43,14 +46,15 @@ Expected:
 
 - `200 OK`
 - challenge returned
-- contains:
+- challenge purpose behaves as login bootstrap
+- payload contains:
   - `id`
   - `message`
   - `expires_at`
 
 ---
 
-### Step 2 — Verify wallet
+### Step 2 — Verify wallet login
 
 ```bash
 curl -s -X POST http://localhost:8080/auth/wallet/verify \
@@ -72,7 +76,7 @@ Expected:
 
 ### Step 3 — Replay protection
 
-Repeat verification with same challenge:
+Repeat verification with the same login challenge.
 
 Expected:
 
@@ -88,14 +92,16 @@ Expected:
 After successful login:
 
 ```sql
-SELECT * FROM users WHERE email LIKE '%wallet.scavo';
+SELECT *
+FROM users
+WHERE email LIKE '%wallet.scavo%';
 ```
 
 Expected:
 
-- user exists
-- email derived from wallet
+- wallet-backed durable user exists
 - stable user ID
+- email derived from wallet identity
 
 ---
 
@@ -109,7 +115,7 @@ FROM auth_wallet_identities;
 Expected:
 
 - wallet identity exists
-- `user_id` is NOT NULL
+- `user_id` is not null
 
 ---
 
@@ -120,18 +126,18 @@ Expected:
 ```sql
 SELECT id, address, user_id, linked_at, is_primary
 FROM auth_wallet_identities
-ORDER BY created_at;
+ORDER BY linked_at NULLS LAST, address;
 ```
 
 Expected:
 
-- `linked_at` populated
-- `is_primary = true` for first wallet
+- `linked_at` populated for linked wallets
+- one primary wallet for the first owned wallet
 - `user_id` correctly set
 
 ---
 
-### Primary wallet uniqueness
+### Primary-wallet uniqueness
 
 ```sql
 SELECT user_id, COUNT(*) AS primary_count
@@ -143,18 +149,82 @@ HAVING COUNT(*) > 1;
 
 Expected:
 
-- **no rows returned**
+- no rows returned
 
 ---
 
 ### Ownership enforcement
 
-Try to attach same wallet to another user:
+Try to attach the same wallet to another user.
 
 Expected:
 
 - operation rejected
-- error: `wallet_identity_already_linked`
+- error equivalent to `wallet_identity_already_linked`
+
+---
+
+## 🔗 Wallet Linking Validation (0.4.9)
+
+### Step 1 — Authenticate first
+
+Obtain a valid access token through dev login or wallet login.
+
+---
+
+### Step 2 — Create wallet-link challenge
+
+```bash
+curl -s -X POST http://localhost:8080/auth/wallets/link/challenge \
+  -H "Authorization: Bearer <ACCESS_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"address":"0xSECONDARY...","chain":"scavium"}'
+```
+
+Expected:
+
+- `200 OK`
+- challenge returned
+- challenge includes:
+  - `purpose = wallet_link`
+  - `requested_by_user_id = current authenticated user`
+
+---
+
+### Step 3 — Verify wallet-link challenge
+
+```bash
+curl -s -X POST http://localhost:8080/auth/wallets/link/verify \
+  -H "Authorization: Bearer <ACCESS_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"challenge_id":"...","address":"0xSECONDARY...","signature":"0x..."}'
+```
+
+Expected:
+
+- `200 OK`
+- `linked_wallet` returned
+- linked wallet belongs to current user
+- linked wallet has:
+  - `is_primary = false`
+  - `linked_at` populated
+- `wallets` array reflects the expanded inventory
+
+---
+
+### Step 4 — Validate persisted link
+
+```sql
+SELECT id, address, user_id, linked_at, is_primary
+FROM auth_wallet_identities
+WHERE user_id = '<CURRENT_USER_ID>'
+ORDER BY is_primary DESC, linked_at ASC NULLS LAST, address ASC;
+```
+
+Expected:
+
+- original primary wallet remains primary
+- new linked wallet appears as secondary
 
 ---
 
@@ -167,34 +237,12 @@ curl -s http://localhost:8080/auth/wallets \
   -H "Authorization: Bearer <ACCESS_TOKEN>"
 ```
 
----
+Expected:
 
-### Expected Response
-
-```json
-{
-  "wallets": [
-    {
-      "id": "...",
-      "address": "0x...",
-      "user_id": "...",
-      "linked_at": "...",
-      "is_primary": true
-    }
-  ]
-}
-```
-
----
-
-### Ordering validation
-
-Verify:
-
-- primary wallet appears first
-- secondary wallets sorted by:
-  - `linked_at`
-  - then address
+- `200 OK`
+- `wallets` array returned
+- primary wallet first
+- newly linked wallet included after successful 0.4.9 linking
 
 ---
 
@@ -209,10 +257,8 @@ curl -s http://localhost:8080/auth/me \
 
 Expected:
 
-- unified user identity
-- wallet context present
-
----
+- unified durable user identity
+- wallet-backed context still valid
 
 ### `/auth/session`
 
@@ -220,44 +266,53 @@ Expected:
 
 - consistent claims
 - matches `/auth/me`
+- no forced token refresh after wallet linking
 
 ---
 
 ## ⚠️ Error Handling Validation
 
 ### Invalid address
-
 Expected:
 
 - `400`
 - `invalid_wallet_address`
 
----
-
 ### Invalid signature
-
 Expected:
 
 - `401`
 - `invalid_wallet_signature`
 
----
-
 ### Challenge expired
-
 Expected:
 
 - `401`
 - `wallet_challenge_expired`
 
----
-
-### Wallet already linked
-
+### Wallet already linked to another user
 Expected:
 
-- `409` or `error`
+- `409`
 - `wallet_identity_already_linked`
+
+### Wallet already linked to current user
+Expected:
+
+- `409`
+- `wallet_identity_already_linked_to_user`
+
+### Challenge belongs to another authenticated user
+Expected:
+
+- `403`
+- `wallet_link_challenge_user_mismatch`
+
+### Wrong challenge purpose
+Expected:
+
+- `409`
+- `wallet_challenge_purpose_mismatch`
 
 ---
 
@@ -268,35 +323,35 @@ Modules covered:
 - `internal/modules/auth`
 - `internal/modules/user`
 
-Key validations:
+Key validations now include:
 
 - signature recovery
 - challenge lifecycle
-- identity linking
+- durable identity linking
 - ownership enforcement
+- authenticated wallet-link contract
+- wallet-link conflict rejection
+- wallet inventory refresh after link
 
 ---
 
-## 🧭 Future Testing (Post 0.4.8)
+## 🧭 Future Testing (Post 0.4.9)
 
 Planned:
 
-- wallet linking API tests
 - unlink scenarios
-- ownership transfer edge cases
-- multi-auth merge testing
+- primary-wallet switching scenarios
+- cross-user ownership transfer edge cases
+- multi-auth merge preparation testing
 
 ---
 
 ## 🧩 Summary
 
-Testing at Phase 0.4.8 guarantees:
+Testing at Phase 0.4.9 guarantees:
 
 - authentication correctness
 - identity persistence
 - ownership consistency
-- API stability
-
-The backend is validated for:
-
-**wallet login → user identity → ownership model → multi-wallet readiness**
+- authenticated wallet linking correctness
+- API stability across both login and link flows
