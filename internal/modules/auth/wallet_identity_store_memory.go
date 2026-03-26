@@ -2,8 +2,10 @@ package auth
 
 import (
 	"context"
+	"sort"
 	"strings"
 	"sync"
+	"time"
 )
 
 type InMemoryWalletIdentityStore struct {
@@ -41,19 +43,88 @@ func (s *InMemoryWalletIdentityStore) GetOrCreate(ctx context.Context, address s
 	return &cp, nil
 }
 
-func (s *InMemoryWalletIdentityStore) AttachUser(ctx context.Context, walletID, userID string) (*WalletIdentity, error) {
+func (s *InMemoryWalletIdentityStore) AttachUser(ctx context.Context, walletID, userID string, primary bool) (*WalletIdentity, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
+	walletID = strings.TrimSpace(walletID)
+	userID = strings.TrimSpace(userID)
+	if walletID == "" || userID == "" {
+		return nil, ErrUnauthorized
+	}
+
+	var target *WalletIdentity
 	for _, identity := range s.items {
 		if identity == nil || identity.ID != walletID {
 			continue
 		}
-
-		identity.UserID = strings.TrimSpace(userID)
-		cp := *identity
-		return &cp, nil
+		target = identity
+		break
 	}
 
-	return nil, ErrWalletIdentityNotFound
+	if target == nil {
+		return nil, ErrWalletIdentityNotFound
+	}
+
+	if strings.TrimSpace(target.UserID) != "" && strings.TrimSpace(target.UserID) != userID {
+		return nil, ErrWalletIdentityAlreadyLinked
+	}
+
+	if primary {
+		for _, identity := range s.items {
+			if identity == nil {
+				continue
+			}
+			if strings.TrimSpace(identity.UserID) == userID && identity.ID != walletID {
+				identity.IsPrimary = false
+			}
+		}
+	}
+
+	now := time.Now().UTC()
+	target.UserID = userID
+	if target.LinkedAt == nil {
+		target.LinkedAt = &now
+	}
+	target.IsPrimary = primary
+
+	cp := *target
+	return &cp, nil
+}
+
+func (s *InMemoryWalletIdentityStore) ListByUser(ctx context.Context, userID string) ([]*WalletIdentity, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	userID = strings.TrimSpace(userID)
+	if userID == "" {
+		return []*WalletIdentity{}, nil
+	}
+
+	out := make([]*WalletIdentity, 0)
+	for _, identity := range s.items {
+		if identity == nil {
+			continue
+		}
+		if strings.TrimSpace(identity.UserID) != userID {
+			continue
+		}
+
+		cp := *identity
+		out = append(out, &cp)
+	}
+
+	sort.Slice(out, func(i, j int) bool {
+		if out[i].IsPrimary != out[j].IsPrimary {
+			return out[i].IsPrimary
+		}
+		if out[i].LinkedAt != nil && out[j].LinkedAt != nil {
+			if !out[i].LinkedAt.Equal(*out[j].LinkedAt) {
+				return out[i].LinkedAt.Before(*out[j].LinkedAt)
+			}
+		}
+		return out[i].Address < out[j].Address
+	})
+
+	return out, nil
 }

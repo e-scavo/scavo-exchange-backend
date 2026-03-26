@@ -9,6 +9,7 @@ import (
 	"time"
 
 	coreauth "github.com/e-scavo/scavo-exchange-backend/internal/core/auth"
+	usermod "github.com/e-scavo/scavo-exchange-backend/internal/modules/user"
 )
 
 func testWalletAddress() string {
@@ -66,11 +67,15 @@ func TestRecoverWalletAddress_Success(t *testing.T) {
 func TestWalletVerificationService_VerifyAndLogin_Success(t *testing.T) {
 	store := NewInMemoryWalletChallengeStore()
 	challengeSvc := NewWalletChallengeService(store, "https://api.scavo.exchange", 5*time.Minute)
+
 	tokens, err := coreauth.NewTokenService("dev_dev_dev_dev_dev_dev_dev_dev", "scavo-exchange-backend", time.Hour)
 	if err != nil {
 		t.Fatalf("NewTokenService error: %v", err)
 	}
-	loginSvc := NewService(tokens, nil, time.Hour)
+
+	users := usermod.NewService(&stubUserRepo{})
+	loginSvc := NewService(tokens, users, time.Hour)
+
 	identityStore := NewInMemoryWalletIdentityStore()
 	verifySvc := NewWalletVerificationService(challengeSvc, loginSvc, identityStore)
 
@@ -116,12 +121,29 @@ func TestWalletVerificationService_VerifyAndLogin_Success(t *testing.T) {
 	if claims.AuthMethod != "wallet_evm" {
 		t.Fatalf("unexpected auth method in claims: %q", claims.AuthMethod)
 	}
+
+	wallets, err := identityStore.ListByUser(context.Background(), result.User.ID)
+	if err != nil {
+		t.Fatalf("ListByUser error: %v", err)
+	}
+	if len(wallets) != 1 {
+		t.Fatalf("expected 1 linked wallet, got %d", len(wallets))
+	}
+	if !wallets[0].IsPrimary {
+		t.Fatal("expected primary wallet")
+	}
+	if wallets[0].LinkedAt == nil {
+		t.Fatal("expected linked_at")
+	}
 }
 
 func TestWalletVerificationService_VerifyAndLogin_RejectsReplay(t *testing.T) {
 	store := NewInMemoryWalletChallengeStore()
 	challengeSvc := NewWalletChallengeService(store, "https://api.scavo.exchange", 5*time.Minute)
-	loginSvc := NewService(newTokenServiceForTest(t), nil, time.Hour)
+
+	users := usermod.NewService(&stubUserRepo{})
+	loginSvc := NewService(newTokenServiceForTest(t), users, time.Hour)
+
 	identityStore := NewInMemoryWalletIdentityStore()
 	verifySvc := NewWalletVerificationService(challengeSvc, loginSvc, identityStore)
 
@@ -139,5 +161,25 @@ func TestWalletVerificationService_VerifyAndLogin_RejectsReplay(t *testing.T) {
 
 	if _, _, err := verifySvc.VerifyAndLogin(context.Background(), challenge.ID, address, signature); err != ErrChallengeUsed {
 		t.Fatalf("expected ErrChallengeUsed, got %v", err)
+	}
+}
+
+func TestInMemoryWalletIdentityStore_AttachUser_RejectsReassign(t *testing.T) {
+	store := NewInMemoryWalletIdentityStore()
+	address := testWalletAddress()
+
+	identity, err := store.GetOrCreate(context.Background(), address)
+	if err != nil {
+		t.Fatalf("GetOrCreate error: %v", err)
+	}
+
+	_, err = store.AttachUser(context.Background(), identity.ID, "u_wallet_owner_a", true)
+	if err != nil {
+		t.Fatalf("first AttachUser error: %v", err)
+	}
+
+	_, err = store.AttachUser(context.Background(), identity.ID, "u_wallet_owner_b", true)
+	if err != ErrWalletIdentityAlreadyLinked {
+		t.Fatalf("expected ErrWalletIdentityAlreadyLinked, got %v", err)
 	}
 }

@@ -15,12 +15,13 @@ import (
 )
 
 var (
-	ErrInvalidWalletAddress    = errors.New("invalid wallet address")
-	ErrChallengeStore          = errors.New("wallet challenge store error")
-	ErrChallengeExpired        = errors.New("wallet challenge expired")
-	ErrChallengeUsed           = errors.New("wallet challenge already used")
-	ErrWalletChallengeNotFound = errors.New("wallet challenge not found")
-	ErrWalletIdentityNotFound  = errors.New("wallet identity not found")
+	ErrInvalidWalletAddress        = errors.New("invalid wallet address")
+	ErrChallengeStore              = errors.New("wallet challenge store error")
+	ErrChallengeExpired            = errors.New("wallet challenge expired")
+	ErrChallengeUsed               = errors.New("wallet challenge already used")
+	ErrWalletChallengeNotFound     = errors.New("wallet challenge not found")
+	ErrWalletIdentityNotFound      = errors.New("wallet identity not found")
+	ErrWalletIdentityAlreadyLinked = errors.New("wallet identity already linked to another user")
 )
 
 var evmAddressRE = regexp.MustCompile(`^0x[0-9a-fA-F]{40}$`)

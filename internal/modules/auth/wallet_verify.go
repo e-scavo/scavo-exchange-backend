@@ -102,6 +102,9 @@ func (s *WalletVerificationService) resolveLinkedUser(ctx context.Context, ident
 	if s.login == nil || s.login.users == nil {
 		linked := walletUser(address)
 		identity.UserID = linked.ID
+		now := time.Now().UTC()
+		identity.LinkedAt = &now
+		identity.IsPrimary = true
 		return linked, identity, nil
 	}
 
@@ -110,7 +113,7 @@ func (s *WalletVerificationService) resolveLinkedUser(ctx context.Context, ident
 		return nil, nil, err
 	}
 
-	identity, err = s.identities.AttachUser(ctx, identity.ID, user.ID)
+	identity, err = s.identities.AttachUser(ctx, identity.ID, user.ID, true)
 	if err != nil {
 		return nil, nil, err
 	}

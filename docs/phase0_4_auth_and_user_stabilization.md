@@ -1,221 +1,281 @@
-# 🔐 Phase 0.4 — Auth and User Stabilization
+# Phase 0.4 — Auth and User Stabilization
+
+## 🧠 Objective
+
+Stabilize authentication, user identity, and wallet-based login flows, transitioning from ephemeral wallet identity toward a durable, unified identity model suitable for future exchange-grade features.
 
 ---
 
-## 🎯 Objective
-
-Establish a robust, extensible authentication foundation for SCAVO Exchange Backend, supporting:
-
-- JWT-based authentication
-- Wallet-based authentication (EVM)
-- Session normalization (HTTP + WebSocket)
-- Persistent wallet identity model
-- Durable wallet ↔ user linkage
-- Future-ready account linking architecture
-
----
-
-## 🧠 Initial Context
+## 📌 Initial Context
 
 At the beginning of Phase 0.4:
 
-- Basic HTTP server and modules were already in place
-- No unified authentication system existed
-- No JWT standardization
-- No wallet authentication
-- No persistent identity model
-- No durable link between wallet auth and platform users
+- Authentication was partially implemented
+- Wallet login existed but lacked persistence
+- No durable relationship existed between wallets and platform users
+- Identity was fragmented across sessions
+
+This phase progressively transforms the system into a consistent identity layer.
 
 ---
 
-## ❗ Problem Statement
+## 🚧 Problem Statement
 
-The backend required a consistent authentication system capable of:
+The system required:
 
-- Supporting multiple authentication methods
-- Generating secure and standardized tokens
-- Providing normalized user/session context
-- Enabling wallet-based login flows
-- Progressively converging toward a full exchange account model
-
----
-
-## 📦 Scope
-
-### Included
-
-- JWT authentication system
-- Auth service abstraction
-- HTTP auth endpoints
-- Wallet challenge mechanism
-- Wallet signature verification
-- Persistent wallet identity model
-- Durable wallet ↔ user linkage
-- WebSocket auth propagation
-- Session normalization
-- PostgreSQL integration for wallet auth
-
-### Excluded
-
-- Multi-wallet account support
-- Refresh tokens
-- Revocation flows
-- Persistent sessions
-- Auth-method merge workflows
+- Deterministic authentication flows
+- Persistent identity representation
+- Wallet-based login suitable for production evolution
+- A unified identity model compatible with multiple auth methods
 
 ---
 
-## 🧨 Root Cause
+## 🔍 Scope
 
-Prior to this phase:
+Phase 0.4 focuses on:
 
-- Authentication logic was fragmented
-- No unified identity model existed
-- No support for wallet-based login
-- No durable storage for auth-related data
-- Wallet-authenticated users had no durable bridge into the platform user model
-
----
-
-# 🧱 Subphase Breakdown
+- Authentication stabilization
+- Wallet login correctness
+- Identity persistence
+- User abstraction
+- Session unification
+- Ownership foundations (introduced in 0.4.8)
 
 ---
 
-## 0.4.1 — Auth Base Setup
-
-### Implemented
-
-- Auth service skeleton
-- Initial login flow (dev mode)
-- Basic user resolution
-- Error handling conventions
+## 🧩 Subphases Breakdown
 
 ---
 
-## 0.4.2 — JWT Implementation
+### 0.4.1 — Auth Baseline Stabilization
 
-### Implemented
+#### Implemented
 
-- `TokenService`
-- JWT generation and parsing
-- Standardized claims structure
-- Token TTL handling
+- Initial auth service structure
+- Token generation baseline
+- Basic login handling
 
-### Claims Introduced
+#### Result
 
-- `uid`
-- `email`
-- `issuer`
-- `subject`
-- `exp`, `iat`, `nbf`
+- System capable of issuing JWT tokens
+- Still lacked identity consistency
 
 ---
 
-## 0.4.3 — Auth Endpoints
+### 0.4.2 — Token Service Stabilization
 
-### Implemented
+#### Implemented
 
-- `/auth/login`
-- `/auth/me`
-- `/auth/session`
+- Token service refactor
+- Claim normalization
+- Expiration handling
 
-### Result
+#### Result
 
-- Standardized REST auth layer
-- Stable identity-read contract for authenticated clients
-
----
-
-## 0.4.4 — Wallet Challenge Contract and Nonce Bootstrap
-
-### Implemented
-
-- wallet challenge request/response contract
-- nonce generation
-- canonical wallet sign-in message
-- basic in-memory challenge storage
-
-### Result
-
-- first stable wallet-auth bootstrap contract
+- Reliable JWT issuance
+- Improved token parsing consistency
 
 ---
 
-## 0.4.5 — Wallet Signature Verification and Token Issuance
+### 0.4.3 — Session Model Stabilization
 
-### Implemented
+#### Implemented
 
-- wallet signature verification
-- address recovery from signed message
-- challenge consumption
-- wallet-auth JWT issuance
-- wallet session propagation across HTTP and WebSocket
+- Session abstraction
+- `/auth/me` and `/auth/session` endpoints
+- Claims hydration
 
-### Result
+#### Result
 
-- complete wallet login bootstrap path
-
----
-
-## 0.4.6 — Wallet Identity Persistence and Durable Challenge Storage
-
-### Implemented
-
-- PostgreSQL-backed wallet challenge store
-- PostgreSQL-backed wallet identity store
-- transaction-safe challenge use semantics
-- durable `wallet_id` propagation into JWT/session layers
-
-### Result
-
-- wallet auth no longer depended on transient in-memory state when PostgreSQL was enabled
+- Session identity accessible across requests
+- Still not tied to persistent entities
 
 ---
 
-## 0.4.7 — Wallet ↔ User Linking and Unified Identity Model
+### 0.4.4 — Wallet Challenge Flow
 
-### Implemented
+#### Implemented
 
-- `auth_wallet_identities.user_id` linkage model
-- automatic wallet-backed user provisioning in `users`
-- unified wallet-auth user resolution for `/auth/me` and `/auth/session`
-- wallet login token minting based on linked platform user identity
-- in-memory fallback linkage semantics for non-DB development
+- Wallet challenge creation
+- Message signing model
+- Expiration control
 
-### Result
+#### Result
 
-- wallet-authenticated sessions now resolve to durable platform users instead of transient synthetic session-only identities
+- Secure wallet authentication entry point
 
 ---
 
-## ✅ Final Outcome of Phase 0.4
+### 0.4.5 — Wallet Verification Baseline
 
-At the end of Phase 0.4, the backend provides:
+#### Implemented
 
-- stable development login
-- stable JWT generation and validation
-- normalized REST and WebSocket session semantics
-- wallet challenge issuance and verification
-- durable wallet challenge persistence
-- durable wallet identity persistence
-- durable wallet ↔ user linkage
-- unified identity hydration across auth methods
+- Signature verification
+- Address recovery
+- Challenge validation
 
----
+#### Result
 
-## 🚫 What Phase 0.4 Still Does Not Solve
-
-- user-managed wallet linking API
-- multi-wallet ownership model
-- refresh-token lifecycle
-- token revocation
-- persistent session storage
-- account merge workflows across auth methods
+- Functional wallet login
+- Still stateless identity
 
 ---
 
-## ⏭️ Suggested Next Phase
+### 0.4.6 — Wallet Identity Persistence
+
+#### Implemented
+
+- `auth_wallet_identities` table
+- Wallet identity storage
+- Durable challenge store
+
+#### Result
+
+- Wallet identity persisted
+- No user linkage yet
+
+---
+
+### 0.4.7 — Wallet ↔ User Linking and Unified Identity Model
+
+#### Implemented
+
+- Durable user creation for wallet login
+- `auth_wallet_identities.user_id`
+- Wallet identity linked to platform user
+- Unified JWT identity model
+
+#### Result
+
+- Wallet login produces a durable user
+- `/auth/me` resolves unified identity
+- System transitions from wallet identity → user identity
+
+---
 
 ### 0.4.8 — Account Consolidation and Multi-Wallet Ownership Foundations
 
-This next step should extend the current 1:1 wallet linkage model toward a broader exchange-ready account ownership architecture.
+#### Implemented
+
+- Removal of 1:1 wallet-user restriction
+- Ownership metadata introduced:
+  - `linked_at`
+  - `is_primary`
+- Safe attachment semantics:
+  - prevents reassignment of wallet to another user
+- Read-only ownership inspection:
+  - `GET /auth/wallets`
+
+#### Result
+
+- One user can own multiple wallets
+- Primary wallet concept established
+- Ownership persistence becomes first-class concern
+- System ready for controlled identity expansion
+
+---
+
+## 🧱 Root Cause Analysis
+
+The initial architecture lacked:
+
+- Persistent identity boundaries
+- Clear ownership semantics
+- Separation between wallet identity and user identity
+
+Each subphase incrementally addressed these gaps.
+
+---
+
+## 📂 Files Affected
+
+### Core modules
+
+- `internal/modules/auth/*`
+- `internal/modules/user/*`
+- `internal/core/auth/*`
+
+### Persistence
+
+- `auth_wallet_challenges`
+- `auth_wallet_identities`
+- `users`
+
+### HTTP layer
+
+- wallet challenge handlers
+- wallet verify handlers
+- wallet listing endpoint (`/auth/wallets`)
+
+---
+
+## ⚙️ Implementation Characteristics
+
+- Backward compatible across subphases
+- Incremental persistence introduction
+- Stateless sessions with durable backing
+- In-memory fallback preserved
+- Ownership rules enforced at store level
+
+---
+
+## 🧪 Validation
+
+### Code-level
+
+```bash
+go test ./...
+```
+
+### Behavioral
+
+- wallet login creates or resolves user
+- wallet identity is persisted
+- identity is linked to user
+- `/auth/me` returns unified identity
+- `/auth/wallets` returns owned wallets
+
+---
+
+## 📈 Release Impact
+
+- Enables durable identity
+- Enables multi-wallet future
+- Stabilizes auth for frontend integration
+- Prepares system for account-level features
+
+---
+
+## ⚠️ Risks
+
+- Ownership logic must remain strict
+- Incorrect linking could compromise identity integrity
+- Future merge flows must respect current constraints
+
+---
+
+## ❌ What This Phase Does NOT Solve
+
+- Manual wallet linking
+- Wallet unlink
+- Multi-auth merge flows
+- Token revocation
+- Refresh tokens
+- Persistent sessions
+
+---
+
+## 🧭 Conclusion
+
+Phase 0.4 establishes a **production-grade authentication and identity foundation**.
+
+With 0.4.8:
+
+- identity is durable
+- ownership is modeled
+- wallet login is stable
+- system is ready for controlled account consolidation
+
+The backend is now prepared for the next evolution step:
+
+➡️ **0.4.9 — User-Driven Wallet Linking and Account Merge Preparation**

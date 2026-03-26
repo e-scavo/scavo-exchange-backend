@@ -2,216 +2,243 @@
 
 ## 🧠 Overview
 
-SCAVO Exchange Backend is a modular Go-based service that provides:
+SCAVO Exchange Backend is a Go-based service that provides authentication, user management, and wallet-based identity for the SCAVO ecosystem.
 
-- JWT-based authentication
-- EVM wallet authentication
-- WebSocket real-time communication
-- PostgreSQL-backed persistence
-- Redis integration support
-- Modular services for auth, user, system, and infrastructure concerns
+The system is designed following a **wallet-first identity model**, progressively evolving into a **unified account architecture** capable of supporting exchange-grade features such as multi-wallet ownership, account consolidation, and future compliance layers.
 
 ---
 
-## 🏗️ Current Stage
+## 🏗️ Architecture Principles
 
-**Stage 0 — Foundation**  
-**Phase 0.4 — Auth and User Stabilization**  
-**Current completed subphase: 0.4.7 — Wallet ↔ User Linking and Unified Identity Model**
-
----
-
-## 🔐 Authentication
-
-### Supported Methods
-
-| Method | Description |
-|--------|-------------|
-| `password_dev` | Development-only email/password login |
-| `wallet_evm` | Wallet signature-based login using EVM-compatible signing |
+- **Wallet-first authentication**
+- **Durable user abstraction**
+- **Stateless JWT sessions**
+- **Progressive identity consolidation**
+- **Database-backed persistence with in-memory fallback**
 
 ---
 
-## 🔗 Wallet Authentication Flow
+## 🚧 Current Stage
 
-The backend now supports a wallet login flow that resolves both a durable wallet identity and a durable platform user.
-
-### Flow Summary
-
-1. Client requests a wallet challenge
-2. Backend generates a one-time challenge message
-3. Client signs the challenge using an EVM wallet
-4. Backend verifies the signature
-5. Backend consumes the challenge
-6. Backend resolves or creates a persistent wallet identity
-7. Backend resolves or creates a linked platform user
-8. Backend issues a JWT access token with unified identity metadata
+**Stage:** 0 — Foundation  
+**Phase:** 0.4 — Auth and User Stabilization  
+**Current Subphase:** **0.4.8 — Account Consolidation and Multi-Wallet Ownership Foundations**
 
 ---
 
-## 🚀 HTTP Endpoints
+## 🔐 Authentication Model
 
-### Auth
+The backend supports two authentication methods:
 
-#### `POST /auth/login`
-Development login endpoint.
+### 1. Password-based (dev only)
+- Used for internal testing
+- Not intended for production
 
-#### `POST /auth/wallet/challenge`
-Creates a wallet signing challenge.
+### 2. Wallet-based authentication (EVM)
 
-#### `POST /auth/wallet/verify`
-Verifies a wallet signature, links the wallet identity to a durable user, and returns a JWT token.
+Flow:
 
-#### `GET /auth/me`
-Returns the authenticated user context.
+1. Client requests challenge  
+   `POST /auth/wallet/challenge`
 
-#### `GET /auth/session`
-Returns normalized session metadata derived from JWT claims.
+2. Server generates challenge:
+   - unique ID
+   - message to sign
+   - expiration
+
+3. Client signs message with wallet
+
+4. Client verifies:
+   `POST /auth/wallet/verify`
+
+5. Backend:
+   - verifies signature
+   - consumes challenge (one-time use)
+   - resolves wallet identity
+   - resolves or creates durable user
+   - links wallet → user
+   - issues JWT
 
 ---
 
-## 🔌 WebSocket
+## 🧩 Identity Model Evolution
 
-### Entry Point
+### Pre 0.4.7
+- Wallet identity existed independently
+- No durable user linkage
 
-#### `GET /ws`
+### 0.4.7 — Wallet ↔ User Linking
+- Each wallet identity is linked to a durable user
+- JWT identity becomes unified
 
-The WebSocket layer supports authenticated sessions through the same JWT token used by the HTTP API.
+### 0.4.8 — Multi-Wallet Ownership Foundations
 
-When a wallet-authenticated token is provided, the session includes:
+Wallet identities now support ownership metadata:
 
 - `user_id`
-- `email`
+- `linked_at`
+- `is_primary`
+
+This enables:
+
+- One user → multiple wallets
+- Single primary wallet designation
+- Ownership persistence independent of sessions
+
+---
+
+## 🗄️ Persistence Model
+
+### Tables involved
+
+#### `auth_wallet_challenges`
+- challenge lifecycle
+- expiration + one-time use
+
+#### `auth_wallet_identities`
+- wallet address registry
+- ownership metadata:
+  - `user_id`
+  - `linked_at`
+  - `is_primary`
+
+#### `users`
+- durable platform users
+- wallet-backed or future auth methods
+
+---
+
+## 🔌 API Endpoints
+
+### Wallet Auth
+
+#### `POST /auth/wallet/challenge`
+
+Request:
+```json
+{
+  "address": "0x...",
+  "chain": "scavium"
+}
+```
+
+---
+
+#### `POST /auth/wallet/verify`
+
+Request:
+```json
+{
+  "challenge_id": "...",
+  "address": "0x...",
+  "signature": "0x..."
+}
+```
+
+Response:
+```json
+{
+  "access_token": "...",
+  "token_type": "Bearer",
+  "expires_in": 3600,
+  "user_id": "...",
+  "wallet_id": "...",
+  "wallet_address": "0x...",
+  "chain": "scavium",
+  "auth_method": "wallet_evm"
+}
+```
+
+---
+
+#### `GET /auth/wallets`
+
+Returns all wallet identities linked to the authenticated user.
+
+Response:
+```json
+{
+  "wallets": [
+    {
+      "id": "...",
+      "address": "0x...",
+      "user_id": "...",
+      "linked_at": "...",
+      "is_primary": true
+    }
+  ]
+}
+```
+
+---
+
+## 🧾 JWT Claims
+
+Tokens include:
+
+- `user_id`
 - `wallet_id`
 - `wallet_address`
 - `auth_method`
-- `chain`
-- `subject`
-- `issuer`
-- `expires_at`
-
----
-
-## 🗄️ Persistence
-
-### Wallet Challenges
-
-Wallet challenges are durably stored in PostgreSQL.
-
-#### Table
-`auth_wallet_challenges`
-
-#### Stored fields
-
-- `id`
-- `address`
-- `chain`
-- `nonce`
-- `message`
-- `issued_at`
-- `expires_at`
-- `used_at`
-- `created_at`
-
-### Wallet Identities
-
-Wallet identities are persisted and uniquely resolved per wallet address.
-
-#### Table
-`auth_wallet_identities`
-
-#### Stored fields
-
-- `id`
-- `address`
-- `user_id`
-- `created_at`
-
-### Users
-
-Wallet-authenticated sessions are now backed by the same `users` table already used by the development login flow.
-
-Wallet-backed users are provisioned automatically with:
-
-- deterministic internal user id
-- synthetic internal email
-- wallet address as display name
-- updated `last_login_at` on successful login
-
----
-
-## 🔑 JWT Claims
-
-Wallet-authenticated sessions may include the following claims:
-
-| Claim | Description |
-|-------|-------------|
-| `uid` | Internal user identifier |
-| `email` | Linked platform user email |
-| `wallet_id` | Persistent wallet identity ID |
-| `wallet_address` | EVM wallet address |
-| `auth_method` | Authentication method (`wallet_evm`, `password_dev`) |
-| `chain` | Logical blockchain identifier |
+- `exp`, `iat`, `nbf`
 
 ---
 
 ## 🧪 Testing
 
-Run the full backend test suite with:
+Basic validation:
 
 ```bash
 go test ./...
 ```
 
-Run the wallet authentication flow manually with:
-
-1. request a wallet challenge
-2. sign the returned message using a test wallet
-3. submit the signature to `POST /auth/wallet/verify`
-4. inspect `auth_wallet_identities.user_id` and `users` to confirm the link
-
 ---
 
-## ⚙️ Runtime Requirements
-
-- Go 1.25+
-- PostgreSQL recommended for durable auth persistence
-- Redis optional
-- Compatible EVM wallet/client for wallet-auth testing
-
----
-
-## 📦 Current Status
-
-| Stage | Phase | Subphase | Status |
-|------|-------|----------|--------|
-| 0 | 0.4 | 0.4.7 | ✅ Completed |
-
----
-
-## 🚧 What 0.4.7 Solves
+## 🚧 What 0.4.8 Solves
 
 - Durable wallet challenge storage
-- Atomic challenge consumption
 - Persistent wallet identity creation
-- Wallet-to-user linking through durable persistence
-- Unified user resolution for `GET /auth/me` and `GET /auth/session`
-- Wallet metadata propagation into JWT/session layers
-- In-memory fallback for non-DB development environments
+- Durable wallet ↔ user linkage
+- Unified wallet-backed session identity
+- Multi-wallet ownership foundations
+- Primary wallet semantics
+- Read-only wallet listing for authenticated users
+- Protection against cross-user wallet reassignment
 
 ---
 
-## ❌ What 0.4.7 Does Not Solve Yet
+## ❌ What 0.4.8 Does Not Solve Yet
 
-- User-managed wallet linking API
-- Multi-wallet account aggregation
+- User-driven wallet linking API
+- Wallet unlink API
+- Account merge workflows
+- Cross-user wallet transfers
 - Refresh tokens
 - Token revocation
-- Persistent session management
-- Account merge flows across auth methods
+- Persistent session storage
 
 ---
 
-## ⏭️ Next Planned Phase
+## 🧭 Next Phase
 
-**Phase 0.4.8 — Account Consolidation and Multi-Wallet Ownership Foundations**
+### 0.4.9 — User-Driven Wallet Linking Contract and Protected Account Merge Preparation
+
+This phase will introduce:
+
+- controlled wallet linking
+- ownership validation flows
+- merge-safe identity contracts
+- groundwork for account consolidation
+
+---
+
+## 🧩 Summary
+
+At the end of Phase 0.4.8:
+
+- Wallet authentication is stable
+- Identity model is unified
+- Multi-wallet ownership is structurally supported
+- The backend is ready for controlled identity expansion
+
+---
