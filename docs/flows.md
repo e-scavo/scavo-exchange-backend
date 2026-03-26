@@ -195,6 +195,57 @@ Allows an already authenticated user to attach a new secondary wallet to the cur
 
 ---
 
+## 🔗 Authenticated Wallet-Owned Account Merge Flow (0.4.10)
+
+### Description
+
+Allows an already authenticated user to absorb a source wallet-owned account after the source wallet explicitly signs a merge challenge.
+
+### Step A — Merge challenge creation
+
+1. client sends  
+   `POST /auth/account/merge/wallet/challenge`
+
+2. request includes:
+   - source wallet address
+   - chain
+
+3. backend validates JWT and extracts current `user_id`
+
+4. backend creates challenge with:
+   - `purpose = account_merge`
+   - `requested_by_user_id = current user`
+
+5. backend returns challenge for signature
+
+---
+
+### Step B — Merge verification
+
+1. source wallet signs the merge challenge
+2. client sends  
+   `POST /auth/account/merge/wallet/verify`
+
+3. backend validates:
+   - challenge existence
+   - unused state
+   - expiration
+   - challenge purpose
+   - challenge user binding
+   - signature correctness
+   - source wallet ownership existence
+
+4. backend resolves source wallet identity
+5. backend derives source user from wallet ownership
+6. backend atomically reassigns all source-user wallets to the authenticated target user
+7. backend returns:
+   - merged wallet
+   - source user id
+   - target user id
+   - updated wallet inventory
+
+---
+
 ## 🔄 Session Flow
 
 ### Description
@@ -231,11 +282,17 @@ Defines how authenticated sessions are resolved.
 - wallet already linked elsewhere → `wallet_identity_already_linked`
 - wallet already linked to current user → `wallet_identity_already_linked_to_user`
 
+### Wallet-Owned Account Merge
+- wrong challenge purpose → `wallet_challenge_purpose_mismatch`
+- challenge belongs to different authenticated user → `wallet_account_merge_user_mismatch`
+- source wallet not linked → `wallet_account_merge_source_not_linked`
+- merge not required because wallet already belongs to current user → `wallet_account_merge_not_required`
+
 ---
 
-## 🧭 Future Flow Extensions (Post 0.4.9)
+## 🧭 Future Flow Extensions (Post 0.4.10)
 
-### Planned in 0.4.10
+### Planned in 0.4.11
 - wallet unlink flow
 - primary-wallet switching flow
 - deeper wallet-management contracts
@@ -249,12 +306,13 @@ Defines how authenticated sessions are resolved.
 
 ## 🧩 Summary
 
-At the end of Phase 0.4.9:
+At the end of Phase 0.4.10:
 
 - authentication is stable
 - identity is unified
 - ownership is enforced
 - user-driven wallet linking is implemented under authenticated control
+- wallet-owned account merge execution is implemented under authenticated control
 
 The backend now transitions from:
 

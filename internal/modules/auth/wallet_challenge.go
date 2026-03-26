@@ -25,11 +25,14 @@ var (
 	ErrWalletAlreadyLinkedToUser   = errors.New("wallet identity already linked to current user")
 	ErrWalletLinkChallengeMismatch = errors.New("wallet link challenge does not belong to current user")
 	ErrWalletChallengePurpose      = errors.New("wallet challenge purpose mismatch")
+	ErrWalletMergeSourceNotLinked  = errors.New("wallet merge source wallet is not linked to another user")
+	ErrWalletMergeSameUser         = errors.New("wallet merge source already belongs to current user")
 )
 
 const (
 	WalletChallengePurposeAuthBootstrap = "auth_bootstrap"
 	WalletChallengePurposeLinkWallet    = "wallet_link"
+	WalletChallengePurposeAccountMerge  = "account_merge"
 )
 
 var evmAddressRE = regexp.MustCompile(`^0x[0-9a-fA-F]{40}$`)
@@ -177,8 +180,11 @@ func (s *WalletChallengeService) buildMessage(ch *WalletChallenge) string {
 	}
 
 	purposeLine := "Purpose: SCAVO Exchange wallet authentication bootstrap."
-	if normalizeWalletChallengePurpose(ch.Purpose) == WalletChallengePurposeLinkWallet {
+	switch normalizeWalletChallengePurpose(ch.Purpose) {
+	case WalletChallengePurposeLinkWallet:
 		purposeLine = "Purpose: SCAVO Exchange authenticated wallet linking confirmation."
+	case WalletChallengePurposeAccountMerge:
+		purposeLine = "Purpose: SCAVO Exchange authenticated account merge confirmation."
 	}
 
 	lines := []string{
@@ -207,6 +213,8 @@ func normalizeWalletChallengePurpose(purpose string) string {
 		return WalletChallengePurposeAuthBootstrap
 	case WalletChallengePurposeLinkWallet:
 		return WalletChallengePurposeLinkWallet
+	case WalletChallengePurposeAccountMerge:
+		return WalletChallengePurposeAccountMerge
 	default:
 		return WalletChallengePurposeAuthBootstrap
 	}

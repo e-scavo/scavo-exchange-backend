@@ -126,3 +126,104 @@ func TestWalletLinkingService_VerifyAndLink_RejectsAlreadyLinkedToOtherUser(t *t
 		t.Fatalf("expected ErrWalletIdentityAlreadyLinked, got %v", err)
 	}
 }
+
+func TestWalletAccountMergeService_VerifyAndMerge_Success(t *testing.T) {
+	store := NewInMemoryWalletChallengeStore()
+	challengeSvc := NewWalletChallengeService(store, "https://api.scavo.exchange", 5*time.Minute)
+	identityStore := NewInMemoryWalletIdentityStore()
+	mergeSvc := NewWalletAccountMergeService(challengeSvc, identityStore)
+
+	targetPrimaryAddress, _ := signWalletMessageForScalar(t, "target-primary", "1")
+	targetPrimaryIdentity, err := identityStore.GetOrCreate(context.Background(), targetPrimaryAddress)
+	if err != nil {
+		t.Fatalf("GetOrCreate target primary error: %v", err)
+	}
+	_, err = identityStore.AttachUser(context.Background(), targetPrimaryIdentity.ID, "u_target", true)
+	if err != nil {
+		t.Fatalf("AttachUser target primary error: %v", err)
+	}
+
+	sourcePrimaryAddress, _ := signWalletMessageForScalar(t, "source-primary", "2")
+	sourcePrimaryIdentity, err := identityStore.GetOrCreate(context.Background(), sourcePrimaryAddress)
+	if err != nil {
+		t.Fatalf("GetOrCreate source primary error: %v", err)
+	}
+	_, err = identityStore.AttachUser(context.Background(), sourcePrimaryIdentity.ID, "u_source", true)
+	if err != nil {
+		t.Fatalf("AttachUser source primary error: %v", err)
+	}
+
+	sourceSecondaryAddress, _ := signWalletMessageForScalar(t, "source-secondary", "3")
+	sourceSecondaryIdentity, err := identityStore.GetOrCreate(context.Background(), sourceSecondaryAddress)
+	if err != nil {
+		t.Fatalf("GetOrCreate source secondary error: %v", err)
+	}
+	_, err = identityStore.AttachUser(context.Background(), sourceSecondaryIdentity.ID, "u_source", false)
+	if err != nil {
+		t.Fatalf("AttachUser source secondary error: %v", err)
+	}
+
+	challenge, err := mergeSvc.CreateChallenge(context.Background(), "u_target", sourcePrimaryAddress, "scavium")
+	if err != nil {
+		t.Fatalf("CreateChallenge error: %v", err)
+	}
+	if challenge.Purpose != WalletChallengePurposeAccountMerge {
+		t.Fatalf("unexpected challenge purpose: %q", challenge.Purpose)
+	}
+	_, signature := signWalletMessageForScalar(t, challenge.Message, "2")
+
+	result, err := mergeSvc.VerifyAndMerge(context.Background(), "u_target", challenge.ID, sourcePrimaryAddress, signature)
+	if err != nil {
+		t.Fatalf("VerifyAndMerge error: %v", err)
+	}
+	if result.SourceUserID != "u_source" {
+		t.Fatalf("unexpected source user id: %q", result.SourceUserID)
+	}
+	if result.TargetUserID != "u_target" {
+		t.Fatalf("unexpected target user id: %q", result.TargetUserID)
+	}
+	if result.MergedWallet == nil {
+		t.Fatal("expected merged wallet")
+	}
+	if result.MergedWallet.UserID != "u_target" {
+		t.Fatalf("unexpected merged wallet user id: %q", result.MergedWallet.UserID)
+	}
+	if len(result.Wallets) != 3 {
+		t.Fatalf("expected 3 wallets after merge, got %d", len(result.Wallets))
+	}
+	if !result.Wallets[0].IsPrimary || result.Wallets[0].Address != targetPrimaryAddress {
+		t.Fatal("expected target primary wallet to remain primary")
+	}
+
+	sourceWallets, err := identityStore.ListByUser(context.Background(), "u_source")
+	if err != nil {
+		t.Fatalf("ListByUser source error: %v", err)
+	}
+	if len(sourceWallets) != 0 {
+		t.Fatalf("expected source user to have 0 wallets after merge, got %d", len(sourceWallets))
+	}
+}
+
+func TestWalletAccountMergeService_VerifyAndMerge_RequiresLinkedSource(t *testing.T) {
+	store := NewInMemoryWalletChallengeStore()
+	challengeSvc := NewWalletChallengeService(store, "https://api.scavo.exchange", 5*time.Minute)
+	identityStore := NewInMemoryWalletIdentityStore()
+	mergeSvc := NewWalletAccountMergeService(challengeSvc, identityStore)
+
+	address, _ := signWalletMessageForScalar(t, "unlinked-source", "4")
+	_, err := identityStore.GetOrCreate(context.Background(), address)
+	if err != nil {
+		t.Fatalf("GetOrCreate error: %v", err)
+	}
+
+	challenge, err := mergeSvc.CreateChallenge(context.Background(), "u_target", address, "scavium")
+	if err != nil {
+		t.Fatalf("CreateChallenge error: %v", err)
+	}
+	_, signature := signWalletMessageForScalar(t, challenge.Message, "4")
+
+	_, err = mergeSvc.VerifyAndMerge(context.Background(), "u_target", challenge.ID, address, signature)
+	if err != ErrWalletMergeSourceNotLinked {
+		t.Fatalf("expected ErrWalletMergeSourceNotLinked, got %v", err)
+	}
+}

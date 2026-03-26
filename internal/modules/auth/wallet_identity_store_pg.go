@@ -55,6 +55,26 @@ func (s *WalletIdentityStorePG) GetOrCreate(ctx context.Context, address string)
 	return identity, nil
 }
 
+func (s *WalletIdentityStorePG) GetByAddress(ctx context.Context, address string) (*WalletIdentity, error) {
+	address = normalizeWalletAddress(address)
+	if !evmAddressRE.MatchString(address) {
+		return nil, ErrInvalidWalletAddress
+	}
+	if s == nil || s.db == nil {
+		return nil, ErrChallengeStore
+	}
+
+	identity, err := s.getByAddress(ctx, address)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, ErrWalletIdentityNotFound
+		}
+		return nil, err
+	}
+
+	return identity, nil
+}
+
 func (s *WalletIdentityStorePG) AttachUser(ctx context.Context, walletID, userID string, primary bool) (*WalletIdentity, error) {
 	if s == nil || s.db == nil {
 		return nil, ErrChallengeStore
@@ -126,6 +146,159 @@ func (s *WalletIdentityStorePG) AttachUser(ctx context.Context, walletID, userID
 	}
 
 	return identity, nil
+}
+
+func (s *WalletIdentityStorePG) ReassignUser(ctx context.Context, walletID, fromUserID, toUserID string, primary bool) (*WalletIdentity, error) {
+	if s == nil || s.db == nil {
+		return nil, ErrChallengeStore
+	}
+
+	walletID = strings.TrimSpace(walletID)
+	fromUserID = strings.TrimSpace(fromUserID)
+	toUserID = strings.TrimSpace(toUserID)
+	if walletID == "" || fromUserID == "" || toUserID == "" {
+		return nil, ErrUnauthorized
+	}
+
+	tx, err := s.db.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+
+	current, err := scanWalletIdentityRow(tx.QueryRow(ctx, `
+		SELECT id::text, address, COALESCE(user_id, ''), linked_at, is_primary
+		FROM auth_wallet_identities
+		WHERE id = $1::uuid
+		FOR UPDATE
+	`, walletID))
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, ErrWalletIdentityNotFound
+		}
+		return nil, err
+	}
+
+	currentUserID := strings.TrimSpace(current.UserID)
+	if currentUserID != fromUserID {
+		if currentUserID == toUserID {
+			return nil, ErrWalletMergeSameUser
+		}
+		return nil, ErrWalletIdentityAlreadyLinked
+	}
+
+	if primary {
+		_, err = tx.Exec(ctx, `
+			UPDATE auth_wallet_identities
+			SET is_primary = FALSE
+			WHERE user_id = $1 AND id <> $2::uuid
+		`, toUserID, walletID)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	_, err = tx.Exec(ctx, `
+		UPDATE auth_wallet_identities
+		SET
+			user_id = $2,
+			linked_at = COALESCE(linked_at, NOW()),
+			is_primary = $3
+		WHERE id = $1::uuid
+	`, walletID, toUserID, primary)
+	if err != nil {
+		return nil, err
+	}
+
+	identity, err := scanWalletIdentityRow(tx.QueryRow(ctx, `
+		SELECT id::text, address, COALESCE(user_id, ''), linked_at, is_primary
+		FROM auth_wallet_identities
+		WHERE id = $1::uuid
+	`, walletID))
+	if err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return nil, err
+	}
+
+	return identity, nil
+}
+
+func (s *WalletIdentityStorePG) MergeUsers(ctx context.Context, sourceUserID, targetUserID string) ([]*WalletIdentity, error) {
+	if s == nil || s.db == nil {
+		return nil, ErrChallengeStore
+	}
+
+	sourceUserID = strings.TrimSpace(sourceUserID)
+	targetUserID = strings.TrimSpace(targetUserID)
+	if sourceUserID == "" || targetUserID == "" {
+		return nil, ErrUnauthorized
+	}
+	if sourceUserID == targetUserID {
+		return s.ListByUser(ctx, targetUserID)
+	}
+
+	tx, err := s.db.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+
+	var sourceCount int
+	if err := tx.QueryRow(ctx, `SELECT COUNT(*) FROM auth_wallet_identities WHERE user_id = $1`, sourceUserID).Scan(&sourceCount); err != nil {
+		return nil, err
+	}
+	if sourceCount == 0 {
+		return []*WalletIdentity{}, nil
+	}
+
+	var targetHasPrimary bool
+	if err := tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM auth_wallet_identities WHERE user_id = $1 AND is_primary = TRUE)`, targetUserID).Scan(&targetHasPrimary); err != nil {
+		return nil, err
+	}
+
+	_, err = tx.Exec(ctx, `
+		UPDATE auth_wallet_identities
+		SET
+			user_id = $2,
+			linked_at = COALESCE(linked_at, NOW()),
+			is_primary = CASE WHEN $3 THEN FALSE ELSE is_primary END
+		WHERE user_id = $1
+	`, sourceUserID, targetUserID, targetHasPrimary)
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := tx.Query(ctx, `
+		SELECT id::text, address, COALESCE(user_id, ''), linked_at, is_primary
+		FROM auth_wallet_identities
+		WHERE user_id = $1
+		ORDER BY is_primary DESC, linked_at ASC NULLS LAST, address ASC
+	`, targetUserID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	out := make([]*WalletIdentity, 0)
+	for rows.Next() {
+		identity, err := scanWalletIdentityRows(rows)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, identity)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return nil, err
+	}
+
+	return out, nil
 }
 
 func (s *WalletIdentityStorePG) ListByUser(ctx context.Context, userID string) ([]*WalletIdentity, error) {

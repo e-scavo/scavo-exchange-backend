@@ -16,7 +16,7 @@ It is intended to:
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.4 — Auth and User Stabilization  
-**Latest Completed Subphase:** 0.4.9 — User-Driven Wallet Linking Contract and Protected Account Merge Preparation
+**Latest Completed Subphase:** 0.4.10 — User-Driven Wallet-Owned Account Merge Execution
 
 ---
 
@@ -67,7 +67,7 @@ Ownership is a first-class persisted concept.
 
 ---
 
-## 🔗 Authenticated Wallet Linking Status (0.4.9)
+## 🔗 Wallet Ownership Status (0.4.10)
 
 The backend now supports an authenticated wallet-linking contract.
 
@@ -128,6 +128,8 @@ The backend now supports an authenticated wallet-linking contract.
 ### Wallet-link endpoints
 - `POST /auth/wallets/link/challenge`
 - `POST /auth/wallets/link/verify`
+- `POST /auth/account/merge/wallet/challenge`
+- `POST /auth/account/merge/wallet/verify`
 
 ---
 
@@ -229,7 +231,7 @@ When continuing development:
 
 ## 🧾 Summary
 
-At the end of Phase 0.4.9:
+At the end of Phase 0.4.10:
 
 - authentication is stable
 - identity is unified

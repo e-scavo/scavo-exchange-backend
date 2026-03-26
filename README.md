@@ -23,7 +23,7 @@ The backend follows a **wallet-first identity model** that progressively evolves
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.4 — Auth and User Stabilization  
-**Current Subphase:** **0.4.9 — User-Driven Wallet Linking Contract and Protected Account Merge Preparation**
+**Current Subphase:** **0.4.10 — User-Driven Wallet-Owned Account Merge Execution**
 
 ---
 
@@ -96,6 +96,14 @@ wallet management now supports an authenticated user-driven linking flow:
 
 This allows a signed secondary-wallet attachment flow without creating a new session or performing account merge heuristics.
 
+### 0.4.10 — User-Driven Wallet-Owned Account Merge Execution
+wallet management now also supports an authenticated merge flow for wallet-owned accounts:
+
+- `POST /auth/account/merge/wallet/challenge`
+- `POST /auth/account/merge/wallet/verify`
+
+This allows the current authenticated user to absorb another wallet-owned account only after the source wallet explicitly signs a merge challenge.
+
 ---
 
 ## 🗄️ Persistence Model
@@ -111,6 +119,7 @@ stores challenge lifecycle and now also includes linking metadata:
 Used for:
 - wallet auth bootstrap challenges
 - authenticated wallet-link confirmation challenges
+- authenticated wallet-owned account merge challenges
 
 #### `auth_wallet_identities`
 stores wallet registry and ownership metadata:
@@ -272,6 +281,70 @@ Response:
 
 ---
 
+### Authenticated Wallet-Owned Account Merge
+
+#### `POST /auth/account/merge/wallet/challenge`
+
+Creates an account-merge challenge bound to the currently authenticated user.
+
+Request:
+
+```json
+{
+  "address": "0x...",
+  "chain": "scavium"
+}
+```
+
+Behavior:
+
+- requires valid JWT
+- challenge purpose becomes `account_merge`
+- challenge stores `requested_by_user_id`
+
+---
+
+#### `POST /auth/account/merge/wallet/verify`
+
+Verifies the merge signature and consolidates all wallets from the source wallet-owned account into the current user.
+
+Request:
+
+```json
+{
+  "challenge_id": "...",
+  "address": "0x...",
+  "signature": "0x..."
+}
+```
+
+Response:
+
+```json
+{
+  "merged_wallet": {
+    "id": "...",
+    "address": "0x...",
+    "user_id": "...",
+    "linked_at": "...",
+    "is_primary": false
+  },
+  "source_user_id": "u_wallet_...",
+  "target_user_id": "u_current_user",
+  "wallets": [
+    {
+      "id": "...",
+      "address": "0x...",
+      "user_id": "...",
+      "linked_at": "...",
+      "is_primary": true
+    }
+  ]
+}
+```
+
+---
+
 ## 🧾 JWT Claims
 
 JWT tokens include:
@@ -284,7 +357,7 @@ JWT tokens include:
 - `iat`
 - `nbf`
 
-Wallet linking does **not** mint a new token. It operates under the existing authenticated session.
+Wallet linking and wallet-owned account merge do **not** mint a new token. Both operate under the existing authenticated session.
 
 ---
 
@@ -296,59 +369,61 @@ Run:
 go test ./...
 ```
 
-Focus areas added in 0.4.9:
+Focus areas added in 0.4.10:
 
-- authenticated link challenge generation
-- link verification flow
-- ownership conflict rejection
-- secondary wallet persistence
-- wallet inventory consistency after linking
+- authenticated merge challenge generation
+- merge verification flow
+- source-wallet ownership validation
+- store-level ownership consolidation
+- wallet inventory consistency after merge
 
 ---
 
-## 🚧 What 0.4.9 Solves
+## 🚧 What 0.4.10 Solves
 
 - authenticated user-driven wallet linking
-- challenge purpose separation between login and linking
+- authenticated wallet-owned account merge execution
+- challenge purpose separation between login, linking, and merge
 - challenge-to-user binding through `requested_by_user_id`
 - protected secondary-wallet attachment
-- prevention of cross-user wallet takeover during linking
-- wallet inventory refresh after successful link verification
+- protected wallet-signed ownership consolidation
+- wallet inventory refresh after successful link and merge verification
 
 ---
 
-## ❌ What 0.4.9 Does Not Solve Yet
+## ❌ What 0.4.10 Does Not Solve Yet
 
 - wallet unlink API
 - primary-wallet switch API
-- cross-user ownership transfer
-- automatic account merge workflows
+- arbitrary cross-user ownership transfer outside wallet-signed merge
 - merge between wallet-backed and other auth methods
 - refresh tokens
 - token revocation
 - persistent authenticated sessions
+- archival or alias records for merged source users
 
 ---
 
 ## 🧭 Next Phase
 
-### 0.4.10 — Wallet Ownership Management and Merge-Safe Identity Progression
+### 0.4.11 — Wallet Ownership Management and Primary-Control Progression
 
 Next expected focus:
 
 - unlink / detach contract design
 - protected primary-wallet switching
-- deeper merge-safe identity preparation
+- stronger post-merge ownership administration
 - stronger account-level ownership operations
 
 ---
 
 ## 🧩 Summary
 
-At the end of Phase 0.4.9:
+At the end of Phase 0.4.10:
 
 - wallet authentication remains stable
 - identity remains unified
 - ownership remains protected
 - authenticated wallet linking is now available
-- the backend is ready for the first real account-level wallet management operations
+- wallet-owned account merge execution is now available
+- the backend is ready for the next real account-level wallet management operations

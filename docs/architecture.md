@@ -81,6 +81,9 @@ the architecture adds a dedicated authenticated linking flow, still based on cha
 
 This is the first backend-managed wallet operation that acts on ownership under an existing session rather than during initial login bootstrap.
 
+### 0.4.10 — Wallet-Owned Account Merge Execution
+the architecture now adds a second authenticated ownership operation that allows the current user to absorb a wallet-owned source account after an explicit merge challenge is signed by the source wallet.
+
 ---
 
 ## 🏷️ Ownership Model
@@ -92,7 +95,8 @@ This is the first backend-managed wallet operation that acts on ownership under 
 3. only one wallet per user can be primary
 4. wallet ownership cannot be reassigned across users
 5. authenticated wallet linking adds secondary wallets only
-6. 0.4.9 does not switch primary ownership
+6. 0.4.9 does not switch primary ownership during linking
+7. 0.4.10 preserves the current target primary wallet when a merge occurs
 
 ---
 
@@ -121,6 +125,7 @@ wallet challenges now include:
 
 - `auth_bootstrap`
 - `wallet_link`
+- `account_merge`
 
 This avoids reusing the same challenge semantics blindly across two very different operations.
 
@@ -164,6 +169,28 @@ This avoids reusing the same challenge semantics blindly across two very differe
 
 ---
 
+## 🔄 Authenticated Wallet Account Merge Flow
+
+1. user already holds valid JWT
+2. client requests merge challenge:
+   - `POST /auth/account/merge/wallet/challenge`
+3. backend persists challenge with:
+   - `purpose = account_merge`
+   - `requested_by_user_id = current user`
+4. source wallet signs the merge challenge
+5. client submits:
+   - `POST /auth/account/merge/wallet/verify`
+6. backend validates:
+   - challenge existence
+   - challenge freshness
+   - purpose correctness
+   - requesting user correctness
+   - signature correctness
+   - source wallet ownership existence
+7. backend derives the source user from wallet ownership
+8. backend atomically reassigns all source-user wallets to the current target user
+9. backend returns updated wallet inventory
+
 ## 🔌 API Layer
 
 ### Auth endpoints
@@ -177,6 +204,8 @@ This avoids reusing the same challenge semantics blindly across two very differe
 - `/auth/wallets`
 - `/auth/wallets/link/challenge`
 - `/auth/wallets/link/verify`
+- `/auth/account/merge/wallet/challenge`
+- `/auth/account/merge/wallet/verify`
 
 ---
 
@@ -195,7 +224,7 @@ Claims include:
 - `wallet_address`
 - `auth_method`
 
-Wallet linking does not mint a fresh token because it operates under an already authenticated durable session.
+Wallet linking and wallet-owned account merge do not mint a fresh token because both operate under an already authenticated durable session.
 
 ---
 
@@ -236,7 +265,7 @@ wallet identity is not the same as durable user identity.
 Ownership is explicit rather than inferred.
 
 ### Challenge-purpose separation
-0.4.9 extends the challenge system rather than introducing a second parallel challenge subsystem, but still keeps semantic separation through `purpose`.
+0.4.9 and 0.4.10 extend the challenge system rather than introducing parallel challenge subsystems, but still keep semantic separation through `purpose`.
 
 ### Incremental evolution
 each subphase introduces one structural improvement while preserving previous behavior.
@@ -249,18 +278,18 @@ Still intentionally not supported:
 
 - wallet unlink
 - primary-wallet switching
-- cross-user wallet transfer
-- automatic merge execution
+- arbitrary cross-user wallet transfer outside wallet-signed merge
 - multi-auth merge resolution
+- user-record archival after merge
 
 ---
 
-## 🚧 Future Evolution (Post 0.4.9)
+## 🚧 Future Evolution (Post 0.4.10)
 
-### 0.4.10
+### 0.4.11
 - wallet detach / unlink rules
 - primary-wallet switching contract
-- deeper merge-safe identity progression
+- deeper post-merge identity progression
 
 ### Later phases
 - account consolidation
@@ -272,10 +301,11 @@ Still intentionally not supported:
 
 ## 🧩 Summary
 
-At the end of 0.4.9:
+At the end of 0.4.10:
 
 - wallet authentication is stable
 - durable identity is stable
 - wallet ownership is stable
 - authenticated wallet linking is implemented
+- wallet-owned account merge execution is implemented
 - the backend is structurally ready to move from ownership persistence into true account-level wallet management

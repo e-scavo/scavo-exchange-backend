@@ -15,6 +15,9 @@ type WalletIdentity struct {
 
 type WalletIdentityStore interface {
 	GetOrCreate(ctx context.Context, address string) (*WalletIdentity, error)
+	GetByAddress(ctx context.Context, address string) (*WalletIdentity, error)
 	AttachUser(ctx context.Context, walletID, userID string, primary bool) (*WalletIdentity, error)
+	ReassignUser(ctx context.Context, walletID, fromUserID, toUserID string, primary bool) (*WalletIdentity, error)
+	MergeUsers(ctx context.Context, sourceUserID, targetUserID string) ([]*WalletIdentity, error)
 	ListByUser(ctx context.Context, userID string) ([]*WalletIdentity, error)
 }

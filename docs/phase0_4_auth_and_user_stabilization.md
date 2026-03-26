@@ -182,6 +182,27 @@ Phase 0.4 focuses on:
 
 ---
 
+### 0.4.10 — User-Driven Wallet-Owned Account Merge Execution
+
+#### Implemented
+- authenticated account-merge challenge flow:
+  - `POST /auth/account/merge/wallet/challenge`
+- authenticated account-merge verification flow:
+  - `POST /auth/account/merge/wallet/verify`
+- challenge-purpose expansion with `account_merge`
+- source-wallet signature requirement before merge execution
+- protected rejection of merge attempts against unlinked wallets
+- protected rejection when the wallet already belongs to the current user
+- store-level atomic wallet-ownership consolidation from source user to target user
+- deterministic preservation of the target account primary wallet when one already exists
+- merged wallet inventory response after successful consolidation
+
+#### Result
+- the backend now supports explicit execution of a wallet-owned account merge under authenticated user control
+- the previous 0.4.9 preparation step is converted into a real, constrained merge operation without weakening ownership rules
+
+---
+
 ## 🧱 Root Cause Analysis
 
 The initial architecture lacked:
@@ -212,6 +233,7 @@ Each subphase incrementally addressed one structural gap while preserving backwa
 - wallet verify handlers
 - wallet inventory endpoint
 - authenticated wallet-link handlers
+- authenticated wallet-account-merge handlers
 
 ---
 
@@ -222,6 +244,7 @@ Each subphase incrementally addressed one structural gap while preserving backwa
 - stateless sessions with durable backing state
 - in-memory fallback preserved
 - challenge-purpose separation introduced without forking the entire challenge subsystem
+- merge execution remains explicit and wallet-signed
 - ownership rules remain enforced at the store layer
 - link contract remains explicitly authenticated
 
@@ -243,15 +266,17 @@ go test ./...
 - `/auth/wallets` returns owned wallets
 - `/auth/wallets/link/challenge` creates user-bound link challenge
 - `/auth/wallets/link/verify` attaches a new secondary wallet
+- `/auth/account/merge/wallet/challenge` creates a user-bound merge challenge
+- `/auth/account/merge/wallet/verify` consolidates wallet ownership from the source wallet-owned account
 
 ---
 
 ## 📈 Release Impact
 
-- enables authenticated wallet linking without destabilizing login
+- enables authenticated wallet-owned account merge execution without destabilizing login
 - keeps ownership model strict while expanding functionality
-- prepares backend for future account-level wallet operations
-- establishes safer preconditions for later merge-related work
+- converts merge preparation into a real explicit flow
+- establishes safer preconditions for later unlink and primary-switch work
 
 ---
 
@@ -269,7 +294,8 @@ go test ./...
 - wallet unlink
 - primary-wallet switching
 - cross-user wallet transfer
-- automatic account merge execution
+- arbitrary cross-user transfer outside wallet-signed merge execution
+- merged-source user archival or aliasing
 - token revocation
 - refresh tokens
 - persistent sessions
@@ -280,14 +306,15 @@ go test ./...
 
 Phase 0.4 now establishes a strong identity and wallet-ownership foundation.
 
-With 0.4.9:
+With 0.4.10:
 
 - wallet authentication is stable
 - identity is durable
 - ownership is persisted
 - authenticated wallet linking is available
+- wallet-owned account merge execution is available
 - the backend is prepared for the next controlled step toward real account management
 
 Next expected evolution:
 
-➡️ **0.4.10 — Wallet Ownership Management and Merge-Safe Identity Progression**
+➡️ **0.4.11 — Wallet Ownership Management and Primary-Control Progression**

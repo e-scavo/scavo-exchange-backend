@@ -29,56 +29,57 @@ Status: ✅ Completed
 | 0.4.7 | Wallet ↔ user linking and unified identity model | ✅ Completed |
 | 0.4.8 | Account consolidation and multi-wallet ownership foundations | ✅ Completed |
 | 0.4.9 | User-driven wallet linking contract and protected account merge preparation | ✅ Completed |
+| 0.4.10 | User-driven wallet-owned account merge execution | ✅ Completed |
 
 ---
 
-## ✅ Phase 0.4.9 Closure Summary
+## ✅ Phase 0.4.10 Closure Summary
 
-Phase 0.4.9 introduces the first authenticated wallet-management contract on top of the durable identity and ownership model created in previous subphases.
+Phase 0.4.10 executes the first protected wallet-owned account merge on top of the wallet-linking and ownership model delivered in 0.4.9.
 
-The backend can now accept an authenticated request from an already logged-in user, generate a wallet-linking challenge, verify the signed challenge, and attach a secondary wallet without issuing a new login session or performing risky account merge heuristics.
+The backend can now accept an authenticated request from an already logged-in user, generate an account-merge challenge for a wallet that already belongs to another wallet-owned user, verify the signed challenge, and atomically reassign all wallets from that source wallet-owned account into the current authenticated user.
 
-### Delivered in 0.4.9
+### Delivered in 0.4.10
 
-- authenticated wallet-link challenge endpoint
-- authenticated wallet-link verify endpoint
-- challenge purpose separation:
+- authenticated account-merge challenge endpoint
+- authenticated account-merge verify endpoint
+- challenge purpose expansion:
   - `auth_bootstrap`
   - `wallet_link`
-- persisted challenge metadata:
-  - `purpose`
-  - `requested_by_user_id`
-- protected rejection of mismatched user-bound link challenges
-- protected rejection of linking a wallet already owned by another user
-- secondary-wallet attachment with `is_primary = false`
-- updated wallet inventory returned after successful linking
+  - `account_merge`
+- protected rejection when merge challenge is signed by the wrong wallet
+- protected rejection when the source wallet is unlinked
+- protected rejection when merge is not required because the wallet already belongs to the current user
+- atomic wallet-ownership consolidation from source user to current authenticated user
+- deterministic primary-wallet preservation rules during merge
+- updated wallet inventory returned after successful merge
 
 ---
 
 ## 🔍 Functional Result
 
-The system now supports the following linked-wallet sequence under an existing authenticated session:
+The system now supports the following wallet-owned account merge sequence under an existing authenticated session:
 
 1. user authenticates normally
-2. user requests wallet-link challenge
-3. challenge is persisted with `wallet_link` purpose and `requested_by_user_id`
-4. user signs with the secondary wallet
+2. user requests account-merge challenge for a wallet already linked elsewhere
+3. challenge is persisted with `account_merge` purpose and `requested_by_user_id`
+4. source wallet signs the merge challenge
 5. backend verifies signature and user-bound challenge
-6. wallet identity is resolved
-7. ownership conflict is checked
-8. wallet is attached as a non-primary wallet
+6. source wallet identity is resolved
+7. source user is derived from wallet ownership
+8. all source-user wallets are reassigned to the authenticated target user
 9. updated owned-wallet list is returned
 
 ---
 
-## ❌ Not Included in 0.4.9
+## ❌ Not Included in 0.4.10
 
 The following items remain intentionally out of scope:
 
 - wallet unlink endpoint
 - primary-wallet switch endpoint
-- cross-user wallet transfer
-- automatic account-merge execution
+- arbitrary cross-user wallet transfer
+- archival / alias records for merged source users
 - merge between wallet identities and future auth methods
 - refresh tokens
 - revocation flows
@@ -88,7 +89,7 @@ The following items remain intentionally out of scope:
 
 ## ⏭️ Next Phase
 
-### 0.4.10 — Wallet Ownership Management and Merge-Safe Identity Progression
+### 0.4.11 — Wallet Ownership Management and Primary-Control Progression
 
 Planned focus:
 

@@ -317,3 +317,112 @@ func TestHTTPHandlers_WalletLinkVerify_Success(t *testing.T) {
 		t.Fatalf("expected 2 wallets, got %d", len(payload.Wallets))
 	}
 }
+
+func TestHTTPHandlers_WalletAccountMergeChallenge_Success(t *testing.T) {
+	store := NewInMemoryWalletChallengeStore()
+
+	h := HTTPHandlers{
+		Tokens:       mustTokenService(t),
+		TTL:          time.Hour,
+		Users:        usermod.NewService(nil),
+		Challenges:   store,
+		ChallengeTTL: 5 * time.Minute,
+	}
+
+	req := httptest.NewRequest(http.MethodPost, "/auth/account/merge/wallet/challenge", strings.NewReader(`{"address":"0x1111111111111111111111111111111111111111","chain":"scavium"}`))
+	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	rec := httptest.NewRecorder()
+
+	h.WalletAccountMergeChallenge(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+
+	var payload WalletAccountMergeChallengeResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("decode error: %v", err)
+	}
+	if payload.Challenge == nil {
+		t.Fatal("expected challenge payload")
+	}
+	if payload.Challenge.Purpose != WalletChallengePurposeAccountMerge {
+		t.Fatalf("unexpected challenge purpose: %q", payload.Challenge.Purpose)
+	}
+}
+
+func TestHTTPHandlers_WalletAccountMergeVerify_Success(t *testing.T) {
+	challengeStore := NewInMemoryWalletChallengeStore()
+	identityStore := NewInMemoryWalletIdentityStore()
+
+	targetPrimaryAddress, _ := signWalletMessageForScalar(t, "handler-target-primary", "1")
+	targetPrimaryIdentity, err := identityStore.GetOrCreate(context.Background(), targetPrimaryAddress)
+	if err != nil {
+		t.Fatalf("GetOrCreate target primary error: %v", err)
+	}
+	_, err = identityStore.AttachUser(context.Background(), targetPrimaryIdentity.ID, "u_test_example_com", true)
+	if err != nil {
+		t.Fatalf("AttachUser target primary error: %v", err)
+	}
+
+	sourcePrimaryAddress, _ := signWalletMessageForScalar(t, "handler-source-primary", "2")
+	sourcePrimaryIdentity, err := identityStore.GetOrCreate(context.Background(), sourcePrimaryAddress)
+	if err != nil {
+		t.Fatalf("GetOrCreate source primary error: %v", err)
+	}
+	_, err = identityStore.AttachUser(context.Background(), sourcePrimaryIdentity.ID, "u_wallet_source", true)
+	if err != nil {
+		t.Fatalf("AttachUser source primary error: %v", err)
+	}
+
+	challengeSvc := NewWalletChallengeService(challengeStore, "https://api.scavo.exchange", 5*time.Minute)
+	challenge, err := challengeSvc.CreateWithOptions(context.Background(), sourcePrimaryAddress, "scavium", WalletChallengeOptions{
+		Purpose:           WalletChallengePurposeAccountMerge,
+		RequestedByUserID: "u_test_example_com",
+	})
+	if err != nil {
+		t.Fatalf("CreateWithOptions error: %v", err)
+	}
+	_, signature := signWalletMessageForScalar(t, challenge.Message, "2")
+
+	h := HTTPHandlers{
+		Tokens:           mustTokenService(t),
+		TTL:              time.Hour,
+		Users:            usermod.NewService(nil),
+		Challenges:       challengeStore,
+		WalletIdentities: identityStore,
+		ChallengeTTL:     5 * time.Minute,
+		PublicBaseURL:    "https://api.scavo.exchange",
+	}
+
+	body := `{"challenge_id":"` + challenge.ID + `","address":"` + sourcePrimaryAddress + `","signature":"` + signature + `"}`
+	req := httptest.NewRequest(http.MethodPost, "/auth/account/merge/wallet/verify", strings.NewReader(body))
+	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	rec := httptest.NewRecorder()
+
+	h.WalletAccountMergeVerify(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+
+	var payload WalletAccountMergeVerifyResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("decode error: %v", err)
+	}
+	if payload.MergedWallet == nil {
+		t.Fatal("expected merged wallet")
+	}
+	if payload.MergedWallet.UserID != "u_test_example_com" {
+		t.Fatalf("unexpected merged wallet user id: %q", payload.MergedWallet.UserID)
+	}
+	if payload.SourceUserID != "u_wallet_source" {
+		t.Fatalf("unexpected source user id: %q", payload.SourceUserID)
+	}
+	if payload.TargetUserID != "u_test_example_com" {
+		t.Fatalf("unexpected target user id: %q", payload.TargetUserID)
+	}
+	if len(payload.Wallets) != 2 {
+		t.Fatalf("expected 2 wallets, got %d", len(payload.Wallets))
+	}
+}

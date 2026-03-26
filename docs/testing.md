@@ -228,6 +228,70 @@ Expected:
 
 ---
 
+## 🔗 Wallet-Owned Account Merge Validation (0.4.10)
+
+### Step 1 — Authenticate first
+
+Obtain a valid access token through dev login or wallet login.
+
+---
+
+### Step 2 — Create account-merge challenge
+
+```bash
+curl -s -X POST http://localhost:8080/auth/account/merge/wallet/challenge \
+  -H "Authorization: Bearer <ACCESS_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"address":"0xSOURCE_PRIMARY...","chain":"scavium"}'
+```
+
+Expected:
+
+- `200 OK`
+- challenge returned
+- challenge includes:
+  - `purpose = account_merge`
+  - `requested_by_user_id = current authenticated user`
+
+---
+
+### Step 3 — Verify account-merge challenge
+
+```bash
+curl -s -X POST http://localhost:8080/auth/account/merge/wallet/verify \
+  -H "Authorization: Bearer <ACCESS_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"challenge_id":"...","address":"0xSOURCE_PRIMARY...","signature":"0x..."}'
+```
+
+Expected:
+
+- `200 OK`
+- `merged_wallet` returned
+- `source_user_id` returned
+- `target_user_id` returned
+- all wallets from the source wallet-owned account now appear in the target inventory
+- if the target already had a primary wallet, it remains primary
+
+---
+
+### Step 4 — Validate persisted merge
+
+```sql
+SELECT id, address, user_id, linked_at, is_primary
+FROM auth_wallet_identities
+WHERE user_id IN ('<TARGET_USER_ID>', '<SOURCE_USER_ID>')
+ORDER BY user_id, is_primary DESC, linked_at ASC NULLS LAST, address ASC;
+```
+
+Expected:
+
+- all former source-user wallets now point to `<TARGET_USER_ID>`
+- `<SOURCE_USER_ID>` owns zero wallets after merge
+- target primary semantics remain deterministic
+
+---
+
 ## 📦 Wallet Inventory API Validation
 
 ### Request
@@ -243,6 +307,7 @@ Expected:
 - `wallets` array returned
 - primary wallet first
 - newly linked wallet included after successful 0.4.9 linking
+- merged wallets included after successful 0.4.10 merge
 
 ---
 
@@ -308,6 +373,18 @@ Expected:
 - `403`
 - `wallet_link_challenge_user_mismatch`
 
+### Merge source wallet is not linked
+Expected:
+
+- `409`
+- `wallet_account_merge_source_not_linked`
+
+### Merge is not required
+Expected:
+
+- `409`
+- `wallet_account_merge_not_required`
+
 ### Wrong challenge purpose
 Expected:
 
@@ -332,26 +409,30 @@ Key validations now include:
 - authenticated wallet-link contract
 - wallet-link conflict rejection
 - wallet inventory refresh after link
+- authenticated wallet-owned account merge contract
+- atomic ownership consolidation at the store layer
 
 ---
 
-## 🧭 Future Testing (Post 0.4.9)
+## 🧭 Future Testing (Post 0.4.10)
 
 Planned:
 
 - unlink scenarios
 - primary-wallet switching scenarios
 - cross-user ownership transfer edge cases
+- post-merge user archival testing
 - multi-auth merge preparation testing
 
 ---
 
 ## 🧩 Summary
 
-Testing at Phase 0.4.9 guarantees:
+Testing at Phase 0.4.10 guarantees:
 
 - authentication correctness
 - identity persistence
 - ownership consistency
 - authenticated wallet linking correctness
-- API stability across both login and link flows
+- authenticated wallet-owned account merge correctness
+- API stability across login, link, and merge flows

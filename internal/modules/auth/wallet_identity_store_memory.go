@@ -43,6 +43,24 @@ func (s *InMemoryWalletIdentityStore) GetOrCreate(ctx context.Context, address s
 	return &cp, nil
 }
 
+func (s *InMemoryWalletIdentityStore) GetByAddress(ctx context.Context, address string) (*WalletIdentity, error) {
+	address = normalizeWalletAddress(address)
+	if !evmAddressRE.MatchString(address) {
+		return nil, ErrInvalidWalletAddress
+	}
+
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	identity, ok := s.items[address]
+	if !ok || identity == nil {
+		return nil, ErrWalletIdentityNotFound
+	}
+
+	cp := *identity
+	return &cp, nil
+}
+
 func (s *InMemoryWalletIdentityStore) AttachUser(ctx context.Context, walletID, userID string, primary bool) (*WalletIdentity, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -92,6 +110,98 @@ func (s *InMemoryWalletIdentityStore) AttachUser(ctx context.Context, walletID, 
 	return &cp, nil
 }
 
+func (s *InMemoryWalletIdentityStore) ReassignUser(ctx context.Context, walletID, fromUserID, toUserID string, primary bool) (*WalletIdentity, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	walletID = strings.TrimSpace(walletID)
+	fromUserID = strings.TrimSpace(fromUserID)
+	toUserID = strings.TrimSpace(toUserID)
+	if walletID == "" || fromUserID == "" || toUserID == "" {
+		return nil, ErrUnauthorized
+	}
+
+	var target *WalletIdentity
+	for _, identity := range s.items {
+		if identity == nil || identity.ID != walletID {
+			continue
+		}
+		target = identity
+		break
+	}
+
+	if target == nil {
+		return nil, ErrWalletIdentityNotFound
+	}
+	if strings.TrimSpace(target.UserID) != fromUserID {
+		if strings.TrimSpace(target.UserID) == toUserID {
+			return nil, ErrWalletMergeSameUser
+		}
+		return nil, ErrWalletIdentityAlreadyLinked
+	}
+
+	if primary {
+		for _, identity := range s.items {
+			if identity == nil {
+				continue
+			}
+			if strings.TrimSpace(identity.UserID) == toUserID && identity.ID != walletID {
+				identity.IsPrimary = false
+			}
+		}
+	}
+
+	target.UserID = toUserID
+	target.IsPrimary = primary
+	if target.LinkedAt == nil {
+		now := time.Now().UTC()
+		target.LinkedAt = &now
+	}
+
+	cp := *target
+	return &cp, nil
+}
+
+func (s *InMemoryWalletIdentityStore) MergeUsers(ctx context.Context, sourceUserID, targetUserID string) ([]*WalletIdentity, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	sourceUserID = strings.TrimSpace(sourceUserID)
+	targetUserID = strings.TrimSpace(targetUserID)
+	if sourceUserID == "" || targetUserID == "" {
+		return nil, ErrUnauthorized
+	}
+	if sourceUserID == targetUserID {
+		return s.listByUserLocked(targetUserID), nil
+	}
+
+	targetHasPrimary := false
+	for _, identity := range s.items {
+		if identity != nil && strings.TrimSpace(identity.UserID) == targetUserID && identity.IsPrimary {
+			targetHasPrimary = true
+			break
+		}
+	}
+
+	for _, identity := range s.items {
+		if identity == nil || strings.TrimSpace(identity.UserID) != sourceUserID {
+			continue
+		}
+		identity.UserID = targetUserID
+		if targetHasPrimary {
+			identity.IsPrimary = false
+		} else if identity.IsPrimary {
+			targetHasPrimary = true
+		}
+		if identity.LinkedAt == nil {
+			now := time.Now().UTC()
+			identity.LinkedAt = &now
+		}
+	}
+
+	return s.listByUserLocked(targetUserID), nil
+}
+
 func (s *InMemoryWalletIdentityStore) ListByUser(ctx context.Context, userID string) ([]*WalletIdentity, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
@@ -101,6 +211,10 @@ func (s *InMemoryWalletIdentityStore) ListByUser(ctx context.Context, userID str
 		return []*WalletIdentity{}, nil
 	}
 
+	return s.listByUserLocked(userID), nil
+}
+
+func (s *InMemoryWalletIdentityStore) listByUserLocked(userID string) []*WalletIdentity {
 	out := make([]*WalletIdentity, 0)
 	for _, identity := range s.items {
 		if identity == nil {
@@ -126,5 +240,5 @@ func (s *InMemoryWalletIdentityStore) ListByUser(ctx context.Context, userID str
 		return out[i].Address < out[j].Address
 	})
 
-	return out, nil
+	return out
 }

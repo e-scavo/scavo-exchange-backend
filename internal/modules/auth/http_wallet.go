@@ -59,6 +59,29 @@ type WalletLinkVerifyResponse struct {
 	Challenge    *WalletChallenge  `json:"challenge,omitempty"`
 }
 
+type WalletAccountMergeChallengeRequest struct {
+	Address string `json:"address"`
+	Chain   string `json:"chain,omitempty"`
+}
+
+type WalletAccountMergeChallengeResponse struct {
+	Challenge *WalletChallenge `json:"challenge"`
+}
+
+type WalletAccountMergeVerifyRequest struct {
+	ChallengeID string `json:"challenge_id"`
+	Address     string `json:"address"`
+	Signature   string `json:"signature"`
+}
+
+type WalletAccountMergeVerifyResponse struct {
+	MergedWallet *WalletIdentity   `json:"merged_wallet,omitempty"`
+	Wallets      []*WalletIdentity `json:"wallets"`
+	Challenge    *WalletChallenge  `json:"challenge,omitempty"`
+	SourceUserID string            `json:"source_user_id"`
+	TargetUserID string            `json:"target_user_id"`
+}
+
 func (h HTTPHandlers) WalletChallenge(w http.ResponseWriter, r *http.Request) {
 	var req WalletChallengeRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -233,5 +256,101 @@ func (h HTTPHandlers) WalletLinkVerify(w http.ResponseWriter, r *http.Request) {
 		LinkedWallet: result.Linked,
 		Wallets:      result.Wallets,
 		Challenge:    result.Challenge,
+	})
+}
+
+func (h HTTPHandlers) WalletAccountMergeChallenge(w http.ResponseWriter, r *http.Request) {
+	claims, ok := coreauth.ClaimsFromContext(r.Context())
+	if !ok || claims == nil || claims.UserID == "" {
+		writeJSON(w, http.StatusUnauthorized, map[string]any{"error": "unauthorized"})
+		return
+	}
+
+	var req WalletAccountMergeChallengeRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "bad_request"})
+		return
+	}
+
+	challengeTTL := h.ChallengeTTL
+	if challengeTTL <= 0 {
+		challengeTTL = 5 * time.Minute
+	}
+
+	challengeSvc := NewWalletChallengeService(h.Challenges, h.PublicBaseURL, challengeTTL)
+	mergeSvc := NewWalletAccountMergeService(challengeSvc, h.WalletIdentities)
+
+	challenge, err := mergeSvc.CreateChallenge(r.Context(), claims.UserID, req.Address, req.Chain)
+	if err != nil {
+		switch {
+		case errors.Is(err, ErrUnauthorized):
+			writeJSON(w, http.StatusUnauthorized, map[string]any{"error": "unauthorized"})
+		case errors.Is(err, ErrInvalidWalletAddress):
+			writeJSON(w, http.StatusBadRequest, map[string]any{"error": "invalid_wallet_address"})
+		default:
+			writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "wallet_account_merge_challenge_error"})
+		}
+		return
+	}
+
+	writeJSON(w, http.StatusOK, WalletAccountMergeChallengeResponse{Challenge: challenge})
+}
+
+func (h HTTPHandlers) WalletAccountMergeVerify(w http.ResponseWriter, r *http.Request) {
+	claims, ok := coreauth.ClaimsFromContext(r.Context())
+	if !ok || claims == nil || claims.UserID == "" {
+		writeJSON(w, http.StatusUnauthorized, map[string]any{"error": "unauthorized"})
+		return
+	}
+
+	var req WalletAccountMergeVerifyRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "bad_request"})
+		return
+	}
+
+	challengeTTL := h.ChallengeTTL
+	if challengeTTL <= 0 {
+		challengeTTL = 5 * time.Minute
+	}
+
+	challengeSvc := NewWalletChallengeService(h.Challenges, h.PublicBaseURL, challengeTTL)
+	mergeSvc := NewWalletAccountMergeService(challengeSvc, h.WalletIdentities)
+
+	result, err := mergeSvc.VerifyAndMerge(r.Context(), claims.UserID, req.ChallengeID, req.Address, req.Signature)
+	if err != nil {
+		switch {
+		case errors.Is(err, ErrUnauthorized):
+			writeJSON(w, http.StatusUnauthorized, map[string]any{"error": "unauthorized"})
+		case errors.Is(err, ErrInvalidWalletAddress):
+			writeJSON(w, http.StatusBadRequest, map[string]any{"error": "invalid_wallet_address"})
+		case errors.Is(err, ErrInvalidWalletSignature):
+			writeJSON(w, http.StatusUnauthorized, map[string]any{"error": "invalid_wallet_signature"})
+		case errors.Is(err, ErrWalletChallengeNotFound):
+			writeJSON(w, http.StatusNotFound, map[string]any{"error": "wallet_challenge_not_found"})
+		case errors.Is(err, ErrChallengeExpired):
+			writeJSON(w, http.StatusUnauthorized, map[string]any{"error": "wallet_challenge_expired"})
+		case errors.Is(err, ErrChallengeUsed):
+			writeJSON(w, http.StatusUnauthorized, map[string]any{"error": "wallet_challenge_used"})
+		case errors.Is(err, ErrWalletChallengePurpose):
+			writeJSON(w, http.StatusConflict, map[string]any{"error": "wallet_challenge_purpose_mismatch"})
+		case errors.Is(err, ErrWalletLinkChallengeMismatch):
+			writeJSON(w, http.StatusForbidden, map[string]any{"error": "wallet_account_merge_user_mismatch"})
+		case errors.Is(err, ErrWalletMergeSourceNotLinked):
+			writeJSON(w, http.StatusConflict, map[string]any{"error": "wallet_account_merge_source_not_linked"})
+		case errors.Is(err, ErrWalletMergeSameUser):
+			writeJSON(w, http.StatusConflict, map[string]any{"error": "wallet_account_merge_not_required"})
+		default:
+			writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "wallet_account_merge_verify_error"})
+		}
+		return
+	}
+
+	writeJSON(w, http.StatusOK, WalletAccountMergeVerifyResponse{
+		MergedWallet: result.MergedWallet,
+		Wallets:      result.Wallets,
+		Challenge:    result.Challenge,
+		SourceUserID: result.SourceUserID,
+		TargetUserID: result.TargetUserID,
 	})
 }
