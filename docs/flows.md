@@ -297,11 +297,11 @@ Defines how authenticated sessions are resolved.
 
 ---
 
-## 🧭 Future Flow Extensions (Post 0.4.12)
+## 🧭 Future Flow Extensions (Post 0.4.13)
 
-### Planned in 0.4.13
-- wallet detach execution flow
-- primary-replacement preconditions for detach execution
+### Planned in 0.4.14
+- detached-wallet follow-up lifecycle rules
+- optional detached-identity history or audit markers
 
 ### Later phases
 - multi-auth merge flow
@@ -368,5 +368,22 @@ The backend now transitions from:
 - detach eligibility never detaches a wallet
 - detach eligibility never changes ownership
 - detach eligibility never reassigns primary automatically
-- primary wallets remain non-eligible until a safer detach execution contract exists
-- single-wallet users remain non-eligible until a future detach design defines what should happen next
+- primary wallets remain non-eligible for detach execution
+- single-wallet users remain non-eligible for detach execution
+
+### 8. Wallet Detach Execution
+
+1. authenticated user calls `POST /auth/wallets/detach`
+2. backend extracts current authenticated `user_id`
+3. backend normalizes and validates `wallet_address`
+4. detach service reuses the eligibility rules from the detach-check contract
+5. backend rejects the request if the wallet is primary or if the user would become wallet-empty
+6. store clears `user_id`, `linked_at`, and `is_primary` from the detached wallet identity
+7. backend returns the detached wallet snapshot plus the refreshed remaining owned-wallet inventory
+
+#### Safety Rules
+
+- detach execution only works for wallets already eligible under the detach-check rules
+- detach execution never reassigns primary automatically
+- detach execution never moves the detached wallet to a different user
+- detach execution preserves the remaining primary wallet exactly as it was before the operation

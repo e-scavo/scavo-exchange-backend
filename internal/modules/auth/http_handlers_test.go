@@ -595,3 +595,114 @@ func TestHTTPHandlers_WalletDetachCheck_RejectsWalletNotOwnedByUser(t *testing.T
 		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
 	}
 }
+
+type walletDetachConflictPayload struct {
+	Error string                     `json:"error"`
+	Check *WalletDetachCheckResponse `json:"check,omitempty"`
+}
+
+func TestHTTPHandlers_WalletDetach_Success(t *testing.T) {
+	identityStore := NewInMemoryWalletIdentityStore()
+
+	primaryAddress, _ := signWalletMessageForScalar(t, "handler-detach-exec-primary", "39")
+	primaryIdentity, err := identityStore.GetOrCreate(context.Background(), primaryAddress)
+	if err != nil {
+		t.Fatalf("GetOrCreate primary error: %v", err)
+	}
+	_, err = identityStore.AttachUser(context.Background(), primaryIdentity.ID, "u_test_example_com", true)
+	if err != nil {
+		t.Fatalf("AttachUser primary error: %v", err)
+	}
+
+	secondaryAddress, _ := signWalletMessageForScalar(t, "handler-detach-exec-secondary", "40")
+	secondaryIdentity, err := identityStore.GetOrCreate(context.Background(), secondaryAddress)
+	if err != nil {
+		t.Fatalf("GetOrCreate secondary error: %v", err)
+	}
+	_, err = identityStore.AttachUser(context.Background(), secondaryIdentity.ID, "u_test_example_com", false)
+	if err != nil {
+		t.Fatalf("AttachUser secondary error: %v", err)
+	}
+
+	h := HTTPHandlers{
+		Tokens:           mustTokenService(t),
+		TTL:              time.Hour,
+		Users:            usermod.NewService(nil),
+		WalletIdentities: identityStore,
+	}
+
+	req := httptest.NewRequest(http.MethodPost, "/auth/wallets/detach", strings.NewReader(`{"wallet_address":"`+secondaryAddress+`"}`))
+	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	rec := httptest.NewRecorder()
+
+	h.WalletDetach(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+
+	var payload WalletDetachExecuteResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("decode error: %v", err)
+	}
+	if payload.DetachedWallet == nil || payload.DetachedWallet.Address != secondaryAddress {
+		t.Fatalf("unexpected detached wallet: %#v", payload.DetachedWallet)
+	}
+	if payload.DetachedWallet.UserID != "" {
+		t.Fatalf("expected detached wallet user to be empty, got %q", payload.DetachedWallet.UserID)
+	}
+	if len(payload.Wallets) != 1 {
+		t.Fatalf("expected 1 remaining wallet, got %d", len(payload.Wallets))
+	}
+	if payload.Wallets[0].Address != primaryAddress || !payload.Wallets[0].IsPrimary {
+		t.Fatal("expected original primary wallet to remain attached and primary")
+	}
+	if payload.Check == nil || !payload.Check.Eligible {
+		t.Fatalf("expected successful eligibility snapshot, got %#v", payload.Check)
+	}
+}
+
+func TestHTTPHandlers_WalletDetach_RejectsPrimaryWallet(t *testing.T) {
+	identityStore := NewInMemoryWalletIdentityStore()
+
+	primaryAddress, _ := signWalletMessageForScalar(t, "handler-detach-exec-primary-only", "41")
+	primaryIdentity, err := identityStore.GetOrCreate(context.Background(), primaryAddress)
+	if err != nil {
+		t.Fatalf("GetOrCreate primary error: %v", err)
+	}
+	_, err = identityStore.AttachUser(context.Background(), primaryIdentity.ID, "u_test_example_com", true)
+	if err != nil {
+		t.Fatalf("AttachUser primary error: %v", err)
+	}
+
+	h := HTTPHandlers{
+		Tokens:           mustTokenService(t),
+		TTL:              time.Hour,
+		Users:            usermod.NewService(nil),
+		WalletIdentities: identityStore,
+	}
+
+	req := httptest.NewRequest(http.MethodPost, "/auth/wallets/detach", strings.NewReader(`{"wallet_address":"`+primaryAddress+`"}`))
+	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	rec := httptest.NewRecorder()
+
+	h.WalletDetach(rec, req)
+
+	if rec.Code != http.StatusConflict {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+
+	var payload walletDetachConflictPayload
+	if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("decode error: %v", err)
+	}
+	if payload.Error != "wallet_detach_not_eligible" {
+		t.Fatalf("unexpected error code: %q", payload.Error)
+	}
+	if payload.Check == nil || payload.Check.Eligible {
+		t.Fatalf("expected ineligible check payload, got %#v", payload.Check)
+	}
+	if len(payload.Check.Reasons) == 0 || payload.Check.Reasons[0] != WalletDetachReasonWalletIsPrimary {
+		t.Fatalf("unexpected detach reasons: %#v", payload.Check)
+	}
+}

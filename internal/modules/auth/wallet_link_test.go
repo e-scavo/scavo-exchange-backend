@@ -372,3 +372,79 @@ func TestWalletDetachService_CheckEligibility_SuccessForOwnedSecondaryWallet(t *
 		t.Fatalf("expected no reasons, got %v", result.Reasons)
 	}
 }
+
+func TestWalletDetachService_Execute_SuccessForOwnedSecondaryWallet(t *testing.T) {
+	identityStore := NewInMemoryWalletIdentityStore()
+	detachSvc := NewWalletDetachService(identityStore)
+
+	primaryAddress, _ := signWalletMessageForScalar(t, "detach-exec-primary", "36")
+	primaryIdentity, err := identityStore.GetOrCreate(context.Background(), primaryAddress)
+	if err != nil {
+		t.Fatalf("GetOrCreate primary error: %v", err)
+	}
+	_, err = identityStore.AttachUser(context.Background(), primaryIdentity.ID, "u_target", true)
+	if err != nil {
+		t.Fatalf("AttachUser primary error: %v", err)
+	}
+
+	secondaryAddress, _ := signWalletMessageForScalar(t, "detach-exec-secondary", "37")
+	secondaryIdentity, err := identityStore.GetOrCreate(context.Background(), secondaryAddress)
+	if err != nil {
+		t.Fatalf("GetOrCreate secondary error: %v", err)
+	}
+	_, err = identityStore.AttachUser(context.Background(), secondaryIdentity.ID, "u_target", false)
+	if err != nil {
+		t.Fatalf("AttachUser secondary error: %v", err)
+	}
+
+	result, err := detachSvc.Execute(context.Background(), "u_target", secondaryAddress)
+	if err != nil {
+		t.Fatalf("Execute error: %v", err)
+	}
+	if result.Detached == nil || result.Detached.Address != secondaryAddress {
+		t.Fatalf("unexpected detached wallet: %#v", result.Detached)
+	}
+	if result.Detached.UserID != "" {
+		t.Fatalf("expected detached wallet to have empty user id, got %q", result.Detached.UserID)
+	}
+	if result.Detached.IsPrimary {
+		t.Fatal("expected detached wallet to be non-primary")
+	}
+	if result.Detached.LinkedAt != nil {
+		t.Fatal("expected detached wallet linked_at to be cleared")
+	}
+	if len(result.Wallets) != 1 {
+		t.Fatalf("expected 1 remaining wallet, got %d", len(result.Wallets))
+	}
+	if result.Wallets[0].Address != primaryAddress || !result.Wallets[0].IsPrimary {
+		t.Fatal("expected original primary wallet to remain attached and primary")
+	}
+
+	storedDetached, err := identityStore.GetByAddress(context.Background(), secondaryAddress)
+	if err != nil {
+		t.Fatalf("GetByAddress detached error: %v", err)
+	}
+	if storedDetached.UserID != "" || storedDetached.IsPrimary || storedDetached.LinkedAt != nil {
+		t.Fatalf("unexpected stored detached wallet state: %#v", storedDetached)
+	}
+}
+
+func TestWalletDetachService_Execute_RejectsPrimaryWallet(t *testing.T) {
+	identityStore := NewInMemoryWalletIdentityStore()
+	detachSvc := NewWalletDetachService(identityStore)
+
+	primaryAddress, _ := signWalletMessageForScalar(t, "detach-exec-primary-only", "38")
+	primaryIdentity, err := identityStore.GetOrCreate(context.Background(), primaryAddress)
+	if err != nil {
+		t.Fatalf("GetOrCreate primary error: %v", err)
+	}
+	_, err = identityStore.AttachUser(context.Background(), primaryIdentity.ID, "u_target", true)
+	if err != nil {
+		t.Fatalf("AttachUser primary error: %v", err)
+	}
+
+	_, err = detachSvc.Execute(context.Background(), "u_target", primaryAddress)
+	if err != ErrWalletDetachNotEligible {
+		t.Fatalf("expected ErrWalletDetachNotEligible, got %v", err)
+	}
+}

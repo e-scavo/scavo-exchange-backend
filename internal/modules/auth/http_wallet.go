@@ -94,6 +94,16 @@ type WalletDetachCheckResponse struct {
 	Reasons          []string `json:"reasons"`
 }
 
+type WalletDetachExecuteRequest struct {
+	Address string `json:"wallet_address"`
+}
+
+type WalletDetachExecuteResponse struct {
+	DetachedWallet *WalletIdentity            `json:"detached_wallet,omitempty"`
+	Wallets        []*WalletIdentity          `json:"wallets"`
+	Check          *WalletDetachCheckResponse `json:"check,omitempty"`
+}
+
 type WalletPrimarySetRequest struct {
 	Address string `json:"wallet_address"`
 }
@@ -413,6 +423,67 @@ func (h HTTPHandlers) WalletDetachCheck(w http.ResponseWriter, r *http.Request) 
 		IsPrimary:        result.IsPrimary,
 		OwnedWalletCount: result.OwnedWalletCount,
 		Reasons:          result.Reasons,
+	})
+}
+
+func (h HTTPHandlers) WalletDetach(w http.ResponseWriter, r *http.Request) {
+	claims, ok := coreauth.ClaimsFromContext(r.Context())
+	if !ok || claims == nil || claims.UserID == "" {
+		writeJSON(w, http.StatusUnauthorized, map[string]any{"error": "unauthorized"})
+		return
+	}
+
+	var req WalletDetachExecuteRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "bad_request"})
+		return
+	}
+
+	svc := NewWalletDetachService(h.WalletIdentities)
+	result, err := svc.Execute(r.Context(), claims.UserID, req.Address)
+	if err != nil {
+		switch {
+		case errors.Is(err, ErrUnauthorized):
+			writeJSON(w, http.StatusUnauthorized, map[string]any{"error": "unauthorized"})
+		case errors.Is(err, ErrInvalidWalletAddress):
+			writeJSON(w, http.StatusBadRequest, map[string]any{"error": "invalid_wallet_address"})
+		case errors.Is(err, ErrWalletIdentityNotFound):
+			writeJSON(w, http.StatusNotFound, map[string]any{"error": "wallet_identity_not_found"})
+		case errors.Is(err, ErrWalletNotOwnedByUser):
+			writeJSON(w, http.StatusForbidden, map[string]any{"error": "wallet_identity_not_owned_by_user"})
+		case errors.Is(err, ErrWalletDetachNotEligible):
+			var check *WalletDetachCheckResponse
+			if result != nil && result.Check != nil {
+				check = &WalletDetachCheckResponse{
+					WalletAddress:    result.Check.WalletAddress,
+					Eligible:         result.Check.Eligible,
+					IsPrimary:        result.Check.IsPrimary,
+					OwnedWalletCount: result.Check.OwnedWalletCount,
+					Reasons:          result.Check.Reasons,
+				}
+			}
+			writeJSON(w, http.StatusConflict, map[string]any{"error": "wallet_detach_not_eligible", "check": check})
+		default:
+			writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "wallet_detach_error"})
+		}
+		return
+	}
+
+	var check *WalletDetachCheckResponse
+	if result != nil && result.Check != nil {
+		check = &WalletDetachCheckResponse{
+			WalletAddress:    result.Check.WalletAddress,
+			Eligible:         result.Check.Eligible,
+			IsPrimary:        result.Check.IsPrimary,
+			OwnedWalletCount: result.Check.OwnedWalletCount,
+			Reasons:          result.Check.Reasons,
+		}
+	}
+
+	writeJSON(w, http.StatusOK, WalletDetachExecuteResponse{
+		DetachedWallet: result.Detached,
+		Wallets:        result.Wallets,
+		Check:          check,
 	})
 }
 

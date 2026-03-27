@@ -32,43 +32,42 @@ Status: ✅ Completed
 | 0.4.10 | User-driven wallet-owned account merge execution | ✅ Completed |
 | 0.4.11 | Primary wallet management and ownership safety hardening | ✅ Completed |
 | 0.4.12 | Wallet detach contract preparation and ownership guardrails | ✅ Completed |
+| 0.4.13 | Protected wallet detach execution | ✅ Completed |
 
 ---
 
-## ✅ Phase 0.4.12 Closure Summary
+## ✅ Phase 0.4.13 Closure Summary
 
-Phase 0.4.12 adds the first explicit detach-preparation contract on top of the ownership model delivered through 0.4.11.
+Phase 0.4.13 turns the detach-eligibility contract from 0.4.12 into a real, authenticated ownership mutation for the already safe cases.
 
-The backend can now accept an authenticated request from an already logged-in user, validate ownership of an already linked wallet, and evaluate whether that wallet is currently safe to detach without executing unlink behavior.
+The backend can now accept an authenticated request from an already logged-in user, validate ownership of an already linked wallet, reuse the same conservative detach guardrails, and execute the detach only when the wallet is both owned and eligible.
 
-### Delivered in 0.4.12
+### Delivered in 0.4.13
 
-- authenticated detach-eligibility endpoint: `POST /auth/wallets/detach/check`
-- conservative eligibility contract for future unlink work
-- explicit response fields for `eligible`, `is_primary`, `owned_wallet_count`, and `reasons`
-- protected rejection when the target wallet is missing
-- protected rejection when the wallet does not belong to the current authenticated user
-- explicit non-eligibility when the wallet is primary
-- explicit non-eligibility when detach would leave the user without any wallets
-- existing link, merge, and primary-switch coverage preserved
+- authenticated detach execution endpoint: `POST /auth/wallets/detach`
+- detach service execution path that reuses the 0.4.12 eligibility rules before mutating ownership
+- store-level detach contract that clears `user_id`, `linked_at`, and `is_primary` from the detached wallet identity
+- updated wallet inventory response after successful detach execution
+- protected conflict response when the wallet is not detach-eligible under current guardrails
+- existing link, merge, primary-switch, and detach-check coverage preserved
 
 ---
 
 ## 🔍 Functional Result
 
-The system now supports the following detach-preparation sequence under an existing authenticated session:
+The system now supports the following detach execution sequence under an existing authenticated session:
 
 1. user authenticates normally
 2. user lists or already knows their owned wallets
-3. user requests `POST /auth/wallets/detach/check` with one owned wallet address
+3. user requests `POST /auth/wallets/detach` with one owned wallet address
 4. backend validates that the wallet exists and belongs to the authenticated user
-5. backend evaluates whether the wallet is currently primary
-6. backend evaluates how many wallets the user currently owns
-7. backend returns an eligibility decision plus explicit reasons when detach is not yet safe
+5. backend reuses the detach eligibility rules from 0.4.12
+6. backend rejects the request if the wallet is primary or if detach would leave the user without wallets
+7. backend clears ownership metadata from the detached wallet and returns the refreshed remaining wallet inventory
 
 ---
 
-## ❌ Not Included in 0.4.12
+## ❌ Not Included in 0.4.13
 
 The following items remain intentionally out of scope:
 
@@ -85,11 +84,10 @@ The following items remain intentionally out of scope:
 
 ## ⏭️ Next Phase
 
-### 0.4.13 — Wallet Detach Execution Design
+### 0.4.14 — Detach Follow-Up Semantics and Source Identity Lifecycle
 
 Planned focus:
 
-- transform detach eligibility into a real detach contract
-- define how primary replacement must occur before detach execution
-- preserve strict ownership invariants during unlink execution
-- continue progression from ownership guardrails toward controlled wallet detachment
+- define whether detached wallets should bootstrap fresh wallet-only users automatically in future flows
+- evaluate whether detached identities require archival, history, or audit-friendly lifecycle markers
+- preserve strict ownership invariants while preparing richer unlink semantics

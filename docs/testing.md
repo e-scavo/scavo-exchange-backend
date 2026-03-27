@@ -415,7 +415,7 @@ Key validations now include:
 
 ---
 
-## 🧭 Future Testing (Post 0.4.12)
+## 🧭 Future Testing (Post 0.4.13)
 
 Planned:
 
@@ -429,7 +429,7 @@ Planned:
 
 ## 🧩 Summary
 
-Testing at Phase 0.4.12 guarantees:
+Testing at Phase 0.4.13 guarantees:
 
 - authentication correctness
 - identity persistence
@@ -483,7 +483,10 @@ ORDER BY is_primary DESC, linked_at ASC NULLS LAST, address ASC;
 ### API
 
 ```bash
-curl -s -X POST http://localhost:8080/auth/wallets/detach/check   -H "Authorization: Bearer <ACCESS_TOKEN>"   -H "Content-Type: application/json"   -d '{
+curl -s -X POST http://localhost:8080/auth/wallets/detach/check \
+  -H "Authorization: Bearer <ACCESS_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
     "wallet_address": "0xYOUR_OWNED_WALLET"
   }'
 ```
@@ -513,3 +516,40 @@ curl -s -X POST http://localhost:8080/auth/wallets/detach/check   -H "Authorizat
 - current user would have no wallets left after detach → `user_would_have_no_wallets`
 - multiple reasons may be returned together
 
+## 0.4.13 — Wallet Detach Execution
+
+### API
+
+```bash
+curl -s -X POST http://localhost:8080/auth/wallets/detach \
+  -H "Authorization: Bearer <ACCESS_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "wallet_address": "0xYOUR_ELIGIBLE_OWNED_WALLET"
+  }'
+```
+
+### Expected Result
+
+- HTTP `200 OK` for eligible owned non-primary wallets
+- response contains:
+  - `detached_wallet`
+  - `wallets`
+  - `check`
+- detached wallet returns with cleared ownership fields
+- remaining wallet inventory preserves the existing primary wallet
+
+### Conflict Case
+
+```bash
+curl -s -X POST http://localhost:8080/auth/wallets/detach \
+  -H "Authorization: Bearer <ACCESS_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "wallet_address": "0xYOUR_PRIMARY_OR_ONLY_WALLET"
+  }'
+```
+
+- HTTP `409 Conflict` when current guardrails still mark the wallet as non-eligible
+- response error: `wallet_detach_not_eligible`
+- conflict payload includes the same detach-check snapshot and reasons used to reject execution

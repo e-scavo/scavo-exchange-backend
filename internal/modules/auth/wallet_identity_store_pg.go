@@ -362,6 +362,93 @@ func (s *WalletIdentityStorePG) SetPrimary(ctx context.Context, userID, address 
 	return identity, nil
 }
 
+func (s *WalletIdentityStorePG) DetachUser(ctx context.Context, userID, address string) (*WalletIdentity, []*WalletIdentity, error) {
+	if s == nil || s.db == nil {
+		return nil, nil, ErrChallengeStore
+	}
+
+	userID = strings.TrimSpace(userID)
+	address = normalizeWalletAddress(address)
+	if userID == "" {
+		return nil, nil, ErrUnauthorized
+	}
+	if !evmAddressRE.MatchString(address) {
+		return nil, nil, ErrInvalidWalletAddress
+	}
+
+	tx, err := s.db.Begin(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+
+	current, err := scanWalletIdentityRow(tx.QueryRow(ctx, `
+		SELECT id::text, address, COALESCE(user_id, ''), linked_at, is_primary
+		FROM auth_wallet_identities
+		WHERE address = $1
+		FOR UPDATE
+	`, address))
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil, ErrWalletIdentityNotFound
+		}
+		return nil, nil, err
+	}
+	if strings.TrimSpace(current.UserID) != userID {
+		return nil, nil, ErrWalletNotOwnedByUser
+	}
+
+	_, err = tx.Exec(ctx, `
+		UPDATE auth_wallet_identities
+		SET
+			user_id = NULL,
+			linked_at = NULL,
+			is_primary = FALSE
+		WHERE address = $1
+	`, address)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	detached, err := scanWalletIdentityRow(tx.QueryRow(ctx, `
+		SELECT id::text, address, COALESCE(user_id, ''), linked_at, is_primary
+		FROM auth_wallet_identities
+		WHERE address = $1
+	`, address))
+	if err != nil {
+		return nil, nil, err
+	}
+
+	rows, err := tx.Query(ctx, `
+		SELECT id::text, address, COALESCE(user_id, ''), linked_at, is_primary
+		FROM auth_wallet_identities
+		WHERE user_id = $1
+		ORDER BY is_primary DESC, linked_at ASC NULLS LAST, address ASC
+	`, userID)
+	if err != nil {
+		return nil, nil, err
+	}
+	defer rows.Close()
+
+	remaining := make([]*WalletIdentity, 0)
+	for rows.Next() {
+		identity, err := scanWalletIdentityRows(rows)
+		if err != nil {
+			return nil, nil, err
+		}
+		remaining = append(remaining, identity)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, nil, err
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return nil, nil, err
+	}
+
+	return detached, remaining, nil
+}
+
 func (s *WalletIdentityStorePG) ListByUser(ctx context.Context, userID string) ([]*WalletIdentity, error) {
 	if s == nil || s.db == nil {
 		return []*WalletIdentity{}, nil

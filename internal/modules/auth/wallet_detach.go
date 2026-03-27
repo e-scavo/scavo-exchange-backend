@@ -19,6 +19,12 @@ type WalletDetachCheckResult struct {
 	Reasons          []string `json:"reasons"`
 }
 
+type WalletDetachExecuteResult struct {
+	Detached *WalletIdentity          `json:"detached,omitempty"`
+	Wallets  []*WalletIdentity        `json:"wallets"`
+	Check    *WalletDetachCheckResult `json:"check,omitempty"`
+}
+
 type WalletDetachService struct {
 	identities WalletIdentityStore
 }
@@ -74,4 +80,31 @@ func (s *WalletDetachService) CheckEligibility(ctx context.Context, userID, addr
 	}
 
 	return result, nil
+}
+
+func (s *WalletDetachService) Execute(ctx context.Context, userID, address string) (*WalletDetachExecuteResult, error) {
+	check, err := s.CheckEligibility(ctx, userID, address)
+	if err != nil {
+		return nil, err
+	}
+	if check == nil {
+		return nil, ErrUnauthorized
+	}
+	if !check.Eligible {
+		return &WalletDetachExecuteResult{Check: check, Wallets: []*WalletIdentity{}}, ErrWalletDetachNotEligible
+	}
+
+	detached, wallets, err := s.identities.DetachUser(ctx, userID, address)
+	if err != nil {
+		return nil, err
+	}
+	if wallets == nil {
+		wallets = []*WalletIdentity{}
+	}
+
+	return &WalletDetachExecuteResult{
+		Detached: detached,
+		Wallets:  wallets,
+		Check:    check,
+	}, nil
 }

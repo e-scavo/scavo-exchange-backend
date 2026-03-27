@@ -236,6 +236,36 @@ func (s *InMemoryWalletIdentityStore) SetPrimary(ctx context.Context, userID, ad
 	return &cp, nil
 }
 
+func (s *InMemoryWalletIdentityStore) DetachUser(ctx context.Context, userID, address string) (*WalletIdentity, []*WalletIdentity, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	userID = strings.TrimSpace(userID)
+	address = normalizeWalletAddress(address)
+	if userID == "" {
+		return nil, nil, ErrUnauthorized
+	}
+	if !evmAddressRE.MatchString(address) {
+		return nil, nil, ErrInvalidWalletAddress
+	}
+
+	target, ok := s.items[address]
+	if !ok || target == nil {
+		return nil, nil, ErrWalletIdentityNotFound
+	}
+	if strings.TrimSpace(target.UserID) != userID {
+		return nil, nil, ErrWalletNotOwnedByUser
+	}
+
+	target.UserID = ""
+	target.LinkedAt = nil
+	target.IsPrimary = false
+
+	cp := *target
+	remaining := s.listByUserLocked(userID)
+	return &cp, remaining, nil
+}
+
 func (s *InMemoryWalletIdentityStore) ListByUser(ctx context.Context, userID string) ([]*WalletIdentity, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()

@@ -20,5 +20,6 @@ type WalletIdentityStore interface {
 	ReassignUser(ctx context.Context, walletID, fromUserID, toUserID string, primary bool) (*WalletIdentity, error)
 	MergeUsers(ctx context.Context, sourceUserID, targetUserID string) ([]*WalletIdentity, error)
 	SetPrimary(ctx context.Context, userID, address string) (*WalletIdentity, error)
+	DetachUser(ctx context.Context, userID, address string) (*WalletIdentity, []*WalletIdentity, error)
 	ListByUser(ctx context.Context, userID string) ([]*WalletIdentity, error)
 }
