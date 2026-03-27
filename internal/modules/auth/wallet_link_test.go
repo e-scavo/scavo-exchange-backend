@@ -8,6 +8,8 @@ import (
 	"math/big"
 	"testing"
 	"time"
+
+	usermod "github.com/e-scavo/scavo-exchange-backend/internal/modules/user"
 )
 
 func signWalletMessageForScalar(t *testing.T, message, scalar string) (string, string) {
@@ -426,6 +428,159 @@ func TestWalletDetachService_Execute_SuccessForOwnedSecondaryWallet(t *testing.T
 	}
 	if storedDetached.UserID != "" || storedDetached.IsPrimary || storedDetached.LinkedAt != nil {
 		t.Fatalf("unexpected stored detached wallet state: %#v", storedDetached)
+	}
+}
+
+func TestWalletLinkingService_VerifyAndLink_AllowsDetachedWalletReattachment(t *testing.T) {
+	challengeStore := NewInMemoryWalletChallengeStore()
+	challengeSvc := NewWalletChallengeService(challengeStore, "https://api.scavo.exchange", 5*time.Minute)
+	identityStore := NewInMemoryWalletIdentityStore()
+	linkSvc := NewWalletLinkingService(challengeSvc, identityStore)
+	detachSvc := NewWalletDetachService(identityStore)
+
+	primaryAddress, _ := signWalletMessageForScalar(t, "reattach-primary", "42")
+	primaryIdentity, err := identityStore.GetOrCreate(context.Background(), primaryAddress)
+	if err != nil {
+		t.Fatalf("GetOrCreate primary error: %v", err)
+	}
+	_, err = identityStore.AttachUser(context.Background(), primaryIdentity.ID, "u_target", true)
+	if err != nil {
+		t.Fatalf("AttachUser primary error: %v", err)
+	}
+
+	secondaryAddress, _ := signWalletMessageForScalar(t, "reattach-secondary", "43")
+	secondaryIdentity, err := identityStore.GetOrCreate(context.Background(), secondaryAddress)
+	if err != nil {
+		t.Fatalf("GetOrCreate secondary error: %v", err)
+	}
+	_, err = identityStore.AttachUser(context.Background(), secondaryIdentity.ID, "u_target", false)
+	if err != nil {
+		t.Fatalf("AttachUser secondary error: %v", err)
+	}
+
+	detachResult, err := detachSvc.Execute(context.Background(), "u_target", secondaryAddress)
+	if err != nil {
+		t.Fatalf("Execute detach error: %v", err)
+	}
+	if detachResult == nil || detachResult.Detached == nil {
+		t.Fatal("expected detached wallet result")
+	}
+	if len(detachResult.Wallets) != 1 {
+		t.Fatalf("expected 1 remaining wallet after detach, got %d", len(detachResult.Wallets))
+	}
+
+	challenge, err := linkSvc.CreateChallenge(context.Background(), "u_target", secondaryAddress, "scavium")
+	if err != nil {
+		t.Fatalf("CreateChallenge error: %v", err)
+	}
+	_, signature := signWalletMessageForScalar(t, challenge.Message, "43")
+
+	result, err := linkSvc.VerifyAndLink(context.Background(), "u_target", challenge.ID, secondaryAddress, signature)
+	if err != nil {
+		t.Fatalf("VerifyAndLink error: %v", err)
+	}
+	if result.Linked == nil {
+		t.Fatal("expected linked wallet")
+	}
+	if result.Linked.UserID != "u_target" {
+		t.Fatalf("unexpected relinked user id: %q", result.Linked.UserID)
+	}
+	if result.Linked.IsPrimary {
+		t.Fatal("expected reattached wallet to remain non-primary")
+	}
+	if result.Linked.LinkedAt == nil {
+		t.Fatal("expected reattached wallet to get linked_at again")
+	}
+	if len(result.Wallets) != 2 {
+		t.Fatalf("expected 2 wallets after reattachment, got %d", len(result.Wallets))
+	}
+
+	stored, err := identityStore.GetByAddress(context.Background(), secondaryAddress)
+	if err != nil {
+		t.Fatalf("GetByAddress relinked error: %v", err)
+	}
+	if stored.UserID != "u_target" {
+		t.Fatalf("unexpected stored relinked user id: %q", stored.UserID)
+	}
+	if stored.LinkedAt == nil {
+		t.Fatal("expected stored relinked wallet linked_at")
+	}
+	if stored.IsPrimary {
+		t.Fatal("expected stored relinked wallet to remain non-primary")
+	}
+}
+
+func TestWalletVerificationService_VerifyAndLogin_RebindsDetachedWalletToWalletUser(t *testing.T) {
+	challengeStore := NewInMemoryWalletChallengeStore()
+	challengeSvc := NewWalletChallengeService(challengeStore, "https://api.scavo.exchange", 5*time.Minute)
+	identityStore := NewInMemoryWalletIdentityStore()
+	detachSvc := NewWalletDetachService(identityStore)
+	loginSvc := NewService(newTokenServiceForTest(t), usermod.NewService(&stubUserRepo{}), time.Hour)
+	verifySvc := NewWalletVerificationService(challengeSvc, loginSvc, identityStore)
+
+	primaryAddress, _ := signWalletMessageForScalar(t, "wallet-login-primary", "44")
+	primaryIdentity, err := identityStore.GetOrCreate(context.Background(), primaryAddress)
+	if err != nil {
+		t.Fatalf("GetOrCreate primary error: %v", err)
+	}
+	_, err = identityStore.AttachUser(context.Background(), primaryIdentity.ID, "u_existing_owner", true)
+	if err != nil {
+		t.Fatalf("AttachUser primary error: %v", err)
+	}
+
+	secondaryAddress, _ := signWalletMessageForScalar(t, "wallet-login-secondary", "45")
+	secondaryIdentity, err := identityStore.GetOrCreate(context.Background(), secondaryAddress)
+	if err != nil {
+		t.Fatalf("GetOrCreate secondary error: %v", err)
+	}
+	_, err = identityStore.AttachUser(context.Background(), secondaryIdentity.ID, "u_existing_owner", false)
+	if err != nil {
+		t.Fatalf("AttachUser secondary error: %v", err)
+	}
+
+	_, err = detachSvc.Execute(context.Background(), "u_existing_owner", secondaryAddress)
+	if err != nil {
+		t.Fatalf("Execute secondary detach error: %v", err)
+	}
+
+	challenge, err := challengeSvc.Create(context.Background(), secondaryAddress, "scavium")
+	if err != nil {
+		t.Fatalf("Create challenge error: %v", err)
+	}
+	_, signature := signWalletMessageForScalar(t, challenge.Message, "45")
+
+	result, usedChallenge, err := verifySvc.VerifyAndLogin(context.Background(), challenge.ID, secondaryAddress, signature)
+	if err != nil {
+		t.Fatalf("VerifyAndLogin error: %v", err)
+	}
+	if result == nil || result.User == nil {
+		t.Fatal("expected wallet login result with user")
+	}
+	if result.User.ID != walletUserID(secondaryAddress) {
+		t.Fatalf("expected detached wallet login to resolve wallet-owned user, got %q", result.User.ID)
+	}
+	if result.AuthMethod != "wallet_evm" {
+		t.Fatalf("unexpected auth method: %q", result.AuthMethod)
+	}
+	if usedChallenge == nil || usedChallenge.UsedAt == nil {
+		t.Fatal("expected used challenge metadata")
+	}
+
+	stored, err := identityStore.GetByAddress(context.Background(), secondaryAddress)
+	if err != nil {
+		t.Fatalf("GetByAddress relogin error: %v", err)
+	}
+	if stored.UserID == "" {
+		t.Fatal("expected wallet login to rebind detached wallet")
+	}
+	if stored.UserID != result.User.ID {
+		t.Fatalf("unexpected rebound user id: %q vs %q", stored.UserID, result.User.ID)
+	}
+	if stored.LinkedAt == nil {
+		t.Fatal("expected rebound wallet linked_at")
+	}
+	if !stored.IsPrimary {
+		t.Fatal("expected rebound wallet to become primary for wallet-owned user")
 	}
 }
 

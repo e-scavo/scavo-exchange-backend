@@ -345,7 +345,7 @@ go test ./...
 
 Phase 0.4 now establishes a strong identity and wallet-ownership foundation.
 
-With 0.4.12:
+With 0.4.14:
 
 - wallet authentication is stable
 - identity is durable
@@ -354,8 +354,54 @@ With 0.4.12:
 - wallet-owned account merge execution is available
 - explicit primary-wallet switching is available
 - detach eligibility can be evaluated safely before unlink execution
-- the backend is prepared for controlled wallet-detach design
+- detach execution is implemented for already eligible owned wallets
+- detached wallets are explicitly treated as reusable known identities
+- detached wallets can be reattached either through protected linking or through wallet-login bootstrap rebound
 
 Next expected evolution:
 
-➡️ **0.4.13 — Wallet Detach Execution Design**
+➡️ **0.4.15 — Detached Identity Audit Readiness**
+
+
+---
+
+## 0.4.14 — Detached Wallet Reattachment Semantics and Lifecycle Clarification
+
+### Objective
+Clarify the post-detach lifecycle of wallet identities without introducing premature schema expansion or audit complexity.
+
+### Scope
+- confirm that detached wallet identities remain reusable known identities
+- validate that authenticated wallet-linking can reattach a previously detached wallet
+- validate that wallet-login bootstrap can rebound a detached wallet into a wallet-owned user identity
+- align documentation with the actual current lifecycle behavior
+
+### Delivered
+- service-level reattachment test coverage after detach
+- service-level wallet-login rebound coverage after detach
+- handler-level coverage for detached-wallet reattachment under the authenticated link flow
+- explicit documentation that detached wallets are not deleted or archived in the current phase
+
+### Lifecycle Semantics Clarified
+After detach, the wallet identity:
+- keeps its durable wallet identity record
+- keeps its normalized address
+- clears `user_id`
+- clears `linked_at`
+- clears `is_primary`
+- remains reusable for future attachment
+
+This means the current system treats detached wallets as **known reusable identities**, not as terminal, archived, or deleted entities.
+
+### Not Introduced Here
+- `detached_at`
+- `detached_by_user_id`
+- lifecycle audit tables
+- event sourcing
+- archival or soft-delete semantics
+
+### Validation
+Validated through:
+- detached-wallet reattachment tests under `WalletLinkingService`
+- detached-wallet wallet-login rebound tests under `WalletVerificationService`
+- HTTP handler coverage for reattaching a detached wallet through the authenticated link contract

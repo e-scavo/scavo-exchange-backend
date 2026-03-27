@@ -33,48 +33,48 @@ Status: ✅ Completed
 | 0.4.11 | Primary wallet management and ownership safety hardening | ✅ Completed |
 | 0.4.12 | Wallet detach contract preparation and ownership guardrails | ✅ Completed |
 | 0.4.13 | Protected wallet detach execution | ✅ Completed |
+| 0.4.14 | Detached wallet reattachment semantics and lifecycle clarification | ✅ Completed |
 
 ---
 
-## ✅ Phase 0.4.13 Closure Summary
+## ✅ Phase 0.4.14 Closure Summary
 
-Phase 0.4.13 turns the detach-eligibility contract from 0.4.12 into a real, authenticated ownership mutation for the already safe cases.
+Phase 0.4.14 closes the first post-detach lifecycle gap without introducing heavy new persistence semantics.
 
-The backend can now accept an authenticated request from an already logged-in user, validate ownership of an already linked wallet, reuse the same conservative detach guardrails, and execute the detach only when the wallet is both owned and eligible.
+The backend now explicitly validates that a detached wallet identity remains reusable: it can be reattached again through the authenticated wallet-link flow, and it can also re-enter the wallet-login bootstrap flow to resolve back into a wallet-owned user identity.
 
-### Delivered in 0.4.13
+### Delivered in 0.4.14
 
-- authenticated detach execution endpoint: `POST /auth/wallets/detach`
-- detach service execution path that reuses the 0.4.12 eligibility rules before mutating ownership
-- store-level detach contract that clears `user_id`, `linked_at`, and `is_primary` from the detached wallet identity
-- updated wallet inventory response after successful detach execution
-- protected conflict response when the wallet is not detach-eligible under current guardrails
-- existing link, merge, primary-switch, and detach-check coverage preserved
+- explicit lifecycle clarification for detached wallet identities
+- service-level reattachment coverage for detached wallets under authenticated linking
+- service-level wallet-login rebound coverage for detached wallets under wallet bootstrap auth
+- handler-level coverage proving detached wallets can be linked again by the authenticated owner
+- documentation updates aligning detach execution with post-detach reuse semantics
+- no schema expansion required to make current detached-wallet behavior explicit
 
 ---
 
 ## 🔍 Functional Result
 
-The system now supports the following detach execution sequence under an existing authenticated session:
+The system now supports the following post-detach lifecycle sequence:
 
-1. user authenticates normally
-2. user lists or already knows their owned wallets
-3. user requests `POST /auth/wallets/detach` with one owned wallet address
-4. backend validates that the wallet exists and belongs to the authenticated user
-5. backend reuses the detach eligibility rules from 0.4.12
-6. backend rejects the request if the wallet is primary or if detach would leave the user without wallets
-7. backend clears ownership metadata from the detached wallet and returns the refreshed remaining wallet inventory
+1. user detaches one already eligible owned wallet
+2. backend clears `user_id`, `linked_at`, and `is_primary` from that wallet identity
+3. wallet identity remains known to the backend by address and wallet identity ID
+4. authenticated user can later reattach that wallet again through `POST /auth/wallets/link/challenge` + `POST /auth/wallets/link/verify`
+5. detached wallet can also re-enter `POST /auth/wallet/verify` and resolve back into a wallet-owned user identity
+6. no archival or deletion semantics are required for the current lifecycle model
 
 ---
 
-## ❌ Not Included in 0.4.13
+## ❌ Not Included in 0.4.14
 
 The following items remain intentionally out of scope:
 
-- wallet unlink execution
-- arbitrary cross-user wallet transfer
-- archival / alias records for merged source users
-- automatic replacement of primary during detach
+- detached-identity audit columns
+- archival / soft-delete markers for detached wallets
+- recovery or dispute workflows around detached ownership
+- automatic primary replacement for risky detach cases
 - merge between wallet identities and future auth methods
 - refresh tokens
 - revocation flows
@@ -84,10 +84,10 @@ The following items remain intentionally out of scope:
 
 ## ⏭️ Next Phase
 
-### 0.4.14 — Detach Follow-Up Semantics and Source Identity Lifecycle
+### 0.4.15 — Detached Identity Audit Readiness
 
 Planned focus:
 
-- define whether detached wallets should bootstrap fresh wallet-only users automatically in future flows
-- evaluate whether detached identities require archival, history, or audit-friendly lifecycle markers
-- preserve strict ownership invariants while preparing richer unlink semantics
+- decide whether detached identities require explicit audit metadata
+- evaluate whether detach history should become queryable later
+- preserve current reusable detached-wallet semantics while preparing richer lifecycle observability

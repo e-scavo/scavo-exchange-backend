@@ -318,6 +318,88 @@ func TestHTTPHandlers_WalletLinkVerify_Success(t *testing.T) {
 	}
 }
 
+func TestHTTPHandlers_WalletLinkVerify_AllowsDetachedWalletReattachment(t *testing.T) {
+	challengeStore := NewInMemoryWalletChallengeStore()
+	identityStore := NewInMemoryWalletIdentityStore()
+	detachSvc := NewWalletDetachService(identityStore)
+
+	primaryAddress, _ := signWalletMessageForScalar(t, "handler-reattach-primary", "46")
+	primaryIdentity, err := identityStore.GetOrCreate(context.Background(), primaryAddress)
+	if err != nil {
+		t.Fatalf("GetOrCreate primary error: %v", err)
+	}
+	_, err = identityStore.AttachUser(context.Background(), primaryIdentity.ID, "u_test_example_com", true)
+	if err != nil {
+		t.Fatalf("AttachUser primary error: %v", err)
+	}
+
+	secondaryAddress, _ := signWalletMessageForScalar(t, "handler-reattach-secondary", "47")
+	secondaryIdentity, err := identityStore.GetOrCreate(context.Background(), secondaryAddress)
+	if err != nil {
+		t.Fatalf("GetOrCreate secondary error: %v", err)
+	}
+	_, err = identityStore.AttachUser(context.Background(), secondaryIdentity.ID, "u_test_example_com", false)
+	if err != nil {
+		t.Fatalf("AttachUser secondary error: %v", err)
+	}
+
+	_, err = detachSvc.Execute(context.Background(), "u_test_example_com", secondaryAddress)
+	if err != nil {
+		t.Fatalf("Execute detach error: %v", err)
+	}
+
+	challengeSvc := NewWalletChallengeService(challengeStore, "https://api.scavo.exchange", 5*time.Minute)
+	challenge, err := challengeSvc.CreateWithOptions(context.Background(), secondaryAddress, "scavium", WalletChallengeOptions{
+		Purpose:           WalletChallengePurposeLinkWallet,
+		RequestedByUserID: "u_test_example_com",
+	})
+	if err != nil {
+		t.Fatalf("CreateWithOptions error: %v", err)
+	}
+	_, signature := signWalletMessageForScalar(t, challenge.Message, "47")
+
+	h := HTTPHandlers{
+		Tokens:           mustTokenService(t),
+		TTL:              time.Hour,
+		Users:            usermod.NewService(nil),
+		Challenges:       challengeStore,
+		WalletIdentities: identityStore,
+		ChallengeTTL:     5 * time.Minute,
+		PublicBaseURL:    "https://api.scavo.exchange",
+	}
+
+	body := `{"challenge_id":"` + challenge.ID + `","address":"` + secondaryAddress + `","signature":"` + signature + `"}`
+	req := httptest.NewRequest(http.MethodPost, "/auth/wallets/link/verify", strings.NewReader(body))
+	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	rec := httptest.NewRecorder()
+
+	h.WalletLinkVerify(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+
+	var payload WalletLinkVerifyResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("decode error: %v", err)
+	}
+	if payload.LinkedWallet == nil {
+		t.Fatal("expected linked wallet")
+	}
+	if payload.LinkedWallet.UserID != "u_test_example_com" {
+		t.Fatalf("unexpected relinked wallet user id: %q", payload.LinkedWallet.UserID)
+	}
+	if payload.LinkedWallet.IsPrimary {
+		t.Fatal("expected relinked wallet to remain secondary")
+	}
+	if payload.LinkedWallet.LinkedAt == nil {
+		t.Fatal("expected relinked wallet linked_at")
+	}
+	if len(payload.Wallets) != 2 {
+		t.Fatalf("expected 2 wallets after reattachment, got %d", len(payload.Wallets))
+	}
+}
+
 func TestHTTPHandlers_WalletAccountMergeChallenge_Success(t *testing.T) {
 	store := NewInMemoryWalletChallengeStore()
 

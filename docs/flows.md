@@ -297,11 +297,45 @@ Defines how authenticated sessions are resolved.
 
 ---
 
-## 🧭 Future Flow Extensions (Post 0.4.13)
+## 9. Detached Wallet Reattachment
 
-### Planned in 0.4.14
-- detached-wallet follow-up lifecycle rules
-- optional detached-identity history or audit markers
+1. authenticated user previously detaches one eligible owned secondary wallet
+2. detached wallet identity remains persisted by address and wallet identity ID
+3. authenticated user later calls `POST /auth/wallets/link/challenge` for that same address
+4. backend creates a normal protected wallet-link challenge bound to the authenticated user
+5. wallet signs and verifies through `POST /auth/wallets/link/verify`
+6. backend reattaches the detached wallet as an owned secondary wallet again
+
+#### Safety Rules
+
+- detached-wallet reattachment still requires an authenticated session
+- detached-wallet reattachment still requires wallet signature proof
+- detached-wallet reattachment does not bypass current ownership checks
+- detached-wallet reattachment does not implicitly restore historical primary state
+
+### 10. Detached Wallet Wallet-Login Rebound
+
+1. detached wallet later initiates the standard wallet-login bootstrap flow
+2. backend creates a normal auth challenge through `POST /auth/wallet/challenge`
+3. wallet signs and verifies through `POST /auth/wallet/verify`
+4. backend resolves or recreates the wallet-owned user identity for that wallet
+5. backend reattaches the wallet under that wallet-owned durable user
+6. wallet becomes primary in that wallet-owned identity scope
+
+#### Safety Rules
+
+- wallet-login rebound follows the same wallet-auth flow as any other wallet bootstrap
+- detached-wallet rebound does not restore the previous detached owner automatically
+- detached-wallet rebound does not create archival or audit metadata in the current phase
+
+---
+
+## 🧭 Future Flow Extensions (Post 0.4.14)
+
+### Planned in 0.4.15
+- detached-identity audit and history readiness
+- optional detached-identity lifecycle metadata
+- richer detached-wallet observability
 
 ### Later phases
 - multi-auth merge flow
@@ -312,7 +346,7 @@ Defines how authenticated sessions are resolved.
 
 ## 🧩 Summary
 
-At the end of Phase 0.4.12:
+At the end of Phase 0.4.14:
 
 - authentication is stable
 - identity is unified
@@ -321,10 +355,12 @@ At the end of Phase 0.4.12:
 - wallet-owned account merge execution is implemented under authenticated control
 - primary-wallet switching is implemented under authenticated control
 - wallet detach eligibility is implemented under authenticated control
+- wallet detach execution is implemented under authenticated control for already eligible wallets
+- detached wallets are explicitly reusable through reattachment or wallet-login rebound
 
 The backend now transitions from:
 
-**authentication flows → ownership flows → authenticated wallet-management flows**
+**authentication flows → ownership flows → authenticated wallet-management flows → detached-wallet lifecycle clarification**
 
 ### 6. Primary-Wallet Switching
 

@@ -16,7 +16,7 @@ It is intended to:
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.4 — Auth and User Stabilization  
-**Latest Completed Subphase:** 0.4.13 — Protected Wallet Detach Execution
+**Latest Completed Subphase:** 0.4.14 — Detached Wallet Reattachment Semantics and Lifecycle Clarification
 
 ---
 
@@ -67,9 +67,9 @@ Ownership is a first-class persisted concept.
 
 ---
 
-## 🔗 Wallet Ownership Status (0.4.13)
+## 🔗 Wallet Ownership Status (0.4.14)
 
-The backend now supports authenticated wallet-linking, authenticated wallet-owned account merge execution, authenticated primary-wallet switching, authenticated wallet detach-eligibility evaluation, and authenticated detach execution for already eligible owned wallets.
+The backend now supports authenticated wallet-linking, authenticated wallet-owned account merge execution, authenticated primary-wallet switching, authenticated wallet detach-eligibility evaluation, authenticated detach execution for already eligible owned wallets, and explicitly validated post-detach wallet reattachment semantics.
 
 ### Capabilities
 
@@ -83,6 +83,9 @@ The backend now supports authenticated wallet-linking, authenticated wallet-owne
 - authenticated user can explicitly switch the current primary wallet
 - authenticated user can request detach-eligibility evaluation for one owned wallet
 - authenticated user can execute detach for one already eligible owned wallet
+- detached wallet identities remain reusable known identities after detach
+- detached wallets can be reattached through the protected linking flow
+- detached wallets can re-enter wallet-login bootstrap and resolve into wallet-owned user identities again
 - explicit detach rejection reasons are returned when detach is not yet eligible
 - updated wallet inventory is returned after successful linking, merge, primary switching, and detach execution
 
@@ -213,9 +216,9 @@ The system intentionally does **not** yet support:
 
 Expected next focus:
 
-- define whether detached wallets should remain free identities only or bootstrap fresh wallet-only accounts later
+- decide whether detached identities require explicit audit metadata later
 - evaluate audit and lifecycle markers for detached identities
-- preserve conservative ownership invariants while enriching detach semantics
+- preserve conservative ownership invariants while enriching detach observability
 
 ---
 
@@ -234,7 +237,7 @@ When continuing development:
 
 ## 🧾 Summary
 
-At the end of Phase 0.4.13:
+At the end of Phase 0.4.14:
 
 - authentication is stable
 - identity is unified
@@ -244,4 +247,5 @@ At the end of Phase 0.4.13:
 - explicit primary-wallet switching is implemented
 - wallet detach eligibility is implemented
 - wallet detach execution is implemented for already eligible owned wallets
-- the backend is ready to move into controlled detach execution design
+- detached wallet identities are explicitly reusable after detach
+- the backend is ready to move into detached-identity audit and lifecycle enrichment work
