@@ -16,7 +16,7 @@ It is intended to:
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.4 — Auth and User Stabilization  
-**Latest Completed Subphase:** 0.4.14 — Detached Wallet Reattachment Semantics and Lifecycle Clarification
+**Latest Completed Subphase:** 0.4.15 — Detached Identity Audit Readiness
 
 ---
 

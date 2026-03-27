@@ -505,6 +505,9 @@ func TestWalletLinkingService_VerifyAndLink_AllowsDetachedWalletReattachment(t *
 	if stored.LinkedAt == nil {
 		t.Fatal("expected stored relinked wallet linked_at")
 	}
+	if stored.DetachedAt == nil {
+		t.Fatal("expected relinked wallet to preserve detached_at")
+	}
 	if stored.IsPrimary {
 		t.Fatal("expected stored relinked wallet to remain non-primary")
 	}
@@ -538,9 +541,12 @@ func TestWalletVerificationService_VerifyAndLogin_RebindsDetachedWalletToWalletU
 		t.Fatalf("AttachUser secondary error: %v", err)
 	}
 
-	_, err = detachSvc.Execute(context.Background(), "u_existing_owner", secondaryAddress)
+	detachResult, err := detachSvc.Execute(context.Background(), "u_existing_owner", secondaryAddress)
 	if err != nil {
 		t.Fatalf("Execute secondary detach error: %v", err)
+	}
+	if detachResult == nil || detachResult.Detached == nil || detachResult.Detached.DetachedAt == nil {
+		t.Fatal("expected detached wallet metadata with detached_at")
 	}
 
 	challenge, err := challengeSvc.Create(context.Background(), secondaryAddress, "scavium")
@@ -578,6 +584,9 @@ func TestWalletVerificationService_VerifyAndLogin_RebindsDetachedWalletToWalletU
 	}
 	if stored.LinkedAt == nil {
 		t.Fatal("expected rebound wallet linked_at")
+	}
+	if stored.DetachedAt == nil {
+		t.Fatal("expected rebound wallet to preserve detached_at")
 	}
 	if !stored.IsPrimary {
 		t.Fatal("expected rebound wallet to become primary for wallet-owned user")

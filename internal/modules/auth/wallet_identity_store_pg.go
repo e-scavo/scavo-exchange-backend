@@ -93,7 +93,7 @@ func (s *WalletIdentityStorePG) AttachUser(ctx context.Context, walletID, userID
 	defer func() { _ = tx.Rollback(ctx) }()
 
 	current, err := scanWalletIdentityRow(tx.QueryRow(ctx, `
-		SELECT id::text, address, COALESCE(user_id, ''), linked_at, is_primary
+		SELECT id::text, address, COALESCE(user_id, ''), linked_at, detached_at, is_primary
 		FROM auth_wallet_identities
 		WHERE id = $1::uuid
 		FOR UPDATE
@@ -133,7 +133,7 @@ func (s *WalletIdentityStorePG) AttachUser(ctx context.Context, walletID, userID
 	}
 
 	identity, err := scanWalletIdentityRow(tx.QueryRow(ctx, `
-		SELECT id::text, address, COALESCE(user_id, ''), linked_at, is_primary
+		SELECT id::text, address, COALESCE(user_id, ''), linked_at, detached_at, is_primary
 		FROM auth_wallet_identities
 		WHERE id = $1::uuid
 	`, walletID))
@@ -167,7 +167,7 @@ func (s *WalletIdentityStorePG) ReassignUser(ctx context.Context, walletID, from
 	defer func() { _ = tx.Rollback(ctx) }()
 
 	current, err := scanWalletIdentityRow(tx.QueryRow(ctx, `
-		SELECT id::text, address, COALESCE(user_id, ''), linked_at, is_primary
+		SELECT id::text, address, COALESCE(user_id, ''), linked_at, detached_at, is_primary
 		FROM auth_wallet_identities
 		WHERE id = $1::uuid
 		FOR UPDATE
@@ -211,7 +211,7 @@ func (s *WalletIdentityStorePG) ReassignUser(ctx context.Context, walletID, from
 	}
 
 	identity, err := scanWalletIdentityRow(tx.QueryRow(ctx, `
-		SELECT id::text, address, COALESCE(user_id, ''), linked_at, is_primary
+		SELECT id::text, address, COALESCE(user_id, ''), linked_at, detached_at, is_primary
 		FROM auth_wallet_identities
 		WHERE id = $1::uuid
 	`, walletID))
@@ -272,7 +272,7 @@ func (s *WalletIdentityStorePG) MergeUsers(ctx context.Context, sourceUserID, ta
 	}
 
 	rows, err := tx.Query(ctx, `
-		SELECT id::text, address, COALESCE(user_id, ''), linked_at, is_primary
+		SELECT id::text, address, COALESCE(user_id, ''), linked_at, detached_at, is_primary
 		FROM auth_wallet_identities
 		WHERE user_id = $1
 		ORDER BY is_primary DESC, linked_at ASC NULLS LAST, address ASC
@@ -322,7 +322,7 @@ func (s *WalletIdentityStorePG) SetPrimary(ctx context.Context, userID, address 
 	defer func() { _ = tx.Rollback(ctx) }()
 
 	current, err := scanWalletIdentityRow(tx.QueryRow(ctx, `
-		SELECT id::text, address, COALESCE(user_id, ''), linked_at, is_primary
+		SELECT id::text, address, COALESCE(user_id, ''), linked_at, detached_at, is_primary
 		FROM auth_wallet_identities
 		WHERE address = $1
 		FOR UPDATE
@@ -347,7 +347,7 @@ func (s *WalletIdentityStorePG) SetPrimary(ctx context.Context, userID, address 
 	}
 
 	identity, err := scanWalletIdentityRow(tx.QueryRow(ctx, `
-		SELECT id::text, address, COALESCE(user_id, ''), linked_at, is_primary
+		SELECT id::text, address, COALESCE(user_id, ''), linked_at, detached_at, is_primary
 		FROM auth_wallet_identities
 		WHERE address = $1
 	`, address))
@@ -383,7 +383,7 @@ func (s *WalletIdentityStorePG) DetachUser(ctx context.Context, userID, address 
 	defer func() { _ = tx.Rollback(ctx) }()
 
 	current, err := scanWalletIdentityRow(tx.QueryRow(ctx, `
-		SELECT id::text, address, COALESCE(user_id, ''), linked_at, is_primary
+		SELECT id::text, address, COALESCE(user_id, ''), linked_at, detached_at, is_primary
 		FROM auth_wallet_identities
 		WHERE address = $1
 		FOR UPDATE
@@ -403,6 +403,7 @@ func (s *WalletIdentityStorePG) DetachUser(ctx context.Context, userID, address 
 		SET
 			user_id = NULL,
 			linked_at = NULL,
+			detached_at = NOW(),
 			is_primary = FALSE
 		WHERE address = $1
 	`, address)
@@ -411,7 +412,7 @@ func (s *WalletIdentityStorePG) DetachUser(ctx context.Context, userID, address 
 	}
 
 	detached, err := scanWalletIdentityRow(tx.QueryRow(ctx, `
-		SELECT id::text, address, COALESCE(user_id, ''), linked_at, is_primary
+		SELECT id::text, address, COALESCE(user_id, ''), linked_at, detached_at, is_primary
 		FROM auth_wallet_identities
 		WHERE address = $1
 	`, address))
@@ -420,7 +421,7 @@ func (s *WalletIdentityStorePG) DetachUser(ctx context.Context, userID, address 
 	}
 
 	rows, err := tx.Query(ctx, `
-		SELECT id::text, address, COALESCE(user_id, ''), linked_at, is_primary
+		SELECT id::text, address, COALESCE(user_id, ''), linked_at, detached_at, is_primary
 		FROM auth_wallet_identities
 		WHERE user_id = $1
 		ORDER BY is_primary DESC, linked_at ASC NULLS LAST, address ASC
@@ -460,7 +461,7 @@ func (s *WalletIdentityStorePG) ListByUser(ctx context.Context, userID string) (
 	}
 
 	rows, err := s.db.Query(ctx, `
-		SELECT id::text, address, COALESCE(user_id, ''), linked_at, is_primary
+		SELECT id::text, address, COALESCE(user_id, ''), linked_at, detached_at, is_primary
 		FROM auth_wallet_identities
 		WHERE user_id = $1
 		ORDER BY is_primary DESC, linked_at ASC NULLS LAST, address ASC
@@ -488,7 +489,7 @@ func (s *WalletIdentityStorePG) ListByUser(ctx context.Context, userID string) (
 
 func (s *WalletIdentityStorePG) getByAddress(ctx context.Context, address string) (*WalletIdentity, error) {
 	return scanWalletIdentityRow(s.db.QueryRow(ctx, `
-		SELECT id::text, address, COALESCE(user_id, ''), linked_at, is_primary
+		SELECT id::text, address, COALESCE(user_id, ''), linked_at, detached_at, is_primary
 		FROM auth_wallet_identities
 		WHERE address = $1
 	`, address))
@@ -497,12 +498,14 @@ func (s *WalletIdentityStorePG) getByAddress(ctx context.Context, address string
 func scanWalletIdentityRow(row pgx.Row) (*WalletIdentity, error) {
 	var identity WalletIdentity
 	var linkedAt pgtype.Timestamptz
+	var detachedAt pgtype.Timestamptz
 
 	err := row.Scan(
 		&identity.ID,
 		&identity.Address,
 		&identity.UserID,
 		&linkedAt,
+		&detachedAt,
 		&identity.IsPrimary,
 	)
 	if err != nil {
@@ -512,6 +515,10 @@ func scanWalletIdentityRow(row pgx.Row) (*WalletIdentity, error) {
 	if linkedAt.Valid {
 		ts := linkedAt.Time.UTC()
 		identity.LinkedAt = &ts
+	}
+	if detachedAt.Valid {
+		ts := detachedAt.Time.UTC()
+		identity.DetachedAt = &ts
 	}
 
 	return &identity, nil
@@ -520,12 +527,14 @@ func scanWalletIdentityRow(row pgx.Row) (*WalletIdentity, error) {
 func scanWalletIdentityRows(rows pgx.Rows) (*WalletIdentity, error) {
 	var identity WalletIdentity
 	var linkedAt pgtype.Timestamptz
+	var detachedAt pgtype.Timestamptz
 
 	err := rows.Scan(
 		&identity.ID,
 		&identity.Address,
 		&identity.UserID,
 		&linkedAt,
+		&detachedAt,
 		&identity.IsPrimary,
 	)
 	if err != nil {
@@ -535,6 +544,10 @@ func scanWalletIdentityRows(rows pgx.Rows) (*WalletIdentity, error) {
 	if linkedAt.Valid {
 		ts := linkedAt.Time.UTC()
 		identity.LinkedAt = &ts
+	}
+	if detachedAt.Valid {
+		ts := detachedAt.Time.UTC()
+		identity.DetachedAt = &ts
 	}
 
 	return &identity, nil

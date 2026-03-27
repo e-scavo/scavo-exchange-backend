@@ -653,6 +653,7 @@ wallet identity becomes a first-class ownership entity with:
 - `address`
 - `user_id`
 - `linked_at`
+- `detached_at`
 - `is_primary`
 
 ### 0.4.9 — Authenticated Wallet Linking Contract
@@ -826,6 +827,7 @@ stores wallet registry and ownership:
 - `address`
 - `user_id`
 - `linked_at`
+- `detached_at`
 - `is_primary`
 
 ### `users`
@@ -865,12 +867,14 @@ Still intentionally not supported:
 
 ---
 
-## 🚧 Future Evolution (Post 0.4.14)
+## 🚧 Current Lifecycle Audit Readiness (0.4.15)
 
-### 0.4.15
-- detached-identity audit and history readiness
-- optional detached-identity lifecycle metadata
-- deeper post-merge and post-detach identity progression
+Detached wallet identities now preserve minimal lifecycle metadata:
+
+- `detached_at`
+
+This timestamp is stamped during detach execution and intentionally survives later reattachment or wallet-login rebound so the backend can distinguish previously detached reusable identities from identities that have never been detached.
+
 
 ### Later phases
 - account consolidation
@@ -882,7 +886,7 @@ Still intentionally not supported:
 
 ## 🧩 Summary
 
-At the end of 0.4.14:
+At the end of 0.4.15:
 
 - wallet authentication is stable
 - durable identity is stable
@@ -893,4 +897,5 @@ At the end of 0.4.14:
 - authenticated wallet detach eligibility is implemented
 - authenticated wallet detach execution is implemented for already eligible owned wallets
 - detached wallet identities are explicitly reusable after detach
-- the backend is structurally ready to move from ownership persistence into detached-identity audit and lifecycle enrichment
+- detached wallet identities now preserve minimal audit-ready lifecycle metadata through `detached_at`
+- the backend is structurally ready to move from ownership persistence into richer detached-identity observability only if future phases require it

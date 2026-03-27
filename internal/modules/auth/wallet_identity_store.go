@@ -6,11 +6,12 @@ import (
 )
 
 type WalletIdentity struct {
-	ID        string     `json:"id"`
-	Address   string     `json:"address"`
-	UserID    string     `json:"user_id,omitempty"`
-	LinkedAt  *time.Time `json:"linked_at,omitempty"`
-	IsPrimary bool       `json:"is_primary"`
+	ID         string     `json:"id"`
+	Address    string     `json:"address"`
+	UserID     string     `json:"user_id,omitempty"`
+	LinkedAt   *time.Time `json:"linked_at,omitempty"`
+	DetachedAt *time.Time `json:"detached_at,omitempty"`
+	IsPrimary  bool       `json:"is_primary"`
 }
 
 type WalletIdentityStore interface {

@@ -345,7 +345,7 @@ go test ./...
 
 Phase 0.4 now establishes a strong identity and wallet-ownership foundation.
 
-With 0.4.14:
+With 0.4.15:
 
 - wallet authentication is stable
 - identity is durable
@@ -357,10 +357,11 @@ With 0.4.14:
 - detach execution is implemented for already eligible owned wallets
 - detached wallets are explicitly treated as reusable known identities
 - detached wallets can be reattached either through protected linking or through wallet-login bootstrap rebound
+- detached identities now preserve minimal audit-ready lifecycle metadata through `detached_at`
 
 Next expected evolution:
 
-➡️ **0.4.15 — Detached Identity Audit Readiness**
+➡️ **0.4.16 — Detached Identity Extended Audit Semantics (only if later needed)**
 
 
 ---
@@ -405,3 +406,51 @@ Validated through:
 - detached-wallet reattachment tests under `WalletLinkingService`
 - detached-wallet wallet-login rebound tests under `WalletVerificationService`
 - HTTP handler coverage for reattaching a detached wallet through the authenticated link contract
+
+
+---
+
+## 0.4.15 — Detached Identity Audit Readiness
+
+### Objective
+Add minimal persisted lifecycle metadata for detached wallet identities without introducing heavy audit tables, event sourcing, or archival semantics.
+
+### Scope
+- persist minimal detached-wallet lifecycle metadata
+- ensure detach execution stamps that metadata
+- ensure reattachment and wallet-login rebound preserve that metadata
+- align documentation with the new audit-ready lifecycle contract
+
+### Delivered
+- `detached_at` added to `WalletIdentity`
+- PostgreSQL migration adding `detached_at` to `auth_wallet_identities`
+- in-memory and PostgreSQL store support for reading and writing `detached_at`
+- detach execution updated to stamp `detached_at`
+- test coverage proving detached metadata survives later reattachment and wallet-login rebound
+- documentation updates aligning detached-wallet reuse with minimal audit readiness
+
+### Lifecycle Semantics Clarified
+A detached wallet identity now preserves minimal lifecycle evidence:
+- `user_id` is cleared on detach
+- `linked_at` is cleared on detach
+- `is_primary` is cleared on detach
+- `detached_at` is stamped on detach
+- `detached_at` survives later reattachment or wallet-login rebound
+
+This means the system can now distinguish:
+- a wallet identity that has never been detached
+- a wallet identity that was previously detached and later reused
+
+### Not Introduced Here
+- `detached_by_user_id`
+- queryable detached-history tables
+- event sourcing
+- archival or soft-delete semantics
+- multi-event lifecycle reporting
+
+### Validation
+Validated through:
+- detach execution coverage returning detached wallet metadata with `detached_at`
+- service-level reattachment tests proving `detached_at` survives authenticated relinking
+- service-level wallet-login rebound tests proving `detached_at` survives bootstrap reuse
+- documentation alignment across README and docs/*

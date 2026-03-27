@@ -733,6 +733,9 @@ func TestHTTPHandlers_WalletDetach_Success(t *testing.T) {
 	if payload.DetachedWallet.UserID != "" {
 		t.Fatalf("expected detached wallet user to be empty, got %q", payload.DetachedWallet.UserID)
 	}
+	if payload.DetachedWallet.DetachedAt == nil {
+		t.Fatal("expected detached wallet detached_at metadata")
+	}
 	if len(payload.Wallets) != 1 {
 		t.Fatalf("expected 1 remaining wallet, got %d", len(payload.Wallets))
 	}

@@ -257,8 +257,10 @@ func (s *InMemoryWalletIdentityStore) DetachUser(ctx context.Context, userID, ad
 		return nil, nil, ErrWalletNotOwnedByUser
 	}
 
+	now := time.Now().UTC()
 	target.UserID = ""
 	target.LinkedAt = nil
+	target.DetachedAt = &now
 	target.IsPrimary = false
 
 	cp := *target

@@ -330,11 +330,26 @@ Defines how authenticated sessions are resolved.
 
 ---
 
-## 🧭 Future Flow Extensions (Post 0.4.14)
+## 9. Detached Identity Audit Readiness
 
-### Planned in 0.4.15
-- detached-identity audit and history readiness
-- optional detached-identity lifecycle metadata
+1. authenticated user detaches one already eligible wallet through `POST /auth/wallets/detach`
+2. backend clears ownership fields from that wallet identity
+3. backend stamps `detached_at` on that wallet identity
+4. detached wallet remains reusable through future protected linking or wallet-login rebound
+5. later reuse keeps `detached_at` as minimal lifecycle evidence that the identity has been detached before
+
+#### Safety Rules
+
+- `detached_at` never changes current ownership by itself
+- `detached_at` never restores previous ownership
+- detached lifecycle metadata is intentionally minimal and non-destructive
+- current phase does not introduce detached-history tables, event sourcing, or archival semantics
+
+## 🧭 Future Flow Extensions (Post 0.4.15)
+
+### Potential later evolution
+- detached-by-user audit metadata
+- queryable detach history
 - richer detached-wallet observability
 
 ### Later phases
@@ -346,7 +361,7 @@ Defines how authenticated sessions are resolved.
 
 ## 🧩 Summary
 
-At the end of Phase 0.4.14:
+At the end of Phase 0.4.15:
 
 - authentication is stable
 - identity is unified
@@ -357,10 +372,11 @@ At the end of Phase 0.4.14:
 - wallet detach eligibility is implemented under authenticated control
 - wallet detach execution is implemented under authenticated control for already eligible wallets
 - detached wallets are explicitly reusable through reattachment or wallet-login rebound
+- detached wallets now preserve minimal audit-ready lifecycle evidence through `detached_at`
 
 The backend now transitions from:
 
-**authentication flows → ownership flows → authenticated wallet-management flows → detached-wallet lifecycle clarification**
+**authentication flows → ownership flows → authenticated wallet-management flows → detached-wallet lifecycle clarification → detached-identity audit readiness**
 
 ### 6. Primary-Wallet Switching
 

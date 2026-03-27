@@ -23,7 +23,7 @@ The backend follows a **wallet-first identity model** that progressively evolves
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.4 — Auth and User Stabilization  
-**Current Subphase:** **0.4.14 — Detached Wallet Reattachment Semantics and Lifecycle Clarification**
+**Current Subphase:** **0.4.15 — Detached Identity Audit Readiness**
 
 ---
 
@@ -80,6 +80,7 @@ wallet identities gained ownership metadata:
 
 - `user_id`
 - `linked_at`
+- `detached_at`
 - `is_primary`
 
 This allowed:
@@ -117,6 +118,14 @@ wallet management now also supports an authenticated detach-eligibility evaluati
 - `POST /auth/wallets/detach/check`
 
 This allows the current authenticated user to ask the backend whether one owned wallet is currently safe to detach, without changing ownership and without executing unlink behavior.
+
+### 0.4.15 — Detached Identity Audit Readiness
+wallet identities now preserve minimal detached-lifecycle audit metadata:
+
+- `detached_at`
+
+This allows the backend to distinguish a wallet that has never been detached from a wallet identity that was previously detached and later reused through linking or wallet-login rebound.
+
 
 ### 0.4.13 — Protected Wallet Detach Execution
 wallet management now also supports an authenticated detach execution flow for already eligible owned wallets:
@@ -160,6 +169,7 @@ stores wallet registry and ownership metadata:
 - `address`
 - `user_id`
 - `linked_at`
+- `detached_at`
 - `is_primary`
 
 #### `users`
@@ -466,7 +476,3 @@ At the end of Phase 0.4.14:
 - detached wallet identities are explicitly reusable known identities
 - detached wallets can be reattached via protected linking or via wallet-login bootstrap rebound
 - the backend is ready for richer detached-identity lifecycle work without ambiguity about current behavior
-
-
-
-```
