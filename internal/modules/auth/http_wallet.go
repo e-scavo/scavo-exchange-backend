@@ -82,6 +82,18 @@ type WalletAccountMergeVerifyResponse struct {
 	TargetUserID string            `json:"target_user_id"`
 }
 
+type WalletDetachCheckRequest struct {
+	Address string `json:"wallet_address"`
+}
+
+type WalletDetachCheckResponse struct {
+	WalletAddress    string   `json:"wallet_address"`
+	Eligible         bool     `json:"eligible"`
+	IsPrimary        bool     `json:"is_primary"`
+	OwnedWalletCount int      `json:"owned_wallet_count"`
+	Reasons          []string `json:"reasons"`
+}
+
 type WalletPrimarySetRequest struct {
 	Address string `json:"wallet_address"`
 }
@@ -361,6 +373,46 @@ func (h HTTPHandlers) WalletAccountMergeVerify(w http.ResponseWriter, r *http.Re
 		Challenge:    result.Challenge,
 		SourceUserID: result.SourceUserID,
 		TargetUserID: result.TargetUserID,
+	})
+}
+
+func (h HTTPHandlers) WalletDetachCheck(w http.ResponseWriter, r *http.Request) {
+	claims, ok := coreauth.ClaimsFromContext(r.Context())
+	if !ok || claims == nil || claims.UserID == "" {
+		writeJSON(w, http.StatusUnauthorized, map[string]any{"error": "unauthorized"})
+		return
+	}
+
+	var req WalletDetachCheckRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "bad_request"})
+		return
+	}
+
+	svc := NewWalletDetachService(h.WalletIdentities)
+	result, err := svc.CheckEligibility(r.Context(), claims.UserID, req.Address)
+	if err != nil {
+		switch {
+		case errors.Is(err, ErrUnauthorized):
+			writeJSON(w, http.StatusUnauthorized, map[string]any{"error": "unauthorized"})
+		case errors.Is(err, ErrInvalidWalletAddress):
+			writeJSON(w, http.StatusBadRequest, map[string]any{"error": "invalid_wallet_address"})
+		case errors.Is(err, ErrWalletIdentityNotFound):
+			writeJSON(w, http.StatusNotFound, map[string]any{"error": "wallet_identity_not_found"})
+		case errors.Is(err, ErrWalletNotOwnedByUser):
+			writeJSON(w, http.StatusForbidden, map[string]any{"error": "wallet_identity_not_owned_by_user"})
+		default:
+			writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "wallet_detach_check_error"})
+		}
+		return
+	}
+
+	writeJSON(w, http.StatusOK, WalletDetachCheckResponse{
+		WalletAddress:    result.WalletAddress,
+		Eligible:         result.Eligible,
+		IsPrimary:        result.IsPrimary,
+		OwnedWalletCount: result.OwnedWalletCount,
+		Reasons:          result.Reasons,
 	})
 }
 

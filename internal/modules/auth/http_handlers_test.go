@@ -512,3 +512,86 @@ func TestHTTPHandlers_WalletSetPrimary_RejectsWalletNotOwnedByUser(t *testing.T)
 		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
 	}
 }
+
+func TestHTTPHandlers_WalletDetachCheck_Success(t *testing.T) {
+	identityStore := NewInMemoryWalletIdentityStore()
+
+	primaryAddress, _ := signWalletMessageForScalar(t, "handler-detach-primary", "33")
+	primaryIdentity, err := identityStore.GetOrCreate(context.Background(), primaryAddress)
+	if err != nil {
+		t.Fatalf("GetOrCreate primary error: %v", err)
+	}
+	_, err = identityStore.AttachUser(context.Background(), primaryIdentity.ID, "u_test_example_com", true)
+	if err != nil {
+		t.Fatalf("AttachUser primary error: %v", err)
+	}
+
+	secondaryAddress, _ := signWalletMessageForScalar(t, "handler-detach-secondary", "34")
+	secondaryIdentity, err := identityStore.GetOrCreate(context.Background(), secondaryAddress)
+	if err != nil {
+		t.Fatalf("GetOrCreate secondary error: %v", err)
+	}
+	_, err = identityStore.AttachUser(context.Background(), secondaryIdentity.ID, "u_test_example_com", false)
+	if err != nil {
+		t.Fatalf("AttachUser secondary error: %v", err)
+	}
+
+	h := HTTPHandlers{
+		Tokens:           mustTokenService(t),
+		TTL:              time.Hour,
+		Users:            usermod.NewService(nil),
+		WalletIdentities: identityStore,
+	}
+
+	req := httptest.NewRequest(http.MethodPost, "/auth/wallets/detach/check", strings.NewReader(`{"wallet_address":"`+secondaryAddress+`"}`))
+	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	rec := httptest.NewRecorder()
+
+	h.WalletDetachCheck(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+
+	var payload WalletDetachCheckResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("decode error: %v", err)
+	}
+	if !payload.Eligible {
+		t.Fatalf("expected eligible payload, got reasons=%v", payload.Reasons)
+	}
+	if payload.OwnedWalletCount != 2 {
+		t.Fatalf("expected owned wallet count 2, got %d", payload.OwnedWalletCount)
+	}
+}
+
+func TestHTTPHandlers_WalletDetachCheck_RejectsWalletNotOwnedByUser(t *testing.T) {
+	identityStore := NewInMemoryWalletIdentityStore()
+
+	otherAddress, _ := signWalletMessageForScalar(t, "handler-detach-other", "35")
+	otherIdentity, err := identityStore.GetOrCreate(context.Background(), otherAddress)
+	if err != nil {
+		t.Fatalf("GetOrCreate other error: %v", err)
+	}
+	_, err = identityStore.AttachUser(context.Background(), otherIdentity.ID, "u_other", true)
+	if err != nil {
+		t.Fatalf("AttachUser other error: %v", err)
+	}
+
+	h := HTTPHandlers{
+		Tokens:           mustTokenService(t),
+		TTL:              time.Hour,
+		Users:            usermod.NewService(nil),
+		WalletIdentities: identityStore,
+	}
+
+	req := httptest.NewRequest(http.MethodPost, "/auth/wallets/detach/check", strings.NewReader(`{"wallet_address":"`+otherAddress+`"}`))
+	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	rec := httptest.NewRecorder()
+
+	h.WalletDetachCheck(rec, req)
+
+	if rec.Code != http.StatusForbidden {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+}

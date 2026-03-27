@@ -31,48 +31,51 @@ Status: ✅ Completed
 | 0.4.9 | User-driven wallet linking contract and protected account merge preparation | ✅ Completed |
 | 0.4.10 | User-driven wallet-owned account merge execution | ✅ Completed |
 | 0.4.11 | Primary wallet management and ownership safety hardening | ✅ Completed |
+| 0.4.12 | Wallet detach contract preparation and ownership guardrails | ✅ Completed |
 
 ---
 
-## ✅ Phase 0.4.11 Closure Summary
+## ✅ Phase 0.4.12 Closure Summary
 
-Phase 0.4.11 adds the first explicit post-merge wallet-ownership management operation on top of the linking and merge model delivered through 0.4.10.
+Phase 0.4.12 adds the first explicit detach-preparation contract on top of the ownership model delivered through 0.4.11.
 
-The backend can now accept an authenticated request from an already logged-in user, validate ownership of an already linked wallet, and atomically reassign the `is_primary` flag so the requested owned wallet becomes the single primary wallet for that user.
+The backend can now accept an authenticated request from an already logged-in user, validate ownership of an already linked wallet, and evaluate whether that wallet is currently safe to detach without executing unlink behavior.
 
-### Delivered in 0.4.11
+### Delivered in 0.4.12
 
-- authenticated primary-wallet switch endpoint: `POST /auth/wallets/primary`
-- store-level primary-wallet reassignment contract
+- authenticated detach-eligibility endpoint: `POST /auth/wallets/detach/check`
+- conservative eligibility contract for future unlink work
+- explicit response fields for `eligible`, `is_primary`, `owned_wallet_count`, and `reasons`
 - protected rejection when the target wallet is missing
 - protected rejection when the wallet does not belong to the current authenticated user
-- deterministic single-primary enforcement during reassignment
-- refreshed owned-wallet inventory returned after successful primary switch
-- existing wallet-link and wallet-account-merge coverage preserved
+- explicit non-eligibility when the wallet is primary
+- explicit non-eligibility when detach would leave the user without any wallets
+- existing link, merge, and primary-switch coverage preserved
 
 ---
 
 ## 🔍 Functional Result
 
-The system now supports the following explicit primary-wallet reassignment sequence under an existing authenticated session:
+The system now supports the following detach-preparation sequence under an existing authenticated session:
 
 1. user authenticates normally
 2. user lists or already knows their owned wallets
-3. user requests `POST /auth/wallets/primary` with one owned wallet address
+3. user requests `POST /auth/wallets/detach/check` with one owned wallet address
 4. backend validates that the wallet exists and belongs to the authenticated user
-5. backend atomically clears the previous primary flag for that user
-6. backend marks the requested wallet as the only primary wallet
-7. updated owned-wallet inventory is returned with the new primary wallet first
+5. backend evaluates whether the wallet is currently primary
+6. backend evaluates how many wallets the user currently owns
+7. backend returns an eligibility decision plus explicit reasons when detach is not yet safe
 
 ---
 
-## ❌ Not Included in 0.4.11
+## ❌ Not Included in 0.4.12
 
 The following items remain intentionally out of scope:
 
-- wallet unlink endpoint
+- wallet unlink execution
 - arbitrary cross-user wallet transfer
 - archival / alias records for merged source users
+- automatic replacement of primary during detach
 - merge between wallet identities and future auth methods
 - refresh tokens
 - revocation flows
@@ -82,11 +85,11 @@ The following items remain intentionally out of scope:
 
 ## ⏭️ Next Phase
 
-### 0.4.12 — Wallet Ownership Detach Contract Preparation
+### 0.4.13 — Wallet Detach Execution Design
 
 Planned focus:
 
-- introduce safe wallet detach / unlink semantics
-- preserve primary-wallet invariants during future detach operations
-- deepen merge-safe identity rules
-- continue progression from ownership model toward account-level management
+- transform detach eligibility into a real detach contract
+- define how primary replacement must occur before detach execution
+- preserve strict ownership invariants during unlink execution
+- continue progression from ownership guardrails toward controlled wallet detachment

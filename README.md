@@ -23,7 +23,7 @@ The backend follows a **wallet-first identity model** that progressively evolves
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.4 — Auth and User Stabilization  
-**Current Subphase:** **0.4.11 — Primary Wallet Management and Ownership Safety Hardening**
+**Current Subphase:** **0.4.12 — Wallet Detach Contract Preparation and Ownership Guardrails**
 
 ---
 
@@ -110,6 +110,13 @@ wallet management now also supports an authenticated primary-wallet switch flow:
 - `POST /auth/wallets/primary`
 
 This allows the current authenticated user to explicitly select which owned wallet is primary without changing ownership.
+
+### 0.4.12 — Wallet Detach Eligibility Contract
+wallet management now also supports an authenticated detach-eligibility evaluation flow:
+
+- `POST /auth/wallets/detach/check`
+
+This allows the current authenticated user to ask the backend whether one owned wallet is currently safe to detach, without changing ownership and without executing unlink behavior.
 
 ---
 
@@ -376,31 +383,32 @@ Run:
 go test ./...
 ```
 
-Focus areas added in 0.4.11:
+Focus areas added in 0.4.12:
 
-- authenticated primary-wallet switch endpoint
-- ownership validation for primary reassignment
-- deterministic single-primary transition
-- wallet inventory consistency after primary switch
-- existing link and merge coverage preserved
+- authenticated detach-eligibility endpoint
+- explicit detach rejection reasons for unsafe ownership states
+- conservative protection against primary-wallet detach
+- conservative protection against detaching the last owned wallet
+- existing link, merge, and primary-switch coverage preserved
 
 ---
 
-## 🚧 What 0.4.11 Solves
+## 🚧 What 0.4.12 Solves
 
 - authenticated user-driven wallet linking
 - authenticated wallet-owned account merge execution
 - protected primary-wallet switching under an authenticated user session
+- authenticated wallet detach-eligibility evaluation under an authenticated user session
 - challenge purpose separation between login, linking, and merge
 - challenge-to-user binding through `requested_by_user_id`
 - protected secondary-wallet attachment
 - protected wallet-signed ownership consolidation
 - deterministic single-primary wallet reassignment
-- wallet inventory refresh after successful link, merge, and primary-switch operations
+- explicit detach rejection reasons for ownership-unsafe states
 
 ---
 
-## ❌ What 0.4.11 Does Not Solve Yet
+## ❌ What 0.4.12 Does Not Solve Yet
 
 - wallet unlink API
 - arbitrary cross-user ownership transfer outside wallet-signed merge
@@ -414,26 +422,28 @@ Focus areas added in 0.4.11:
 
 ## 🧭 Next Phase
 
-### 0.4.12 — Wallet Ownership Detach Contract Preparation
+### 0.4.13 — Wallet Detach Execution Design
 
 Next expected focus:
 
-- unlink / detach contract design
-- safe ownership preconditions for detach operations
-- stronger post-merge ownership administration
-- stronger account-level ownership operations
+- transform detach eligibility into controlled detach execution
+- require safe primary replacement before primary detach
+- preserve ownership invariants during unlink
+- continue account-level wallet-management evolution
 
 ---
 
 ## 🧩 Summary
 
-At the end of Phase 0.4.11:
+At the end of Phase 0.4.12:
 
 - wallet authentication remains stable
 - identity remains unified
 - ownership remains protected
-- authenticated wallet linking is now available
-- wallet-owned account merge execution is now available
-- explicit primary-wallet switching is now available
-- the backend is ready for detach-safe account-level wallet management operations
+- authenticated wallet linking is available
+- wallet-owned account merge execution is available
+- explicit primary-wallet switching is available
+- wallet detach eligibility is available under authenticated control
+- the backend is ready for controlled detach execution design
+
 

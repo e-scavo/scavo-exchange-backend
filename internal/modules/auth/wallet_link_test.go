@@ -292,3 +292,83 @@ func TestWalletPrimaryService_SetPrimary_RejectsWalletNotOwnedByUser(t *testing.
 		t.Fatalf("expected ErrWalletNotOwnedByUser, got %v", err)
 	}
 }
+
+func TestWalletDetachService_CheckEligibility_RejectsPrimaryOnlyWallet(t *testing.T) {
+	identityStore := NewInMemoryWalletIdentityStore()
+	detachSvc := NewWalletDetachService(identityStore)
+
+	address, _ := signWalletMessageForScalar(t, "detach-primary-only", "30")
+	identity, err := identityStore.GetOrCreate(context.Background(), address)
+	if err != nil {
+		t.Fatalf("GetOrCreate error: %v", err)
+	}
+	_, err = identityStore.AttachUser(context.Background(), identity.ID, "u_target", true)
+	if err != nil {
+		t.Fatalf("AttachUser error: %v", err)
+	}
+
+	result, err := detachSvc.CheckEligibility(context.Background(), "u_target", address)
+	if err != nil {
+		t.Fatalf("CheckEligibility error: %v", err)
+	}
+	if result.Eligible {
+		t.Fatal("expected ineligible detach result")
+	}
+	if !result.IsPrimary {
+		t.Fatal("expected wallet to be primary")
+	}
+	if result.OwnedWalletCount != 1 {
+		t.Fatalf("expected owned wallet count 1, got %d", result.OwnedWalletCount)
+	}
+	if len(result.Reasons) != 2 {
+		t.Fatalf("expected 2 reasons, got %d", len(result.Reasons))
+	}
+	if result.Reasons[0] != WalletDetachReasonWalletIsPrimary {
+		t.Fatalf("unexpected first reason: %q", result.Reasons[0])
+	}
+	if result.Reasons[1] != WalletDetachReasonUserWouldBeEmpty {
+		t.Fatalf("unexpected second reason: %q", result.Reasons[1])
+	}
+}
+
+func TestWalletDetachService_CheckEligibility_SuccessForOwnedSecondaryWallet(t *testing.T) {
+	identityStore := NewInMemoryWalletIdentityStore()
+	detachSvc := NewWalletDetachService(identityStore)
+
+	primaryAddress, _ := signWalletMessageForScalar(t, "detach-primary", "31")
+	primaryIdentity, err := identityStore.GetOrCreate(context.Background(), primaryAddress)
+	if err != nil {
+		t.Fatalf("GetOrCreate primary error: %v", err)
+	}
+	_, err = identityStore.AttachUser(context.Background(), primaryIdentity.ID, "u_target", true)
+	if err != nil {
+		t.Fatalf("AttachUser primary error: %v", err)
+	}
+
+	secondaryAddress, _ := signWalletMessageForScalar(t, "detach-secondary", "32")
+	secondaryIdentity, err := identityStore.GetOrCreate(context.Background(), secondaryAddress)
+	if err != nil {
+		t.Fatalf("GetOrCreate secondary error: %v", err)
+	}
+	_, err = identityStore.AttachUser(context.Background(), secondaryIdentity.ID, "u_target", false)
+	if err != nil {
+		t.Fatalf("AttachUser secondary error: %v", err)
+	}
+
+	result, err := detachSvc.CheckEligibility(context.Background(), "u_target", secondaryAddress)
+	if err != nil {
+		t.Fatalf("CheckEligibility error: %v", err)
+	}
+	if !result.Eligible {
+		t.Fatalf("expected eligible detach result, got reasons=%v", result.Reasons)
+	}
+	if result.IsPrimary {
+		t.Fatal("expected secondary wallet to be non-primary")
+	}
+	if result.OwnedWalletCount != 2 {
+		t.Fatalf("expected owned wallet count 2, got %d", result.OwnedWalletCount)
+	}
+	if len(result.Reasons) != 0 {
+		t.Fatalf("expected no reasons, got %v", result.Reasons)
+	}
+}

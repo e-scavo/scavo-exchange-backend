@@ -411,14 +411,16 @@ Key validations now include:
 - wallet inventory refresh after link
 - authenticated wallet-owned account merge contract
 - atomic ownership consolidation at the store layer
+- authenticated wallet detach-eligibility contract
 
 ---
 
-## 🧭 Future Testing (Post 0.4.11)
+## 🧭 Future Testing (Post 0.4.12)
 
 Planned:
 
-- unlink scenarios
+- detach execution scenarios
+- primary-replacement preconditions for detach execution
 - cross-user ownership transfer edge cases
 - post-merge user archival testing
 - multi-auth merge preparation testing
@@ -427,7 +429,7 @@ Planned:
 
 ## 🧩 Summary
 
-Testing at Phase 0.4.11 guarantees:
+Testing at Phase 0.4.12 guarantees:
 
 - authentication correctness
 - identity persistence
@@ -435,7 +437,8 @@ Testing at Phase 0.4.11 guarantees:
 - authenticated wallet linking correctness
 - authenticated wallet-owned account merge correctness
 - authenticated primary-wallet switching correctness
-- API stability across login, link, merge, and primary-switch flows
+- authenticated wallet detach-eligibility correctness
+- API stability across login, link, merge, primary-switch, and detach-check flows
 
 ## 0.4.11 — Primary Wallet Switching
 
@@ -473,3 +476,40 @@ ORDER BY is_primary DESC, linked_at ASC NULLS LAST, address ASC;
 - requested wallet has `is_primary = true`
 - previous primary wallet has `is_primary = false`
 - no ownership changes occurred
+
+
+## 0.4.12 — Wallet Detach Eligibility
+
+### API
+
+```bash
+curl -s -X POST http://localhost:8080/auth/wallets/detach/check   -H "Authorization: Bearer <ACCESS_TOKEN>"   -H "Content-Type: application/json"   -d '{
+    "wallet_address": "0xYOUR_OWNED_WALLET"
+  }'
+```
+
+### Expected Result
+
+- HTTP `200 OK`
+- response contains:
+  - `wallet_address`
+  - `eligible`
+  - `is_primary`
+  - `owned_wallet_count`
+  - `reasons`
+- ownership remains unchanged
+
+### Expected Cases
+
+#### Eligible
+- target wallet belongs to current user
+- target wallet is not primary
+- current user owns more than one wallet
+- `eligible = true`
+- `reasons = []`
+
+#### Not Eligible
+- target wallet is primary → `wallet_is_primary`
+- current user would have no wallets left after detach → `user_would_have_no_wallets`
+- multiple reasons may be returned together
+

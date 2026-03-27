@@ -288,13 +288,20 @@ Defines how authenticated sessions are resolved.
 - source wallet not linked → `wallet_account_merge_source_not_linked`
 - merge not required because wallet already belongs to current user → `wallet_account_merge_not_required`
 
+### Wallet Detach Eligibility
+- invalid address → `invalid_wallet_address`
+- wallet missing → `wallet_identity_not_found`
+- wallet belongs to another user → `wallet_identity_not_owned_by_user`
+- detach currently blocked because wallet is primary → response `eligible = false` with `wallet_is_primary`
+- detach currently blocked because user would have no wallets left → response `eligible = false` with `user_would_have_no_wallets`
+
 ---
 
-## 🧭 Future Flow Extensions (Post 0.4.11)
+## 🧭 Future Flow Extensions (Post 0.4.12)
 
-### Planned in 0.4.12
-- wallet unlink flow
-- deeper wallet-management contracts
+### Planned in 0.4.13
+- wallet detach execution flow
+- primary-replacement preconditions for detach execution
 
 ### Later phases
 - multi-auth merge flow
@@ -305,7 +312,7 @@ Defines how authenticated sessions are resolved.
 
 ## 🧩 Summary
 
-At the end of Phase 0.4.11:
+At the end of Phase 0.4.12:
 
 - authentication is stable
 - identity is unified
@@ -313,6 +320,7 @@ At the end of Phase 0.4.11:
 - user-driven wallet linking is implemented under authenticated control
 - wallet-owned account merge execution is implemented under authenticated control
 - primary-wallet switching is implemented under authenticated control
+- wallet detach eligibility is implemented under authenticated control
 
 The backend now transitions from:
 
@@ -340,3 +348,25 @@ The backend now transitions from:
 - switching primary wallet never bypasses authentication
 - exactly one primary wallet remains for the user after the operation
 
+
+### 7. Wallet Detach Eligibility
+
+1. authenticated user calls `POST /auth/wallets/detach/check`
+2. backend extracts current authenticated `user_id`
+3. backend normalizes and validates `wallet_address`
+4. wallet identity store verifies:
+   - wallet exists
+   - wallet belongs to the current authenticated user
+5. detach service evaluates:
+   - whether the wallet is currently primary
+   - how many wallets the user currently owns
+6. backend returns a structured detach-eligibility response
+7. ownership remains unchanged regardless of the result
+
+#### Safety Rules
+
+- detach eligibility never detaches a wallet
+- detach eligibility never changes ownership
+- detach eligibility never reassigns primary automatically
+- primary wallets remain non-eligible until a safer detach execution contract exists
+- single-wallet users remain non-eligible until a future detach design defines what should happen next

@@ -203,6 +203,45 @@ Phase 0.4 focuses on:
 
 ---
 
+### 0.4.11 — Primary Wallet Management and Ownership Safety Hardening
+
+#### Implemented
+- authenticated primary-wallet switch flow:
+  - `POST /auth/wallets/primary`
+- store-level `SetPrimary(...)` contract
+- protected rejection when the wallet is missing
+- protected rejection when the wallet does not belong to the current authenticated user
+- deterministic single-primary reassignment within the owned-wallet set
+- refreshed wallet inventory response after successful primary switching
+
+#### Result
+- the backend now supports the first explicit post-merge wallet-ownership management action
+- ownership can be reorganized safely without changing wallet attachment or merge history
+
+---
+
+### 0.4.12 — Wallet Detach Contract Preparation and Ownership Guardrails
+
+#### Implemented
+- authenticated detach-eligibility evaluation flow:
+  - `POST /auth/wallets/detach/check`
+- detach-check response contract with:
+  - `eligible`
+  - `is_primary`
+  - `owned_wallet_count`
+  - `reasons`
+- protected rejection when the wallet is missing
+- protected rejection when the wallet does not belong to the current authenticated user
+- conservative non-eligibility when the wallet is the current primary wallet
+- conservative non-eligibility when detach would leave the user without any wallets
+- explicit reasoning contract for future unlink-safe product work
+
+#### Result
+- the backend now supports detach-preparation under authenticated control without introducing destructive ownership changes
+- future wallet detach execution can be designed against an already enforced eligibility contract instead of relying on implicit assumptions
+
+---
+
 ## 🧱 Root Cause Analysis
 
 The initial architecture lacked:
@@ -306,7 +345,7 @@ go test ./...
 
 Phase 0.4 now establishes a strong identity and wallet-ownership foundation.
 
-With 0.4.11:
+With 0.4.12:
 
 - wallet authentication is stable
 - identity is durable
@@ -314,8 +353,9 @@ With 0.4.11:
 - authenticated wallet linking is available
 - wallet-owned account merge execution is available
 - explicit primary-wallet switching is available
-- the backend is prepared for detach-safe ownership progression
+- detach eligibility can be evaluated safely before unlink execution
+- the backend is prepared for controlled wallet-detach design
 
 Next expected evolution:
 
-➡️ **0.4.12 — Wallet Ownership Detach Contract Preparation**
+➡️ **0.4.13 — Wallet Detach Execution Design**

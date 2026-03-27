@@ -16,7 +16,7 @@ It is intended to:
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.4 — Auth and User Stabilization  
-**Latest Completed Subphase:** 0.4.11 — Primary Wallet Management and Ownership Safety Hardening
+**Latest Completed Subphase:** 0.4.12 — Wallet Detach Contract Preparation and Ownership Guardrails
 
 ---
 
@@ -67,9 +67,9 @@ Ownership is a first-class persisted concept.
 
 ---
 
-## 🔗 Wallet Ownership Status (0.4.11)
+## 🔗 Wallet Ownership Status (0.4.12)
 
-The backend now supports authenticated wallet-linking, authenticated wallet-owned account merge execution, and authenticated primary-wallet switching.
+The backend now supports authenticated wallet-linking, authenticated wallet-owned account merge execution, authenticated primary-wallet switching, and authenticated wallet detach-eligibility evaluation.
 
 ### Capabilities
 
@@ -81,6 +81,8 @@ The backend now supports authenticated wallet-linking, authenticated wallet-owne
 - secondary wallet attaches to current user
 - authenticated user can execute wallet-owned account merge after source-wallet signature
 - authenticated user can explicitly switch the current primary wallet
+- authenticated user can request detach-eligibility evaluation for one owned wallet
+- explicit detach rejection reasons are returned without modifying ownership
 - updated wallet inventory is returned after successful linking, merge, and primary switching
 
 ### Protections
@@ -206,12 +208,12 @@ The system intentionally does **not** yet support:
 
 ## 🧭 Next Phase
 
-### 0.4.12 — Wallet Ownership Detach Contract Preparation
+### 0.4.13 — Wallet Detach Execution Design
 
 Expected next focus:
 
-- detach / unlink semantics
-- preserve primary-wallet safety during detach
+- controlled detach / unlink execution
+- preserve primary-wallet safety during detach execution
 - stronger account-level ownership management
 - deeper merge-safe identity preparation
 
@@ -232,7 +234,7 @@ When continuing development:
 
 ## 🧾 Summary
 
-At the end of Phase 0.4.11:
+At the end of Phase 0.4.12:
 
 - authentication is stable
 - identity is unified
@@ -240,4 +242,5 @@ At the end of Phase 0.4.11:
 - authenticated wallet linking is implemented
 - authenticated wallet-owned account merge is implemented
 - explicit primary-wallet switching is implemented
-- the backend is ready to move into detach-safe ownership management
+- wallet detach eligibility is implemented
+- the backend is ready to move into controlled detach execution design
