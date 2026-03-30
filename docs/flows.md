@@ -439,3 +439,44 @@ The backend now transitions from:
 - detach execution never reassigns primary automatically
 - detach execution never moves the detached wallet to a different user
 - detach execution preserves the remaining primary wallet exactly as it was before the operation
+
+
+---
+
+## 📦 Authenticated Wallet Inventory Read Model (0.4.16)
+
+### Description
+
+`GET /auth/wallets` now returns an explicit lifecycle-aware wallet inventory read model rather than a simpler ownership-only list.
+
+### Response Fields
+
+Each wallet in the response now includes:
+
+- `id`
+- `address`
+- `user_id`
+- `linked_at`
+- `detached_at`
+- `is_primary`
+- `status`
+
+### Status Semantics
+
+The response derives a conservative wallet status:
+
+- `active`
+- `detached`
+- `unlinked`
+
+For the authenticated inventory route, the practical state remains `active`, because only wallets currently owned by the authenticated user are listed. However, previously detached wallets that were later reattached may still expose `detached_at`, preserving minimal lifecycle evidence.
+
+### Operational Value
+
+This flow improves:
+
+- wallet/account UI rendering
+- support and debugging visibility
+- primary-wallet inspection
+- lifecycle-aware account diagnostics
+

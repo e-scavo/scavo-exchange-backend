@@ -454,3 +454,60 @@ Validated through:
 - service-level reattachment tests proving `detached_at` survives authenticated relinking
 - service-level wallet-login rebound tests proving `detached_at` survives bootstrap reuse
 - documentation alignment across README and docs/*
+
+
+---
+
+## 0.4.16 — Wallet Identity Read Model Enrichment
+
+### Objective
+Expose the real wallet identity lifecycle state more explicitly through the authenticated wallet inventory endpoint.
+
+### Scope
+- introduce an explicit wallet read model for `GET /auth/wallets`
+- expose lifecycle-aware fields already present in the backend model
+- add a conservative derived `status` field
+- validate active-wallet serialization and detached-then-reattached visibility
+- align documentation with the enriched public contract
+
+### Delivered
+- explicit `WalletReadModel` for authenticated wallet listing
+- public response fields:
+  - `id`
+  - `address`
+  - `user_id`
+  - `linked_at`
+  - `detached_at`
+  - `is_primary`
+  - `status`
+- handler-level coverage for active wallet inventory
+- handler-level coverage proving `detached_at` remains visible after detach + reattach
+- documentation updates aligning the API contract with the lifecycle-aware wallet identity model
+
+### Lifecycle Semantics Clarified
+The authenticated wallet inventory now exposes both:
+- current ownership state
+- minimal historical detach evidence
+
+The derived `status` field is conservative:
+- `active` when the wallet is currently linked to a user
+- `detached` when no owner exists and `detached_at` is present
+- `unlinked` when neither ownership nor detach evidence exists
+
+For `GET /auth/wallets`, the practical operational case remains `active`, because the endpoint lists wallets currently owned by the authenticated user.
+
+### Not Introduced Here
+- filtering or query parameters for wallet inventory
+- pagination
+- search
+- admin inventory views
+- richer detached-history endpoints
+- ownership-rule changes
+
+### Validation
+Validated through:
+- full `go test ./...`
+- handler-level wallet inventory serialization checks
+- explicit validation that detached-then-reattached wallets still expose `detached_at`
+- documentation alignment across README and docs/*
+

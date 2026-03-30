@@ -317,3 +317,45 @@ At the end of 0.4.15:
 - detached wallet identities are explicitly reusable after detach
 - detached wallet identities now preserve minimal audit-ready lifecycle metadata through `detached_at`
 - the backend is structurally ready to evolve into richer detached-identity observability only if later phases require it
+
+
+---
+
+## Wallet Identity Read Model (0.4.16)
+
+By the end of Phase 0.4.16, the backend explicitly separates:
+
+- the internal wallet identity domain model
+- the external authenticated wallet inventory read model
+
+The internal model preserves ownership and lifecycle state such as:
+
+- `user_id`
+- `linked_at`
+- `detached_at`
+- `is_primary`
+
+The external read model exposed by `GET /auth/wallets` now returns:
+
+- `id`
+- `address`
+- `user_id`
+- `linked_at`
+- `detached_at`
+- `is_primary`
+- `status`
+
+### Status Derivation
+
+The `status` field is derived conservatively:
+
+- `active` when the wallet is currently linked to a user
+- `detached` when the wallet has no current owner and `detached_at` is present
+- `unlinked` when the wallet has no current owner and no detach evidence
+
+For the authenticated wallet inventory route, the expected real-world case remains `active`, because the endpoint lists wallets currently owned by the authenticated user. The value of the enrichment is that previous detach lifecycle evidence can remain visible after reattachment.
+
+### Architectural Benefit
+
+This keeps mutation-focused ownership logic separate from read-oriented inventory projection. It improves frontend and debugging visibility without changing ownership or lifecycle business rules.
+

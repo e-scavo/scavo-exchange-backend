@@ -411,17 +411,17 @@ Run:
 go test ./...
 ```
 
-Focus areas added in 0.4.14:
+Focus areas added in 0.4.16:
 
-- explicit post-detach lifecycle clarification
-- detached-wallet reattachment semantics under the authenticated link flow
-- detached-wallet wallet-login rebound semantics under wallet bootstrap auth
-- test coverage proving detached identities remain reusable known wallet identities
-- existing link, merge, and primary-switch coverage preserved
+- wallet inventory read-model enrichment
+- explicit lifecycle-aware wallet inventory serialization
+- `status` derivation for owned-wallet inventory responses
+- visibility of `detached_at` after detach + reattach
+- existing link, merge, primary-switch, and detach coverage preserved
 
 ---
 
-## 🚧 What 0.4.14 Solves
+## 🚧 What 0.4.16 Solves
 
 - authenticated user-driven wallet linking
 - authenticated wallet-owned account merge execution
@@ -436,7 +436,7 @@ Focus areas added in 0.4.14:
 
 ---
 
-## ❌ What 0.4.14 Does Not Solve Yet
+## ❌ What 0.4.16 Does Not Solve Yet
 
 - wallet unlink API
 - arbitrary cross-user ownership transfer outside wallet-signed merge
@@ -450,20 +450,20 @@ Focus areas added in 0.4.14:
 
 ## 🧭 Next Phase
 
-### 0.4.14 — Detach Follow-Up Semantics and Source Identity Lifecycle
+### 0.4.17 — Wallet Inventory Query Semantics and Filtering Preparation
 
 Next expected focus:
 
-- detached-identity audit columns such as `detached_at` or `detached_by_user_id`
-- archival, soft-delete, or event-sourced lifecycle tracking for detached identities
-- richer dispute, recovery, or manual ownership intervention workflows
-- preserve ownership invariants while extending unlink lifecycle semantics
+- optional query semantics for inventory consumption
+- filtering and projection evolution on top of the enriched read model
+- preserve backward compatibility of the current wallet inventory contract
+- avoid reworking ownership invariants already stabilized in Phase 0.4
 
 ---
 
 ## 🧩 Summary
 
-At the end of Phase 0.4.14:
+At the end of Phase 0.4.16:
 
 - wallet authentication remains stable
 - identity remains unified
@@ -475,4 +475,124 @@ At the end of Phase 0.4.14:
 - wallet detach execution is available for already eligible owned wallets
 - detached wallet identities are explicitly reusable known identities
 - detached wallets can be reattached via protected linking or via wallet-login bootstrap rebound
-- the backend is ready for richer detached-identity lifecycle work without ambiguity about current behavior
+- detached wallet identities preserve minimal audit-ready lifecycle evidence through `detached_at`
+- `GET /auth/wallets` now exposes an enriched lifecycle-aware wallet inventory read model
+
+
+---
+
+## Phase 0.4.16 — Wallet Identity Read Model Enrichment
+
+### Objective
+
+Expose a richer and more explicit wallet inventory read model through `GET /auth/wallets`, so authenticated clients can observe current ownership plus minimal lifecycle evidence already maintained by the backend.
+
+### Initial Context
+
+By the end of 0.4.15, the backend already supported wallet authentication, authenticated wallet linking, wallet-owned account merge, primary-wallet switching, detach eligibility and execution, detached-wallet reattachment semantics, and minimal detached-identity audit readiness through `detached_at`.
+
+The internal wallet identity model had already become more lifecycle-aware than the public wallet inventory response.
+
+### Problem Statement
+
+The backend already preserved wallet lifecycle fields such as:
+
+- `linked_at`
+- `detached_at`
+- `is_primary`
+
+However, `GET /auth/wallets` had not yet been explicitly upgraded into a lifecycle-aware read model contract. This created a visibility gap between internal state and client-facing inventory data.
+
+### Scope
+
+Included:
+
+- explicit wallet read-model mapping
+- exposure of:
+  - `id`
+  - `address`
+  - `user_id`
+  - `linked_at`
+  - `detached_at`
+  - `is_primary`
+  - derived `status`
+- handler-level validation for active wallet inventory and detached-then-reattached wallet visibility
+
+Excluded:
+
+- ownership rule changes
+- schema changes
+- detach/reattach business-rule changes
+- filtering, pagination, or reporting expansion
+
+### Root Cause Analysis
+
+The root issue was not missing domain behavior but an outdated API projection. The internal model already tracked richer lifecycle state, while the public inventory endpoint still behaved like a simpler list projection.
+
+### Files Affected
+
+- `internal/modules/auth/http_wallet_list.go`
+- `internal/modules/auth/http_handlers_test.go`
+- `README.md`
+- `docs/phase-status.md`
+- `docs/handoff/backend-status.md`
+- `docs/phase0_4_auth_and_user_stabilization.md`
+- `docs/architecture.md`
+- `docs/flows.md`
+- `docs/testing.md`
+
+### Implementation Characteristics
+
+The wallet inventory handler now maps wallet identities into an explicit `WalletReadModel` exposing:
+
+- `id`
+- `address`
+- `user_id`
+- `linked_at`
+- `detached_at`
+- `is_primary`
+- `status`
+
+The derived `status` semantics are conservative:
+
+- `active` when the wallet is currently linked to a user
+- `detached` when there is no current owner and `detached_at` is present
+- `unlinked` when there is no current owner and no detach evidence
+
+For `GET /auth/wallets`, the operational case remains `active`, because the route lists wallets currently owned by the authenticated user. The main value of the enrichment is that previously detached lifecycle evidence remains visible after reattachment.
+
+### Validation
+
+Validated with:
+
+```bash
+go test ./...
+```
+
+Result:
+
+- `internal/modules/auth` OK
+- no visible regressions in the rest of the backend tree
+
+### Release Impact
+
+This subphase is additive and read-oriented. It improves client visibility and debugging without changing authentication, ownership, linking, merge, primary-switch, or detach rules.
+
+### Risks
+
+Low risk. The change is limited to response projection and handler-level contract clarity.
+
+### What it does NOT solve
+
+This subphase does not add:
+
+- filtering
+- pagination
+- search
+- admin reporting
+- richer detached-identity history endpoints
+- advanced lifecycle analytics
+
+### Conclusion
+
+Phase 0.4.16 closes the gap between the internal wallet identity lifecycle model and the authenticated wallet inventory API contract. The backend now exposes a richer wallet inventory read model while preserving all ownership guarantees stabilized in previous subphases.

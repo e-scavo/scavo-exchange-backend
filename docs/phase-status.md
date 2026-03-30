@@ -35,6 +35,7 @@ Status: ✅ Completed
 | 0.4.13 | Protected wallet detach execution | ✅ Completed |
 | 0.4.14 | Detached wallet reattachment semantics and lifecycle clarification | ✅ Completed |
 | 0.4.15 | Detached identity audit readiness | ✅ Completed |
+| 0.4.16 | Wallet identity read model enrichment | ✅ Completed |
 
 ---
 
@@ -92,3 +93,66 @@ The following items remain intentionally out of scope:
 - optional `detached_by_user_id` or richer detach history if future audit scope requires it
 - queryable lifecycle reporting if operational observability later needs it
 - preserve current reusable detached-wallet semantics while preparing richer lifecycle observability
+
+
+---
+
+## ✅ Phase 0.4.16 Closure Summary
+
+Phase 0.4.16 enriches the authenticated wallet inventory contract without changing ownership behavior or persistence rules.
+
+The backend now exposes a dedicated wallet read model through `GET /auth/wallets`, including:
+
+- `id`
+- `address`
+- `user_id`
+- `linked_at`
+- `detached_at`
+- `is_primary`
+- `status`
+
+### Delivered in 0.4.16
+
+- explicit `WalletReadModel` projection for authenticated wallet inventory
+- lifecycle-aware visibility of `linked_at`, `detached_at`, and `is_primary`
+- derived `status` field for wallet inventory responses
+- handler-level validation for active wallet inventory serialization
+- handler-level validation proving detached-then-reattached wallets still expose `detached_at`
+- documentation updates aligning the public API contract with the real wallet identity lifecycle model
+
+---
+
+## 🔍 Functional Result
+
+The system now supports the following authenticated inventory behavior:
+
+1. authenticated user calls `GET /auth/wallets`
+2. backend resolves all wallet identities currently owned by that durable user
+3. backend projects each identity through an explicit read model
+4. lifecycle-aware fields are returned, including current ownership state and minimal historical detach evidence
+5. clients can observe both current ownership and preserved detached-wallet lifecycle evidence without requiring additional endpoints
+
+---
+
+## ❌ Not Included in 0.4.16
+
+The following items remain intentionally out of scope:
+
+- filtering or query parameters for wallet inventory
+- pagination
+- search
+- admin reporting endpoints
+- richer detached-identity history endpoints
+- event sourcing or audit tables
+- additional ownership mutations
+
+---
+
+## ⏭️ Next Phase
+
+### Next Expected Evolution
+
+- wallet inventory query semantics and filtering preparation on top of the enriched read model
+- preserve backward compatibility of the public wallet inventory contract
+- avoid reworking ownership invariants already stabilized in Phase 0.4
+

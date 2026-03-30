@@ -16,7 +16,7 @@ It is intended to:
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.4 — Auth and User Stabilization  
-**Latest Completed Subphase:** 0.4.15 — Detached Identity Audit Readiness
+**Latest Completed Subphase:** 0.4.16 — Wallet Identity Read Model Enrichment
 
 ---
 
@@ -176,6 +176,21 @@ The backend guarantees:
 
 ---
 
+
+## 📦 Wallet Inventory Read Model
+
+`GET /auth/wallets` now returns an explicit wallet read model including:
+
+- `id`
+- `address`
+- `user_id`
+- `linked_at`
+- `detached_at`
+- `is_primary`
+- `status`
+
+This makes the public inventory contract lifecycle-aware while preserving the same ownership semantics already stabilized in previous subphases.
+
 ## 🧪 Testing Status
 
 Validated at the design and code level through:
@@ -194,6 +209,9 @@ Coverage now includes:
 - wallet-link verification flow
 - ownership conflict rejection during link operations
 - protected primary-wallet switching
+- detach eligibility and execution
+- detached-wallet reattachment semantics
+- enriched wallet inventory read-model serialization
 
 ---
 
@@ -201,6 +219,7 @@ Coverage now includes:
 
 The system intentionally does **not** yet support:
 
+- wallet inventory filtering or query semantics beyond the current contract
 - wallet unlink operations
 - cross-user wallet transfer
 - merge between wallet identities and future auth methods
@@ -212,13 +231,13 @@ The system intentionally does **not** yet support:
 
 ## 🧭 Next Phase
 
-### 0.4.14 — Detach Follow-Up Semantics and Source Identity Lifecycle
+### 0.4.17 — Wallet Inventory Query Semantics and Filtering Preparation
 
 Expected next focus:
 
-- decide whether detached identities require explicit audit metadata later
-- evaluate audit and lifecycle markers for detached identities
-- preserve conservative ownership invariants while enriching detach observability
+- evolve optional query semantics on top of the enriched wallet inventory read model
+- preserve backward compatibility of the current inventory contract
+- avoid destabilizing ownership and lifecycle guarantees already closed in Phase 0.4
 
 ---
 
@@ -237,7 +256,7 @@ When continuing development:
 
 ## 🧾 Summary
 
-At the end of Phase 0.4.14:
+At the end of Phase 0.4.16:
 
 - authentication is stable
 - identity is unified
@@ -248,4 +267,6 @@ At the end of Phase 0.4.14:
 - wallet detach eligibility is implemented
 - wallet detach execution is implemented for already eligible owned wallets
 - detached wallet identities are explicitly reusable after detach
-- the backend is ready to move into detached-identity audit and lifecycle enrichment work
+- detached wallet identities preserve minimal audit-ready lifecycle evidence through `detached_at`
+- the authenticated wallet inventory endpoint now exposes an enriched lifecycle-aware read model
+

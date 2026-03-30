@@ -899,3 +899,34 @@ At the end of 0.4.15:
 - detached wallet identities are explicitly reusable after detach
 - detached wallet identities now preserve minimal audit-ready lifecycle metadata through `detached_at`
 - the backend is structurally ready to move from ownership persistence into richer detached-identity observability only if future phases require it
+
+
+---
+
+## Phase 0.4.16 Testing Notes
+
+### Goal
+
+Validate the enriched wallet inventory read model exposed by `GET /auth/wallets`.
+
+### Coverage Added
+
+Handler-level validation covers:
+
+- successful wallet inventory response
+- explicit active-wallet status projection
+- primary wallet visibility
+- `linked_at` visibility for owned wallets
+- absence of `detached_at` for active wallets that were never detached
+- preservation of `detached_at` after detach + reattach
+
+### Validation Command
+
+```bash
+go test ./...
+```
+
+### Expected Result
+
+- `internal/modules/auth` passes
+- no regressions appear in the rest of the backend tree

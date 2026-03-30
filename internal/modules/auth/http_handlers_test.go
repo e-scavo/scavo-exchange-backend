@@ -180,7 +180,7 @@ func TestHTTPHandlers_Wallets_Success(t *testing.T) {
 		t.Fatalf("GetOrCreate error: %v", err)
 	}
 
-	_, err = store.AttachUser(context.Background(), identity.ID, "u_test_example_com", true)
+	attached, err := store.AttachUser(context.Background(), identity.ID, "u_test_example_com", true)
 	if err != nil {
 		t.Fatalf("AttachUser error: %v", err)
 	}
@@ -210,11 +210,29 @@ func TestHTTPHandlers_Wallets_Success(t *testing.T) {
 	if len(payload.Wallets) != 1 {
 		t.Fatalf("expected 1 wallet, got %d", len(payload.Wallets))
 	}
+	if payload.Wallets[0].ID != identity.ID {
+		t.Fatalf("unexpected wallet id: %q", payload.Wallets[0].ID)
+	}
+	if payload.Wallets[0].Address != address {
+		t.Fatalf("unexpected wallet address: %q", payload.Wallets[0].Address)
+	}
 	if payload.Wallets[0].UserID != "u_test_example_com" {
 		t.Fatalf("unexpected wallet user id: %q", payload.Wallets[0].UserID)
 	}
 	if !payload.Wallets[0].IsPrimary {
 		t.Fatal("expected primary wallet")
+	}
+	if payload.Wallets[0].Status != "active" {
+		t.Fatalf("unexpected wallet status: %q", payload.Wallets[0].Status)
+	}
+	if payload.Wallets[0].LinkedAt == nil {
+		t.Fatal("expected linked_at")
+	}
+	if payload.Wallets[0].DetachedAt != nil {
+		t.Fatalf("unexpected detached_at for active wallet: %#v", payload.Wallets[0].DetachedAt)
+	}
+	if attached.LinkedAt == nil || !payload.Wallets[0].LinkedAt.Equal(*attached.LinkedAt) {
+		t.Fatalf("unexpected linked_at payload: %#v", payload.Wallets[0].LinkedAt)
 	}
 }
 
@@ -789,5 +807,64 @@ func TestHTTPHandlers_WalletDetach_RejectsPrimaryWallet(t *testing.T) {
 	}
 	if len(payload.Check.Reasons) == 0 || payload.Check.Reasons[0] != WalletDetachReasonWalletIsPrimary {
 		t.Fatalf("unexpected detach reasons: %#v", payload.Check)
+	}
+}
+func TestHTTPHandlers_Wallets_ReattachedWalletPreservesDetachedAt(t *testing.T) {
+	store := NewInMemoryWalletIdentityStore()
+	address := testWalletAddress()
+
+	identity, err := store.GetOrCreate(context.Background(), address)
+	if err != nil {
+		t.Fatalf("GetOrCreate error: %v", err)
+	}
+
+	_, err = store.AttachUser(context.Background(), identity.ID, "u_test_example_com", true)
+	if err != nil {
+		t.Fatalf("initial AttachUser error: %v", err)
+	}
+
+	_, _, err = store.DetachUser(context.Background(), "u_test_example_com", address)
+	if err != nil {
+		t.Fatalf("DetachUser error: %v", err)
+	}
+
+	relinked, err := store.AttachUser(context.Background(), identity.ID, "u_test_example_com", true)
+	if err != nil {
+		t.Fatalf("reattach AttachUser error: %v", err)
+	}
+
+	h := HTTPHandlers{
+		Tokens:           mustTokenService(t),
+		TTL:              time.Hour,
+		Users:            usermod.NewService(nil),
+		WalletIdentities: store,
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/auth/wallets", nil)
+	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	rec := httptest.NewRecorder()
+
+	h.Wallets(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+
+	var payload WalletsResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("decode error: %v", err)
+	}
+
+	if len(payload.Wallets) != 1 {
+		t.Fatalf("expected 1 wallet, got %d", len(payload.Wallets))
+	}
+	if payload.Wallets[0].Status != "active" {
+		t.Fatalf("unexpected wallet status after reattach: %q", payload.Wallets[0].Status)
+	}
+	if payload.Wallets[0].DetachedAt == nil {
+		t.Fatal("expected detached_at to remain visible after reattach")
+	}
+	if relinked.DetachedAt == nil || !payload.Wallets[0].DetachedAt.Equal(*relinked.DetachedAt) {
+		t.Fatalf("unexpected detached_at payload: %#v", payload.Wallets[0].DetachedAt)
 	}
 }
