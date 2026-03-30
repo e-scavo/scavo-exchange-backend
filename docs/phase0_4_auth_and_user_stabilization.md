@@ -511,3 +511,52 @@ Validated through:
 - explicit validation that detached-then-reattached wallets still expose `detached_at`
 - documentation alignment across README and docs/*
 
+
+
+## 0.4.17 — Wallet Inventory Query Filtering and Sorting
+
+### Objective
+Add small, explicit query semantics to the authenticated wallet inventory endpoint without changing domain or persistence behavior.
+
+### Scope
+- add optional `status` filtering for `GET /auth/wallets`
+- add optional `primary` filtering for `GET /auth/wallets`
+- add optional `linked_at` sorting with `asc|desc` ordering
+- keep backward compatibility when query params are omitted
+- validate invalid query values explicitly at handler level
+- extend handler-level coverage for the new query contract
+
+### Delivered
+- optional query params:
+  - `status=active|detached`
+  - `primary=true|false`
+  - `sort=linked_at`
+  - `order=asc|desc`
+- explicit `400` errors for invalid query combinations or unsupported values
+- filtering and sorting applied only on the lifecycle-aware read model already exposed by the handler
+- documentation updates aligning the wallet inventory endpoint with the new query semantics
+
+### Lifecycle / Query Semantics Clarified
+This subphase does not widen the ownership scope of the endpoint.
+
+`GET /auth/wallets` still lists only wallets currently owned by the authenticated user. Because of that:
+- `status=active` is the normal operational case
+- `status=detached` is a valid filter but is expected to produce an empty result under the current route contract
+- `primary=true|false` operates only within the authenticated owned-wallet inventory
+- explicit `sort=linked_at` overrides only the response ordering, not ownership semantics
+
+### Not Introduced Here
+- pagination
+- text search
+- admin inventory views
+- store-level query APIs
+- SQL filtering or ordering changes
+- detached-wallet history reporting
+- ownership-rule changes
+
+### Validation
+Validation path for this subphase:
+- `go test ./...`
+- handler-level validation for filter/sort compatibility
+- handler-level validation for invalid query parameters returning `400`
+

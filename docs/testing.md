@@ -930,3 +930,58 @@ go test ./...
 
 - `internal/modules/auth` passes
 - no regressions appear in the rest of the backend tree
+
+
+## Phase 0.4.17 Testing Notes
+
+### Goal
+
+Validate wallet inventory query filtering and sorting on top of the lifecycle-aware `GET /auth/wallets` read model.
+
+### Coverage Added
+
+Handler-level validation covers:
+
+- backward-compatible wallet inventory response without query params
+- `primary=true` returning only primary wallets
+- `primary=false` returning only non-primary wallets
+- `status=active` returning currently owned wallets
+- `status=detached` returning an empty result under the current owned-wallet route contract
+- `sort=linked_at&order=desc` returning wallets in explicit descending linked order
+- invalid query params returning `400` with explicit error codes
+
+### Validation Command
+
+```
+go test ./...
+```
+
+### Manual API Checks
+
+```
+curl -s http://localhost:8080/auth/wallets \
+  -H "Authorization: Bearer $TOKEN"
+
+curl -s "http://localhost:8080/auth/wallets?primary=true" \
+  -H "Authorization: Bearer $TOKEN"
+
+curl -s "http://localhost:8080/auth/wallets?primary=false" \
+  -H "Authorization: Bearer $TOKEN"
+
+curl -s "http://localhost:8080/auth/wallets?status=active" \
+  -H "Authorization: Bearer $TOKEN"
+
+curl -s "http://localhost:8080/auth/wallets?status=detached" \
+  -H "Authorization: Bearer $TOKEN"
+
+curl -s "http://localhost:8080/auth/wallets?sort=linked_at&order=desc" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Expected Result
+
+- `internal/modules/auth` passes with the new handler coverage
+- default inventory behavior remains backward compatible
+- explicit filtering and sorting behave deterministically
+- unsupported query values are rejected with `400`
+

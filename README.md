@@ -23,7 +23,7 @@ The backend follows a **wallet-first identity model** that progressively evolves
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.4 — Auth and User Stabilization  
-**Current Subphase:** **0.4.15 — Detached Identity Audit Readiness**
+**Current Subphase:** **0.4.17 — Wallet Inventory Query Filtering and Sorting**
 
 ---
 
@@ -450,12 +450,12 @@ Focus areas added in 0.4.16:
 
 ## 🧭 Next Phase
 
-### 0.4.17 — Wallet Inventory Query Semantics and Filtering Preparation
+### 0.4.18 — Wallet Inventory Pagination and Advanced Query Preparation
 
 Next expected focus:
 
-- optional query semantics for inventory consumption
-- filtering and projection evolution on top of the enriched read model
+- optional pagination on top of the filtered inventory contract
+- additional low-risk query semantics only if a real client need appears
 - preserve backward compatibility of the current wallet inventory contract
 - avoid reworking ownership invariants already stabilized in Phase 0.4
 
@@ -596,3 +596,148 @@ This subphase does not add:
 ### Conclusion
 
 Phase 0.4.16 closes the gap between the internal wallet identity lifecycle model and the authenticated wallet inventory API contract. The backend now exposes a richer wallet inventory read model while preserving all ownership guarantees stabilized in previous subphases.
+
+
+## Phase 0.4.17 — Wallet Inventory Query Filtering and Sorting
+
+### Objective
+
+Make `GET /auth/wallets` operationally more useful for clients by adding small, explicit query semantics on top of the lifecycle-aware read model introduced in 0.4.16.
+
+### Initial Context
+
+By the end of 0.4.16, the backend already exposed an explicit wallet read model including:
+
+- `linked_at`
+- `detached_at`
+- `is_primary`
+- `status`
+
+However, the endpoint still behaved like a fixed inventory listing. Clients could observe richer lifecycle state, but could not yet request even basic filtered or ordered views of that same read model.
+
+### Problem Statement
+
+The real gap was not in domain behavior or persistence. The gap was in inventory query semantics.
+
+`GET /auth/wallets` returned the enriched lifecycle-aware projection, but it did not yet support:
+
+- filtering by `status`
+- filtering by `primary`
+- explicit ordering by `linked_at`
+
+This made the public API less useful for account-management and wallet-inventory UIs even though the underlying read model was already available.
+
+### Scope
+
+Included:
+
+- optional `status` filter with supported values:
+  - `active`
+  - `detached`
+- optional `primary` filter with supported values:
+  - `true`
+  - `false`
+- optional sorting contract:
+  - `sort=linked_at`
+  - `order=asc|desc`
+- strict query validation with explicit `400` errors for unsupported values
+- handler-level test coverage for filtering, sorting, and invalid query contracts
+
+Excluded:
+
+- ownership rule changes
+- store changes
+- SQL query changes
+- pagination
+- search
+- admin reporting
+- broader detached-history APIs
+
+### Root Cause Analysis
+
+The root issue remained in the HTTP read layer. The lifecycle-aware model already existed, but the endpoint had no safe query contract for clients to consume that richer projection in a structured way.
+
+### Files Affected
+
+- `internal/modules/auth/http_wallet_list.go`
+- `internal/modules/auth/http_handlers_test.go`
+- `README.md`
+- `docs/phase-status.md`
+- `docs/handoff/backend-status.md`
+- `docs/phase0_4_auth_and_user_stabilization.md`
+- `docs/flows.md`
+- `docs/testing.md`
+
+### Implementation Characteristics
+
+The implementation remains read-only and handler-local. It does not change domain or persistence behavior.
+
+`GET /auth/wallets` now accepts these optional query parameters:
+
+- `status=active|detached`
+- `primary=true|false`
+- `sort=linked_at`
+- `order=asc|desc`
+
+Compatibility is preserved:
+
+- when no query parameters are provided, the endpoint keeps the existing inventory behavior
+- the existing store-defined default ordering remains the default path
+- filtering and sorting are applied only after the owned-wallet inventory has already been resolved
+
+Validation is strict:
+
+- invalid `status` returns `400` with `invalid_status`
+- invalid `primary` returns `400` with `invalid_primary`
+- invalid `sort` returns `400` with `invalid_sort`
+- invalid `order` returns `400` with `invalid_order`
+- `order` without a supported `sort` also returns `400` with `invalid_sort`
+
+A practical note remains important: because `GET /auth/wallets` lists wallets currently owned by the authenticated user, `status=detached` is expected to return an empty result under the current contract. That is intentional and keeps the semantics explicit without widening the endpoint scope.
+
+### Validation
+
+Validation path for this subphase:
+
+```
+go test ./...
+```
+
+Focused coverage added in handler tests for:
+
+- backward-compatible inventory listing without query params
+- `primary=true`
+- `primary=false`
+- `status=active`
+- `status=detached` returning an empty result under the current owned-wallet contract
+- `sort=linked_at&order=desc`
+- invalid query parameters returning `400`
+
+### Release Impact
+
+This subphase is additive and read-oriented. It improves client query semantics without changing wallet auth, ownership, linking, merge, primary switch, detach execution, or detached-wallet reuse rules.
+
+### Risks
+
+Low risk. The change is restricted to the authenticated wallet inventory handler and its tests.
+
+Main guarded risks:
+
+- accidental breakage of existing default ordering
+- ambiguous invalid query behavior
+- accidental persistence or domain coupling for a read-only enhancement
+
+### What it does NOT solve
+
+This subphase does not add:
+
+- pagination
+- search
+- detached-wallet history listing
+- admin inventory views
+- new ownership operations
+- domain redesign
+
+### Conclusion
+
+Phase 0.4.17 makes the lifecycle-aware wallet inventory endpoint actually queryable in a small, controlled, backward-compatible way. The backend now exposes a safer and more useful inventory contract while keeping all Phase 0.4 ownership and lifecycle invariants intact.
