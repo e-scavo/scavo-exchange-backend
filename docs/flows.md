@@ -760,3 +760,21 @@ For the same authenticated user and wallet inventory:
 
 ### Outcome
 The backend now protects the semantic alignment between wallet inventory primary-actionability hints and primary-switch execution without changing primary-domain rules or persistence behavior.
+
+## Phase 0.4.28 — Wallet Management Read Flow Closure
+
+### Flow impact
+The authenticated wallet-management surface is now documented as one continuous read flow instead of separate isolated capabilities.
+
+### Read-flow semantics
+For the same authenticated user:
+
+- `GET /auth/wallets` is the inventory entry point and the only place where advisory actionability hints should be read
+- `can_set_primary=true` should be interpreted as a valid invitation to call `POST /auth/wallets/primary` for that wallet
+- `can_detach=true` should be interpreted as a valid invitation to call `POST /auth/wallets/detach/check` and, if still eligible, `POST /auth/wallets/detach`
+- after either action path succeeds, the inventory should be refreshed and treated as the new source of truth for `is_primary`, `status`, `detached_at`, and updated actionability hints
+- inventory hints remain advisory; primary and detach endpoints remain authoritative for execution
+
+### Outcome
+The backend keeps the same runtime behavior as 0.4.27, but the wallet-management path is now documented as a complete inventory-driven read flow from initial listing to refreshed post-action inventory.
+

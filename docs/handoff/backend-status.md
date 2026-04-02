@@ -232,14 +232,14 @@ The system intentionally does **not** yet support:
 
 ## 🧭 Next Phase
 
-### 0.4.27 — Wallet Primary Switch Read Consistency
+### 0.4.28 — Wallet Management Read Flow Closure
 
 Delivered:
 
-- handler-level consistency coverage connecting `GET /auth/wallets` and `POST /auth/wallets/primary` for a two-wallet inventory
-- explicit validation that the current primary remains `can_set_primary=false` before switching
-- explicit validation that a secondary wallet exposed as `can_set_primary=true` can be promoted successfully and then becomes non-promotable after the switch
-- documentation that keeps inventory-side primary hints advisory while preserving primary-switch authority
+- wallet-management documentation now connects inventory, advisory actionability hints, primary switching, detach checking, detach execution, and refreshed inventory as one complete read flow
+- README current-subphase summary corrected so the main project header matches the actual phase state already reflected elsewhere in the ZIP
+- manual validation guidance expanded to cover refreshed inventory expectations after primary and detach operations
+- no changes to runtime wallet-management rules, stores, or persistence
 
 Expected next focus:
 
@@ -299,3 +299,6 @@ Phase 0.4.25 prepares the authenticated wallet inventory for wallet-management c
 
 
 Phase 0.4.26 closes the consistency gap between the enriched wallet inventory read model and `POST /auth/wallets/detach/check`. The implementation adds handler-level coverage proving that inventory-side detach hints remain semantically aligned with detach-check eligibility and reasons for single-wallet and two-wallet ownership scenarios, while leaving detach authority in the existing check and execute endpoints.
+
+
+Phase 0.4.28 closes the wallet-management read flow around the authenticated inventory and the existing primary / detach actions. The implementation is documentation-only, but it corrects the README phase summary and consolidates the real inventory → actionability hint → action/check endpoint → refreshed inventory flow so client and operator guidance now matches the authenticated wallet-management surface end to end.

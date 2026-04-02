@@ -455,7 +455,26 @@ Phase 0.4.27 closes the consistency gap between wallet inventory primary-actiona
 - ownership-rule changes
 - store-level actionability persistence
 
-### 0.4.28 — To Be Defined Against Real ZIP
+## ✅ Phase 0.4.28 Closure Summary
+
+Phase 0.4.28 closes the wallet-management read flow around the authenticated inventory and the existing primary / detach actions without changing domain rules, stores, or persistence.
+
+### Delivered in 0.4.28
+
+- main README header corrected so the declared current subphase matches the actual state already reflected across the ZIP
+- explicit documentation of the end-to-end wallet-management flow: inventory → actionability hint → action/check endpoint → refreshed inventory
+- operator guidance clarifying that inventory hints remain advisory while action and check endpoints remain authoritative
+- manual validation guidance covering refreshed inventory expectations after primary switching and detach execution
+
+## ❌ Not Included in 0.4.28
+
+- new wallet-management endpoints
+- new inventory fields
+- changes to primary-switch or detach rules
+- ownership-rule changes
+- store-level or persistence changes
+
+### 0.4.29 — To Be Defined Against Real ZIP
 
 Expected next focus:
 

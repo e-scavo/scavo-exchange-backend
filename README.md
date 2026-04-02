@@ -23,7 +23,7 @@ The backend follows a **wallet-first identity model** that progressively evolves
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.4 — Auth and User Stabilization  
-**Current Subphase:** **0.4.26 — Wallet Detach Check Read Consistency**
+**Current Subphase:** **0.4.28 — Wallet Management Read Flow Closure**
 
 ---
 
@@ -1269,3 +1269,17 @@ Close the consistency gap between wallet-inventory primary actionability hints a
 
 ### Conclusion
 Phase 0.4.27 does not change primary-switch domain rules or persistence behavior. It hardens the contract between the enriched wallet inventory read model and the dedicated primary-switch endpoint so future wallet-management work can rely on both surfaces staying semantically aligned.
+
+## Phase 0.4.28 — Wallet Management Read Flow Closure
+
+### Objective
+Close the end-to-end consumption flow around authenticated wallet management by explicitly connecting wallet inventory, advisory actionability hints, primary switching, detach checking, detach execution, and the expected refreshed inventory state.
+
+### Delivered
+- README and phase documentation now present wallet management as a complete read-flow: inventory → action decision → action/check endpoint → refreshed inventory
+- explicit operator guidance clarifying how `can_set_primary`, `can_detach`, and `detach_block_reasons` should be consumed before `POST /auth/wallets/primary`, `POST /auth/wallets/detach/check`, and `POST /auth/wallets/detach`
+- testing notes expanded with a manual end-to-end validation sequence covering inventory refresh after primary switching and detach execution
+- current-subphase summary corrected so the main README header matches the actual state already reflected by the rest of the ZIP
+
+### Conclusion
+Phase 0.4.28 does not change wallet-management rules, handlers, stores, or persistence. It closes the operational read flow around the existing wallet inventory and action endpoints so client and operator guidance now matches the real authenticated wallet-management surface end to end.

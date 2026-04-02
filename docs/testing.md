@@ -1211,3 +1211,27 @@ Handler-level coverage now verifies:
 ```
 go test ./...
 ```
+
+## Phase 0.4.28 Testing Notes
+
+### Goal
+Validate the end-to-end wallet-management read flow built around `GET /auth/wallets`, `POST /auth/wallets/primary`, `POST /auth/wallets/detach/check`, and `POST /auth/wallets/detach`.
+
+### Manual Validation Sequence
+
+1. Call `GET /auth/wallets` and record:
+   - the current primary wallet
+   - any wallet exposed as `can_set_primary=true`
+   - any wallet exposed as `can_detach=true`
+2. Execute `POST /auth/wallets/primary` on a wallet exposed as promotable and then refresh `GET /auth/wallets`
+3. Confirm that the refreshed inventory flips `is_primary` and `can_set_primary` coherently between the former primary and the promoted wallet
+4. Execute `POST /auth/wallets/detach/check` on a wallet exposed as detachable and confirm the check remains compatible with the inventory-side detach hints
+5. Execute `POST /auth/wallets/detach` when the check remains eligible and then refresh `GET /auth/wallets`
+6. Confirm that the refreshed inventory exposes the updated lifecycle state (`status`, `detached_at`) and recalculated actionability hints
+
+### Validation Command
+
+```
+go test ./...
+```
+

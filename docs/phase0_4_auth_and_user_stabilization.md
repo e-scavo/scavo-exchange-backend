@@ -794,3 +794,18 @@ Close the consistency gap between wallet-inventory primary-actionability hints a
 
 ### Conclusion
 Phase 0.4.27 hardens the contract between the authenticated wallet inventory and the authenticated primary-switch endpoint so future wallet-management work can rely on both surfaces staying semantically aligned.
+
+## Phase 0.4.28 — Wallet Management Read Flow Closure
+
+### Objective
+Close the authenticated wallet-management read flow by documenting how inventory, actionability hints, primary switching, detach checking, detach execution, and post-action inventory refresh fit together as one coherent surface.
+
+### Delivered
+- phase documentation now treats wallet management as an inventory-driven read flow rather than a set of isolated endpoint notes
+- explicit clarification that `can_set_primary`, `can_detach`, and `detach_block_reasons` are advisory read-model hints consumed before the authoritative action/check endpoints
+- manual validation guidance covering refreshed inventory expectations after primary switching and detach execution
+- README current-subphase summary aligned with the actual state already reflected by the rest of the ZIP
+
+### Conclusion
+Phase 0.4.28 closes the operational wallet-management read flow without changing handlers, domain rules, stores, or persistence. The authenticated inventory remains the entry point, while primary and detach endpoints remain authoritative execution surfaces.
+
