@@ -23,7 +23,7 @@ The backend follows a **wallet-first identity model** that progressively evolves
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.4 — Auth and User Stabilization  
-**Current Subphase:** **0.4.21 — Wallet Inventory Query Parameter Contract Hardening**
+**Current Subphase:** **0.4.22 — Wallet Inventory Response Contract Clarification**
 
 ---
 
@@ -253,9 +253,27 @@ Response:
   ],
   "total": 1,
   "limit": 0,
-  "offset": 0
+  "offset": 0,
+  "returned": 1,
+  "has_more": false
 }
 ```
+
+When the request uses bounded pagination (`limit > 0`), the response may also include:
+
+- `next_offset`
+- `previous_offset`
+
+Response field semantics:
+
+- `wallets`: current window of wallet inventory rows after filtering and sorting
+- `total`: total number of rows after filters and sort, before applying the window
+- `limit`: requested page size, or `0` when the request is unbounded
+- `offset`: requested starting offset
+- `returned`: number of rows actually present in `wallets`
+- `has_more`: whether another row exists after the current window
+- `next_offset`: suggested offset for the next bounded window when one exists
+- `previous_offset`: suggested offset for the previous bounded window when one exists
 
 Supported optional query params:
 
@@ -1026,6 +1044,56 @@ This subphase does not add:
 
 Phase 0.4.19 completes the basic navigation contract of the authenticated wallet inventory endpoint. The backend now exposes not only filtered, ordered, and windowed wallet inventory responses, but also explicit metadata describing the returned window itself.
 
+
+## Phase 0.4.22 — Wallet Inventory Response Contract Clarification
+
+### Objective
+Clarify and document the complete `GET /auth/wallets` response contract so the visible API examples match the behavior already implemented in 0.4.17 through 0.4.21.
+
+### Problem Statement
+The wallet inventory endpoint already returned enriched lifecycle and navigation metadata, but the main README endpoint example still showed only a partial response contract. This created an avoidable gap between implementation and operator-facing documentation.
+
+### Scope
+- align the primary `GET /auth/wallets` README example with the real JSON contract
+- document the response semantics of:
+  - `wallets`
+  - `total`
+  - `limit`
+  - `offset`
+  - `returned`
+  - `has_more`
+  - `next_offset`
+  - `previous_offset`
+- clarify bounded vs unbounded response behavior
+- update phase and handoff documentation to mark the contract as clarified
+
+### Implementation Characteristics
+- documentation-only closure
+- no domain changes
+- no store changes
+- no persistence changes
+- no new endpoint capabilities
+
+### Validation
+- documentation reviewed against the real `GET /auth/wallets` handler contract
+- no behavioral change required
+- `go test ./...`
+
+### Release Impact
+Wallet inventory consumers now have a complete and explicit reference for the authenticated inventory response contract, including navigation metadata already exposed by the backend.
+
+### Risks
+- incomplete docs drifting again from the implementation
+
+### What it does NOT solve
+- new filters
+- new sort fields
+- cursor pagination
+- store-level pagination
+- ownership-rule changes
+
+### Conclusion
+Phase 0.4.22 closes the documentation gap around the wallet inventory response contract. The endpoint behavior remains unchanged, but the visible API contract is now explicit and aligned with the implementation.
 
 ## Phase 0.4.21 — Wallet Inventory Query Parameter Contract Hardening
 

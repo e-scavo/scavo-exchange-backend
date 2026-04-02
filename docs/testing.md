@@ -1086,3 +1086,23 @@ Handler-level validation covers:
 ```
 go test ./...
 ```
+
+
+## Phase 0.4.22 Testing Notes
+
+### Goal
+Validate that wallet inventory response examples and documentation are aligned with the implemented `GET /auth/wallets` contract.
+
+### Coverage Added
+Documentation and contract review cover:
+
+- response examples including `returned` and `has_more`
+- documented semantics for `next_offset` and `previous_offset`
+- explicit unbounded (`limit=0`) vs bounded response behavior
+- no behavioral regression expected because the subphase is documentation-only
+
+### Validation Command
+
+```
+go test ./...
+```

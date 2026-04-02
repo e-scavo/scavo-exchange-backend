@@ -41,6 +41,7 @@ Status: ✅ Completed
 | 0.4.19 | Wallet inventory navigation metadata | ✅ Completed |
 | 0.4.20 | Wallet inventory cursorless navigation hints | ✅ Completed |
 | 0.4.21 | Wallet inventory query parameter contract hardening | ✅ Completed |
+| 0.4.22 | Wallet inventory response contract clarification | ✅ Completed |
 
 ---
 
@@ -318,13 +319,13 @@ The following items remain intentionally out of scope:
 
 ## ⏭️ Next Phase
 
-### 0.4.22 — Wallet Inventory Response Contract Clarification
+### 0.4.23 — Wallet Inventory Query Examples Closure
 
 Expected next focus:
 
-- only add further wallet inventory query semantics if a concrete client need appears
-- preserve backward compatibility of the current paginated wallet inventory contract
-- keep all future enhancements read-only unless the ZIP proves otherwise
+- preserve backward compatibility of the clarified wallet inventory response contract
+- only extend inventory semantics when a concrete client need appears
+- keep future inventory work read-only unless the ZIP proves otherwise
 
 
 ## ✅ Phase 0.4.21 Closure Summary
@@ -352,5 +353,34 @@ Phase 0.4.21 hardens the wallet inventory query-parameter contract without addin
 Expected next focus:
 
 - preserve backward compatibility of the wallet inventory response contract
+- only extend inventory semantics when a concrete client need appears
+- keep future inventory work read-only unless the ZIP proves otherwise
+
+
+## ✅ Phase 0.4.22 Closure Summary
+
+Phase 0.4.22 clarifies the wallet inventory response contract so the operator-facing endpoint documentation matches the JSON behavior already implemented in prior subphases.
+
+### Delivered in 0.4.22
+
+- the main `GET /auth/wallets` README response example now includes `returned` and `has_more`
+- response field semantics are explicitly documented for bounded and unbounded inventory requests
+- navigation hints (`next_offset`, `previous_offset`) are documented as bounded-window metadata
+- phase and handoff documentation now reflect that the response contract is explicitly clarified
+
+## ❌ Not Included in 0.4.22
+
+- new endpoint behavior
+- new filters
+- new sort fields
+- cursor pagination
+- store-level pagination
+- ownership-rule changes
+
+### 0.4.23 — Wallet Inventory Query Examples Closure
+
+Expected next focus:
+
+- preserve backward compatibility of the clarified wallet inventory contract
 - only extend inventory semantics when a concrete client need appears
 - keep future inventory work read-only unless the ZIP proves otherwise

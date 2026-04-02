@@ -672,3 +672,35 @@ Harden the `GET /auth/wallets` query-parameter contract without changing domain,
 
 ### Conclusion
 Phase 0.4.21 consolidates the wallet inventory query contract so clients can rely on clearer defaults and stricter parameter combinations without any domain redesign.
+
+
+## 0.4.22 — Wallet Inventory Response Contract Clarification
+
+### Objective
+Clarify the visible `GET /auth/wallets` response contract so documentation matches the lifecycle-aware, paginated, and navigation-aware response already implemented.
+
+### Scope
+- update the primary wallet inventory response example
+- document the semantics of `returned` and `has_more`
+- document bounded-window navigation hints: `next_offset` and `previous_offset`
+- clarify unbounded (`limit=0`) vs bounded inventory responses
+
+### Delivered
+- README response example aligned with the real endpoint contract
+- explicit response-field semantics for wallet inventory consumers
+- clarified documentation for bounded vs unbounded responses
+- no code, store, or persistence changes
+
+### Validation
+- documentation reviewed against the actual handler contract
+- `go test ./...`
+
+### What it does NOT solve
+- new filters
+- new sort fields
+- cursor pagination
+- store-level pagination
+- ownership-rule changes
+
+### Conclusion
+Phase 0.4.22 closes the remaining documentation gap around the wallet inventory response contract and leaves the endpoint behavior unchanged.

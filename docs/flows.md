@@ -661,3 +661,24 @@ Evaluation order remains:
 
 ### Outcome
 The flow remains read-only and ownership-scoped while becoming more predictable for clients consuming wallet inventory queries.
+
+
+## 0.4.22 — Wallet Inventory Response Contract Clarification
+
+### Flow impact
+The authenticated wallet inventory flow does not change behavior in 0.4.22. This subphase only makes the visible response contract explicit for operators and client implementers.
+
+### Response semantics clarified
+For `GET /auth/wallets`, the response contract is now documented as follows:
+
+- `wallets`: current filtered, sorted, and windowed rows
+- `total`: total filtered row count before windowing
+- `limit`: requested page size, or `0` for unbounded requests
+- `offset`: requested starting offset
+- `returned`: number of rows actually returned in the current response
+- `has_more`: whether another row exists after the current window
+- `next_offset`: next bounded offset hint when another page exists
+- `previous_offset`: previous bounded offset hint when a previous page exists
+
+### Outcome
+The flow remains read-only and ownership-scoped, while the response contract becomes fully explicit and aligned with the implemented endpoint behavior.

@@ -16,7 +16,7 @@ It is intended to:
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.4 — Auth and User Stabilization  
-**Latest Completed Subphase:** 0.4.21 — Wallet Inventory Query Parameter Contract Hardening
+**Latest Completed Subphase:** 0.4.22 — Wallet Inventory Response Contract Clarification
 
 ---
 
@@ -232,11 +232,11 @@ The system intentionally does **not** yet support:
 
 ## 🧭 Next Phase
 
-### 0.4.22 — Wallet Inventory Response Contract Clarification
+### 0.4.23 — Wallet Inventory Query Examples Closure
 
 Expected next focus:
 
-- preserve backward compatibility of the wallet inventory response contract
+- preserve backward compatibility of the clarified wallet inventory response contract
 - only extend inventory semantics when a concrete client need appears
 - keep future inventory work read-only unless the ZIP proves otherwise
 
@@ -275,3 +275,6 @@ At the end of Phase 0.4.16:
 
 
 Phase 0.4.21 hardens the authenticated wallet inventory query contract by making parameter combinations and defaults explicit (`order` now requires `sort`, and `sort=linked_at` defaults to ascending order when `order` is omitted). The implementation stays entirely in the handler/read-model layer and does not modify ownership, stores, or persistence.
+
+
+Phase 0.4.22 closes the documentation gap around the authenticated wallet inventory response contract. The main endpoint example is now aligned with the implemented JSON fields, including returned-window metadata and bounded navigation hints, without changing domain, stores, or persistence.
