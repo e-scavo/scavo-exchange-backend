@@ -682,3 +682,19 @@ For `GET /auth/wallets`, the response contract is now documented as follows:
 
 ### Outcome
 The flow remains read-only and ownership-scoped, while the response contract becomes fully explicit and aligned with the implemented endpoint behavior.
+
+
+## 0.4.23 — Wallet Inventory Query Examples Closure
+
+### Flow impact
+The authenticated wallet inventory flow does not change behavior in 0.4.23. This subphase only adds concrete examples showing how the already-supported query contract is consumed.
+
+### Example request patterns
+- `GET /auth/wallets`
+- `GET /auth/wallets?primary=true`
+- `GET /auth/wallets?sort=linked_at&order=desc`
+- `GET /auth/wallets?limit=2&offset=0`
+- `GET /auth/wallets?order=desc` → contractual `400` because `sort` is required
+
+### Outcome
+The flow remains read-only and ownership-scoped, while the documentation now shows concrete query usage and error examples aligned with the real endpoint contract.

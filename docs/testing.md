@@ -1106,3 +1106,25 @@ Documentation and contract review cover:
 ```
 go test ./...
 ```
+
+
+## Phase 0.4.23 Testing Notes
+
+### Goal
+Validate that the operator-facing query examples for `GET /auth/wallets` are aligned with the implemented handler contract and its existing validation rules.
+
+### Coverage Added
+Documentation and manual validation guidance now cover:
+
+- base inventory request examples
+- filtered examples such as `primary=true`
+- sorted examples such as `sort=linked_at&order=desc`
+- bounded pagination examples using `limit` and `offset`
+- explicit invalid example: `order` without `sort`
+- no behavioral regression expected because the subphase is documentation-only
+
+### Validation Command
+
+```
+go test ./...
+```

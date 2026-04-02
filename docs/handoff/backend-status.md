@@ -16,7 +16,7 @@ It is intended to:
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.4 — Auth and User Stabilization  
-**Latest Completed Subphase:** 0.4.22 — Wallet Inventory Response Contract Clarification
+**Latest Completed Subphase:** 0.4.23 — Wallet Inventory Query Examples Closure
 
 ---
 
@@ -232,13 +232,13 @@ The system intentionally does **not** yet support:
 
 ## 🧭 Next Phase
 
-### 0.4.23 — Wallet Inventory Query Examples Closure
+### 0.4.24 — Wallet Inventory Manual Validation Closure
 
 Expected next focus:
 
-- preserve backward compatibility of the clarified wallet inventory response contract
-- only extend inventory semantics when a concrete client need appears
-- keep future inventory work read-only unless the ZIP proves otherwise
+- preserve backward compatibility of the wallet inventory examples layer
+- keep future work read-only unless the ZIP proves otherwise
+- only expand inventory semantics when a concrete client need appears
 
 ---
 
@@ -278,3 +278,6 @@ Phase 0.4.21 hardens the authenticated wallet inventory query contract by making
 
 
 Phase 0.4.22 closes the documentation gap around the authenticated wallet inventory response contract. The main endpoint example is now aligned with the implemented JSON fields, including returned-window metadata and bounded navigation hints, without changing domain, stores, or persistence.
+
+
+Phase 0.4.23 closes the operator-facing examples layer for `GET /auth/wallets` by documenting concrete valid and invalid query patterns, plus bounded-window response examples, without changing domain, stores, persistence, or handler behavior.

@@ -704,3 +704,34 @@ Clarify the visible `GET /auth/wallets` response contract so documentation match
 
 ### Conclusion
 Phase 0.4.22 closes the remaining documentation gap around the wallet inventory response contract and leaves the endpoint behavior unchanged.
+
+
+## 0.4.23 — Wallet Inventory Query Examples Closure
+
+### Objective
+Close the concrete examples layer for `GET /auth/wallets` so operators and client implementers can see how the already-supported query contract behaves in practice.
+
+### Scope
+- add example requests for base, filtered, sorted, and paginated inventory queries
+- add example error documentation for invalid contractual combinations
+- keep all examples aligned with the real handler behavior
+
+### Delivered
+- concrete examples for base inventory requests
+- concrete examples for `primary=true`, `sort=linked_at&order=desc`, and `limit` / `offset`
+- explicit invalid example for `order` without `sort`
+- documentation-only closure of the wallet inventory examples layer
+
+### Validation
+- documentation reviewed against the actual handler contract
+- `go test ./...`
+
+### What it does NOT solve
+- new endpoint behavior
+- new filters or sort fields
+- cursor pagination
+- store-level pagination
+- ownership-rule changes
+
+### Conclusion
+Phase 0.4.23 closes the concrete usage examples layer for the wallet inventory endpoint without changing code or persistence behavior.

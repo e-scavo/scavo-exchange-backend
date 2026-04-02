@@ -23,7 +23,7 @@ The backend follows a **wallet-first identity model** that progressively evolves
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.4 — Auth and User Stabilization  
-**Current Subphase:** **0.4.22 — Wallet Inventory Response Contract Clarification**
+**Current Subphase:** **0.4.23 — Wallet Inventory Query Examples Closure**
 
 ---
 
@@ -1094,6 +1094,43 @@ Wallet inventory consumers now have a complete and explicit reference for the au
 
 ### Conclusion
 Phase 0.4.22 closes the documentation gap around the wallet inventory response contract. The endpoint behavior remains unchanged, but the visible API contract is now explicit and aligned with the implementation.
+
+
+## Phase 0.4.23 — Wallet Inventory Query Examples Closure
+
+### Objective
+Close the operator-facing usage examples for `GET /auth/wallets` so the endpoint contract is not only documented abstractly, but also illustrated through concrete valid and invalid query examples aligned with the real handler behavior.
+
+### Scope
+- add concrete example requests for the wallet inventory endpoint
+- add concrete response examples for filtered, sorted, and paginated inventory queries
+- add at least one explicit contractual error example
+- keep the phase documentation aligned with the real handler behavior
+
+### Problem Statement
+By 0.4.22, the wallet inventory endpoint contract had already been clarified, but operators and client implementers still lacked a compact set of end-to-end examples showing how the query parameters and response metadata work together in practice.
+
+### Delivered
+- example request without query parameters
+- example request with `primary=true`
+- example request with `sort=linked_at&order=desc`
+- example request with bounded pagination (`limit` and `offset`)
+- example request showing an invalid contractual combination: `order` without `sort`
+- documentation-only closure of the wallet inventory examples layer
+
+### Validation
+- documentation reviewed against the real `GET /auth/wallets` handler contract
+- `go test ./...`
+
+### What it does NOT solve
+- new endpoint behavior
+- new filters or sort fields
+- cursor pagination
+- store-level pagination
+- ownership-rule changes
+
+### Conclusion
+Phase 0.4.23 closes the remaining examples gap around `GET /auth/wallets` by documenting concrete request and response patterns without changing domain, stores, persistence, or handler behavior.
 
 ## Phase 0.4.21 — Wallet Inventory Query Parameter Contract Hardening
 

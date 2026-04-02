@@ -42,6 +42,7 @@ Status: ✅ Completed
 | 0.4.20 | Wallet inventory cursorless navigation hints | ✅ Completed |
 | 0.4.21 | Wallet inventory query parameter contract hardening | ✅ Completed |
 | 0.4.22 | Wallet inventory response contract clarification | ✅ Completed |
+| 0.4.23 | Wallet inventory query examples closure | ✅ Completed |
 
 ---
 
@@ -377,10 +378,39 @@ Phase 0.4.22 clarifies the wallet inventory response contract so the operator-fa
 - store-level pagination
 - ownership-rule changes
 
-### 0.4.23 — Wallet Inventory Query Examples Closure
+### 0.4.24 — Wallet Inventory Manual Validation Closure
 
 Expected next focus:
 
-- preserve backward compatibility of the clarified wallet inventory contract
-- only extend inventory semantics when a concrete client need appears
-- keep future inventory work read-only unless the ZIP proves otherwise
+- preserve backward compatibility of the wallet inventory examples layer
+- keep future work read-only unless the ZIP proves otherwise
+- only expand inventory semantics when a concrete client need appears
+
+
+## ✅ Phase 0.4.23 Closure Summary
+
+Phase 0.4.23 closes the concrete examples layer for `GET /auth/wallets` so operators and client implementers can see valid and invalid request patterns alongside bounded-window response examples.
+
+### Delivered in 0.4.23
+
+- request examples for base, filtered, sorted, and paginated wallet inventory queries
+- an explicit invalid example for `order` without `sort`
+- response examples showing bounded-window metadata and navigation hints
+- accumulated documentation aligned with the real handler contract
+
+## ❌ Not Included in 0.4.23
+
+- new endpoint behavior
+- new filters
+- new sort fields
+- cursor pagination
+- store-level pagination
+- ownership-rule changes
+
+### 0.4.24 — Wallet Inventory Manual Validation Closure
+
+Expected next focus:
+
+- preserve backward compatibility of the wallet inventory examples layer
+- keep future work read-only unless the ZIP proves otherwise
+- only expand inventory semantics when a concrete client need appears
