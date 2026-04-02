@@ -1365,6 +1365,123 @@ func TestHTTPHandlers_WalletAccountMergeVerify_Success(t *testing.T) {
 	}
 }
 
+func TestHTTPHandlers_WalletPrimarySwitch_ReadConsistency(t *testing.T) {
+	identityStore := NewInMemoryWalletIdentityStore()
+
+	primaryAddress, _ := signWalletMessageForScalar(t, "handler-primary-consistency-primary", "51")
+	primaryIdentity, err := identityStore.GetOrCreate(context.Background(), primaryAddress)
+	if err != nil {
+		t.Fatalf("GetOrCreate primary error: %v", err)
+	}
+	_, err = identityStore.AttachUser(context.Background(), primaryIdentity.ID, "u_test_example_com", true)
+	if err != nil {
+		t.Fatalf("AttachUser primary error: %v", err)
+	}
+
+	secondaryAddress, _ := signWalletMessageForScalar(t, "handler-primary-consistency-secondary", "52")
+	secondaryIdentity, err := identityStore.GetOrCreate(context.Background(), secondaryAddress)
+	if err != nil {
+		t.Fatalf("GetOrCreate secondary error: %v", err)
+	}
+	_, err = identityStore.AttachUser(context.Background(), secondaryIdentity.ID, "u_test_example_com", false)
+	if err != nil {
+		t.Fatalf("AttachUser secondary error: %v", err)
+	}
+
+	h := HTTPHandlers{
+		Tokens:           mustTokenService(t),
+		TTL:              time.Hour,
+		Users:            usermod.NewService(nil),
+		WalletIdentities: identityStore,
+	}
+
+	beforeReq := httptest.NewRequest(http.MethodGet, "/auth/wallets", nil)
+	beforeReq = beforeReq.WithContext(context.WithValue(beforeReq.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	beforeRec := httptest.NewRecorder()
+	h.Wallets(beforeRec, beforeReq)
+	if beforeRec.Code != http.StatusOK {
+		t.Fatalf("unexpected pre-switch inventory status: %d body=%s", beforeRec.Code, beforeRec.Body.String())
+	}
+
+	var before WalletsResponse
+	if err := json.Unmarshal(beforeRec.Body.Bytes(), &before); err != nil {
+		t.Fatalf("decode pre-switch inventory error: %v", err)
+	}
+	if len(before.Wallets) != 2 {
+		t.Fatalf("expected 2 wallets before switch, got %d", len(before.Wallets))
+	}
+
+	var beforePrimary, beforeSecondary *WalletReadModel
+	for _, wallet := range before.Wallets {
+		switch wallet.Address {
+		case primaryAddress:
+			beforePrimary = wallet
+		case secondaryAddress:
+			beforeSecondary = wallet
+		}
+	}
+	if beforePrimary == nil || beforeSecondary == nil {
+		t.Fatalf("unexpected pre-switch inventory payload: %#v", before.Wallets)
+	}
+	if !beforePrimary.IsPrimary || beforePrimary.CanSetPrimary {
+		t.Fatalf("expected current primary to stay non-promotable before switch: %#v", beforePrimary)
+	}
+	if beforeSecondary.IsPrimary || !beforeSecondary.CanSetPrimary {
+		t.Fatalf("expected secondary to be promotable before switch: %#v", beforeSecondary)
+	}
+
+	switchReq := httptest.NewRequest(http.MethodPost, "/auth/wallets/primary", strings.NewReader(`{"wallet_address":"`+secondaryAddress+`"}`))
+	switchReq = switchReq.WithContext(context.WithValue(switchReq.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	switchRec := httptest.NewRecorder()
+	h.WalletSetPrimary(switchRec, switchReq)
+	if switchRec.Code != http.StatusOK {
+		t.Fatalf("unexpected primary switch status: %d body=%s", switchRec.Code, switchRec.Body.String())
+	}
+
+	var switched WalletPrimarySetResponse
+	if err := json.Unmarshal(switchRec.Body.Bytes(), &switched); err != nil {
+		t.Fatalf("decode primary switch payload error: %v", err)
+	}
+	if switched.PrimaryWallet == nil || switched.PrimaryWallet.Address != secondaryAddress || !switched.PrimaryWallet.IsPrimary {
+		t.Fatalf("unexpected switched primary payload: %#v", switched.PrimaryWallet)
+	}
+
+	afterReq := httptest.NewRequest(http.MethodGet, "/auth/wallets", nil)
+	afterReq = afterReq.WithContext(context.WithValue(afterReq.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	afterRec := httptest.NewRecorder()
+	h.Wallets(afterRec, afterReq)
+	if afterRec.Code != http.StatusOK {
+		t.Fatalf("unexpected post-switch inventory status: %d body=%s", afterRec.Code, afterRec.Body.String())
+	}
+
+	var after WalletsResponse
+	if err := json.Unmarshal(afterRec.Body.Bytes(), &after); err != nil {
+		t.Fatalf("decode post-switch inventory error: %v", err)
+	}
+	if len(after.Wallets) != 2 {
+		t.Fatalf("expected 2 wallets after switch, got %d", len(after.Wallets))
+	}
+
+	var afterPrimary, afterSecondary *WalletReadModel
+	for _, wallet := range after.Wallets {
+		switch wallet.Address {
+		case primaryAddress:
+			afterPrimary = wallet
+		case secondaryAddress:
+			afterSecondary = wallet
+		}
+	}
+	if afterPrimary == nil || afterSecondary == nil {
+		t.Fatalf("unexpected post-switch inventory payload: %#v", after.Wallets)
+	}
+	if afterPrimary.IsPrimary || !afterPrimary.CanSetPrimary {
+		t.Fatalf("expected former primary to become promotable after switch: %#v", afterPrimary)
+	}
+	if !afterSecondary.IsPrimary || afterSecondary.CanSetPrimary {
+		t.Fatalf("expected new primary to become non-promotable after switch: %#v", afterSecondary)
+	}
+}
+
 func TestHTTPHandlers_WalletSetPrimary_Success(t *testing.T) {
 	identityStore := NewInMemoryWalletIdentityStore()
 

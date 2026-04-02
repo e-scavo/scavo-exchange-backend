@@ -743,3 +743,20 @@ For the same authenticated user and wallet inventory:
 
 ### Outcome
 The backend now protects the semantic alignment between wallet inventory actionability hints and detach-check eligibility without changing detach-domain rules or persistence behavior.
+
+
+## Phase 0.4.27 — Wallet Primary Switch Read Consistency
+
+### Flow impact
+The inventory flow and the primary-switch flow keep their existing behavior in 0.4.27, but their relationship is now explicitly covered and documented.
+
+### Consistency semantics
+For the same authenticated user and wallet inventory:
+
+- `can_set_primary=false` should remain compatible with the currently primary wallet in `GET /auth/wallets`
+- `can_set_primary=true` should remain compatible with a valid candidate for `POST /auth/wallets/primary`
+- after a successful primary switch, the promoted wallet should become `is_primary=true` and `can_set_primary=false` in the refreshed inventory
+- the former primary should become `is_primary=false` and `can_set_primary=true` in the refreshed inventory
+
+### Outcome
+The backend now protects the semantic alignment between wallet inventory primary-actionability hints and primary-switch execution without changing primary-domain rules or persistence behavior.

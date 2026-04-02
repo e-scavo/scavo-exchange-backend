@@ -232,7 +232,14 @@ The system intentionally does **not** yet support:
 
 ## 🧭 Next Phase
 
-### 0.4.27 — To Be Defined Against Real ZIP
+### 0.4.27 — Wallet Primary Switch Read Consistency
+
+Delivered:
+
+- handler-level consistency coverage connecting `GET /auth/wallets` and `POST /auth/wallets/primary` for a two-wallet inventory
+- explicit validation that the current primary remains `can_set_primary=false` before switching
+- explicit validation that a secondary wallet exposed as `can_set_primary=true` can be promoted successfully and then becomes non-promotable after the switch
+- documentation that keeps inventory-side primary hints advisory while preserving primary-switch authority
 
 Expected next focus:
 

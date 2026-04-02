@@ -436,7 +436,26 @@ Phase 0.4.26 closes the consistency gap between wallet inventory actionability h
 - new inventory query parameters
 - ownership-rule changes
 
-### 0.4.27 — To Be Defined Against Real ZIP
+## ✅ Phase 0.4.27 Closure Summary
+
+Phase 0.4.27 closes the consistency gap between wallet inventory primary-actionability hints and `POST /auth/wallets/primary` without changing primary-switch rules, stores, or persistence.
+
+### Delivered in 0.4.27
+
+- handler-level consistency coverage for a two-wallet inventory before and after primary switching
+- explicit validation that the current primary stays `can_set_primary=false` before the switch
+- explicit validation that a secondary wallet exposed as `can_set_primary=true` can be promoted and then becomes non-promotable after the switch
+- documentation that keeps inventory-side primary hints advisory while preserving primary-switch authority
+
+## ❌ Not Included in 0.4.27
+
+- new primary-switch rules
+- new wallet-management endpoints
+- new inventory fields
+- ownership-rule changes
+- store-level actionability persistence
+
+### 0.4.28 — To Be Defined Against Real ZIP
 
 Expected next focus:
 

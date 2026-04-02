@@ -1254,3 +1254,18 @@ Close the consistency gap between wallet-inventory actionability hints and `POST
 
 ### Conclusion
 Phase 0.4.26 does not change detach-domain rules or persistence behavior. It hardens the contract between the enriched read model and the dedicated detach-check endpoint so future wallet-management work can rely on both surfaces staying semantically aligned.
+
+
+## Phase 0.4.27 — Wallet Primary Switch Read Consistency
+
+### Objective
+Close the consistency gap between wallet-inventory primary actionability hints and `POST /auth/wallets/primary` so both surfaces remain interpretably aligned for the same authenticated user and wallet set.
+
+### Delivered
+- handler-level consistency coverage for two-wallet inventories around primary-switch eligibility and post-switch inventory state
+- explicit validation that `can_set_primary=false` stays aligned with the current primary wallet before switching
+- explicit validation that a secondary wallet exposed as `can_set_primary=true` can be promoted successfully and becomes non-promotable after the switch
+- documentation that keeps inventory-side primary hints advisory while leaving final execution authority in `POST /auth/wallets/primary`
+
+### Conclusion
+Phase 0.4.27 does not change primary-switch domain rules or persistence behavior. It hardens the contract between the enriched wallet inventory read model and the dedicated primary-switch endpoint so future wallet-management work can rely on both surfaces staying semantically aligned.

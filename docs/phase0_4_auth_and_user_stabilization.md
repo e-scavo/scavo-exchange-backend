@@ -779,3 +779,18 @@ Keep the authenticated wallet inventory actionability hints semantically aligned
 
 ### Conclusion
 Phase 0.4.26 hardens the relationship between wallet inventory readiness hints and detach eligibility checks without changing detach-domain rules, stores, or persistence.
+
+
+## Phase 0.4.27 — Wallet Primary Switch Read Consistency
+
+### Objective
+Close the consistency gap between wallet-inventory primary-actionability hints and `POST /auth/wallets/primary` without changing domain authority, stores, or persistence.
+
+### Delivered
+- handler-level consistency coverage proving that inventory-side `can_set_primary` remains aligned with primary-switch execution in a two-wallet inventory
+- explicit validation that the current primary stays non-promotable before the switch
+- explicit validation that a secondary wallet exposed as promotable can be switched successfully and then becomes non-promotable afterward
+- documentation that keeps inventory-side primary hints advisory while preserving primary-switch execution authority
+
+### Conclusion
+Phase 0.4.27 hardens the contract between the authenticated wallet inventory and the authenticated primary-switch endpoint so future wallet-management work can rely on both surfaces staying semantically aligned.

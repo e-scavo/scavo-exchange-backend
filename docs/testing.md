@@ -1191,3 +1191,23 @@ Handler-level coverage now verifies:
 ```
 go test ./...
 ```
+
+
+## Phase 0.4.27 Testing Notes
+
+### Goal
+Validate that wallet inventory primary-actionability hints remain semantically consistent with `POST /auth/wallets/primary`.
+
+### Coverage Added
+Handler-level coverage now verifies:
+
+- in a two-wallet inventory, the current primary remains `can_set_primary=false` before switching
+- in a two-wallet inventory, the secondary wallet remains `can_set_primary=true` before switching
+- promoting that secondary wallet through `POST /auth/wallets/primary` succeeds and returns an updated primary wallet
+- after the switch, inventory state flips coherently so the new primary becomes non-promotable and the former primary becomes promotable
+
+### Validation Command
+
+```
+go test ./...
+```
