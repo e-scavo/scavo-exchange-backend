@@ -3,6 +3,7 @@ package auth
 import (
 	"net/http"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -21,6 +22,9 @@ type WalletReadModel struct {
 
 type WalletsResponse struct {
 	Wallets []*WalletReadModel `json:"wallets"`
+	Total   int                `json:"total"`
+	Limit   int                `json:"limit"`
+	Offset  int                `json:"offset"`
 }
 
 type WalletsQuery struct {
@@ -28,6 +32,8 @@ type WalletsQuery struct {
 	Primary *bool
 	Sort    string
 	Order   string
+	Limit   int
+	Offset  int
 }
 
 func mapWalletIdentityToReadModel(wallet *WalletIdentity) *WalletReadModel {
@@ -123,7 +129,41 @@ func parseWalletsQuery(r *http.Request) (WalletsQuery, string) {
 		}
 	}
 
+	limit := strings.TrimSpace(params.Get("limit"))
+	if limit != "" {
+		value, ok := parsePositiveInt(limit)
+		if !ok {
+			return WalletsQuery{}, "invalid_limit"
+		}
+		q.Limit = value
+	}
+
+	offset := strings.TrimSpace(params.Get("offset"))
+	if offset != "" {
+		value, ok := parseNonNegativeInt(offset)
+		if !ok {
+			return WalletsQuery{}, "invalid_offset"
+		}
+		q.Offset = value
+	}
+
 	return q, ""
+}
+
+func parsePositiveInt(raw string) (int, bool) {
+	value, err := strconv.Atoi(raw)
+	if err != nil || value <= 0 {
+		return 0, false
+	}
+	return value, true
+}
+
+func parseNonNegativeInt(raw string) (int, bool) {
+	value, err := strconv.Atoi(raw)
+	if err != nil || value < 0 {
+		return 0, false
+	}
+	return value, true
 }
 
 func filterWalletReadModels(wallets []*WalletReadModel, q WalletsQuery) []*WalletReadModel {
@@ -196,9 +236,31 @@ func sortWalletReadModels(wallets []*WalletReadModel, q WalletsQuery) []*WalletR
 	return out
 }
 
-func applyWalletsQuery(wallets []*WalletReadModel, q WalletsQuery) []*WalletReadModel {
+func paginateWalletReadModels(wallets []*WalletReadModel, q WalletsQuery) []*WalletReadModel {
+	if len(wallets) == 0 {
+		return []*WalletReadModel{}
+	}
+
+	if q.Offset >= len(wallets) {
+		return []*WalletReadModel{}
+	}
+
+	start := q.Offset
+	end := len(wallets)
+	if q.Limit > 0 && start+q.Limit < end {
+		end = start + q.Limit
+	}
+
+	out := make([]*WalletReadModel, 0, end-start)
+	out = append(out, wallets[start:end]...)
+	return out
+}
+
+func applyWalletsQuery(wallets []*WalletReadModel, q WalletsQuery) ([]*WalletReadModel, int) {
 	filtered := filterWalletReadModels(wallets, q)
-	return sortWalletReadModels(filtered, q)
+	sorted := sortWalletReadModels(filtered, q)
+	total := len(sorted)
+	return paginateWalletReadModels(sorted, q), total
 }
 
 func (h HTTPHandlers) Wallets(w http.ResponseWriter, r *http.Request) {
@@ -215,7 +277,7 @@ func (h HTTPHandlers) Wallets(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if h.WalletIdentities == nil {
-		writeJSON(w, http.StatusOK, WalletsResponse{Wallets: []*WalletReadModel{}})
+		writeJSON(w, http.StatusOK, WalletsResponse{Wallets: []*WalletReadModel{}, Total: 0, Limit: query.Limit, Offset: query.Offset})
 		return
 	}
 
@@ -229,5 +291,6 @@ func (h HTTPHandlers) Wallets(w http.ResponseWriter, r *http.Request) {
 	}
 
 	mapped := mapWalletIdentitiesToReadModels(wallets)
-	writeJSON(w, http.StatusOK, WalletsResponse{Wallets: applyWalletsQuery(mapped, query)})
+	window, total := applyWalletsQuery(mapped, query)
+	writeJSON(w, http.StatusOK, WalletsResponse{Wallets: window, Total: total, Limit: query.Limit, Offset: query.Offset})
 }

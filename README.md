@@ -23,7 +23,7 @@ The backend follows a **wallet-first identity model** that progressively evolves
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.4 — Auth and User Stabilization  
-**Current Subphase:** **0.4.17 — Wallet Inventory Query Filtering and Sorting**
+**Current Subphase:** **0.4.18 — Wallet Inventory Pagination and Windowed Response**
 
 ---
 
@@ -246,11 +246,25 @@ Response:
       "address": "0x...",
       "user_id": "...",
       "linked_at": "...",
-      "is_primary": true
+      "detached_at": null,
+      "is_primary": true,
+      "status": "active"
     }
-  ]
+  ],
+  "total": 1,
+  "limit": 0,
+  "offset": 0
 }
 ```
+
+Supported optional query params:
+
+- `status=active|detached`
+- `primary=true|false`
+- `sort=linked_at`
+- `order=asc|desc`
+- `limit=<positive integer>`
+- `offset=<non-negative integer>`
 
 ---
 
@@ -450,14 +464,14 @@ Focus areas added in 0.4.16:
 
 ## 🧭 Next Phase
 
-### 0.4.18 — Wallet Inventory Pagination and Advanced Query Preparation
+### 0.4.19 — Wallet Inventory Advanced Query Preparation
 
 Next expected focus:
 
-- optional pagination on top of the filtered inventory contract
-- additional low-risk query semantics only if a real client need appears
-- preserve backward compatibility of the current wallet inventory contract
+- extend wallet inventory semantics only if a concrete client need appears
+- preserve backward compatibility of the current paginated inventory contract
 - avoid reworking ownership invariants already stabilized in Phase 0.4
+- keep all further enhancements read-only unless the ZIP proves otherwise
 
 ---
 
@@ -741,3 +755,150 @@ This subphase does not add:
 ### Conclusion
 
 Phase 0.4.17 makes the lifecycle-aware wallet inventory endpoint actually queryable in a small, controlled, backward-compatible way. The backend now exposes a safer and more useful inventory contract while keeping all Phase 0.4 ownership and lifecycle invariants intact.
+
+
+## Phase 0.4.18 — Wallet Inventory Pagination and Windowed Response
+
+### Objective
+
+Add simple, explicit pagination to `GET /auth/wallets` on top of the filtered and sortable lifecycle-aware inventory contract introduced in 0.4.17.
+
+### Initial Context
+
+By the end of 0.4.17, the authenticated wallet inventory endpoint already supported:
+
+- lifecycle-aware wallet read-model projection
+- `status` filtering
+- `primary` filtering
+- `linked_at` ordering
+
+However, clients still had no way to request a bounded result window or receive explicit metadata about the size of the filtered inventory.
+
+### Problem Statement
+
+The remaining gap was not in ownership or persistence. The gap was in windowed inventory delivery.
+
+`GET /auth/wallets` could already return a filtered and sorted inventory, but it still lacked:
+
+- optional `limit`
+- optional `offset`
+- explicit response metadata describing the filtered result size and the requested window
+
+This kept the API less practical for inventory UIs that need deterministic partial rendering while preserving the current authenticated ownership scope.
+
+### Scope
+
+Included:
+
+- optional `limit` query param
+- optional `offset` query param
+- strict validation for invalid pagination inputs
+- pagination applied only after filtering and sorting
+- additive response metadata:
+  - `total`
+  - `limit`
+  - `offset`
+- handler-level tests for valid and invalid pagination scenarios
+
+Excluded:
+
+- cursor pagination
+- `has_more` or next-page tokens
+- store changes
+- SQL pagination
+- detached-wallet history APIs
+- ownership-rule changes
+- new mutation flows
+
+### Root Cause Analysis
+
+The lifecycle-aware read model and basic query semantics already existed. The missing piece was a small read-layer contract for bounded inventory retrieval. This is a handler concern, not a domain or persistence concern.
+
+### Files Affected
+
+- `internal/modules/auth/http_wallet_list.go`
+- `internal/modules/auth/http_handlers_test.go`
+- `README.md`
+- `docs/phase-status.md`
+- `docs/handoff/backend-status.md`
+- `docs/phase0_4_auth_and_user_stabilization.md`
+- `docs/flows.md`
+- `docs/testing.md`
+
+### Implementation Characteristics
+
+`GET /auth/wallets` now remains authenticated and ownership-scoped, but also accepts:
+
+- `limit=<positive integer>`
+- `offset=<non-negative integer>`
+
+The response now includes additive pagination metadata:
+
+- `wallets`
+- `total`
+- `limit`
+- `offset`
+
+Important behavior:
+
+- filtering still happens first
+- sorting still happens second
+- pagination happens only after filtering and sorting
+- `total` reflects the number of wallets after filtering and sorting, before windowing
+- `limit=0` means no explicit page-size cap was requested
+- `offset=0` remains the default starting position
+
+Validation is strict:
+
+- invalid `limit` returns `400` with `invalid_limit`
+- invalid `offset` returns `400` with `invalid_offset`
+
+This keeps the contract explicit and avoids silently accepting malformed query values.
+
+### Validation
+
+Validation path for this subphase:
+
+```
+go test ./...
+```
+
+Focused handler coverage now includes:
+
+- backward-compatible wallet inventory listing with metadata defaults
+- `limit` only
+- `offset` only
+- `limit + offset`
+- valid empty window when the requested offset exceeds the filtered inventory length
+- invalid `limit` values returning `400`
+- invalid `offset` values returning `400`
+
+### Release Impact
+
+This subphase is additive and read-only. It improves the authenticated wallet inventory API contract without changing ownership, linking, merge, primary switching, detach execution, or detached-wallet reuse semantics.
+
+### Risks
+
+Low risk. The change remains constrained to the wallet inventory handler, its response contract, and handler-level tests.
+
+Main guarded risks:
+
+- accidental response-contract breakage for existing clients
+- incorrect pagination ordering if applied before filtering/sorting
+- silent acceptance of malformed pagination values
+
+### What it does NOT solve
+
+This subphase does not add:
+
+- cursor pagination
+- text search
+- detached-wallet history reporting
+- admin inventory views
+- store-level pagination
+- ownership-rule changes
+- new wallet mutation endpoints
+
+### Conclusion
+
+Phase 0.4.18 makes the lifecycle-aware wallet inventory endpoint windowable while preserving its authenticated ownership scope and all Phase 0.4 invariants. The backend now supports small, explicit pagination semantics on top of the queryable wallet inventory contract.

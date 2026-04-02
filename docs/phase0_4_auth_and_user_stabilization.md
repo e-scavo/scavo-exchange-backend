@@ -560,3 +560,55 @@ Validation path for this subphase:
 - handler-level validation for filter/sort compatibility
 - handler-level validation for invalid query parameters returning `400`
 
+
+
+## 0.4.18 — Wallet Inventory Pagination and Windowed Response
+
+### Objective
+Add small, explicit pagination semantics to the authenticated wallet inventory endpoint without changing domain or persistence behavior.
+
+### Scope
+- add optional `limit` pagination for `GET /auth/wallets`
+- add optional `offset` pagination for `GET /auth/wallets`
+- expose additive response metadata: `total`, `limit`, `offset`
+- keep backward compatibility with the existing filter/sort contract
+- validate invalid pagination values explicitly at handler level
+- extend handler-level coverage for valid and invalid pagination windows
+
+### Delivered
+- optional query params:
+  - `limit=<positive integer>`
+  - `offset=<non-negative integer>`
+- additive wallet inventory response metadata:
+  - `total`
+  - `limit`
+  - `offset`
+- strict `400` errors for malformed pagination values
+- pagination applied only after the existing wallet inventory filter/sort pipeline
+- documentation updates aligning the wallet inventory endpoint with its new windowed response contract
+
+### Lifecycle / Query Semantics Clarified
+This subphase still does not widen the ownership scope of the endpoint.
+
+`GET /auth/wallets` still lists only wallets currently owned by the authenticated user. Because of that:
+- pagination operates only inside the authenticated owned-wallet inventory
+- `total` reflects the filtered inventory size before the requested window is applied
+- `limit=0` means no explicit page-size cap was requested
+- `offset=0` remains the default starting position
+
+### Not Introduced Here
+- cursor pagination
+- next-page tokens
+- text search
+- admin inventory views
+- store-level pagination APIs
+- SQL pagination
+- detached-wallet history reporting
+- ownership-rule changes
+
+### Validation
+Validation path for this subphase:
+- `go test ./...`
+- handler-level validation for `limit` and `offset` compatibility
+- handler-level validation for invalid pagination parameters returning `400`
+- handler-level validation for empty but valid inventory windows

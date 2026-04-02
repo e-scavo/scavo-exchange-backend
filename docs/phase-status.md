@@ -37,6 +37,7 @@ Status: ✅ Completed
 | 0.4.15 | Detached identity audit readiness | ✅ Completed |
 | 0.4.16 | Wallet identity read model enrichment | ✅ Completed |
 | 0.4.17 | Wallet inventory query filtering and sorting | ✅ Completed |
+| 0.4.18 | Wallet inventory pagination and windowed response | ✅ Completed |
 
 ---
 
@@ -153,8 +154,8 @@ The following items remain intentionally out of scope:
 
 ### Next Expected Evolution
 
-- wallet inventory query semantics and filtering preparation on top of the enriched read model
-- preserve backward compatibility of the public wallet inventory contract
+- wallet inventory pagination on top of the filtered and sortable read model
+- additive response metadata for windowed wallet inventory delivery
 - avoid reworking ownership invariants already stabilized in Phase 0.4
 
 
@@ -215,3 +216,62 @@ The following items remain intentionally out of scope:
 - additional low-risk query semantics only if they remain read-only and backward compatible
 - preserve the current ownership and lifecycle invariants already stabilized in Phase 0.4
 
+
+
+## ✅ Phase 0.4.18 Closure Summary
+
+Phase 0.4.18 adds simple windowing semantics to the authenticated wallet inventory API contract.
+
+The backend now supports optional pagination on `GET /auth/wallets` through:
+
+- `limit`
+- `offset`
+- additive response metadata (`total`, `limit`, `offset`)
+
+### Delivered in 0.4.18
+
+- optional `limit=<positive integer>`
+- optional `offset=<non-negative integer>`
+- strict `400` validation for malformed pagination values
+- pagination applied only after wallet inventory filtering and sorting
+- response metadata exposing filtered total and requested window parameters
+- handler-level test coverage for valid and invalid pagination behavior
+
+---
+
+## 🔍 Functional Result
+
+The system now supports the following authenticated inventory behavior:
+
+1. authenticated user calls `GET /auth/wallets` with optional filters, sorting, and pagination
+2. backend resolves wallet identities currently owned by that durable user
+3. backend maps each identity into the lifecycle-aware wallet read model
+4. optional filters are applied
+5. optional ordering is applied
+6. optional pagination window is applied
+7. backend returns `wallets`, `total`, `limit`, and `offset`
+
+---
+
+## ❌ Not Included in 0.4.18
+
+The following items remain intentionally out of scope:
+
+- cursor pagination
+- next-page tokens
+- text search
+- detached-wallet history endpoints
+- admin inventory views
+- store-level pagination or query expansion
+- ownership-rule changes
+- new wallet mutation endpoints
+
+---
+
+## ⏭️ Next Phase
+
+### Next Expected Evolution
+
+- only add further wallet inventory query semantics if a concrete client need appears
+- preserve backward compatibility of the paginated wallet inventory contract
+- keep future inventory enhancements read-only unless the ZIP proves otherwise

@@ -210,6 +210,15 @@ func TestHTTPHandlers_Wallets_Success(t *testing.T) {
 	if len(payload.Wallets) != 1 {
 		t.Fatalf("expected 1 wallet, got %d", len(payload.Wallets))
 	}
+	if payload.Total != 1 {
+		t.Fatalf("expected total=1, got %d", payload.Total)
+	}
+	if payload.Limit != 0 {
+		t.Fatalf("expected default limit=0, got %d", payload.Limit)
+	}
+	if payload.Offset != 0 {
+		t.Fatalf("expected default offset=0, got %d", payload.Offset)
+	}
 	if payload.Wallets[0].ID != identity.ID {
 		t.Fatalf("unexpected wallet id: %q", payload.Wallets[0].ID)
 	}
@@ -450,6 +459,117 @@ func TestHTTPHandlers_Wallets_InvalidQueryParams(t *testing.T) {
 		})
 	}
 }
+
+func TestHTTPHandlers_Wallets_Pagination(t *testing.T) {
+	store := NewInMemoryWalletIdentityStore()
+	now := time.Now().UTC()
+
+	mustSeedWalletIdentity(t, store, "0x7777777777777777777777777777777777777771", "u_test_example_com", true, now.Add(-3*time.Hour))
+	mustSeedWalletIdentity(t, store, "0x7777777777777777777777777777777777777772", "u_test_example_com", false, now.Add(-2*time.Hour))
+	mustSeedWalletIdentity(t, store, "0x7777777777777777777777777777777777777773", "u_test_example_com", false, now.Add(-1*time.Hour))
+
+	h := HTTPHandlers{
+		Tokens:           mustTokenService(t),
+		TTL:              time.Hour,
+		Users:            usermod.NewService(nil),
+		WalletIdentities: store,
+	}
+
+	for _, tc := range []struct {
+		name           string
+		query          string
+		expectedAddrs  []string
+		expectedTotal  int
+		expectedLimit  int
+		expectedOffset int
+	}{
+		{name: "limit_only", query: "/auth/wallets?limit=2", expectedAddrs: []string{"0x7777777777777777777777777777777777777771", "0x7777777777777777777777777777777777777772"}, expectedTotal: 3, expectedLimit: 2, expectedOffset: 0},
+		{name: "offset_only", query: "/auth/wallets?offset=1", expectedAddrs: []string{"0x7777777777777777777777777777777777777772", "0x7777777777777777777777777777777777777773"}, expectedTotal: 3, expectedLimit: 0, expectedOffset: 1},
+		{name: "limit_and_offset", query: "/auth/wallets?limit=1&offset=1", expectedAddrs: []string{"0x7777777777777777777777777777777777777772"}, expectedTotal: 3, expectedLimit: 1, expectedOffset: 1},
+		{name: "window_empty", query: "/auth/wallets?limit=2&offset=10", expectedAddrs: []string{}, expectedTotal: 3, expectedLimit: 2, expectedOffset: 10},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, tc.query, nil)
+			req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+			rec := httptest.NewRecorder()
+
+			h.Wallets(rec, req)
+
+			if rec.Code != http.StatusOK {
+				t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+			}
+
+			var payload WalletsResponse
+			if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
+				t.Fatalf("decode error: %v", err)
+			}
+
+			if payload.Total != tc.expectedTotal {
+				t.Fatalf("expected total=%d, got %d", tc.expectedTotal, payload.Total)
+			}
+			if payload.Limit != tc.expectedLimit {
+				t.Fatalf("expected limit=%d, got %d", tc.expectedLimit, payload.Limit)
+			}
+			if payload.Offset != tc.expectedOffset {
+				t.Fatalf("expected offset=%d, got %d", tc.expectedOffset, payload.Offset)
+			}
+			if len(payload.Wallets) != len(tc.expectedAddrs) {
+				t.Fatalf("expected %d wallets, got %d", len(tc.expectedAddrs), len(payload.Wallets))
+			}
+			for i, addr := range tc.expectedAddrs {
+				if payload.Wallets[i].Address != addr {
+					t.Fatalf("unexpected wallet address at %d: %q", i, payload.Wallets[i].Address)
+				}
+			}
+		})
+	}
+}
+
+func TestHTTPHandlers_Wallets_InvalidPaginationParams(t *testing.T) {
+	store := NewInMemoryWalletIdentityStore()
+	mustSeedWalletIdentity(t, store, "0x8888888888888888888888888888888888888888", "u_test_example_com", true, time.Now().UTC())
+
+	h := HTTPHandlers{
+		Tokens:           mustTokenService(t),
+		TTL:              time.Hour,
+		Users:            usermod.NewService(nil),
+		WalletIdentities: store,
+	}
+
+	for _, tc := range []struct {
+		name          string
+		query         string
+		expectedError string
+	}{
+		{name: "invalid_limit_text", query: "/auth/wallets?limit=abc", expectedError: "invalid_limit"},
+		{name: "invalid_limit_zero", query: "/auth/wallets?limit=0", expectedError: "invalid_limit"},
+		{name: "invalid_limit_negative", query: "/auth/wallets?limit=-1", expectedError: "invalid_limit"},
+		{name: "invalid_offset_text", query: "/auth/wallets?offset=abc", expectedError: "invalid_offset"},
+		{name: "invalid_offset_negative", query: "/auth/wallets?offset=-1", expectedError: "invalid_offset"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, tc.query, nil)
+			req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+			rec := httptest.NewRecorder()
+
+			h.Wallets(rec, req)
+
+			if rec.Code != http.StatusBadRequest {
+				t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+			}
+
+			var payload map[string]any
+			if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
+				t.Fatalf("decode error: %v", err)
+			}
+
+			if payload["error"] != tc.expectedError {
+				t.Fatalf("unexpected error payload: %#v", payload)
+			}
+		})
+	}
+}
+
 func TestHTTPHandlers_WalletLinkChallenge_Success(t *testing.T) {
 	store := NewInMemoryWalletChallengeStore()
 

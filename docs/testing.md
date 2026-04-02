@@ -985,3 +985,47 @@ curl -s "http://localhost:8080/auth/wallets?sort=linked_at&order=desc" \
 - explicit filtering and sorting behave deterministically
 - unsupported query values are rejected with `400`
 
+
+
+## Phase 0.4.18 Testing Notes
+
+### Goal
+
+Validate wallet inventory pagination on top of the lifecycle-aware, filterable, and sortable `GET /auth/wallets` read model.
+
+### Coverage Added
+
+Handler-level validation covers:
+
+- backward-compatible wallet inventory response with metadata defaults
+- `limit` only
+- `offset` only
+- `limit + offset`
+- empty but valid inventory window when offset exceeds the filtered inventory size
+- invalid `limit` returning `400` with explicit error codes
+- invalid `offset` returning `400` with explicit error codes
+
+### Validation Command
+
+```
+go test ./...
+```
+
+### Manual API Checks
+
+```
+curl -s http://localhost:8080/auth/wallets \
+  -H "Authorization: Bearer $TOKEN"
+
+curl -s "http://localhost:8080/auth/wallets?limit=2" \
+  -H "Authorization: Bearer $TOKEN"
+
+curl -s "http://localhost:8080/auth/wallets?offset=1" \
+  -H "Authorization: Bearer $TOKEN"
+
+curl -s "http://localhost:8080/auth/wallets?limit=1&offset=1" \
+  -H "Authorization: Bearer $TOKEN"
+
+curl -s "http://localhost:8080/auth/wallets?status=active&sort=linked_at&order=desc&limit=2&offset=0" \
+  -H "Authorization: Bearer $TOKEN"
+```

@@ -16,7 +16,7 @@ It is intended to:
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.4 — Auth and User Stabilization  
-**Latest Completed Subphase:** 0.4.17 — Wallet Inventory Query Filtering and Sorting
+**Latest Completed Subphase:** 0.4.18 — Wallet Inventory Pagination and Windowed Response
 
 ---
 
@@ -220,7 +220,7 @@ Coverage now includes:
 
 The system intentionally does **not** yet support:
 
-- wallet inventory pagination or broader reporting beyond the current query contract
+- cursor pagination or broader reporting beyond the current paginated query contract
 - wallet unlink operations
 - cross-user wallet transfer
 - merge between wallet identities and future auth methods
@@ -232,12 +232,12 @@ The system intentionally does **not** yet support:
 
 ## 🧭 Next Phase
 
-### 0.4.18 — Wallet Inventory Pagination and Advanced Query Preparation
+### 0.4.19 — Wallet Inventory Advanced Query Preparation
 
 Expected next focus:
 
-- add pagination only if a real client need appears
-- extend query semantics only when they remain read-only and backward compatible
+- extend wallet inventory semantics only when they remain read-only and backward compatible
+- preserve the current paginated ownership-scoped contract
 - avoid destabilizing ownership and lifecycle guarantees already closed in Phase 0.4
 
 ---
@@ -270,5 +270,5 @@ At the end of Phase 0.4.16:
 - detached wallet identities are explicitly reusable after detach
 - detached wallet identities preserve minimal audit-ready lifecycle evidence through `detached_at`
 - the authenticated wallet inventory endpoint now exposes an enriched lifecycle-aware read model
-- the authenticated wallet inventory endpoint now supports small explicit filtering and sorting semantics without changing ownership rules
+- the authenticated wallet inventory endpoint now supports filtering, sorting, and simple pagination semantics without changing ownership rules
 
