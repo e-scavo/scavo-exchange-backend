@@ -809,3 +809,18 @@ Close the authenticated wallet-management read flow by documenting how inventory
 ### Conclusion
 Phase 0.4.28 closes the operational wallet-management read flow without changing handlers, domain rules, stores, or persistence. The authenticated inventory remains the entry point, while primary and detach endpoints remain authoritative execution surfaces.
 
+
+
+## Phase 0.4.29 — Wallet Detach Execute Read Consistency
+
+### Objective
+Close the consistency gap between wallet-inventory detach-actionability hints and `POST /auth/wallets/detach` without changing domain authority, stores, or persistence.
+
+### Delivered
+- handler-level consistency coverage proving that a secondary wallet exposed as detachable can be detached successfully and yields a coherent execution payload
+- explicit validation that refreshed inventory no longer exposes the detached wallet as attached to the authenticated user
+- explicit validation that the remaining wallet set recalculates detach hints coherently after the detach
+- documentation that keeps inventory-side detach hints advisory while preserving detach execution authority
+
+### Conclusion
+Phase 0.4.29 hardens the contract between the authenticated wallet inventory and the authenticated detach-execution endpoint so future wallet-management work can rely on both surfaces staying semantically aligned before and after detach execution.

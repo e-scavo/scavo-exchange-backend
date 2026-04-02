@@ -474,7 +474,26 @@ Phase 0.4.28 closes the wallet-management read flow around the authenticated inv
 - ownership-rule changes
 - store-level or persistence changes
 
-### 0.4.29 — To Be Defined Against Real ZIP
+## ✅ Phase 0.4.29 Closure Summary
+
+Phase 0.4.29 closes the consistency gap between authenticated wallet inventory detach hints and `POST /auth/wallets/detach` without changing domain rules, stores, or persistence.
+
+### Delivered in 0.4.29
+
+- handler-level coverage proving that a secondary wallet exposed as detachable can be detached successfully
+- explicit validation that the detach execute response stays compatible with the pre-detach inventory hints and eligibility snapshot
+- explicit validation that refreshed inventory removes the detached wallet from the attached inventory and recalculates detach hints coherently for the remaining wallet
+- documentation clarifying that inventory-side detach hints remain advisory while detach execution remains authoritative
+
+## ❌ Not Included in 0.4.29
+
+- new detach rules
+- new wallet-management endpoints
+- new inventory fields
+- ownership-rule changes
+- store-level or persistence changes
+
+### 0.4.30 — To Be Defined Against Real ZIP
 
 Expected next focus:
 

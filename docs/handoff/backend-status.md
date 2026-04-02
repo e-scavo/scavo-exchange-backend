@@ -232,14 +232,14 @@ The system intentionally does **not** yet support:
 
 ## 🧭 Next Phase
 
-### 0.4.28 — Wallet Management Read Flow Closure
+### 0.4.29 — Wallet Detach Execute Read Consistency
 
 Delivered:
 
-- wallet-management documentation now connects inventory, advisory actionability hints, primary switching, detach checking, detach execution, and refreshed inventory as one complete read flow
-- README current-subphase summary corrected so the main project header matches the actual phase state already reflected elsewhere in the ZIP
-- manual validation guidance expanded to cover refreshed inventory expectations after primary and detach operations
-- no changes to runtime wallet-management rules, stores, or persistence
+- handler-level consistency coverage now proves that a wallet exposed as detachable in inventory can be detached successfully through `POST /auth/wallets/detach`
+- detach execution payload and refreshed inventory are now explicitly protected against semantic drift relative to pre-detach `can_detach` / `detach_block_reasons`
+- documentation clarifies the inventory → detach execute → refreshed inventory contract while keeping inventory hints advisory and detach execution authoritative
+- no changes to runtime detach rules, stores, or persistence
 
 Expected next focus:
 

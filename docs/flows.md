@@ -778,3 +778,20 @@ For the same authenticated user:
 ### Outcome
 The backend keeps the same runtime behavior as 0.4.27, but the wallet-management path is now documented as a complete inventory-driven read flow from initial listing to refreshed post-action inventory.
 
+
+
+## Phase 0.4.29 — Wallet Detach Execute Read Consistency
+
+### Flow impact
+The authenticated wallet inventory and detach-execution flow keep their existing runtime behavior in 0.4.29, but their relationship is now explicitly covered and documented.
+
+### Consistency semantics
+For the same authenticated user and wallet inventory:
+
+- `can_detach=true` should remain compatible with a wallet that can be detached successfully through `POST /auth/wallets/detach`
+- after a successful detach, the refreshed inventory should no longer expose that wallet as attached to the authenticated user
+- the remaining attached wallet set should recalculate `can_detach` and `detach_block_reasons` coherently for the new post-detach state
+- inventory hints remain advisory; detach execution remains authoritative for the actual detach outcome
+
+### Outcome
+The backend now protects the semantic alignment between wallet inventory detach-actionability hints, detach execution, and refreshed inventory without changing detach-domain rules or persistence behavior.

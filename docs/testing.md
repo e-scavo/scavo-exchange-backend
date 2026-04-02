@@ -1235,3 +1235,23 @@ Validate the end-to-end wallet-management read flow built around `GET /auth/wall
 go test ./...
 ```
 
+
+
+## Phase 0.4.29 Testing Notes
+
+### Goal
+Validate that wallet inventory detach-actionability hints remain semantically consistent with `POST /auth/wallets/detach` and with the refreshed inventory returned after detach execution.
+
+### Coverage Added
+Handler-level coverage now verifies:
+
+- in a two-wallet inventory, the current primary remains `can_detach=false` before detach execution
+- in a two-wallet inventory, the secondary wallet remains `can_detach=true` before detach execution
+- detaching that secondary wallet through `POST /auth/wallets/detach` succeeds and returns a detached wallet plus an eligible check snapshot
+- after the detach, refreshed inventory no longer exposes the detached wallet as attached and recalculates detach block reasons coherently for the remaining primary wallet
+
+### Validation Command
+
+```
+go test ./...
+```

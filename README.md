@@ -23,7 +23,7 @@ The backend follows a **wallet-first identity model** that progressively evolves
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.4 — Auth and User Stabilization  
-**Current Subphase:** **0.4.28 — Wallet Management Read Flow Closure**
+**Current Subphase:** **0.4.29 — Wallet Detach Execute Read Consistency**
 
 ---
 
@@ -1283,3 +1283,18 @@ Close the end-to-end consumption flow around authenticated wallet management by 
 
 ### Conclusion
 Phase 0.4.28 does not change wallet-management rules, handlers, stores, or persistence. It closes the operational read flow around the existing wallet inventory and action endpoints so client and operator guidance now matches the real authenticated wallet-management surface end to end.
+
+
+## Phase 0.4.29 — Wallet Detach Execute Read Consistency
+
+### Objective
+Close the consistency gap between wallet-inventory detach actionability hints and `POST /auth/wallets/detach` so pre-detach inventory state, detach execution, and refreshed post-detach inventory remain semantically aligned for the same authenticated user.
+
+### Delivered
+- handler-level consistency coverage for a two-wallet inventory proving that a secondary wallet exposed as `can_detach=true` can be detached successfully
+- explicit validation that the detach execution payload remains compatible with the pre-detach inventory hints and eligibility snapshot
+- explicit validation that the refreshed inventory no longer exposes the detached wallet as attached to the user and recalculates detach hints coherently for the remaining wallet
+- documentation that keeps inventory-side detach hints advisory while preserving `POST /auth/wallets/detach` as the authoritative execution surface
+
+### Conclusion
+Phase 0.4.29 does not change detach-domain rules, handlers, stores, or persistence. It hardens the contract between the authenticated wallet inventory and detach execution so wallet-management consumers can rely on inventory hints, detach results, and refreshed inventory staying semantically aligned end to end.

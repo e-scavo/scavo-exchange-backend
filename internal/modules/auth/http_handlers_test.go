@@ -1656,6 +1656,129 @@ type walletDetachConflictPayload struct {
 	Check *WalletDetachCheckResponse `json:"check,omitempty"`
 }
 
+func TestHTTPHandlers_WalletDetachExecute_ReadConsistency(t *testing.T) {
+	identityStore := NewInMemoryWalletIdentityStore()
+
+	primaryAddress, _ := signWalletMessageForScalar(t, "handler-detach-consistency-primary", "61")
+	primaryIdentity, err := identityStore.GetOrCreate(context.Background(), primaryAddress)
+	if err != nil {
+		t.Fatalf("GetOrCreate primary error: %v", err)
+	}
+	_, err = identityStore.AttachUser(context.Background(), primaryIdentity.ID, "u_test_example_com", true)
+	if err != nil {
+		t.Fatalf("AttachUser primary error: %v", err)
+	}
+
+	secondaryAddress, _ := signWalletMessageForScalar(t, "handler-detach-consistency-secondary", "62")
+	secondaryIdentity, err := identityStore.GetOrCreate(context.Background(), secondaryAddress)
+	if err != nil {
+		t.Fatalf("GetOrCreate secondary error: %v", err)
+	}
+	_, err = identityStore.AttachUser(context.Background(), secondaryIdentity.ID, "u_test_example_com", false)
+	if err != nil {
+		t.Fatalf("AttachUser secondary error: %v", err)
+	}
+
+	h := HTTPHandlers{
+		Tokens:           mustTokenService(t),
+		TTL:              time.Hour,
+		Users:            usermod.NewService(nil),
+		WalletIdentities: identityStore,
+	}
+
+	beforeReq := httptest.NewRequest(http.MethodGet, "/auth/wallets", nil)
+	beforeReq = beforeReq.WithContext(context.WithValue(beforeReq.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	beforeRec := httptest.NewRecorder()
+	h.Wallets(beforeRec, beforeReq)
+	if beforeRec.Code != http.StatusOK {
+		t.Fatalf("unexpected pre-detach inventory status: %d body=%s", beforeRec.Code, beforeRec.Body.String())
+	}
+
+	var before WalletsResponse
+	if err := json.Unmarshal(beforeRec.Body.Bytes(), &before); err != nil {
+		t.Fatalf("decode pre-detach inventory error: %v", err)
+	}
+	if len(before.Wallets) != 2 {
+		t.Fatalf("expected 2 wallets before detach, got %d", len(before.Wallets))
+	}
+
+	var beforePrimary, beforeSecondary *WalletReadModel
+	for _, wallet := range before.Wallets {
+		switch wallet.Address {
+		case primaryAddress:
+			beforePrimary = wallet
+		case secondaryAddress:
+			beforeSecondary = wallet
+		}
+	}
+	if beforePrimary == nil || beforeSecondary == nil {
+		t.Fatalf("unexpected pre-detach inventory payload: %#v", before.Wallets)
+	}
+	if beforePrimary.CanDetach {
+		t.Fatalf("expected primary wallet to remain non-detachable before execute: %#v", beforePrimary)
+	}
+	if !containsString(beforePrimary.DetachBlockReasons, WalletDetachReasonWalletIsPrimary) {
+		t.Fatalf("expected primary detach block reason %q before execute, got %#v", WalletDetachReasonWalletIsPrimary, beforePrimary.DetachBlockReasons)
+	}
+	if !beforeSecondary.CanDetach || len(beforeSecondary.DetachBlockReasons) != 0 {
+		t.Fatalf("expected secondary wallet to be detachable before execute: %#v", beforeSecondary)
+	}
+
+	detachReq := httptest.NewRequest(http.MethodPost, "/auth/wallets/detach", strings.NewReader(`{"wallet_address":"`+secondaryAddress+`"}`))
+	detachReq = detachReq.WithContext(context.WithValue(detachReq.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	detachRec := httptest.NewRecorder()
+	h.WalletDetach(detachRec, detachReq)
+	if detachRec.Code != http.StatusOK {
+		t.Fatalf("unexpected detach execute status: %d body=%s", detachRec.Code, detachRec.Body.String())
+	}
+
+	var detached WalletDetachExecuteResponse
+	if err := json.Unmarshal(detachRec.Body.Bytes(), &detached); err != nil {
+		t.Fatalf("decode detach execute payload error: %v", err)
+	}
+	if detached.DetachedWallet == nil || detached.DetachedWallet.Address != secondaryAddress {
+		t.Fatalf("unexpected detached wallet payload: %#v", detached.DetachedWallet)
+	}
+	if detached.DetachedWallet.UserID != "" || detached.DetachedWallet.DetachedAt == nil {
+		t.Fatalf("expected detached wallet to be detached from user with detached_at set: %#v", detached.DetachedWallet)
+	}
+	if detached.Check == nil || !detached.Check.Eligible || len(detached.Check.Reasons) != 0 {
+		t.Fatalf("expected detach execute to include an eligible check snapshot, got %#v", detached.Check)
+	}
+
+	afterReq := httptest.NewRequest(http.MethodGet, "/auth/wallets", nil)
+	afterReq = afterReq.WithContext(context.WithValue(afterReq.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	afterRec := httptest.NewRecorder()
+	h.Wallets(afterRec, afterReq)
+	if afterRec.Code != http.StatusOK {
+		t.Fatalf("unexpected post-detach inventory status: %d body=%s", afterRec.Code, afterRec.Body.String())
+	}
+
+	var after WalletsResponse
+	if err := json.Unmarshal(afterRec.Body.Bytes(), &after); err != nil {
+		t.Fatalf("decode post-detach inventory error: %v", err)
+	}
+	if len(after.Wallets) != 1 {
+		t.Fatalf("expected 1 wallet after detach, got %d", len(after.Wallets))
+	}
+	remaining := after.Wallets[0]
+	if remaining.Address != primaryAddress {
+		t.Fatalf("expected primary wallet to remain after detach, got %#v", remaining)
+	}
+	if !remaining.IsPrimary {
+		t.Fatalf("expected remaining wallet to still be primary after detach: %#v", remaining)
+	}
+	if remaining.CanDetach {
+		t.Fatalf("expected remaining single primary wallet to be non-detachable after detach: %#v", remaining)
+	}
+	if !containsString(remaining.DetachBlockReasons, WalletDetachReasonWalletIsPrimary) {
+		t.Fatalf("expected remaining wallet block reason %q after detach, got %#v", WalletDetachReasonWalletIsPrimary, remaining.DetachBlockReasons)
+	}
+	if !containsString(remaining.DetachBlockReasons, WalletDetachReasonUserWouldBeEmpty) {
+		t.Fatalf("expected remaining wallet block reason %q after detach, got %#v", WalletDetachReasonUserWouldBeEmpty, remaining.DetachBlockReasons)
+	}
+}
+
 func TestHTTPHandlers_WalletDetach_Success(t *testing.T) {
 	identityStore := NewInMemoryWalletIdentityStore()
 
