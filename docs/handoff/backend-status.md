@@ -16,7 +16,7 @@ It is intended to:
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.4 — Auth and User Stabilization  
-**Latest Completed Subphase:** 0.4.20 — Wallet Inventory Cursorless Navigation Hints
+**Latest Completed Subphase:** 0.4.21 — Wallet Inventory Query Parameter Contract Hardening
 
 ---
 
@@ -232,13 +232,13 @@ The system intentionally does **not** yet support:
 
 ## 🧭 Next Phase
 
-### 0.4.21 — Wallet Inventory Response Contract Hardening
+### 0.4.22 — Wallet Inventory Response Contract Clarification
 
 Expected next focus:
 
-- extend wallet inventory semantics only when they remain read-only and backward compatible
-- preserve the current paginated ownership-scoped contract
-- avoid destabilizing ownership and lifecycle guarantees already closed in Phase 0.4
+- preserve backward compatibility of the wallet inventory response contract
+- only extend inventory semantics when a concrete client need appears
+- keep future inventory work read-only unless the ZIP proves otherwise
 
 ---
 
@@ -274,4 +274,4 @@ At the end of Phase 0.4.16:
 
 
 
-Phase 0.4.20 extends the authenticated wallet inventory response with additive cursorless navigation hints (`next_offset`, `previous_offset`) computed after filtering, sorting, and pagination. The implementation stays entirely in the handler/read-model layer and does not modify ownership, stores, or persistence.
+Phase 0.4.21 hardens the authenticated wallet inventory query contract by making parameter combinations and defaults explicit (`order` now requires `sort`, and `sort=linked_at` defaults to ascending order when `order` is omitted). The implementation stays entirely in the handler/read-model layer and does not modify ownership, stores, or persistence.

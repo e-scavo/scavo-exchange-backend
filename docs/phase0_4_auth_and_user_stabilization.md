@@ -640,23 +640,35 @@ Add additive navigation metadata to `GET /auth/wallets` without changing domain 
 - handler-level validation for filtered and sorted inventory windows with navigation metadata
 
 
-## 0.4.20 — Wallet Inventory Cursorless Navigation Hints
+## 0.4.21 — Wallet Inventory Query Parameter Contract Hardening
 
 ### Objective
-Add additive offset-based navigation hints to `GET /auth/wallets` without changing domain, persistence, or ownership rules.
+Harden the `GET /auth/wallets` query-parameter contract without changing domain, stores, or persistence.
 
 ### Scope
-- add `next_offset` and `previous_offset` to the wallet inventory response
-- compute hints after filtering, sorting, and pagination
-- preserve backward compatibility of the response contract
-- extend handler-level tests for bounded and unbounded windows
+- formalize that `order` requires `sort`
+- make `sort=linked_at` without `order` default explicitly to ascending order
+- keep `offset` without `limit` valid and unbounded
+- extend handler-level coverage for query-contract behavior
 
 ### Delivered
-- forward and backward offset hints for bounded windows
-- `nil` hints for unbounded (`limit=0`) requests
-- stable semantics for empty windows reached by high offsets
-- no changes to stores, migrations, or lifecycle invariants
+- explicit `invalid_order_requires_sort` validation when `order` is present without `sort`
+- explicit ascending default when `sort=linked_at` is present without an `order`
+- preserved offset-only semantics with no bounded navigation hints
+- no changes to ownership invariants, stores, or migrations
 
 ### Validation
 - `go test ./...`
-- handler-level checks for first, intermediate, final, and empty windows
+- handler-level validation for default ascending sort behavior
+- handler-level validation for order/sort combination rules
+- handler-level validation for offset-only unbounded windows
+
+### What it does NOT solve
+- new filters
+- new sort fields
+- cursor pagination
+- store-level pagination
+- ownership-rule changes
+
+### Conclusion
+Phase 0.4.21 consolidates the wallet inventory query contract so clients can rely on clearer defaults and stricter parameter combinations without any domain redesign.

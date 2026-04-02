@@ -421,6 +421,103 @@ func TestHTTPHandlers_Wallets_SortLinkedAt(t *testing.T) {
 	}
 }
 
+func TestHTTPHandlers_Wallets_SortLinkedAt_DefaultOrderAsc(t *testing.T) {
+	store := NewInMemoryWalletIdentityStore()
+	earlierAddress := "0x4545454545454545454545454545454545454545"
+	laterAddress := "0x5656565656565656565656565656565656565656"
+	now := time.Now().UTC()
+	earlier := now.Add(-2 * time.Hour)
+	later := now.Add(-30 * time.Minute)
+
+	mustSeedWalletIdentity(t, store, earlierAddress, "u_test_example_com", false, earlier)
+	mustSeedWalletIdentity(t, store, laterAddress, "u_test_example_com", true, later)
+
+	h := HTTPHandlers{
+		Tokens:           mustTokenService(t),
+		TTL:              time.Hour,
+		Users:            usermod.NewService(nil),
+		WalletIdentities: store,
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/auth/wallets?sort=linked_at", nil)
+	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	rec := httptest.NewRecorder()
+
+	h.Wallets(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+
+	var payload WalletsResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("decode error: %v", err)
+	}
+
+	if len(payload.Wallets) != 2 {
+		t.Fatalf("expected 2 wallets, got %d", len(payload.Wallets))
+	}
+	if payload.Wallets[0].Address != earlierAddress {
+		t.Fatalf("unexpected first wallet: %q", payload.Wallets[0].Address)
+	}
+	if payload.Wallets[1].Address != laterAddress {
+		t.Fatalf("unexpected second wallet: %q", payload.Wallets[1].Address)
+	}
+}
+
+func TestHTTPHandlers_Wallets_OffsetWithoutLimitKeepsUnboundedWindow(t *testing.T) {
+	store := NewInMemoryWalletIdentityStore()
+	now := time.Now().UTC()
+
+	mustSeedWalletIdentity(t, store, "0x6868686868686868686868686868686868686861", "u_test_example_com", true, now.Add(-3*time.Hour))
+	mustSeedWalletIdentity(t, store, "0x6868686868686868686868686868686868686862", "u_test_example_com", false, now.Add(-2*time.Hour))
+	mustSeedWalletIdentity(t, store, "0x6868686868686868686868686868686868686863", "u_test_example_com", false, now.Add(-1*time.Hour))
+
+	h := HTTPHandlers{
+		Tokens:           mustTokenService(t),
+		TTL:              time.Hour,
+		Users:            usermod.NewService(nil),
+		WalletIdentities: store,
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/auth/wallets?offset=1", nil)
+	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	rec := httptest.NewRecorder()
+
+	h.Wallets(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+
+	var payload WalletsResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("decode error: %v", err)
+	}
+
+	if payload.Total != 3 {
+		t.Fatalf("expected total=3, got %d", payload.Total)
+	}
+	if payload.Limit != 0 {
+		t.Fatalf("expected limit=0, got %d", payload.Limit)
+	}
+	if payload.Offset != 1 {
+		t.Fatalf("expected offset=1, got %d", payload.Offset)
+	}
+	if payload.Returned != 2 {
+		t.Fatalf("expected returned=2, got %d", payload.Returned)
+	}
+	if payload.HasMore {
+		t.Fatal("expected has_more=false without explicit limit")
+	}
+	if payload.NextOffset != nil {
+		t.Fatalf("expected next_offset=nil without explicit limit, got %#v", payload.NextOffset)
+	}
+	if payload.PreviousOffset != nil {
+		t.Fatalf("expected previous_offset=nil without explicit limit, got %#v", payload.PreviousOffset)
+	}
+}
+
 func TestHTTPHandlers_Wallets_InvalidQueryParams(t *testing.T) {
 	store := NewInMemoryWalletIdentityStore()
 	mustSeedWalletIdentity(t, store, "0x6666666666666666666666666666666666666666", "u_test_example_com", true, time.Now().UTC())
@@ -441,7 +538,7 @@ func TestHTTPHandlers_Wallets_InvalidQueryParams(t *testing.T) {
 		{name: "invalid_primary", query: "/auth/wallets?primary=maybe", expectedError: "invalid_primary"},
 		{name: "invalid_sort", query: "/auth/wallets?sort=address", expectedError: "invalid_sort"},
 		{name: "invalid_order", query: "/auth/wallets?sort=linked_at&order=sideways", expectedError: "invalid_order"},
-		{name: "order_without_sort", query: "/auth/wallets?order=desc", expectedError: "invalid_sort"},
+		{name: "order_without_sort", query: "/auth/wallets?order=desc", expectedError: "invalid_order_requires_sort"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			req := httptest.NewRequest(http.MethodGet, tc.query, nil)

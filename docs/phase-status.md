@@ -40,6 +40,7 @@ Status: ✅ Completed
 | 0.4.18 | Wallet inventory pagination and windowed response | ✅ Completed |
 | 0.4.19 | Wallet inventory navigation metadata | ✅ Completed |
 | 0.4.20 | Wallet inventory cursorless navigation hints | ✅ Completed |
+| 0.4.21 | Wallet inventory query parameter contract hardening | ✅ Completed |
 
 ---
 
@@ -317,7 +318,7 @@ The following items remain intentionally out of scope:
 
 ## ⏭️ Next Phase
 
-### 0.4.21 — Wallet Inventory Response Contract Hardening
+### 0.4.22 — Wallet Inventory Response Contract Clarification
 
 Expected next focus:
 
@@ -326,28 +327,27 @@ Expected next focus:
 - keep all future enhancements read-only unless the ZIP proves otherwise
 
 
-## ✅ Phase 0.4.20 Closure Summary
+## ✅ Phase 0.4.21 Closure Summary
 
-Phase 0.4.20 completes the offset-based wallet inventory contract with additive navigation hints that remain read-only and ownership-scoped.
+Phase 0.4.21 hardens the wallet inventory query-parameter contract without adding new inventory features or touching ownership persistence.
 
-### Delivered in 0.4.20
+### Delivered in 0.4.21
 
-- `GET /auth/wallets` now returns `next_offset` when a bounded window has another page
-- `GET /auth/wallets` now returns `previous_offset` when a bounded window can move backward
-- unbounded requests (`limit=0`) keep navigation hints unset
-- handler-level tests cover first, intermediate, final, and empty windows
+- `order` now requires an explicit `sort`
+- `sort=linked_at` now defaults explicitly to ascending order when `order` is omitted
+- offset-only requests remain valid and unbounded
+- handler-level tests cover the hardened contract combinations and defaults
 
-## ❌ Not Included in 0.4.20
+## ❌ Not Included in 0.4.21
 
+- new filters
+- new sort fields
 - cursor pagination
 - continuation tokens
-- next/previous URLs
-- new filters
-- search
 - store-level pagination
 - ownership-rule changes
 
-### 0.4.21 — Wallet Inventory Response Contract Hardening
+### 0.4.22 — Wallet Inventory Response Contract Clarification
 
 Expected next focus:
 

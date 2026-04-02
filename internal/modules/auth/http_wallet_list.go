@@ -32,12 +32,16 @@ type WalletsResponse struct {
 }
 
 type WalletsQuery struct {
-	Status  string
-	Primary *bool
-	Sort    string
-	Order   string
-	Limit   int
-	Offset  int
+	Status         string
+	Primary        *bool
+	Sort           string
+	Order          string
+	Limit          int
+	Offset         int
+	SortProvided   bool
+	OrderProvided  bool
+	LimitProvided  bool
+	OffsetProvided bool
 }
 
 func mapWalletIdentityToReadModel(wallet *WalletIdentity) *WalletReadModel {
@@ -118,6 +122,7 @@ func parseWalletsQuery(r *http.Request) (WalletsQuery, string) {
 			return WalletsQuery{}, "invalid_sort"
 		}
 		q.Sort = sortBy
+		q.SortProvided = true
 	}
 
 	order := strings.TrimSpace(strings.ToLower(params.Get("order")))
@@ -125,11 +130,9 @@ func parseWalletsQuery(r *http.Request) (WalletsQuery, string) {
 		switch order {
 		case "asc", "desc":
 			q.Order = order
+			q.OrderProvided = true
 		default:
 			return WalletsQuery{}, "invalid_order"
-		}
-		if q.Sort == "" {
-			return WalletsQuery{}, "invalid_sort"
 		}
 	}
 
@@ -140,6 +143,7 @@ func parseWalletsQuery(r *http.Request) (WalletsQuery, string) {
 			return WalletsQuery{}, "invalid_limit"
 		}
 		q.Limit = value
+		q.LimitProvided = true
 	}
 
 	offset := strings.TrimSpace(params.Get("offset"))
@@ -149,9 +153,30 @@ func parseWalletsQuery(r *http.Request) (WalletsQuery, string) {
 			return WalletsQuery{}, "invalid_offset"
 		}
 		q.Offset = value
+		q.OffsetProvided = true
+	}
+
+	if errCode := validateWalletsQueryContract(&q); errCode != "" {
+		return WalletsQuery{}, errCode
 	}
 
 	return q, ""
+}
+
+func validateWalletsQueryContract(q *WalletsQuery) string {
+	if q == nil {
+		return ""
+	}
+
+	if q.OrderProvided && !q.SortProvided {
+		return "invalid_order_requires_sort"
+	}
+
+	if q.SortProvided && !q.OrderProvided {
+		q.Order = "asc"
+	}
+
+	return ""
 }
 
 func parsePositiveInt(raw string) (int, bool) {

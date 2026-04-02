@@ -23,7 +23,7 @@ The backend follows a **wallet-first identity model** that progressively evolves
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.4 — Auth and User Stabilization  
-**Current Subphase:** **0.4.20 — Wallet Inventory Cursorless Navigation Hints**
+**Current Subphase:** **0.4.21 — Wallet Inventory Query Parameter Contract Hardening**
 
 ---
 
@@ -464,7 +464,7 @@ Focus areas added in 0.4.16:
 
 ## 🧭 Next Phase
 
-### 0.4.21 — Wallet Inventory Response Contract Hardening
+### 0.4.22 — Wallet Inventory Response Contract Clarification
 
 Next expected focus:
 
@@ -1027,38 +1027,37 @@ This subphase does not add:
 Phase 0.4.19 completes the basic navigation contract of the authenticated wallet inventory endpoint. The backend now exposes not only filtered, ordered, and windowed wallet inventory responses, but also explicit metadata describing the returned window itself.
 
 
-## Phase 0.4.20 — Wallet Inventory Cursorless Navigation Hints
+## Phase 0.4.21 — Wallet Inventory Query Parameter Contract Hardening
 
 ### Objective
-Add additive cursorless navigation hints to `GET /auth/wallets` so offset-based clients can move forward and backward without recalculating hints outside the API.
+Harden the `GET /auth/wallets` query-parameter contract without adding new inventory capabilities, stores, or persistence changes.
 
 ### Scope
-- add `next_offset` to the wallet inventory response
-- add `previous_offset` to the wallet inventory response
-- compute navigation hints after filtering, sorting, and pagination
-- preserve backward compatibility of the existing wallet inventory contract
-- extend handler-level coverage for forward and backward navigation hints
+- formalize that `order` requires an explicit `sort`
+- keep `sort=linked_at` as the only supported sort field
+- make the default sort order explicit as ascending when `sort=linked_at` is present without `order`
+- preserve offset-only requests as valid, unbounded windows
+- extend handler-level tests for contract-specific combinations and defaults
 
 ### Delivered
-- additive response fields:
-  - `next_offset`
-  - `previous_offset`
-- deterministic offset-based navigation hints for first, intermediate, last, and empty windows
-- explicit `nil` navigation hints for unbounded (`limit=0`) responses
-- tests covering bounded and unbounded windows, including empty pages and filtered windows
+- explicit contract validation for `order` without `sort` via `invalid_order_requires_sort`
+- explicit defaulting of `order=asc` when `sort=linked_at` is provided without an `order`
+- preserved support for `offset` without `limit`, keeping the response unbounded and navigation hints unset
+- handler-level coverage for contract hardening scenarios and defaults
 
 ### Validation
 - `go test ./...`
-- handler-level validation for `next_offset` and `previous_offset` under bounded wallet inventory requests
-- handler-level validation for empty and filtered windows with navigation hints
+- handler-level validation for `sort=linked_at` with implicit ascending order
+- handler-level validation for `order` without `sort`
+- handler-level validation for offset-only requests staying unbounded
 
 ### What it does NOT solve
+- new filters
+- additional sort fields
 - cursor pagination
 - continuation tokens
-- next/previous URLs
 - store-level pagination
-- additional filters or search
 - ownership-rule changes
 
 ### Conclusion
-Phase 0.4.20 keeps the wallet inventory endpoint read-only and ownership-scoped while completing the basic offset-based navigation contract with explicit forward and backward hints.
+Phase 0.4.21 hardens the wallet inventory query contract by making parameter combinations and defaults explicit while preserving the existing read-only, ownership-scoped behavior.

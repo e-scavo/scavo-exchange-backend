@@ -639,28 +639,25 @@ Authenticated wallet inventory flow now behaves as follows:
 - when `limit=0`, the request is treated as unbounded and `has_more=false`
 
 
-## 0.4.20 — Wallet Inventory Cursorless Navigation Hints
+## 0.4.21 — Wallet Inventory Query Parameter Contract Hardening
 
-### Updated Read Flow
-Authenticated wallet inventory flow now behaves as follows:
+### Flow impact
+`GET /auth/wallets` keeps the same authenticated ownership-scoped flow, but now makes the query contract more explicit:
 
-1. authenticated user calls `GET /auth/wallets`
-2. backend loads wallets currently owned by that durable user
-3. backend maps identities into the lifecycle-aware wallet read model
-4. optional filters are applied
-5. optional ordering is applied
-6. optional pagination window is applied
-7. backend returns:
-   - `wallets`
-   - `total`
-   - `limit`
-   - `offset`
-   - `returned`
-   - `has_more`
-   - `next_offset`
-   - `previous_offset`
+- `order` is rejected unless `sort` is present
+- `sort=linked_at` defaults to ascending order when `order` is omitted
+- `offset` without `limit` remains valid and produces an unbounded window with no navigation hints
 
-### Response Semantics
-- `next_offset` is returned only for bounded requests that have another page
-- `previous_offset` is returned only for bounded requests whose current offset can move backward
-- when `limit=0`, both navigation hints remain unset
+### Request semantics
+Evaluation order remains:
+1. authenticate request
+2. list wallet identities for the authenticated user
+3. map to wallet read model
+4. apply filters
+5. apply sort contract
+6. apply pagination contract
+7. compute navigation metadata
+8. return response
+
+### Outcome
+The flow remains read-only and ownership-scoped while becoming more predictable for clients consuming wallet inventory queries.

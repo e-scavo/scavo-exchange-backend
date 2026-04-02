@@ -1068,19 +1068,18 @@ curl -s "http://localhost:8080/auth/wallets?primary=false&sort=linked_at&order=d
 ```
 
 
-## Phase 0.4.20 Testing Notes
+## Phase 0.4.21 Testing Notes
 
 ### Goal
-Validate additive cursorless navigation hints on top of the existing lifecycle-aware, filterable, sortable, and paginated `GET /auth/wallets` read model.
+Validate hardened query-parameter rules for the lifecycle-aware, filterable, sortable, and paginated `GET /auth/wallets` read model.
 
 ### Coverage Added
 Handler-level validation covers:
 
-- default unbounded response with no navigation hints
-- first bounded page with `next_offset` only
-- intermediate bounded page with both navigation hints
-- final bounded page without `next_offset`
-- empty bounded window reached by high offset with `previous_offset` still available
+- `sort=linked_at` without `order` defaulting to ascending behavior
+- `order` without `sort` returning `invalid_order_requires_sort`
+- offset-only requests remaining valid and unbounded
+- existing invalid parameter validation remaining stable
 
 ### Validation Command
 
