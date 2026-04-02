@@ -824,3 +824,21 @@ Close the consistency gap between wallet-inventory detach-actionability hints an
 
 ### Conclusion
 Phase 0.4.29 hardens the contract between the authenticated wallet inventory and the authenticated detach-execution endpoint so future wallet-management work can rely on both surfaces staying semantically aligned before and after detach execution.
+
+
+## Phase 0.4.30 — Wallet Management Contract Consolidation
+
+### Objective
+
+Consolidate the authenticated wallet-management surfaces into one explicit contract so the end of Phase 0.4 is documented as a coherent inventory-driven wallet-management model.
+
+### Delivered
+
+- consolidated documentation for inventory, primary switch, detach eligibility, and detach execution as one wallet-management contract
+- explicit clarification of advisory read hints versus authoritative eligibility / execution surfaces
+- unified operator guidance for the inventory → action/check → refreshed inventory cycle
+- cross-document alignment closing the wallet-management line of Phase 0.4
+
+### Result
+
+Phase 0.4 now closes with wallet management described as one coherent contract without changing handlers, stores, persistence, or ownership rules.

@@ -43,6 +43,13 @@ Status: ✅ Completed
 | 0.4.21 | Wallet inventory query parameter contract hardening | ✅ Completed |
 | 0.4.22 | Wallet inventory response contract clarification | ✅ Completed |
 | 0.4.23 | Wallet inventory query examples closure | ✅ Completed |
+| 0.4.24 | Wallet inventory manual validation closure | ✅ Completed |
+| 0.4.25 | Wallet actionability read model preparation | ✅ Completed |
+| 0.4.26 | Wallet detach check read consistency | ✅ Completed |
+| 0.4.27 | Wallet primary switch read consistency | ✅ Completed |
+| 0.4.28 | Wallet management read flow closure | ✅ Completed |
+| 0.4.29 | Wallet detach execute read consistency | ✅ Completed |
+| 0.4.30 | Wallet management contract consolidation | ✅ Completed |
 
 ---
 
@@ -493,13 +500,31 @@ Phase 0.4.29 closes the consistency gap between authenticated wallet inventory d
 - ownership-rule changes
 - store-level or persistence changes
 
-### 0.4.30 — To Be Defined Against Real ZIP
+## ✅ Phase 0.4.30 Closure Summary
+
+Phase 0.4.30 consolidates the authenticated wallet-management surfaces into one explicit contract without changing handlers, stores, persistence, or domain rules.
+
+### Delivered in 0.4.30
+
+- consolidated wallet-management contract across inventory, primary switch, detach eligibility, and detach execution
+- explicit documentation of advisory versus authoritative wallet-management surfaces
+- unified operator/testing guidance for the inventory → action/check → refreshed inventory cycle
+- cross-document alignment so handoff, flows, README, and testing describe the same final wallet-management model
+
+## ❌ Not Included in 0.4.30
+
+- new wallet-management endpoints
+- new inventory fields
+- changes to detach or primary rules
+- store-level or persistence changes
+
+### 0.4.31 — To Be Defined Against Real ZIP
 
 Expected next focus:
 
-- continue incremental wallet-management readiness only if the next ZIP shows a real need
-- preserve backward compatibility of `GET /auth/wallets`
-- keep future work ownership-safe and read-model focused
+- open a new functional line only if the next ZIP shows a concrete need beyond wallet-management consolidation
+- preserve backward compatibility of the authenticated wallet inventory and wallet action endpoints
+- keep future work ownership-safe and avoid reopening stabilized invariants
 
 
 ## ✅ Phase 0.4.23 Closure Summary

@@ -23,7 +23,7 @@ The backend follows a **wallet-first identity model** that progressively evolves
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.4 — Auth and User Stabilization  
-**Current Subphase:** **0.4.29 — Wallet Detach Execute Read Consistency**
+**Current Subphase:** **0.4.30 — Wallet Management Contract Consolidation**
 
 ---
 
@@ -482,14 +482,20 @@ Focus areas added in 0.4.16:
 
 ## 🧭 Next Phase
 
-### 0.4.22 — Wallet Inventory Response Contract Clarification
+### 0.4.30 — Wallet Management Contract Consolidation
 
-Next expected focus:
+Delivered:
 
-- preserve backward compatibility of the wallet inventory navigation contract
-- only add further inventory semantics if a concrete client need appears
-- keep all further enhancements read-only unless the ZIP proves otherwise
-- avoid reworking ownership invariants already stabilized in Phase 0.4
+- wallet management is now documented as one coherent contract spanning `GET /auth/wallets`, `POST /auth/wallets/primary`, `POST /auth/wallets/detach/check`, and `POST /auth/wallets/detach`
+- inventory hints are explicitly positioned as advisory read signals while primary / detach endpoints remain authoritative execution surfaces
+- operator guidance now describes the full inventory → action / check → refreshed inventory cycle as one consolidated flow
+- no changes were made to handlers, stores, persistence, or domain rules
+
+Expected next focus:
+
+- continue beyond wallet-management consolidation only if the next ZIP shows a real functional need
+- preserve backward compatibility of the authenticated wallet inventory and wallet-action endpoints
+- keep future work ownership-safe and avoid reopening already stabilized invariants
 
 ---
 
@@ -1298,3 +1304,29 @@ Close the consistency gap between wallet-inventory detach actionability hints an
 
 ### Conclusion
 Phase 0.4.29 does not change detach-domain rules, handlers, stores, or persistence. It hardens the contract between the authenticated wallet inventory and detach execution so wallet-management consumers can rely on inventory hints, detach results, and refreshed inventory staying semantically aligned end to end.
+
+
+## Phase 0.4.30 — Wallet Management Contract Consolidation
+
+### Objective
+
+Consolidate the already-stabilized wallet-management surfaces into one explicit contract so inventory, eligibility, execution, and refreshed post-action state can be consumed as one coherent unit.
+
+### Delivered
+
+- consolidated documentation for the authenticated wallet-management contract built around:
+  - `GET /auth/wallets`
+  - `POST /auth/wallets/primary`
+  - `POST /auth/wallets/detach/check`
+  - `POST /auth/wallets/detach`
+- explicit clarification that:
+  - inventory is the advisory read surface
+  - `detach/check` is the eligibility surface
+  - `primary` and `detach` are execution surfaces
+  - refreshed inventory is the post-action observable state
+- unified testing guidance for inventory-driven wallet-management validation
+- cross-document cleanup so README, flows, testing, handoff, and phase status describe the same wallet-management contract
+
+### Result
+
+Phase 0.4 now closes with wallet management described as one consolidated, inventory-driven contract without changing handlers, stores, persistence, or ownership rules.

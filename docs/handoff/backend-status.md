@@ -232,20 +232,20 @@ The system intentionally does **not** yet support:
 
 ## 🧭 Next Phase
 
-### 0.4.29 — Wallet Detach Execute Read Consistency
+### 0.4.30 — Wallet Management Contract Consolidation
 
 Delivered:
 
-- handler-level consistency coverage now proves that a wallet exposed as detachable in inventory can be detached successfully through `POST /auth/wallets/detach`
-- detach execution payload and refreshed inventory are now explicitly protected against semantic drift relative to pre-detach `can_detach` / `detach_block_reasons`
-- documentation clarifies the inventory → detach execute → refreshed inventory contract while keeping inventory hints advisory and detach execution authoritative
-- no changes to runtime detach rules, stores, or persistence
+- wallet management is now described as one consolidated contract across `GET /auth/wallets`, `POST /auth/wallets/primary`, `POST /auth/wallets/detach/check`, and `POST /auth/wallets/detach`
+- inventory hints are explicitly documented as advisory, while check / execution endpoints remain authoritative
+- flows and testing guidance now describe the full inventory → action/check → refreshed inventory cycle as one coherent operational path
+- no changes were made to runtime rules, stores, persistence, or ownership semantics
 
 Expected next focus:
 
-- continue incremental wallet-management readiness only if the next ZIP shows a real need
-- preserve backward compatibility of `GET /auth/wallets`
-- keep future work ownership-safe and read-model focused
+- open a new functional line only if the next ZIP shows a concrete need beyond wallet-management consolidation
+- preserve backward compatibility of the authenticated wallet inventory and wallet action endpoints
+- keep future work ownership-safe and avoid reopening stabilized invariants
 
 ---
 
@@ -302,3 +302,6 @@ Phase 0.4.26 closes the consistency gap between the enriched wallet inventory re
 
 
 Phase 0.4.28 closes the wallet-management read flow around the authenticated inventory and the existing primary / detach actions. The implementation is documentation-only, but it corrects the README phase summary and consolidates the real inventory → actionability hint → action/check endpoint → refreshed inventory flow so client and operator guidance now matches the authenticated wallet-management surface end to end.
+
+
+Phase 0.4.30 consolidates the final wallet-management contract layer. Inventory, eligibility, execution, and refreshed post-action inventory are now documented as one coherent surface so future work can move beyond Phase 0.4 without reopening already-stabilized wallet-management semantics.

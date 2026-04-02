@@ -795,3 +795,16 @@ For the same authenticated user and wallet inventory:
 
 ### Outcome
 The backend now protects the semantic alignment between wallet inventory detach-actionability hints, detach execution, and refreshed inventory without changing detach-domain rules or persistence behavior.
+
+
+## Phase 0.4.30 — Wallet Management Contract Consolidation
+
+The authenticated wallet inventory and wallet action endpoints keep their existing runtime behavior in 0.4.30, but their relationship is now explicitly consolidated as one contract:
+
+- `GET /auth/wallets` is the advisory read surface
+- `POST /auth/wallets/primary` is the primary-switch execution surface
+- `POST /auth/wallets/detach/check` is the explicit detach-eligibility surface
+- `POST /auth/wallets/detach` is the detach execution surface
+- refreshed `GET /auth/wallets` is the post-action observable state
+
+This phase does not change handlers, stores, persistence, or domain rules. It closes the wallet-management flow as one consolidated inventory-driven contract.

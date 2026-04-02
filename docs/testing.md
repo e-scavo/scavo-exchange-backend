@@ -1255,3 +1255,23 @@ Handler-level coverage now verifies:
 ```
 go test ./...
 ```
+
+
+## Phase 0.4.30 Testing Notes
+
+Validate the consolidated wallet-management contract as one operational surface.
+
+Recommended manual sequence:
+
+1. Call `GET /auth/wallets` and identify advisory hints (`can_set_primary`, `can_detach`, `detach_block_reasons`)
+2. Execute `POST /auth/wallets/primary` only for a wallet exposed as promotable
+3. Refresh `GET /auth/wallets` and confirm primary state plus `can_set_primary` are updated coherently
+4. Execute `POST /auth/wallets/detach/check` only for a wallet exposed as detachable or blocked and confirm returned eligibility / reasons remain interpretable with inventory hints
+5. Execute `POST /auth/wallets/detach` only when still eligible
+6. Refresh `GET /auth/wallets` and confirm detached-wallet visibility plus remaining-wallet hints stay coherent
+
+Expected result:
+
+- inventory remains the advisory entry point
+- check / execution endpoints remain authoritative
+- refreshed inventory remains the observable post-action state
