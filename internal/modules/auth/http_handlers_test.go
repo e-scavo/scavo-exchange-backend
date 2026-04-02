@@ -406,6 +406,186 @@ func TestHTTPHandlers_Wallets_ActionabilityTwoWalletInventory(t *testing.T) {
 	}
 }
 
+func TestHTTPHandlers_WalletDetachCheck_ReadConsistencySinglePrimary(t *testing.T) {
+	store := NewInMemoryWalletIdentityStore()
+	now := time.Now().UTC()
+	address := "0x7777777777777777777777777777777777777781"
+	mustSeedWalletIdentity(t, store, address, "u_test_example_com", true, now.Add(-1*time.Hour))
+
+	h := HTTPHandlers{
+		Tokens:           mustTokenService(t),
+		TTL:              time.Hour,
+		Users:            usermod.NewService(nil),
+		WalletIdentities: store,
+	}
+
+	inventoryReq := httptest.NewRequest(http.MethodGet, "/auth/wallets", nil)
+	inventoryReq = inventoryReq.WithContext(context.WithValue(inventoryReq.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	inventoryRec := httptest.NewRecorder()
+	h.Wallets(inventoryRec, inventoryReq)
+
+	if inventoryRec.Code != http.StatusOK {
+		t.Fatalf("unexpected inventory status: %d body=%s", inventoryRec.Code, inventoryRec.Body.String())
+	}
+
+	var inventory WalletsResponse
+	if err := json.Unmarshal(inventoryRec.Body.Bytes(), &inventory); err != nil {
+		t.Fatalf("inventory decode error: %v", err)
+	}
+	if len(inventory.Wallets) != 1 {
+		t.Fatalf("expected 1 wallet, got %d", len(inventory.Wallets))
+	}
+
+	wallet := inventory.Wallets[0]
+	if wallet.Address != address {
+		t.Fatalf("unexpected wallet address: %q", wallet.Address)
+	}
+	if wallet.CanDetach {
+		t.Fatal("expected inventory can_detach=false for single primary wallet")
+	}
+	if !containsString(wallet.DetachBlockReasons, WalletDetachReasonWalletIsPrimary) {
+		t.Fatalf("expected inventory block reason %q, got %#v", WalletDetachReasonWalletIsPrimary, wallet.DetachBlockReasons)
+	}
+	if !containsString(wallet.DetachBlockReasons, WalletDetachReasonUserWouldBeEmpty) {
+		t.Fatalf("expected inventory block reason %q, got %#v", WalletDetachReasonUserWouldBeEmpty, wallet.DetachBlockReasons)
+	}
+
+	checkReq := httptest.NewRequest(http.MethodPost, "/auth/wallets/detach/check", strings.NewReader(`{"wallet_address":"`+address+`"}`))
+	checkReq = checkReq.WithContext(context.WithValue(checkReq.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	checkRec := httptest.NewRecorder()
+	h.WalletDetachCheck(checkRec, checkReq)
+
+	if checkRec.Code != http.StatusOK {
+		t.Fatalf("unexpected detach-check status: %d body=%s", checkRec.Code, checkRec.Body.String())
+	}
+
+	var check WalletDetachCheckResponse
+	if err := json.Unmarshal(checkRec.Body.Bytes(), &check); err != nil {
+		t.Fatalf("detach-check decode error: %v", err)
+	}
+	if check.Eligible {
+		t.Fatalf("expected eligible=false, got reasons=%v", check.Reasons)
+	}
+	if !check.IsPrimary {
+		t.Fatal("expected detach check is_primary=true")
+	}
+	if check.OwnedWalletCount != 1 {
+		t.Fatalf("expected owned wallet count 1, got %d", check.OwnedWalletCount)
+	}
+	if !containsString(check.Reasons, WalletDetachReasonWalletIsPrimary) {
+		t.Fatalf("expected detach check reason %q, got %#v", WalletDetachReasonWalletIsPrimary, check.Reasons)
+	}
+	if !containsString(check.Reasons, WalletDetachReasonUserWouldBeEmpty) {
+		t.Fatalf("expected detach check reason %q, got %#v", WalletDetachReasonUserWouldBeEmpty, check.Reasons)
+	}
+}
+
+func TestHTTPHandlers_WalletDetachCheck_ReadConsistencyTwoWalletInventory(t *testing.T) {
+	store := NewInMemoryWalletIdentityStore()
+	now := time.Now().UTC()
+	primaryAddress := "0x7777777777777777777777777777777777777782"
+	secondaryAddress := "0x7777777777777777777777777777777777777783"
+	mustSeedWalletIdentity(t, store, primaryAddress, "u_test_example_com", true, now.Add(-2*time.Hour))
+	mustSeedWalletIdentity(t, store, secondaryAddress, "u_test_example_com", false, now.Add(-1*time.Hour))
+
+	h := HTTPHandlers{
+		Tokens:           mustTokenService(t),
+		TTL:              time.Hour,
+		Users:            usermod.NewService(nil),
+		WalletIdentities: store,
+	}
+
+	inventoryReq := httptest.NewRequest(http.MethodGet, "/auth/wallets", nil)
+	inventoryReq = inventoryReq.WithContext(context.WithValue(inventoryReq.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	inventoryRec := httptest.NewRecorder()
+	h.Wallets(inventoryRec, inventoryReq)
+
+	if inventoryRec.Code != http.StatusOK {
+		t.Fatalf("unexpected inventory status: %d body=%s", inventoryRec.Code, inventoryRec.Body.String())
+	}
+
+	var inventory WalletsResponse
+	if err := json.Unmarshal(inventoryRec.Body.Bytes(), &inventory); err != nil {
+		t.Fatalf("inventory decode error: %v", err)
+	}
+	if len(inventory.Wallets) != 2 {
+		t.Fatalf("expected 2 wallets, got %d", len(inventory.Wallets))
+	}
+
+	byAddress := map[string]*WalletReadModel{}
+	for _, wallet := range inventory.Wallets {
+		byAddress[wallet.Address] = wallet
+	}
+
+	primaryWallet := byAddress[primaryAddress]
+	if primaryWallet == nil {
+		t.Fatalf("missing primary inventory wallet %q", primaryAddress)
+	}
+	if primaryWallet.CanDetach {
+		t.Fatal("expected primary inventory can_detach=false")
+	}
+	if !containsString(primaryWallet.DetachBlockReasons, WalletDetachReasonWalletIsPrimary) {
+		t.Fatalf("expected primary inventory block reason %q, got %#v", WalletDetachReasonWalletIsPrimary, primaryWallet.DetachBlockReasons)
+	}
+	if containsString(primaryWallet.DetachBlockReasons, WalletDetachReasonUserWouldBeEmpty) {
+		t.Fatalf("did not expect single-wallet reason for primary in two-wallet inventory: %#v", primaryWallet.DetachBlockReasons)
+	}
+
+	secondaryWallet := byAddress[secondaryAddress]
+	if secondaryWallet == nil {
+		t.Fatalf("missing secondary inventory wallet %q", secondaryAddress)
+	}
+	if !secondaryWallet.CanDetach {
+		t.Fatal("expected secondary inventory can_detach=true")
+	}
+	if len(secondaryWallet.DetachBlockReasons) != 0 {
+		t.Fatalf("expected no secondary detach block reasons, got %#v", secondaryWallet.DetachBlockReasons)
+	}
+
+	for _, tc := range []struct {
+		name              string
+		address           string
+		expectedEligible  bool
+		expectedIsPrimary bool
+		expectedReason    string
+		unexpectedReason  string
+	}{
+		{name: "primary", address: primaryAddress, expectedEligible: false, expectedIsPrimary: true, expectedReason: WalletDetachReasonWalletIsPrimary, unexpectedReason: WalletDetachReasonUserWouldBeEmpty},
+		{name: "secondary", address: secondaryAddress, expectedEligible: true, expectedIsPrimary: false, expectedReason: "", unexpectedReason: WalletDetachReasonWalletIsPrimary},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			checkReq := httptest.NewRequest(http.MethodPost, "/auth/wallets/detach/check", strings.NewReader(`{"wallet_address":"`+tc.address+`"}`))
+			checkReq = checkReq.WithContext(context.WithValue(checkReq.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+			checkRec := httptest.NewRecorder()
+			h.WalletDetachCheck(checkRec, checkReq)
+
+			if checkRec.Code != http.StatusOK {
+				t.Fatalf("unexpected detach-check status: %d body=%s", checkRec.Code, checkRec.Body.String())
+			}
+
+			var check WalletDetachCheckResponse
+			if err := json.Unmarshal(checkRec.Body.Bytes(), &check); err != nil {
+				t.Fatalf("detach-check decode error: %v", err)
+			}
+			if check.Eligible != tc.expectedEligible {
+				t.Fatalf("unexpected eligible=%v want %v reasons=%v", check.Eligible, tc.expectedEligible, check.Reasons)
+			}
+			if check.IsPrimary != tc.expectedIsPrimary {
+				t.Fatalf("unexpected is_primary=%v want %v", check.IsPrimary, tc.expectedIsPrimary)
+			}
+			if check.OwnedWalletCount != 2 {
+				t.Fatalf("expected owned wallet count 2, got %d", check.OwnedWalletCount)
+			}
+			if tc.expectedReason != "" && !containsString(check.Reasons, tc.expectedReason) {
+				t.Fatalf("expected detach check reason %q, got %#v", tc.expectedReason, check.Reasons)
+			}
+			if tc.unexpectedReason != "" && containsString(check.Reasons, tc.unexpectedReason) {
+				t.Fatalf("did not expect detach check reason %q, got %#v", tc.unexpectedReason, check.Reasons)
+			}
+		})
+	}
+}
+
 func TestHTTPHandlers_Wallets_FilterPrimary(t *testing.T) {
 	store := NewInMemoryWalletIdentityStore()
 	primaryAddress := "0x1111111111111111111111111111111111111111"

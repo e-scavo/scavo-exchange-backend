@@ -765,3 +765,17 @@ Prepare the authenticated wallet inventory read model for wallet-management cons
 
 ### Conclusion
 Phase 0.4.25 extends the wallet inventory read model with ownership-safe actionability hints so clients can prepare wallet-management UI decisions without changing execution rules or persistence behavior.
+
+
+## Phase 0.4.26 — Wallet Detach Check Read Consistency
+
+### Objective
+Keep the authenticated wallet inventory actionability hints semantically aligned with `POST /auth/wallets/detach/check` for the same authenticated user and wallet set.
+
+### Delivered
+- consistency coverage for a single primary wallet and a two-wallet inventory
+- explicit validation that inventory-side `can_detach` and `detach_block_reasons` remain compatible with detach-check `eligible` and `reasons`
+- documentation clarifying that inventory hints are advisory and that detach-check remains the pre-execution authority
+
+### Conclusion
+Phase 0.4.26 hardens the relationship between wallet inventory readiness hints and detach eligibility checks without changing detach-domain rules, stores, or persistence.

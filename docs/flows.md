@@ -727,3 +727,19 @@ The authenticated wallet inventory flow now exposes advisory actionability hints
 
 ### Outcome
 The inventory flow remains read-only and ownership-scoped, but it now gives client code enough per-wallet actionability context to prepare wallet-management UI affordances without inferring detach or primary-switch rules on its own.
+
+
+## Phase 0.4.26 — Wallet Detach Check Read Consistency
+
+### Flow impact
+The inventory flow and the detach-check flow keep their existing behavior in 0.4.26, but their relationship is now explicitly covered and documented.
+
+### Consistency semantics
+For the same authenticated user and wallet inventory:
+
+- `can_detach=true` in `GET /auth/wallets` should remain compatible with `eligible=true` in `POST /auth/wallets/detach/check`
+- `can_detach=false` should remain compatible with `eligible=false` under the same detach-domain reasons
+- inventory-side `detach_block_reasons` remain advisory, while `detach/check` stays authoritative before execution
+
+### Outcome
+The backend now protects the semantic alignment between wallet inventory actionability hints and detach-check eligibility without changing detach-domain rules or persistence behavior.

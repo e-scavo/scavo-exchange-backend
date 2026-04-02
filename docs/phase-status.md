@@ -417,7 +417,26 @@ Phase 0.4.25 prepares the authenticated wallet inventory for wallet-management c
 - store-level actionability persistence
 - ownership-rule changes
 
-### 0.4.26 — To Be Defined Against Real ZIP
+## ✅ Phase 0.4.26 Closure Summary
+
+Phase 0.4.26 closes the consistency gap between wallet inventory actionability hints and `POST /auth/wallets/detach/check` without changing detach rules, stores, or persistence.
+
+### Delivered in 0.4.26
+
+- handler-level consistency coverage for single-primary and two-wallet inventories
+- explicit validation that `can_detach=false` remains compatible with `eligible=false` under the same detach reasons
+- explicit validation that detachable secondary wallets stay aligned with `eligible=true` and empty detach reasons
+- documentation that keeps inventory-side hints advisory while preserving detach-check authority
+
+## ❌ Not Included in 0.4.26
+
+- new detach rules
+- new wallet-management endpoints
+- changes to detach execution behavior
+- new inventory query parameters
+- ownership-rule changes
+
+### 0.4.27 — To Be Defined Against Real ZIP
 
 Expected next focus:
 

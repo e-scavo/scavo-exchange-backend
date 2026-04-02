@@ -1171,3 +1171,23 @@ Handler-level coverage now verifies:
 ```
 go test ./...
 ```
+
+
+## Phase 0.4.26 Testing Notes
+
+### Goal
+Validate that wallet inventory detach actionability hints remain semantically consistent with `POST /auth/wallets/detach/check`.
+
+### Coverage Added
+Handler-level coverage now verifies:
+
+- a single primary wallet stays non-detachable in both inventory (`can_detach=false`) and detach check (`eligible=false`)
+- both single-wallet detach block reasons remain aligned between inventory and detach check
+- in a two-wallet inventory, the primary wallet remains blocked for detach in both surfaces
+- in a two-wallet inventory, the secondary wallet remains detachable in both surfaces with no detach reasons
+
+### Validation Command
+
+```
+go test ./...
+```

@@ -232,7 +232,7 @@ The system intentionally does **not** yet support:
 
 ## 🧭 Next Phase
 
-### 0.4.26 — To Be Defined Against Real ZIP
+### 0.4.27 — To Be Defined Against Real ZIP
 
 Expected next focus:
 
@@ -288,3 +288,7 @@ Phase 0.4.24 closes the manual-validation layer around the authenticated wallet 
 
 
 Phase 0.4.25 prepares the authenticated wallet inventory for wallet-management consumption by exposing minimal actionability hints per listed wallet. The implementation stays in the read-model/handler layer, reuses the established detach-domain reasons, and leaves execution authority in the existing detach and primary-switch endpoints.
+
+
+
+Phase 0.4.26 closes the consistency gap between the enriched wallet inventory read model and `POST /auth/wallets/detach/check`. The implementation adds handler-level coverage proving that inventory-side detach hints remain semantically aligned with detach-check eligibility and reasons for single-wallet and two-wallet ownership scenarios, while leaving detach authority in the existing check and execute endpoints.

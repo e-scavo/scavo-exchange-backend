@@ -23,7 +23,7 @@ The backend follows a **wallet-first identity model** that progressively evolves
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.4 — Auth and User Stabilization  
-**Current Subphase:** **0.4.25 — Wallet Actionability Read Model Preparation**
+**Current Subphase:** **0.4.26 — Wallet Detach Check Read Consistency**
 
 ---
 
@@ -1240,3 +1240,17 @@ By 0.4.24, the wallet inventory endpoint was contractually mature, but clients s
 
 ### Conclusion
 Phase 0.4.25 extends the authenticated wallet inventory read model with minimal, ownership-safe actionability hints so clients can prepare wallet-management UI decisions without changing domain authority or persistence behavior.
+
+
+## Phase 0.4.26 — Wallet Detach Check Read Consistency
+
+### Objective
+Close the consistency gap between wallet-inventory actionability hints and `POST /auth/wallets/detach/check` so both surfaces remain interpretably aligned for the same authenticated user and wallet set.
+
+### Delivered
+- handler-level consistency tests covering single-wallet and two-wallet inventories
+- explicit validation that inventory-side `can_detach` / `detach_block_reasons` remain compatible with detach-check `eligible` / `reasons`
+- documentation that keeps inventory hints advisory while leaving final execution authority in `detach/check` and `detach`
+
+### Conclusion
+Phase 0.4.26 does not change detach-domain rules or persistence behavior. It hardens the contract between the enriched read model and the dedicated detach-check endpoint so future wallet-management work can rely on both surfaces staying semantically aligned.
