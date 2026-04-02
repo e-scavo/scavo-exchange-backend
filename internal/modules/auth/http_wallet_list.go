@@ -21,10 +21,12 @@ type WalletReadModel struct {
 }
 
 type WalletsResponse struct {
-	Wallets []*WalletReadModel `json:"wallets"`
-	Total   int                `json:"total"`
-	Limit   int                `json:"limit"`
-	Offset  int                `json:"offset"`
+	Wallets  []*WalletReadModel `json:"wallets"`
+	Total    int                `json:"total"`
+	Limit    int                `json:"limit"`
+	Offset   int                `json:"offset"`
+	Returned int                `json:"returned"`
+	HasMore  bool               `json:"has_more"`
 }
 
 type WalletsQuery struct {
@@ -263,6 +265,27 @@ func applyWalletsQuery(wallets []*WalletReadModel, q WalletsQuery) ([]*WalletRea
 	return paginateWalletReadModels(sorted, q), total
 }
 
+func buildWalletsResponse(window []*WalletReadModel, total int, q WalletsQuery) WalletsResponse {
+	if window == nil {
+		window = []*WalletReadModel{}
+	}
+
+	returned := len(window)
+	hasMore := false
+	if q.Limit > 0 {
+		hasMore = q.Offset+returned < total
+	}
+
+	return WalletsResponse{
+		Wallets:  window,
+		Total:    total,
+		Limit:    q.Limit,
+		Offset:   q.Offset,
+		Returned: returned,
+		HasMore:  hasMore,
+	}
+}
+
 func (h HTTPHandlers) Wallets(w http.ResponseWriter, r *http.Request) {
 	claims, ok := coreauth.ClaimsFromContext(r.Context())
 	if !ok {
@@ -277,7 +300,7 @@ func (h HTTPHandlers) Wallets(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if h.WalletIdentities == nil {
-		writeJSON(w, http.StatusOK, WalletsResponse{Wallets: []*WalletReadModel{}, Total: 0, Limit: query.Limit, Offset: query.Offset})
+		writeJSON(w, http.StatusOK, buildWalletsResponse([]*WalletReadModel{}, 0, query))
 		return
 	}
 
@@ -292,5 +315,5 @@ func (h HTTPHandlers) Wallets(w http.ResponseWriter, r *http.Request) {
 
 	mapped := mapWalletIdentitiesToReadModels(wallets)
 	window, total := applyWalletsQuery(mapped, query)
-	writeJSON(w, http.StatusOK, WalletsResponse{Wallets: window, Total: total, Limit: query.Limit, Offset: query.Offset})
+	writeJSON(w, http.StatusOK, buildWalletsResponse(window, total, query))
 }

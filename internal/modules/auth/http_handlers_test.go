@@ -219,6 +219,12 @@ func TestHTTPHandlers_Wallets_Success(t *testing.T) {
 	if payload.Offset != 0 {
 		t.Fatalf("expected default offset=0, got %d", payload.Offset)
 	}
+	if payload.Returned != 1 {
+		t.Fatalf("expected returned=1, got %d", payload.Returned)
+	}
+	if payload.HasMore {
+		t.Fatal("expected has_more=false by default")
+	}
 	if payload.Wallets[0].ID != identity.ID {
 		t.Fatalf("unexpected wallet id: %q", payload.Wallets[0].ID)
 	}
@@ -476,17 +482,19 @@ func TestHTTPHandlers_Wallets_Pagination(t *testing.T) {
 	}
 
 	for _, tc := range []struct {
-		name           string
-		query          string
-		expectedAddrs  []string
-		expectedTotal  int
-		expectedLimit  int
-		expectedOffset int
+		name             string
+		query            string
+		expectedAddrs    []string
+		expectedTotal    int
+		expectedLimit    int
+		expectedOffset   int
+		expectedReturned int
+		expectedHasMore  bool
 	}{
-		{name: "limit_only", query: "/auth/wallets?limit=2", expectedAddrs: []string{"0x7777777777777777777777777777777777777771", "0x7777777777777777777777777777777777777772"}, expectedTotal: 3, expectedLimit: 2, expectedOffset: 0},
-		{name: "offset_only", query: "/auth/wallets?offset=1", expectedAddrs: []string{"0x7777777777777777777777777777777777777772", "0x7777777777777777777777777777777777777773"}, expectedTotal: 3, expectedLimit: 0, expectedOffset: 1},
-		{name: "limit_and_offset", query: "/auth/wallets?limit=1&offset=1", expectedAddrs: []string{"0x7777777777777777777777777777777777777772"}, expectedTotal: 3, expectedLimit: 1, expectedOffset: 1},
-		{name: "window_empty", query: "/auth/wallets?limit=2&offset=10", expectedAddrs: []string{}, expectedTotal: 3, expectedLimit: 2, expectedOffset: 10},
+		{name: "limit_only", query: "/auth/wallets?limit=2", expectedAddrs: []string{"0x7777777777777777777777777777777777777771", "0x7777777777777777777777777777777777777772"}, expectedTotal: 3, expectedLimit: 2, expectedOffset: 0, expectedReturned: 2, expectedHasMore: true},
+		{name: "offset_only", query: "/auth/wallets?offset=1", expectedAddrs: []string{"0x7777777777777777777777777777777777777772", "0x7777777777777777777777777777777777777773"}, expectedTotal: 3, expectedLimit: 0, expectedOffset: 1, expectedReturned: 2, expectedHasMore: false},
+		{name: "limit_and_offset", query: "/auth/wallets?limit=1&offset=1", expectedAddrs: []string{"0x7777777777777777777777777777777777777772"}, expectedTotal: 3, expectedLimit: 1, expectedOffset: 1, expectedReturned: 1, expectedHasMore: true},
+		{name: "window_empty", query: "/auth/wallets?limit=2&offset=10", expectedAddrs: []string{}, expectedTotal: 3, expectedLimit: 2, expectedOffset: 10, expectedReturned: 0, expectedHasMore: false},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			req := httptest.NewRequest(http.MethodGet, tc.query, nil)
@@ -513,6 +521,12 @@ func TestHTTPHandlers_Wallets_Pagination(t *testing.T) {
 			if payload.Offset != tc.expectedOffset {
 				t.Fatalf("expected offset=%d, got %d", tc.expectedOffset, payload.Offset)
 			}
+			if payload.Returned != tc.expectedReturned {
+				t.Fatalf("expected returned=%d, got %d", tc.expectedReturned, payload.Returned)
+			}
+			if payload.HasMore != tc.expectedHasMore {
+				t.Fatalf("expected has_more=%v, got %v", tc.expectedHasMore, payload.HasMore)
+			}
 			if len(payload.Wallets) != len(tc.expectedAddrs) {
 				t.Fatalf("expected %d wallets, got %d", len(tc.expectedAddrs), len(payload.Wallets))
 			}
@@ -522,6 +536,63 @@ func TestHTTPHandlers_Wallets_Pagination(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestHTTPHandlers_Wallets_NavigationMetadataWithFiltersAndSorting(t *testing.T) {
+	store := NewInMemoryWalletIdentityStore()
+	now := time.Now().UTC()
+
+	mustSeedWalletIdentity(t, store, "0x9999999999999999999999999999999999999991", "u_test_example_com", true, now.Add(-4*time.Hour))
+	mustSeedWalletIdentity(t, store, "0x9999999999999999999999999999999999999992", "u_test_example_com", false, now.Add(-3*time.Hour))
+	mustSeedWalletIdentity(t, store, "0x9999999999999999999999999999999999999993", "u_test_example_com", false, now.Add(-2*time.Hour))
+	mustSeedWalletIdentity(t, store, "0x9999999999999999999999999999999999999994", "u_test_example_com", false, now.Add(-1*time.Hour))
+
+	h := HTTPHandlers{
+		Tokens:           mustTokenService(t),
+		TTL:              time.Hour,
+		Users:            usermod.NewService(nil),
+		WalletIdentities: store,
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/auth/wallets?primary=false&sort=linked_at&order=desc&limit=2&offset=1", nil)
+	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	rec := httptest.NewRecorder()
+
+	h.Wallets(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+
+	var payload WalletsResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("decode error: %v", err)
+	}
+
+	if payload.Total != 3 {
+		t.Fatalf("expected total=3, got %d", payload.Total)
+	}
+	if payload.Limit != 2 {
+		t.Fatalf("expected limit=2, got %d", payload.Limit)
+	}
+	if payload.Offset != 1 {
+		t.Fatalf("expected offset=1, got %d", payload.Offset)
+	}
+	if payload.Returned != 2 {
+		t.Fatalf("expected returned=2, got %d", payload.Returned)
+	}
+	if payload.HasMore {
+		t.Fatal("expected has_more=false on final filtered window")
+	}
+	if len(payload.Wallets) != 2 {
+		t.Fatalf("expected 2 wallets, got %d", len(payload.Wallets))
+	}
+	if payload.Wallets[0].Address != "0x9999999999999999999999999999999999999993" {
+		t.Fatalf("unexpected first wallet: %q", payload.Wallets[0].Address)
+	}
+	if payload.Wallets[1].Address != "0x9999999999999999999999999999999999999992" {
+		t.Fatalf("unexpected second wallet: %q", payload.Wallets[1].Address)
 	}
 }
 

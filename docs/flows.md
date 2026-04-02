@@ -612,3 +612,28 @@ Validation path for this subphase:
 - handler-level validation for `limit` and `offset` compatibility
 - handler-level validation for invalid pagination parameters returning `400`
 - handler-level validation for empty but valid inventory windows
+
+
+## 0.4.19 — Wallet Inventory Navigation Metadata
+
+### Updated Read Flow
+Authenticated wallet inventory flow now behaves as follows:
+
+1. authenticated user calls `GET /auth/wallets`
+2. backend loads wallets currently owned by that durable user
+3. backend maps identities into the lifecycle-aware wallet read model
+4. optional filters are applied
+5. optional ordering is applied
+6. optional pagination window is applied
+7. backend returns:
+   - `wallets`
+   - `total`
+   - `limit`
+   - `offset`
+   - `returned`
+   - `has_more`
+
+### Response Semantics
+- `returned` is the size of the current `wallets` array
+- `has_more` indicates whether another wallet exists after the current window
+- when `limit=0`, the request is treated as unbounded and `has_more=false`

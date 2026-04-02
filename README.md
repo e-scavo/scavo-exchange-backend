@@ -23,7 +23,7 @@ The backend follows a **wallet-first identity model** that progressively evolves
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.4 — Auth and User Stabilization  
-**Current Subphase:** **0.4.18 — Wallet Inventory Pagination and Windowed Response**
+**Current Subphase:** **0.4.19 — Wallet Inventory Navigation Metadata**
 
 ---
 
@@ -464,7 +464,7 @@ Focus areas added in 0.4.16:
 
 ## 🧭 Next Phase
 
-### 0.4.19 — Wallet Inventory Advanced Query Preparation
+### 0.4.20 — Wallet Inventory Advanced Query Preparation
 
 Next expected focus:
 
@@ -902,3 +902,126 @@ This subphase does not add:
 ### Conclusion
 
 Phase 0.4.18 makes the lifecycle-aware wallet inventory endpoint windowable while preserving its authenticated ownership scope and all Phase 0.4 invariants. The backend now supports small, explicit pagination semantics on top of the queryable wallet inventory contract.
+
+
+## Phase 0.4.19 — Wallet Inventory Navigation Metadata
+
+### Objective
+
+Add minimal navigation metadata to the paginated `GET /auth/wallets` response so clients can consume windowed inventory results without inferring navigation state on their own.
+
+### Initial Context
+
+By the end of 0.4.18, the authenticated wallet inventory endpoint already supported lifecycle-aware projection, filtering, sorting, and explicit windowing through `limit` and `offset`.
+
+The response already exposed:
+
+- `wallets`
+- `total`
+- `limit`
+- `offset`
+
+However, clients still had to infer whether more results existed and how many items were effectively returned by the current window.
+
+### Problem Statement
+
+The remaining gap was not in ownership, persistence, or query parsing. The gap was in response navigation semantics.
+
+A paginated inventory response without explicit navigation metadata forces each client to replicate simple backend logic to determine:
+
+- how many items the current window actually returned
+- whether another page exists after the current window
+
+### Scope
+
+Included:
+
+- additive response metadata:
+  - `returned`
+  - `has_more`
+- deterministic calculation after filtering, sorting, and pagination
+- handler-level tests covering default, paginated, empty-window, and filtered-window navigation behavior
+
+Excluded:
+
+- cursor pagination
+- `next_offset` or `previous_offset`
+- new filters
+- store changes
+- SQL pagination
+- ownership changes
+
+### Root Cause Analysis
+
+Phase 0.4.18 made the wallet inventory endpoint windowable, but the response contract still stopped short of describing the returned window itself. This remained a read-model concern and did not require any domain or persistence expansion.
+
+### Files Affected
+
+- `internal/modules/auth/http_wallet_list.go`
+- `internal/modules/auth/http_handlers_test.go`
+- `README.md`
+- `docs/phase-status.md`
+- `docs/handoff/backend-status.md`
+- `docs/phase0_4_auth_and_user_stabilization.md`
+- `docs/flows.md`
+- `docs/testing.md`
+
+### Implementation Characteristics
+
+`GET /auth/wallets` now keeps all existing query semantics and response fields, and adds:
+
+- `returned`
+- `has_more`
+
+Important behavior:
+
+- `returned` equals the actual number of wallets present in `wallets` for the current response
+- `has_more` is calculated only after filtering, sorting, and applying the requested window
+- when `limit=0`, the response is treated as unbounded and `has_more=false`
+- the change is additive and backward compatible
+
+### Validation
+
+Validation path for this subphase:
+
+```
+go test ./...
+```
+
+Focused handler coverage now includes:
+
+- default wallet inventory response with navigation metadata
+- paginated windows with `has_more=true`
+- final windows with `has_more=false`
+- empty valid windows with `returned=0`
+- filtered and sorted windows with correct navigation metadata
+
+### Release Impact
+
+This subphase is additive and read-only. It improves the wallet inventory response contract without changing ownership, linking, detach, merge, or primary-wallet semantics.
+
+### Risks
+
+Low risk. The change remains constrained to the wallet inventory handler, response payload, and handler-level tests.
+
+Main guarded risks:
+
+- incorrect `has_more` calculation
+- accidental response-contract incompatibility
+- ambiguous behavior for unbounded (`limit=0`) requests
+
+### What it does NOT solve
+
+This subphase does not add:
+
+- cursor pagination
+- next-page tokens
+- search
+- detached-wallet history reporting
+- admin inventory views
+- store-level pagination
+- ownership-rule changes
+
+### Conclusion
+
+Phase 0.4.19 completes the basic navigation contract of the authenticated wallet inventory endpoint. The backend now exposes not only filtered, ordered, and windowed wallet inventory responses, but also explicit metadata describing the returned window itself.

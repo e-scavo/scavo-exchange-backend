@@ -16,7 +16,7 @@ It is intended to:
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.4 — Auth and User Stabilization  
-**Latest Completed Subphase:** 0.4.18 — Wallet Inventory Pagination and Windowed Response
+**Latest Completed Subphase:** 0.4.19 — Wallet Inventory Navigation Metadata
 
 ---
 
@@ -232,7 +232,7 @@ The system intentionally does **not** yet support:
 
 ## 🧭 Next Phase
 
-### 0.4.19 — Wallet Inventory Advanced Query Preparation
+### 0.4.20 — Wallet Inventory Advanced Query Preparation
 
 Expected next focus:
 

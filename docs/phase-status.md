@@ -38,6 +38,7 @@ Status: ✅ Completed
 | 0.4.16 | Wallet identity read model enrichment | ✅ Completed |
 | 0.4.17 | Wallet inventory query filtering and sorting | ✅ Completed |
 | 0.4.18 | Wallet inventory pagination and windowed response | ✅ Completed |
+| 0.4.19 | Wallet inventory navigation metadata | ✅ Completed |
 
 ---
 
@@ -275,3 +276,50 @@ The following items remain intentionally out of scope:
 - only add further wallet inventory query semantics if a concrete client need appears
 - preserve backward compatibility of the paginated wallet inventory contract
 - keep future inventory enhancements read-only unless the ZIP proves otherwise
+
+
+## ✅ Phase 0.4.19 Closure Summary
+
+Phase 0.4.19 completes the wallet inventory response contract with additive navigation metadata.
+
+The backend now exposes the following authenticated inventory metadata on `GET /auth/wallets`:
+
+- `total`
+- `limit`
+- `offset`
+- `returned`
+- `has_more`
+
+### Delivered in 0.4.19
+
+- additive `returned` field describing the current window size
+- additive `has_more` field describing whether a next page exists
+- deterministic calculation after filtering, sorting, and pagination
+- preserved backward compatibility of the wallet inventory contract
+- handler-level coverage for default, paginated, empty-window, and filtered-window navigation scenarios
+
+---
+
+## ❌ Not Included in 0.4.19
+
+The following items remain intentionally out of scope:
+
+- cursor pagination
+- next-page tokens
+- `next_offset` / `previous_offset`
+- text search
+- detached-wallet history endpoints
+- store-level query expansion
+- ownership-rule changes
+
+---
+
+## ⏭️ Next Phase
+
+### 0.4.20 — Wallet Inventory Advanced Query Preparation
+
+Expected next focus:
+
+- only add further wallet inventory query semantics if a concrete client need appears
+- preserve backward compatibility of the current paginated wallet inventory contract
+- keep all future enhancements read-only unless the ZIP proves otherwise

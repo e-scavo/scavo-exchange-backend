@@ -612,3 +612,29 @@ Validation path for this subphase:
 - handler-level validation for `limit` and `offset` compatibility
 - handler-level validation for invalid pagination parameters returning `400`
 - handler-level validation for empty but valid inventory windows
+
+
+## 0.4.19 — Wallet Inventory Navigation Metadata
+
+### Objective
+Add additive navigation metadata to `GET /auth/wallets` without changing domain or persistence behavior.
+
+### Scope
+- add `returned` to the wallet inventory response
+- add `has_more` to the wallet inventory response
+- compute navigation metadata after filtering, sorting, and pagination
+- preserve backward compatibility of the existing inventory contract
+- extend handler-level coverage for navigation metadata behavior
+
+### Delivered
+- additive response fields:
+  - `returned`
+  - `has_more`
+- navigation semantics that remain ownership-scoped and read-only
+- explicit handling of unbounded requests (`limit=0` => `has_more=false`)
+- tests covering default, paginated, empty-window, and filtered-window responses
+
+### Validation
+- `go test ./...`
+- handler-level validation for `returned` and `has_more` under default and paginated inventory requests
+- handler-level validation for filtered and sorted inventory windows with navigation metadata

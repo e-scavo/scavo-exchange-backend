@@ -1029,3 +1029,40 @@ curl -s "http://localhost:8080/auth/wallets?limit=1&offset=1" \
 curl -s "http://localhost:8080/auth/wallets?status=active&sort=linked_at&order=desc&limit=2&offset=0" \
   -H "Authorization: Bearer $TOKEN"
 ```
+
+
+## Phase 0.4.19 Testing Notes
+
+### Goal
+Validate wallet inventory navigation metadata on top of the existing lifecycle-aware, filterable, sortable, and paginated `GET /auth/wallets` read model.
+
+### Coverage Added
+Handler-level validation covers:
+
+- default wallet inventory response with `returned` and `has_more`
+- paginated window with `has_more=true`
+- final paginated window with `has_more=false`
+- empty valid window with `returned=0`
+- filtered and sorted paginated window with correct navigation metadata
+
+### Validation Command
+
+```
+go test ./...
+```
+
+### Manual API Checks
+
+```
+curl -s http://localhost:8080/auth/wallets \
+  -H "Authorization: Bearer $TOKEN"
+
+curl -s "http://localhost:8080/auth/wallets?limit=2" \
+  -H "Authorization: Bearer $TOKEN"
+
+curl -s "http://localhost:8080/auth/wallets?limit=1&offset=1" \
+  -H "Authorization: Bearer $TOKEN"
+
+curl -s "http://localhost:8080/auth/wallets?primary=false&sort=linked_at&order=desc&limit=2&offset=1" \
+  -H "Authorization: Bearer $TOKEN"
+```
