@@ -698,3 +698,18 @@ The authenticated wallet inventory flow does not change behavior in 0.4.23. This
 
 ### Outcome
 The flow remains read-only and ownership-scoped, while the documentation now shows concrete query usage and error examples aligned with the real endpoint contract.
+
+
+## Phase 0.4.24 — Wallet Inventory Manual Validation Closure
+
+### Objective
+Close the manual validation layer for `GET /auth/wallets` without changing code, stores, or persistence.
+
+### Delivered
+- consolidated manual validation coverage for base, filtered, sorted, paginated, and unbounded inventory requests
+- explicit operator checks for navigation metadata (`returned`, `has_more`, `next_offset`, `previous_offset`)
+- explicit invalid-query checks for the hardened query-parameter contract
+- documentation-only closure of the wallet inventory manual validation layer
+
+### Conclusion
+Phase 0.4.24 leaves the wallet inventory flow behavior unchanged while making its operator-facing manual verification path explicit and complete.

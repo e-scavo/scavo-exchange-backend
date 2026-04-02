@@ -1128,3 +1128,27 @@ Documentation and manual validation guidance now cover:
 ```
 go test ./...
 ```
+
+
+## Phase 0.4.24 Testing Notes
+
+### Goal
+Validate that the manual validation guidance for `GET /auth/wallets` covers the real handler contract end-to-end.
+
+### Coverage Added
+Documentation and manual validation guidance now cover:
+
+- base authenticated inventory request
+- filtered requests using `primary` and `status`
+- sorted requests using `sort=linked_at&order=desc`
+- bounded pagination requests using `limit` and `offset`
+- unbounded offset-only requests
+- expected manual interpretation of `returned`, `has_more`, `next_offset`, and `previous_offset`
+- explicit invalid-query checks such as `order` without `sort`, invalid `status`, invalid `primary`, and invalid `limit`
+- no behavioral regression expected because the subphase is documentation-only
+
+### Validation Command
+
+```
+go test ./...
+```

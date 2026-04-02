@@ -378,13 +378,33 @@ Phase 0.4.22 clarifies the wallet inventory response contract so the operator-fa
 - store-level pagination
 - ownership-rule changes
 
-### 0.4.24 — Wallet Inventory Manual Validation Closure
+## ✅ Phase 0.4.24 Closure Summary
+
+Phase 0.4.24 closes the manual-validation layer for `GET /auth/wallets` so operators have an explicit checklist for validating the already-implemented query contract end-to-end.
+
+### Delivered in 0.4.24
+
+- consolidated manual validation scenarios for base, filtered, sorted, and paginated wallet inventory requests
+- explicit manual checks for bounded vs unbounded window behavior
+- explicit manual checks for `returned`, `has_more`, `next_offset`, and `previous_offset`
+- invalid-query manual checks for contractual errors such as `order` without `sort`
+
+## ❌ Not Included in 0.4.24
+
+- new endpoint behavior
+- new filters
+- new sort fields
+- cursor pagination
+- store-level pagination
+- ownership-rule changes
+
+### 0.4.25 — To Be Defined Against Real ZIP
 
 Expected next focus:
 
-- preserve backward compatibility of the wallet inventory examples layer
-- keep future work read-only unless the ZIP proves otherwise
-- only expand inventory semantics when a concrete client need appears
+- preserve backward compatibility of the wallet inventory contract
+- only open new functional scope if the next ZIP shows a real need
+- keep future work incremental and ownership-safe
 
 
 ## ✅ Phase 0.4.23 Closure Summary
@@ -407,10 +427,3 @@ Phase 0.4.23 closes the concrete examples layer for `GET /auth/wallets` so opera
 - store-level pagination
 - ownership-rule changes
 
-### 0.4.24 — Wallet Inventory Manual Validation Closure
-
-Expected next focus:
-
-- preserve backward compatibility of the wallet inventory examples layer
-- keep future work read-only unless the ZIP proves otherwise
-- only expand inventory semantics when a concrete client need appears

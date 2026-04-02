@@ -232,13 +232,13 @@ The system intentionally does **not** yet support:
 
 ## 🧭 Next Phase
 
-### 0.4.24 — Wallet Inventory Manual Validation Closure
+### 0.4.25 — To Be Defined Against Real ZIP
 
 Expected next focus:
 
-- preserve backward compatibility of the wallet inventory examples layer
-- keep future work read-only unless the ZIP proves otherwise
-- only expand inventory semantics when a concrete client need appears
+- preserve backward compatibility of the wallet inventory contract
+- only open new functional scope if the next ZIP shows a real need
+- keep future work incremental and ownership-safe
 
 ---
 
@@ -281,3 +281,6 @@ Phase 0.4.22 closes the documentation gap around the authenticated wallet invent
 
 
 Phase 0.4.23 closes the operator-facing examples layer for `GET /auth/wallets` by documenting concrete valid and invalid query patterns, plus bounded-window response examples, without changing domain, stores, persistence, or handler behavior.
+
+
+Phase 0.4.24 closes the manual-validation layer around the authenticated wallet inventory endpoint. The implementation remains documentation-only, but operators now have an explicit checklist for validating base, filtered, sorted, paginated, bounded, unbounded, and invalid query scenarios against the real `GET /auth/wallets` contract.

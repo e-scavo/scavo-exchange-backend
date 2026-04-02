@@ -1166,3 +1166,40 @@ Harden the `GET /auth/wallets` query-parameter contract without adding new inven
 
 ### Conclusion
 Phase 0.4.21 hardens the wallet inventory query contract by making parameter combinations and defaults explicit while preserving the existing read-only, ownership-scoped behavior.
+
+
+## Phase 0.4.24 — Wallet Inventory Manual Validation Closure
+
+### Objective
+Close the manual validation layer for `GET /auth/wallets` so operators have a compact, explicit checklist for verifying the already-implemented inventory contract end-to-end without changing code, stores, or persistence.
+
+### Scope
+- consolidate manual validation scenarios for the wallet inventory endpoint
+- cover base, filtered, sorted, paginated, bounded, and unbounded request patterns
+- document expected navigation metadata behavior for bounded and unbounded windows
+- document expected contractual errors for invalid query combinations
+- keep the phase documentation aligned with the real handler behavior
+
+### Problem Statement
+By 0.4.23, the wallet inventory endpoint already had clarified response fields and concrete request examples, but the documentation still lacked a compact manual-validation closure showing how operators should verify the endpoint end-to-end against the real contract.
+
+### Delivered
+- manual validation checklist for base inventory queries
+- manual validation checklist for `primary`, `status`, `sort`, `order`, `limit`, and `offset` combinations
+- explicit manual verification points for `returned`, `has_more`, `next_offset`, and `previous_offset`
+- explicit invalid-query manual checks such as `order` without `sort`
+- documentation-only closure of the wallet inventory manual validation layer
+
+### Validation
+- documentation reviewed against the real `GET /auth/wallets` handler contract
+- `go test ./...`
+
+### What it does NOT solve
+- new endpoint behavior
+- new filters or sort fields
+- cursor pagination
+- store-level pagination
+- ownership-rule changes
+
+### Conclusion
+Phase 0.4.24 closes the manual-validation layer around `GET /auth/wallets` by documenting how to verify the existing contract end-to-end without changing domain, stores, persistence, or handler behavior.
