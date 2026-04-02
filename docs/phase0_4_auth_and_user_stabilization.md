@@ -638,3 +638,25 @@ Add additive navigation metadata to `GET /auth/wallets` without changing domain 
 - `go test ./...`
 - handler-level validation for `returned` and `has_more` under default and paginated inventory requests
 - handler-level validation for filtered and sorted inventory windows with navigation metadata
+
+
+## 0.4.20 — Wallet Inventory Cursorless Navigation Hints
+
+### Objective
+Add additive offset-based navigation hints to `GET /auth/wallets` without changing domain, persistence, or ownership rules.
+
+### Scope
+- add `next_offset` and `previous_offset` to the wallet inventory response
+- compute hints after filtering, sorting, and pagination
+- preserve backward compatibility of the response contract
+- extend handler-level tests for bounded and unbounded windows
+
+### Delivered
+- forward and backward offset hints for bounded windows
+- `nil` hints for unbounded (`limit=0`) requests
+- stable semantics for empty windows reached by high offsets
+- no changes to stores, migrations, or lifecycle invariants
+
+### Validation
+- `go test ./...`
+- handler-level checks for first, intermediate, final, and empty windows

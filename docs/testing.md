@@ -1066,3 +1066,24 @@ curl -s "http://localhost:8080/auth/wallets?limit=1&offset=1" \
 curl -s "http://localhost:8080/auth/wallets?primary=false&sort=linked_at&order=desc&limit=2&offset=1" \
   -H "Authorization: Bearer $TOKEN"
 ```
+
+
+## Phase 0.4.20 Testing Notes
+
+### Goal
+Validate additive cursorless navigation hints on top of the existing lifecycle-aware, filterable, sortable, and paginated `GET /auth/wallets` read model.
+
+### Coverage Added
+Handler-level validation covers:
+
+- default unbounded response with no navigation hints
+- first bounded page with `next_offset` only
+- intermediate bounded page with both navigation hints
+- final bounded page without `next_offset`
+- empty bounded window reached by high offset with `previous_offset` still available
+
+### Validation Command
+
+```
+go test ./...
+```

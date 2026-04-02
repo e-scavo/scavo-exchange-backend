@@ -39,6 +39,7 @@ Status: ✅ Completed
 | 0.4.17 | Wallet inventory query filtering and sorting | ✅ Completed |
 | 0.4.18 | Wallet inventory pagination and windowed response | ✅ Completed |
 | 0.4.19 | Wallet inventory navigation metadata | ✅ Completed |
+| 0.4.20 | Wallet inventory cursorless navigation hints | ✅ Completed |
 
 ---
 
@@ -316,10 +317,40 @@ The following items remain intentionally out of scope:
 
 ## ⏭️ Next Phase
 
-### 0.4.20 — Wallet Inventory Advanced Query Preparation
+### 0.4.21 — Wallet Inventory Response Contract Hardening
 
 Expected next focus:
 
 - only add further wallet inventory query semantics if a concrete client need appears
 - preserve backward compatibility of the current paginated wallet inventory contract
 - keep all future enhancements read-only unless the ZIP proves otherwise
+
+
+## ✅ Phase 0.4.20 Closure Summary
+
+Phase 0.4.20 completes the offset-based wallet inventory contract with additive navigation hints that remain read-only and ownership-scoped.
+
+### Delivered in 0.4.20
+
+- `GET /auth/wallets` now returns `next_offset` when a bounded window has another page
+- `GET /auth/wallets` now returns `previous_offset` when a bounded window can move backward
+- unbounded requests (`limit=0`) keep navigation hints unset
+- handler-level tests cover first, intermediate, final, and empty windows
+
+## ❌ Not Included in 0.4.20
+
+- cursor pagination
+- continuation tokens
+- next/previous URLs
+- new filters
+- search
+- store-level pagination
+- ownership-rule changes
+
+### 0.4.21 — Wallet Inventory Response Contract Hardening
+
+Expected next focus:
+
+- preserve backward compatibility of the wallet inventory response contract
+- only extend inventory semantics when a concrete client need appears
+- keep future inventory work read-only unless the ZIP proves otherwise

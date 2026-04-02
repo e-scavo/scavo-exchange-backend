@@ -21,12 +21,14 @@ type WalletReadModel struct {
 }
 
 type WalletsResponse struct {
-	Wallets  []*WalletReadModel `json:"wallets"`
-	Total    int                `json:"total"`
-	Limit    int                `json:"limit"`
-	Offset   int                `json:"offset"`
-	Returned int                `json:"returned"`
-	HasMore  bool               `json:"has_more"`
+	Wallets        []*WalletReadModel `json:"wallets"`
+	Total          int                `json:"total"`
+	Limit          int                `json:"limit"`
+	Offset         int                `json:"offset"`
+	Returned       int                `json:"returned"`
+	HasMore        bool               `json:"has_more"`
+	NextOffset     *int               `json:"next_offset,omitempty"`
+	PreviousOffset *int               `json:"previous_offset,omitempty"`
 }
 
 type WalletsQuery struct {
@@ -272,17 +274,33 @@ func buildWalletsResponse(window []*WalletReadModel, total int, q WalletsQuery) 
 
 	returned := len(window)
 	hasMore := false
+	var nextOffset *int
+	var previousOffset *int
+
 	if q.Limit > 0 {
 		hasMore = q.Offset+returned < total
+		if hasMore {
+			v := q.Offset + returned
+			nextOffset = &v
+		}
+		if q.Offset > 0 {
+			v := q.Offset - q.Limit
+			if v < 0 {
+				v = 0
+			}
+			previousOffset = &v
+		}
 	}
 
 	return WalletsResponse{
-		Wallets:  window,
-		Total:    total,
-		Limit:    q.Limit,
-		Offset:   q.Offset,
-		Returned: returned,
-		HasMore:  hasMore,
+		Wallets:        window,
+		Total:          total,
+		Limit:          q.Limit,
+		Offset:         q.Offset,
+		Returned:       returned,
+		HasMore:        hasMore,
+		NextOffset:     nextOffset,
+		PreviousOffset: previousOffset,
 	}
 }
 

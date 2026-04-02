@@ -637,3 +637,30 @@ Authenticated wallet inventory flow now behaves as follows:
 - `returned` is the size of the current `wallets` array
 - `has_more` indicates whether another wallet exists after the current window
 - when `limit=0`, the request is treated as unbounded and `has_more=false`
+
+
+## 0.4.20 — Wallet Inventory Cursorless Navigation Hints
+
+### Updated Read Flow
+Authenticated wallet inventory flow now behaves as follows:
+
+1. authenticated user calls `GET /auth/wallets`
+2. backend loads wallets currently owned by that durable user
+3. backend maps identities into the lifecycle-aware wallet read model
+4. optional filters are applied
+5. optional ordering is applied
+6. optional pagination window is applied
+7. backend returns:
+   - `wallets`
+   - `total`
+   - `limit`
+   - `offset`
+   - `returned`
+   - `has_more`
+   - `next_offset`
+   - `previous_offset`
+
+### Response Semantics
+- `next_offset` is returned only for bounded requests that have another page
+- `previous_offset` is returned only for bounded requests whose current offset can move backward
+- when `limit=0`, both navigation hints remain unset

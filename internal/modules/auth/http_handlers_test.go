@@ -482,19 +482,21 @@ func TestHTTPHandlers_Wallets_Pagination(t *testing.T) {
 	}
 
 	for _, tc := range []struct {
-		name             string
-		query            string
-		expectedAddrs    []string
-		expectedTotal    int
-		expectedLimit    int
-		expectedOffset   int
-		expectedReturned int
-		expectedHasMore  bool
+		name                   string
+		query                  string
+		expectedAddrs          []string
+		expectedTotal          int
+		expectedLimit          int
+		expectedOffset         int
+		expectedReturned       int
+		expectedHasMore        bool
+		expectedNextOffset     *int
+		expectedPreviousOffset *int
 	}{
-		{name: "limit_only", query: "/auth/wallets?limit=2", expectedAddrs: []string{"0x7777777777777777777777777777777777777771", "0x7777777777777777777777777777777777777772"}, expectedTotal: 3, expectedLimit: 2, expectedOffset: 0, expectedReturned: 2, expectedHasMore: true},
-		{name: "offset_only", query: "/auth/wallets?offset=1", expectedAddrs: []string{"0x7777777777777777777777777777777777777772", "0x7777777777777777777777777777777777777773"}, expectedTotal: 3, expectedLimit: 0, expectedOffset: 1, expectedReturned: 2, expectedHasMore: false},
-		{name: "limit_and_offset", query: "/auth/wallets?limit=1&offset=1", expectedAddrs: []string{"0x7777777777777777777777777777777777777772"}, expectedTotal: 3, expectedLimit: 1, expectedOffset: 1, expectedReturned: 1, expectedHasMore: true},
-		{name: "window_empty", query: "/auth/wallets?limit=2&offset=10", expectedAddrs: []string{}, expectedTotal: 3, expectedLimit: 2, expectedOffset: 10, expectedReturned: 0, expectedHasMore: false},
+		{name: "limit_only", query: "/auth/wallets?limit=2", expectedAddrs: []string{"0x7777777777777777777777777777777777777771", "0x7777777777777777777777777777777777777772"}, expectedTotal: 3, expectedLimit: 2, expectedOffset: 0, expectedReturned: 2, expectedHasMore: true, expectedNextOffset: intPtr(2), expectedPreviousOffset: nil},
+		{name: "offset_only", query: "/auth/wallets?offset=1", expectedAddrs: []string{"0x7777777777777777777777777777777777777772", "0x7777777777777777777777777777777777777773"}, expectedTotal: 3, expectedLimit: 0, expectedOffset: 1, expectedReturned: 2, expectedHasMore: false, expectedNextOffset: nil, expectedPreviousOffset: nil},
+		{name: "limit_and_offset", query: "/auth/wallets?limit=1&offset=1", expectedAddrs: []string{"0x7777777777777777777777777777777777777772"}, expectedTotal: 3, expectedLimit: 1, expectedOffset: 1, expectedReturned: 1, expectedHasMore: true, expectedNextOffset: intPtr(2), expectedPreviousOffset: intPtr(0)},
+		{name: "window_empty", query: "/auth/wallets?limit=2&offset=10", expectedAddrs: []string{}, expectedTotal: 3, expectedLimit: 2, expectedOffset: 10, expectedReturned: 0, expectedHasMore: false, expectedNextOffset: nil, expectedPreviousOffset: intPtr(8)},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			req := httptest.NewRequest(http.MethodGet, tc.query, nil)
@@ -526,6 +528,12 @@ func TestHTTPHandlers_Wallets_Pagination(t *testing.T) {
 			}
 			if payload.HasMore != tc.expectedHasMore {
 				t.Fatalf("expected has_more=%v, got %v", tc.expectedHasMore, payload.HasMore)
+			}
+			if !equalOptionalInt(payload.NextOffset, tc.expectedNextOffset) {
+				t.Fatalf("unexpected next_offset: got=%#v want=%#v", payload.NextOffset, tc.expectedNextOffset)
+			}
+			if !equalOptionalInt(payload.PreviousOffset, tc.expectedPreviousOffset) {
+				t.Fatalf("unexpected previous_offset: got=%#v want=%#v", payload.PreviousOffset, tc.expectedPreviousOffset)
 			}
 			if len(payload.Wallets) != len(tc.expectedAddrs) {
 				t.Fatalf("expected %d wallets, got %d", len(tc.expectedAddrs), len(payload.Wallets))
@@ -585,6 +593,12 @@ func TestHTTPHandlers_Wallets_NavigationMetadataWithFiltersAndSorting(t *testing
 	if payload.HasMore {
 		t.Fatal("expected has_more=false on final filtered window")
 	}
+	if payload.NextOffset != nil {
+		t.Fatalf("expected next_offset=nil on final filtered window, got %#v", payload.NextOffset)
+	}
+	if payload.PreviousOffset == nil || *payload.PreviousOffset != 0 {
+		t.Fatalf("expected previous_offset=0 on final filtered window, got %#v", payload.PreviousOffset)
+	}
 	if len(payload.Wallets) != 2 {
 		t.Fatalf("expected 2 wallets, got %d", len(payload.Wallets))
 	}
@@ -638,6 +652,21 @@ func TestHTTPHandlers_Wallets_InvalidPaginationParams(t *testing.T) {
 				t.Fatalf("unexpected error payload: %#v", payload)
 			}
 		})
+	}
+}
+
+func intPtr(v int) *int {
+	return &v
+}
+
+func equalOptionalInt(left, right *int) bool {
+	switch {
+	case left == nil && right == nil:
+		return true
+	case left == nil || right == nil:
+		return false
+	default:
+		return *left == *right
 	}
 }
 

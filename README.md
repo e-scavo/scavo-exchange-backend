@@ -23,7 +23,7 @@ The backend follows a **wallet-first identity model** that progressively evolves
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.4 — Auth and User Stabilization  
-**Current Subphase:** **0.4.19 — Wallet Inventory Navigation Metadata**
+**Current Subphase:** **0.4.20 — Wallet Inventory Cursorless Navigation Hints**
 
 ---
 
@@ -464,14 +464,14 @@ Focus areas added in 0.4.16:
 
 ## 🧭 Next Phase
 
-### 0.4.20 — Wallet Inventory Advanced Query Preparation
+### 0.4.21 — Wallet Inventory Response Contract Hardening
 
 Next expected focus:
 
-- extend wallet inventory semantics only if a concrete client need appears
-- preserve backward compatibility of the current paginated inventory contract
-- avoid reworking ownership invariants already stabilized in Phase 0.4
+- preserve backward compatibility of the wallet inventory navigation contract
+- only add further inventory semantics if a concrete client need appears
 - keep all further enhancements read-only unless the ZIP proves otherwise
+- avoid reworking ownership invariants already stabilized in Phase 0.4
 
 ---
 
@@ -1025,3 +1025,40 @@ This subphase does not add:
 ### Conclusion
 
 Phase 0.4.19 completes the basic navigation contract of the authenticated wallet inventory endpoint. The backend now exposes not only filtered, ordered, and windowed wallet inventory responses, but also explicit metadata describing the returned window itself.
+
+
+## Phase 0.4.20 — Wallet Inventory Cursorless Navigation Hints
+
+### Objective
+Add additive cursorless navigation hints to `GET /auth/wallets` so offset-based clients can move forward and backward without recalculating hints outside the API.
+
+### Scope
+- add `next_offset` to the wallet inventory response
+- add `previous_offset` to the wallet inventory response
+- compute navigation hints after filtering, sorting, and pagination
+- preserve backward compatibility of the existing wallet inventory contract
+- extend handler-level coverage for forward and backward navigation hints
+
+### Delivered
+- additive response fields:
+  - `next_offset`
+  - `previous_offset`
+- deterministic offset-based navigation hints for first, intermediate, last, and empty windows
+- explicit `nil` navigation hints for unbounded (`limit=0`) responses
+- tests covering bounded and unbounded windows, including empty pages and filtered windows
+
+### Validation
+- `go test ./...`
+- handler-level validation for `next_offset` and `previous_offset` under bounded wallet inventory requests
+- handler-level validation for empty and filtered windows with navigation hints
+
+### What it does NOT solve
+- cursor pagination
+- continuation tokens
+- next/previous URLs
+- store-level pagination
+- additional filters or search
+- ownership-rule changes
+
+### Conclusion
+Phase 0.4.20 keeps the wallet inventory endpoint read-only and ownership-scoped while completing the basic offset-based navigation contract with explicit forward and backward hints.

@@ -16,7 +16,7 @@ It is intended to:
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.4 — Auth and User Stabilization  
-**Latest Completed Subphase:** 0.4.19 — Wallet Inventory Navigation Metadata
+**Latest Completed Subphase:** 0.4.20 — Wallet Inventory Cursorless Navigation Hints
 
 ---
 
@@ -232,7 +232,7 @@ The system intentionally does **not** yet support:
 
 ## 🧭 Next Phase
 
-### 0.4.20 — Wallet Inventory Advanced Query Preparation
+### 0.4.21 — Wallet Inventory Response Contract Hardening
 
 Expected next focus:
 
@@ -272,3 +272,6 @@ At the end of Phase 0.4.16:
 - the authenticated wallet inventory endpoint now exposes an enriched lifecycle-aware read model
 - the authenticated wallet inventory endpoint now supports filtering, sorting, and simple pagination semantics without changing ownership rules
 
+
+
+Phase 0.4.20 extends the authenticated wallet inventory response with additive cursorless navigation hints (`next_offset`, `previous_offset`) computed after filtering, sorting, and pagination. The implementation stays entirely in the handler/read-model layer and does not modify ownership, stores, or persistence.
