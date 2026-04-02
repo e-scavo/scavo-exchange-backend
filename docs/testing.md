@@ -1152,3 +1152,22 @@ Documentation and manual validation guidance now cover:
 ```
 go test ./...
 ```
+
+
+## Phase 0.4.25 Testing Notes
+
+### Goal
+Validate that the authenticated wallet inventory exposes actionability hints consistent with the existing wallet detach and primary-switch rules.
+
+### Coverage Added
+Handler-level coverage now verifies:
+
+- a single primary wallet returns `can_set_primary=false`, `can_detach=false`, and both detach block reasons
+- a two-wallet inventory marks the primary wallet as non-actionable for detach and marks the secondary wallet as detachable and promotable
+- detach block reasons remain aligned with the existing domain constants
+
+### Validation Command
+
+```
+go test ./...
+```

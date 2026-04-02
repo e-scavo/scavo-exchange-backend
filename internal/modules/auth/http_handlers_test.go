@@ -279,6 +279,133 @@ func mustSeedWalletIdentity(t *testing.T, store *InMemoryWalletIdentityStore, ad
 	return attached
 }
 
+func containsString(values []string, target string) bool {
+	for _, value := range values {
+		if value == target {
+			return true
+		}
+	}
+	return false
+}
+
+func TestHTTPHandlers_Wallets_ActionabilitySinglePrimary(t *testing.T) {
+	store := NewInMemoryWalletIdentityStore()
+	now := time.Now().UTC()
+	address := "0x7777777777777777777777777777777777777771"
+	mustSeedWalletIdentity(t, store, address, "u_test_example_com", true, now.Add(-1*time.Hour))
+
+	h := HTTPHandlers{
+		Tokens:           mustTokenService(t),
+		TTL:              time.Hour,
+		Users:            usermod.NewService(nil),
+		WalletIdentities: store,
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/auth/wallets", nil)
+	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	rec := httptest.NewRecorder()
+
+	h.Wallets(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+
+	var payload WalletsResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("decode error: %v", err)
+	}
+
+	if len(payload.Wallets) != 1 {
+		t.Fatalf("expected 1 wallet, got %d", len(payload.Wallets))
+	}
+
+	wallet := payload.Wallets[0]
+	if wallet.CanSetPrimary {
+		t.Fatal("expected can_set_primary=false for single primary wallet")
+	}
+	if wallet.CanDetach {
+		t.Fatal("expected can_detach=false for single primary wallet")
+	}
+	if !containsString(wallet.DetachBlockReasons, WalletDetachReasonWalletIsPrimary) {
+		t.Fatalf("expected detach block reason %q, got %#v", WalletDetachReasonWalletIsPrimary, wallet.DetachBlockReasons)
+	}
+	if !containsString(wallet.DetachBlockReasons, WalletDetachReasonUserWouldBeEmpty) {
+		t.Fatalf("expected detach block reason %q, got %#v", WalletDetachReasonUserWouldBeEmpty, wallet.DetachBlockReasons)
+	}
+}
+
+func TestHTTPHandlers_Wallets_ActionabilityTwoWalletInventory(t *testing.T) {
+	store := NewInMemoryWalletIdentityStore()
+	now := time.Now().UTC()
+	primaryAddress := "0x7777777777777777777777777777777777777772"
+	secondaryAddress := "0x7777777777777777777777777777777777777773"
+	mustSeedWalletIdentity(t, store, primaryAddress, "u_test_example_com", true, now.Add(-2*time.Hour))
+	mustSeedWalletIdentity(t, store, secondaryAddress, "u_test_example_com", false, now.Add(-1*time.Hour))
+
+	h := HTTPHandlers{
+		Tokens:           mustTokenService(t),
+		TTL:              time.Hour,
+		Users:            usermod.NewService(nil),
+		WalletIdentities: store,
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/auth/wallets", nil)
+	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	rec := httptest.NewRecorder()
+
+	h.Wallets(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+
+	var payload WalletsResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("decode error: %v", err)
+	}
+
+	if len(payload.Wallets) != 2 {
+		t.Fatalf("expected 2 wallets, got %d", len(payload.Wallets))
+	}
+
+	byAddress := map[string]*WalletReadModel{}
+	for _, wallet := range payload.Wallets {
+		byAddress[wallet.Address] = wallet
+	}
+
+	primary := byAddress[primaryAddress]
+	if primary == nil {
+		t.Fatalf("missing primary wallet %q", primaryAddress)
+	}
+	if primary.CanSetPrimary {
+		t.Fatal("expected primary wallet can_set_primary=false")
+	}
+	if primary.CanDetach {
+		t.Fatal("expected primary wallet can_detach=false")
+	}
+	if !containsString(primary.DetachBlockReasons, WalletDetachReasonWalletIsPrimary) {
+		t.Fatalf("expected primary detach block reason %q, got %#v", WalletDetachReasonWalletIsPrimary, primary.DetachBlockReasons)
+	}
+	if containsString(primary.DetachBlockReasons, WalletDetachReasonUserWouldBeEmpty) {
+		t.Fatalf("did not expect single-wallet block reason for primary in 2-wallet inventory: %#v", primary.DetachBlockReasons)
+	}
+
+	secondary := byAddress[secondaryAddress]
+	if secondary == nil {
+		t.Fatalf("missing secondary wallet %q", secondaryAddress)
+	}
+	if !secondary.CanSetPrimary {
+		t.Fatal("expected secondary wallet can_set_primary=true")
+	}
+	if !secondary.CanDetach {
+		t.Fatal("expected secondary wallet can_detach=true")
+	}
+	if len(secondary.DetachBlockReasons) != 0 {
+		t.Fatalf("expected no detach block reasons for detachable secondary wallet, got %#v", secondary.DetachBlockReasons)
+	}
+}
+
 func TestHTTPHandlers_Wallets_FilterPrimary(t *testing.T) {
 	store := NewInMemoryWalletIdentityStore()
 	primaryAddress := "0x1111111111111111111111111111111111111111"

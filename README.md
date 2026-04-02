@@ -23,7 +23,7 @@ The backend follows a **wallet-first identity model** that progressively evolves
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.4 — Auth and User Stabilization  
-**Current Subphase:** **0.4.23 — Wallet Inventory Query Examples Closure**
+**Current Subphase:** **0.4.25 — Wallet Actionability Read Model Preparation**
 
 ---
 
@@ -1203,3 +1203,40 @@ By 0.4.23, the wallet inventory endpoint already had clarified response fields a
 
 ### Conclusion
 Phase 0.4.24 closes the manual-validation layer around `GET /auth/wallets` by documenting how to verify the existing contract end-to-end without changing domain, stores, persistence, or handler behavior.
+
+
+## Phase 0.4.25 — Wallet Actionability Read Model Preparation
+
+### Objective
+Prepare `GET /auth/wallets` for wallet-management consumption by exposing minimal actionability hints per wallet without changing domain authority, stores, or persistence.
+
+### Scope
+- extend the wallet inventory read model with derived actionability hints
+- expose whether a listed wallet can be promoted to primary from the current inventory view
+- expose whether a listed wallet is detachable from the current inventory view
+- expose detach block reasons using the already-established detach-domain reason constants
+- keep all execution authority in the existing wallet action endpoints
+
+### Problem Statement
+By 0.4.24, the wallet inventory endpoint was contractually mature, but clients still had to infer wallet-management action state or call additional endpoints to know whether a listed wallet was actionable.
+
+### Delivered
+- additive read-model fields: `can_set_primary`, `can_detach`, and `detach_block_reasons`
+- actionability derived entirely from the authenticated inventory read path
+- detach block reasons aligned with the existing detach-domain constants (`wallet_is_primary`, `user_would_have_no_wallets`)
+- handler-level coverage for single-wallet and two-wallet ownership scenarios
+
+### Validation
+- `go test ./...`
+- handler-level validation for actionability on a single primary wallet
+- handler-level validation for actionability on primary and secondary wallets in a two-wallet inventory
+
+### What it does NOT solve
+- new wallet-management endpoints
+- changes to detach or primary-switch execution rules
+- new query parameters
+- store-level actionability persistence
+- ownership-rule changes
+
+### Conclusion
+Phase 0.4.25 extends the authenticated wallet inventory read model with minimal, ownership-safe actionability hints so clients can prepare wallet-management UI decisions without changing domain authority or persistence behavior.

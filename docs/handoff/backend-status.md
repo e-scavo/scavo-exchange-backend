@@ -232,13 +232,13 @@ The system intentionally does **not** yet support:
 
 ## 🧭 Next Phase
 
-### 0.4.25 — To Be Defined Against Real ZIP
+### 0.4.26 — To Be Defined Against Real ZIP
 
 Expected next focus:
 
-- preserve backward compatibility of the wallet inventory contract
-- only open new functional scope if the next ZIP shows a real need
-- keep future work incremental and ownership-safe
+- continue incremental wallet-management readiness only if the next ZIP shows a real need
+- preserve backward compatibility of `GET /auth/wallets`
+- keep future work ownership-safe and read-model focused
 
 ---
 
@@ -284,3 +284,7 @@ Phase 0.4.23 closes the operator-facing examples layer for `GET /auth/wallets` b
 
 
 Phase 0.4.24 closes the manual-validation layer around the authenticated wallet inventory endpoint. The implementation remains documentation-only, but operators now have an explicit checklist for validating base, filtered, sorted, paginated, bounded, unbounded, and invalid query scenarios against the real `GET /auth/wallets` contract.
+
+
+
+Phase 0.4.25 prepares the authenticated wallet inventory for wallet-management consumption by exposing minimal actionability hints per listed wallet. The implementation stays in the read-model/handler layer, reuses the established detach-domain reasons, and leaves execution authority in the existing detach and primary-switch endpoints.

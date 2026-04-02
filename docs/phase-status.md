@@ -398,13 +398,32 @@ Phase 0.4.24 closes the manual-validation layer for `GET /auth/wallets` so opera
 - store-level pagination
 - ownership-rule changes
 
-### 0.4.25 — To Be Defined Against Real ZIP
+## ✅ Phase 0.4.25 Closure Summary
+
+Phase 0.4.25 prepares the authenticated wallet inventory for wallet-management consumption by exposing minimal actionability hints per listed wallet without changing stores, persistence, or execution authority.
+
+### Delivered in 0.4.25
+
+- additive wallet inventory fields: `can_set_primary`, `can_detach`, and `detach_block_reasons`
+- detach block reasons aligned with the existing detach-domain reasons (`wallet_is_primary`, `user_would_have_no_wallets`)
+- handler-level validation for single-wallet and two-wallet inventory scenarios
+- inventory-side actionability semantics kept explicitly advisory, with execution authority left to the existing action endpoints
+
+## ❌ Not Included in 0.4.25
+
+- new wallet-management endpoints
+- changes to detach or primary-switch execution behavior
+- new query parameters
+- store-level actionability persistence
+- ownership-rule changes
+
+### 0.4.26 — To Be Defined Against Real ZIP
 
 Expected next focus:
 
-- preserve backward compatibility of the wallet inventory contract
-- only open new functional scope if the next ZIP shows a real need
-- keep future work incremental and ownership-safe
+- continue incremental wallet-management readiness only if the next ZIP shows a real need
+- preserve backward compatibility of `GET /auth/wallets`
+- keep future work ownership-safe and read-model focused
 
 
 ## ✅ Phase 0.4.23 Closure Summary

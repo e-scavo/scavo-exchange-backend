@@ -713,3 +713,17 @@ Close the manual validation layer for `GET /auth/wallets` without changing code,
 
 ### Conclusion
 Phase 0.4.24 leaves the wallet inventory flow behavior unchanged while making its operator-facing manual verification path explicit and complete.
+
+
+## Phase 0.4.25 — Wallet Actionability Read Model Preparation
+
+### Flow impact
+The authenticated wallet inventory flow now exposes advisory actionability hints for each listed wallet while keeping all real execution authority in the existing primary-switch and detach endpoints.
+
+### Added read-model hints
+- `can_set_primary`: `true` when the wallet is active and not already primary
+- `can_detach`: `true` when the wallet is active, not primary, and the user would still own another active wallet
+- `detach_block_reasons`: advisory block reasons derived from the detach-domain constants
+
+### Outcome
+The inventory flow remains read-only and ownership-scoped, but it now gives client code enough per-wallet actionability context to prepare wallet-management UI affordances without inferring detach or primary-switch rules on its own.

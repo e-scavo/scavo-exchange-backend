@@ -750,3 +750,18 @@ Close the manual validation layer for `GET /auth/wallets` without changing code,
 
 ### Conclusion
 Phase 0.4.24 leaves the wallet inventory flow behavior unchanged while making its operator-facing manual verification path explicit and complete.
+
+
+## Phase 0.4.25 — Wallet Actionability Read Model Preparation
+
+### Objective
+Prepare the authenticated wallet inventory read model for wallet-management consumption by exposing minimal per-wallet actionability hints.
+
+### Delivered
+- additive inventory fields: `can_set_primary`, `can_detach`, and `detach_block_reasons`
+- advisory actionability derived from the authenticated inventory view without changing domain authority
+- detach block reasons aligned with the existing detach-domain constants
+- handler-level coverage for single-wallet and two-wallet inventory cases
+
+### Conclusion
+Phase 0.4.25 extends the wallet inventory read model with ownership-safe actionability hints so clients can prepare wallet-management UI decisions without changing execution rules or persistence behavior.

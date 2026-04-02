@@ -11,13 +11,16 @@ import (
 )
 
 type WalletReadModel struct {
-	ID         string     `json:"id"`
-	Address    string     `json:"address"`
-	UserID     string     `json:"user_id,omitempty"`
-	LinkedAt   *time.Time `json:"linked_at,omitempty"`
-	DetachedAt *time.Time `json:"detached_at,omitempty"`
-	IsPrimary  bool       `json:"is_primary"`
-	Status     string     `json:"status"`
+	ID                 string     `json:"id"`
+	Address            string     `json:"address"`
+	UserID             string     `json:"user_id,omitempty"`
+	LinkedAt           *time.Time `json:"linked_at,omitempty"`
+	DetachedAt         *time.Time `json:"detached_at,omitempty"`
+	IsPrimary          bool       `json:"is_primary"`
+	Status             string     `json:"status"`
+	CanSetPrimary      bool       `json:"can_set_primary"`
+	CanDetach          bool       `json:"can_detach"`
+	DetachBlockReasons []string   `json:"detach_block_reasons"`
 }
 
 type WalletsResponse struct {
@@ -85,7 +88,46 @@ func mapWalletIdentitiesToReadModels(wallets []*WalletIdentity) []*WalletReadMod
 		return []*WalletReadModel{}
 	}
 
-	return out
+	return enrichWalletReadModelsActionability(out)
+}
+
+func enrichWalletReadModelsActionability(wallets []*WalletReadModel) []*WalletReadModel {
+	if len(wallets) == 0 {
+		return []*WalletReadModel{}
+	}
+
+	activeOwnedCount := 0
+	for _, wallet := range wallets {
+		if wallet != nil && wallet.Status == "active" {
+			activeOwnedCount++
+		}
+	}
+
+	for _, wallet := range wallets {
+		if wallet == nil {
+			continue
+		}
+
+		wallet.CanSetPrimary = wallet.Status == "active" && !wallet.IsPrimary
+		wallet.CanDetach = false
+		wallet.DetachBlockReasons = []string{}
+
+		if wallet.Status != "active" {
+			continue
+		}
+
+		if wallet.IsPrimary {
+			wallet.DetachBlockReasons = append(wallet.DetachBlockReasons, WalletDetachReasonWalletIsPrimary)
+		}
+		if activeOwnedCount <= 1 {
+			wallet.DetachBlockReasons = append(wallet.DetachBlockReasons, WalletDetachReasonUserWouldBeEmpty)
+		}
+		if len(wallet.DetachBlockReasons) == 0 {
+			wallet.CanDetach = true
+		}
+	}
+
+	return wallets
 }
 
 func parseWalletsQuery(r *http.Request) (WalletsQuery, string) {
