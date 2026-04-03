@@ -63,7 +63,7 @@ func (s *WalletAccountMergeService) VerifyAndMerge(ctx context.Context, targetUs
 	if challenge == nil {
 		return nil, ErrWalletChallengeNotFound
 	}
-	if normalizeWalletChallengePurpose(challenge.Purpose) != WalletChallengePurposeAccountMerge {
+	if purpose, ok := canonicalWalletChallengePurpose(challenge.Purpose); !ok || purpose != WalletChallengePurposeAccountMerge {
 		return nil, ErrWalletChallengePurpose
 	}
 	if strings.TrimSpace(challenge.RequestedByUserID) != targetUserID {

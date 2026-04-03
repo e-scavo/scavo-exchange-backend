@@ -612,3 +612,72 @@ func TestWalletDetachService_Execute_RejectsPrimaryWallet(t *testing.T) {
 		t.Fatalf("expected ErrWalletDetachNotEligible, got %v", err)
 	}
 }
+
+func TestWalletLinkingService_VerifyAndLink_RejectsUnknownChallengePurpose(t *testing.T) {
+	store := NewInMemoryWalletChallengeStore()
+	challengeSvc := NewWalletChallengeService(store, "https://api.scavo.exchange", 5*time.Minute)
+	identityStore := NewInMemoryWalletIdentityStore()
+	linkSvc := NewWalletLinkingService(challengeSvc, identityStore)
+
+	address, _ := signWalletMessageForScalar(t, "unknown-link", "12")
+	now := time.Now().UTC()
+	challenge := &WalletChallenge{
+		ID:                "link_unknown_purpose",
+		Address:           address,
+		Chain:             "scavium",
+		Nonce:             "nonce_unknown_link",
+		Message:           "SCAVO Exchange legacy link purpose",
+		Purpose:           "legacy_link_typo",
+		RequestedByUserID: "u_target",
+		IssuedAt:          now,
+		ExpiresAt:         now.Add(5 * time.Minute),
+	}
+	if err := store.Save(context.Background(), challenge); err != nil {
+		t.Fatalf("Save error: %v", err)
+	}
+	_, signature := signWalletMessageForScalar(t, challenge.Message, "12")
+
+	_, err := linkSvc.VerifyAndLink(context.Background(), "u_target", challenge.ID, address, signature)
+	if err != ErrWalletChallengePurpose {
+		t.Fatalf("expected ErrWalletChallengePurpose, got %v", err)
+	}
+}
+
+func TestWalletAccountMergeService_VerifyAndMerge_RejectsUnknownChallengePurpose(t *testing.T) {
+	store := NewInMemoryWalletChallengeStore()
+	challengeSvc := NewWalletChallengeService(store, "https://api.scavo.exchange", 5*time.Minute)
+	identityStore := NewInMemoryWalletIdentityStore()
+	mergeSvc := NewWalletAccountMergeService(challengeSvc, identityStore)
+
+	sourceAddress, _ := signWalletMessageForScalar(t, "unknown-merge", "13")
+	sourceIdentity, err := identityStore.GetOrCreate(context.Background(), sourceAddress)
+	if err != nil {
+		t.Fatalf("GetOrCreate error: %v", err)
+	}
+	_, err = identityStore.AttachUser(context.Background(), sourceIdentity.ID, "u_source", true)
+	if err != nil {
+		t.Fatalf("AttachUser error: %v", err)
+	}
+
+	now := time.Now().UTC()
+	challenge := &WalletChallenge{
+		ID:                "merge_unknown_purpose",
+		Address:           sourceAddress,
+		Chain:             "scavium",
+		Nonce:             "nonce_unknown_merge",
+		Message:           "SCAVO Exchange legacy merge purpose",
+		Purpose:           "legacy_merge_typo",
+		RequestedByUserID: "u_target",
+		IssuedAt:          now,
+		ExpiresAt:         now.Add(5 * time.Minute),
+	}
+	if err := store.Save(context.Background(), challenge); err != nil {
+		t.Fatalf("Save error: %v", err)
+	}
+	_, signature := signWalletMessageForScalar(t, challenge.Message, "13")
+
+	_, err = mergeSvc.VerifyAndMerge(context.Background(), "u_target", challenge.ID, sourceAddress, signature)
+	if err != ErrWalletChallengePurpose {
+		t.Fatalf("expected ErrWalletChallengePurpose, got %v", err)
+	}
+}

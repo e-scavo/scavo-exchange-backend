@@ -233,3 +233,35 @@ func TestInMemoryWalletIdentityStore_AttachUser_RejectsReassign(t *testing.T) {
 		t.Fatalf("expected ErrWalletIdentityAlreadyLinked, got %v", err)
 	}
 }
+
+func TestWalletVerificationService_VerifyAndLogin_RejectsUnknownChallengePurpose(t *testing.T) {
+	store := NewInMemoryWalletChallengeStore()
+	challengeSvc := NewWalletChallengeService(store, "https://api.scavo.exchange", 5*time.Minute)
+
+	users := usermod.NewService(&stubUserRepo{})
+	loginSvc := NewService(newTokenServiceForTest(t), users, time.Hour)
+
+	identityStore := NewInMemoryWalletIdentityStore()
+	verifySvc := NewWalletVerificationService(challengeSvc, loginSvc, identityStore)
+
+	address := testWalletAddress()
+	now := time.Now().UTC()
+	challenge := &WalletChallenge{
+		ID:        "verify_unknown_purpose",
+		Address:   address,
+		Chain:     "scavium",
+		Nonce:     "nonce_unknown_verify",
+		Message:   "SCAVO Exchange legacy verify purpose",
+		Purpose:   "legacy_bootstrap_typo",
+		IssuedAt:  now,
+		ExpiresAt: now.Add(5 * time.Minute),
+	}
+	_, signature := signWalletMessageForTest(t, challenge.Message)
+	if err := store.Save(context.Background(), challenge); err != nil {
+		t.Fatalf("Save error: %v", err)
+	}
+
+	if _, _, err := verifySvc.VerifyAndLogin(context.Background(), challenge.ID, address, signature); err != ErrWalletChallengePurpose {
+		t.Fatalf("expected ErrWalletChallengePurpose, got %v", err)
+	}
+}

@@ -23,7 +23,7 @@ The backend follows a **wallet-first identity model** that progressively evolves
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.4 — Auth and User Stabilization  
-**Current Subphase:** **0.4.31 — Wallet Auth Bootstrap Purpose Enforcement**
+**Current Subphase:** **0.4.32 — Wallet Challenge Purpose Strictness Closure**
 
 ---
 
@@ -1355,3 +1355,27 @@ The wallet lifecycle remains unchanged:
 - wallet login / rebound after detach still uses `auth_bootstrap`
 
 What changes is the contract enforcement: these challenge purposes are no longer interchangeable at the wallet-auth bootstrap boundary.
+
+
+## Phase 0.4.32 — Wallet Challenge Purpose Strictness Closure
+
+### Objective
+
+Close the remaining permissive purpose-normalization gap so wallet challenges no longer silently degrade unknown or malformed purpose values into `auth_bootstrap` during runtime consumption.
+
+### Delivered
+
+- strict purpose resolution for controlled challenge creation
+- explicit rejection of unknown challenge purposes at wallet verify/login
+- explicit rejection of unknown challenge purposes at authenticated wallet link
+- explicit rejection of unknown challenge purposes at authenticated wallet-owned account merge
+- runtime loading now preserves unknown persisted purpose values instead of reclassifying them as bootstrap
+- test coverage proving creation defaults remain controlled while unknown runtime purposes are rejected
+
+### Result
+
+Phase 0.4 closes with strict challenge-purpose handling across creation and consumption:
+
+- controlled creation still defaults empty purpose to `auth_bootstrap`
+- supported purposes remain `auth_bootstrap`, `wallet_link`, and `account_merge`
+- unknown or malformed purposes are no longer treated as valid bootstrap challenges at runtime

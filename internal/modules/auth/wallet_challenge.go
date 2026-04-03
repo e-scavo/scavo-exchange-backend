@@ -94,7 +94,10 @@ func (s *WalletChallengeService) CreateWithOptions(ctx context.Context, address,
 	}
 
 	chain = normalizeChain(chain)
-	purpose := normalizeWalletChallengePurpose(options.Purpose)
+	purpose, err := resolveWalletChallengePurposeForCreate(options.Purpose)
+	if err != nil {
+		return nil, err
+	}
 	now := time.Now().UTC()
 	expiresAt := now.Add(s.ttl)
 
@@ -143,8 +146,7 @@ func (s *WalletChallengeService) Get(ctx context.Context, id string) (*WalletCha
 		return nil, ErrChallengeExpired
 	}
 
-	challenge.Purpose = normalizeWalletChallengePurpose(challenge.Purpose)
-	challenge.RequestedByUserID = strings.TrimSpace(challenge.RequestedByUserID)
+	normalizeWalletChallengeLoaded(challenge)
 
 	return challenge, nil
 }
@@ -162,8 +164,7 @@ func (s *WalletChallengeService) MarkUsed(ctx context.Context, id string, usedAt
 		return nil, ErrWalletChallengeNotFound
 	}
 
-	challenge.Purpose = normalizeWalletChallengePurpose(challenge.Purpose)
-	challenge.RequestedByUserID = strings.TrimSpace(challenge.RequestedByUserID)
+	normalizeWalletChallengeLoaded(challenge)
 
 	return challenge, nil
 }
@@ -182,11 +183,13 @@ func (s *WalletChallengeService) buildMessage(ch *WalletChallenge) string {
 	}
 
 	purposeLine := "Purpose: SCAVO Exchange wallet authentication bootstrap."
-	switch normalizeWalletChallengePurpose(ch.Purpose) {
-	case WalletChallengePurposeLinkWallet:
-		purposeLine = "Purpose: SCAVO Exchange authenticated wallet linking confirmation."
-	case WalletChallengePurposeAccountMerge:
-		purposeLine = "Purpose: SCAVO Exchange authenticated account merge confirmation."
+	if purpose, ok := canonicalWalletChallengePurpose(ch.Purpose); ok {
+		switch purpose {
+		case WalletChallengePurposeLinkWallet:
+			purposeLine = "Purpose: SCAVO Exchange authenticated wallet linking confirmation."
+		case WalletChallengePurposeAccountMerge:
+			purposeLine = "Purpose: SCAVO Exchange authenticated account merge confirmation."
+		}
 	}
 
 	lines := []string{
@@ -209,16 +212,27 @@ func (s *WalletChallengeService) buildMessage(ch *WalletChallenge) string {
 	return strings.Join(lines, "\n")
 }
 
-func normalizeWalletChallengePurpose(purpose string) string {
+func resolveWalletChallengePurposeForCreate(purpose string) (string, error) {
+	purpose = strings.TrimSpace(strings.ToLower(purpose))
+	if purpose == "" {
+		return WalletChallengePurposeAuthBootstrap, nil
+	}
+	if canonical, ok := canonicalWalletChallengePurpose(purpose); ok {
+		return canonical, nil
+	}
+	return "", ErrWalletChallengePurpose
+}
+
+func canonicalWalletChallengePurpose(purpose string) (string, bool) {
 	switch strings.TrimSpace(strings.ToLower(purpose)) {
-	case "", WalletChallengePurposeAuthBootstrap:
-		return WalletChallengePurposeAuthBootstrap
+	case WalletChallengePurposeAuthBootstrap:
+		return WalletChallengePurposeAuthBootstrap, true
 	case WalletChallengePurposeLinkWallet:
-		return WalletChallengePurposeLinkWallet
+		return WalletChallengePurposeLinkWallet, true
 	case WalletChallengePurposeAccountMerge:
-		return WalletChallengePurposeAccountMerge
+		return WalletChallengePurposeAccountMerge, true
 	default:
-		return WalletChallengePurposeAuthBootstrap
+		return "", false
 	}
 }
 

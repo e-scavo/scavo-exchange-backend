@@ -51,6 +51,7 @@ Status: ✅ Completed
 | 0.4.29 | Wallet detach execute read consistency | ✅ Completed |
 | 0.4.30 | Wallet management contract consolidation | ✅ Completed |
 | 0.4.31 | Wallet auth bootstrap purpose enforcement | ✅ Completed |
+| 0.4.32 | Wallet challenge purpose strictness closure | ✅ Completed |
 
 ---
 
@@ -539,13 +540,34 @@ Phase 0.4.31 closes the remaining challenge-purpose enforcement gap at the walle
 - detach-rule changes
 - store-level or persistence changes
 
-### 0.4.32 — To Be Defined Against Real ZIP
+## ✅ Phase 0.4.32 Closure Summary
+
+Phase 0.4.32 closes the last permissive purpose-normalization gap in wallet challenges without changing stores, persistence, ownership, or lifecycle semantics.
+
+### Delivered in 0.4.32
+
+- strict creation-time purpose resolution with controlled defaulting only for empty purpose
+- unknown purpose values are no longer normalized to `auth_bootstrap` at runtime
+- wallet verify/login rejects unknown challenge purposes
+- authenticated wallet link rejects unknown challenge purposes
+- authenticated wallet-owned account merge rejects unknown challenge purposes
+- tests proving invalid purpose values are preserved and rejected instead of silently reclassified
+
+## ❌ Not Included in 0.4.32
+
+- new wallet lifecycle operations
+- ownership-rule changes
+- primary-wallet changes
+- detach-rule changes
+- store schema or migration changes
+
+### 0.4.33 — To Be Defined Against Real ZIP
 
 Expected next focus:
 
-- only continue Phase 0.4 if the next ZIP shows a concrete remaining lifecycle gap
-- preserve strict challenge-purpose isolation across wallet login and wallet-management flows
-- keep detached-wallet reuse semantics backward-compatible and ownership-safe
+- only continue Phase 0.4 if the next ZIP shows a concrete remaining runtime or documentation gap
+- keep challenge-purpose handling strict across wallet login and wallet-management flows
+- preserve detached-wallet reuse semantics and ownership invariants
 
 
 ## ✅ Phase 0.4.23 Closure Summary

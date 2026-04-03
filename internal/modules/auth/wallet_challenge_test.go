@@ -70,3 +70,43 @@ func TestWalletChallengeService_Create_DefaultChain(t *testing.T) {
 		t.Fatalf("expected default chain scavium, got %q", challenge.Chain)
 	}
 }
+
+func TestWalletChallengeService_CreateWithOptions_RejectsUnknownPurpose(t *testing.T) {
+	store := NewInMemoryWalletChallengeStore()
+	svc := NewWalletChallengeService(store, "", 5*time.Minute)
+
+	_, err := svc.CreateWithOptions(context.Background(), "0x1111111111111111111111111111111111111111", "scavium", WalletChallengeOptions{
+		Purpose: "legacy_bootstrap_typo",
+	})
+	if err != ErrWalletChallengePurpose {
+		t.Fatalf("expected ErrWalletChallengePurpose, got %v", err)
+	}
+}
+
+func TestWalletChallengeService_Get_DoesNotDefaultUnknownPurposeToBootstrap(t *testing.T) {
+	store := NewInMemoryWalletChallengeStore()
+	svc := NewWalletChallengeService(store, "", 5*time.Minute)
+	now := time.Now().UTC()
+
+	challenge := &WalletChallenge{
+		ID:        "ch_invalid_purpose",
+		Address:   "0x1111111111111111111111111111111111111111",
+		Chain:     "scavium",
+		Nonce:     "nonce",
+		Message:   "invalid purpose challenge",
+		Purpose:   "legacy_bootstrap_typo",
+		IssuedAt:  now,
+		ExpiresAt: now.Add(5 * time.Minute),
+	}
+	if err := store.Save(context.Background(), challenge); err != nil {
+		t.Fatalf("Save error: %v", err)
+	}
+
+	got, err := svc.Get(context.Background(), challenge.ID)
+	if err != nil {
+		t.Fatalf("Get error: %v", err)
+	}
+	if got.Purpose != "legacy_bootstrap_typo" {
+		t.Fatalf("expected unknown purpose to remain unchanged, got %q", got.Purpose)
+	}
+}

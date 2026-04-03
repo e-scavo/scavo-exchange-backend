@@ -61,7 +61,7 @@ func (s *WalletLinkingService) VerifyAndLink(ctx context.Context, userID, challe
 	if challenge == nil {
 		return nil, ErrWalletChallengeNotFound
 	}
-	if normalizeWalletChallengePurpose(challenge.Purpose) != WalletChallengePurposeLinkWallet {
+	if purpose, ok := canonicalWalletChallengePurpose(challenge.Purpose); !ok || purpose != WalletChallengePurposeLinkWallet {
 		return nil, ErrWalletChallengePurpose
 	}
 	if strings.TrimSpace(challenge.RequestedByUserID) != userID {

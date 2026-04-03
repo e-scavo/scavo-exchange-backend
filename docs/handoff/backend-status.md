@@ -16,7 +16,7 @@ It is intended to:
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.4 — Auth and User Stabilization  
-**Latest Completed Subphase:** 0.4.31 — Wallet Auth Bootstrap Purpose Enforcement
+**Latest Completed Subphase:** 0.4.32 — Wallet Challenge Purpose Strictness Closure
 
 ---
 
@@ -232,18 +232,19 @@ The system intentionally does **not** yet support:
 
 ## 🧭 Next Phase
 
-### 0.4.31 — Wallet Auth Bootstrap Purpose Enforcement
+### 0.4.32 — Wallet Challenge Purpose Strictness Closure
 
 Delivered:
 
-- `POST /auth/wallet/verify` now accepts only `auth_bootstrap` challenges
-- `wallet_link` and `account_merge` challenges are rejected at the wallet-auth bootstrap boundary
-- handler responses now expose `wallet_challenge_purpose_mismatch` for purpose violations
-- detached-wallet rebound through login remains supported, but only through the correct bootstrap-purpose challenge
+- controlled challenge creation now defaults empty purpose values only during explicit challenge issuance
+- unknown or malformed challenge purposes are no longer silently normalized to `auth_bootstrap` during runtime loading
+- wallet verify/login rejects unknown challenge purposes
+- authenticated wallet link rejects unknown challenge purposes
+- authenticated wallet-owned account merge rejects unknown challenge purposes
 
 Expected next focus:
 
-- continue only if the next ZIP shows a real remaining lifecycle gap
+- continue only if the next ZIP shows a real remaining runtime or documentation gap
 - preserve strict purpose separation across wallet login and wallet-management flows
 - keep ownership and persistence rules unchanged unless the real code requires otherwise
 
@@ -305,3 +306,9 @@ Phase 0.4.28 closes the wallet-management read flow around the authenticated inv
 
 
 Phase 0.4.30 consolidates the final wallet-management contract layer. Inventory, eligibility, execution, and refreshed post-action inventory are now documented as one coherent surface so future work can move beyond Phase 0.4 without reopening already-stabilized wallet-management semantics.
+
+
+Phase 0.4.31 hardens the wallet-auth bootstrap boundary so `POST /auth/wallet/verify` can no longer consume `wallet_link` or `account_merge` challenges. Detached-wallet rebound remains supported, but only through the correct bootstrap-purpose challenge.
+
+
+Phase 0.4.32 closes the last permissive challenge-purpose normalization gap. Controlled challenge creation still defaults empty purpose to `auth_bootstrap`, but unknown or malformed purpose values are now preserved as invalid runtime data and rejected by wallet verify/login, authenticated wallet link, and wallet-owned account merge.

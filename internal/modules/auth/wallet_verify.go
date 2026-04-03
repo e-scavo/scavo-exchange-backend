@@ -44,7 +44,7 @@ func (s *WalletVerificationService) VerifyAndLogin(ctx context.Context, challeng
 	if challenge == nil {
 		return nil, nil, ErrWalletChallengeNotFound
 	}
-	if normalizeWalletChallengePurpose(challenge.Purpose) != WalletChallengePurposeAuthBootstrap {
+	if purpose, ok := canonicalWalletChallengePurpose(challenge.Purpose); !ok || purpose != WalletChallengePurposeAuthBootstrap {
 		return nil, nil, ErrWalletChallengePurpose
 	}
 	if normalizeWalletAddress(challenge.Address) != address {

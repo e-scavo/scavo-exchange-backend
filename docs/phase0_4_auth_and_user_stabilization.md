@@ -856,3 +856,17 @@ Phase 0.4 now closes with wallet management described as one coherent contract w
 - wallet login, detach rebound, authenticated linking, and wallet-owned account merge keep their existing runtime semantics
 - the remaining contract gap is closed: challenge purposes are no longer reusable across different wallet lifecycle entry points
 - Phase 0.4 closes with stricter purpose isolation and no ownership or persistence redesign
+
+
+## Phase 0.4.32 — Wallet Challenge Purpose Strictness Closure
+
+### Implemented
+- wallet challenge creation now defaults empty purpose values only during controlled challenge issuance
+- unknown or malformed purpose values are no longer silently normalized to `auth_bootstrap` during runtime reads
+- wallet verify/login, authenticated wallet link, and authenticated wallet-owned account merge now all reject unknown challenge purposes
+- tests now cover invalid-purpose creation rejection, runtime preservation of unknown purpose values, and service-level rejection across verify/link/merge
+
+### Result
+- the wallet lifecycle remains unchanged
+- purpose handling is now strict both at the wallet-auth bootstrap boundary and inside the underlying challenge domain contract
+- Phase 0.4 closes with no remaining fallback that can reinterpret invalid challenge-purpose data as a valid bootstrap contract

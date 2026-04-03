@@ -46,7 +46,7 @@ func (s *WalletChallengeStorePG) Save(ctx context.Context, challenge *WalletChal
 		challenge.Chain,
 		challenge.Nonce,
 		challenge.Message,
-		normalizeWalletChallengePurpose(challenge.Purpose),
+		challengeStoredPurpose(challenge.Purpose),
 		nilIfEmpty(challenge.RequestedByUserID),
 		challenge.IssuedAt.UTC(),
 		challenge.ExpiresAt.UTC(),
@@ -67,7 +67,7 @@ func (s *WalletChallengeStorePG) GetByID(ctx context.Context, id string) (*Walle
 			chain,
 			nonce,
 			message,
-			COALESCE(purpose, 'auth_bootstrap'),
+			COALESCE(purpose, ''),
 			COALESCE(requested_by_user_id, ''),
 			issued_at,
 			expires_at,
@@ -127,7 +127,7 @@ func (s *WalletChallengeStorePG) Use(ctx context.Context, id string, usedAt time
 			chain,
 			nonce,
 			message,
-			COALESCE(purpose, 'auth_bootstrap'),
+			COALESCE(purpose, ''),
 			COALESCE(requested_by_user_id, ''),
 			issued_at,
 			expires_at,
@@ -194,8 +194,15 @@ func normalizeWalletChallengeLoaded(challenge *WalletChallenge) {
 
 	challenge.IssuedAt = challenge.IssuedAt.UTC()
 	challenge.ExpiresAt = challenge.ExpiresAt.UTC()
-	challenge.Purpose = normalizeWalletChallengePurpose(challenge.Purpose)
+	challenge.Purpose = challengeStoredPurpose(challenge.Purpose)
 	challenge.RequestedByUserID = strings.TrimSpace(challenge.RequestedByUserID)
+}
+
+func challengeStoredPurpose(purpose string) string {
+	if canonical, ok := canonicalWalletChallengePurpose(purpose); ok {
+		return canonical
+	}
+	return strings.TrimSpace(strings.ToLower(purpose))
 }
 
 func nilIfEmpty(v string) any {
