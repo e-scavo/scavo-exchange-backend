@@ -164,6 +164,56 @@ func TestWalletVerificationService_VerifyAndLogin_RejectsReplay(t *testing.T) {
 	}
 }
 
+func TestWalletVerificationService_VerifyAndLogin_RejectsWalletLinkChallengePurpose(t *testing.T) {
+	store := NewInMemoryWalletChallengeStore()
+	challengeSvc := NewWalletChallengeService(store, "https://api.scavo.exchange", 5*time.Minute)
+
+	users := usermod.NewService(&stubUserRepo{})
+	loginSvc := NewService(newTokenServiceForTest(t), users, time.Hour)
+
+	identityStore := NewInMemoryWalletIdentityStore()
+	verifySvc := NewWalletVerificationService(challengeSvc, loginSvc, identityStore)
+
+	address := testWalletAddress()
+	challenge, err := challengeSvc.CreateWithOptions(context.Background(), address, "scavium", WalletChallengeOptions{
+		Purpose: WalletChallengePurposeLinkWallet,
+	})
+	if err != nil {
+		t.Fatalf("challenge create error: %v", err)
+	}
+
+	_, signature := signWalletMessageForTest(t, challenge.Message)
+
+	if _, _, err := verifySvc.VerifyAndLogin(context.Background(), challenge.ID, address, signature); err != ErrWalletChallengePurpose {
+		t.Fatalf("expected ErrWalletChallengePurpose, got %v", err)
+	}
+}
+
+func TestWalletVerificationService_VerifyAndLogin_RejectsAccountMergeChallengePurpose(t *testing.T) {
+	store := NewInMemoryWalletChallengeStore()
+	challengeSvc := NewWalletChallengeService(store, "https://api.scavo.exchange", 5*time.Minute)
+
+	users := usermod.NewService(&stubUserRepo{})
+	loginSvc := NewService(newTokenServiceForTest(t), users, time.Hour)
+
+	identityStore := NewInMemoryWalletIdentityStore()
+	verifySvc := NewWalletVerificationService(challengeSvc, loginSvc, identityStore)
+
+	address := testWalletAddress()
+	challenge, err := challengeSvc.CreateWithOptions(context.Background(), address, "scavium", WalletChallengeOptions{
+		Purpose: WalletChallengePurposeAccountMerge,
+	})
+	if err != nil {
+		t.Fatalf("challenge create error: %v", err)
+	}
+
+	_, signature := signWalletMessageForTest(t, challenge.Message)
+
+	if _, _, err := verifySvc.VerifyAndLogin(context.Background(), challenge.ID, address, signature); err != ErrWalletChallengePurpose {
+		t.Fatalf("expected ErrWalletChallengePurpose, got %v", err)
+	}
+}
+
 func TestInMemoryWalletIdentityStore_AttachUser_RejectsReassign(t *testing.T) {
 	store := NewInMemoryWalletIdentityStore()
 	address := testWalletAddress()

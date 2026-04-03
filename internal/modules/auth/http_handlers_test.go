@@ -1074,6 +1074,48 @@ func equalOptionalInt(left, right *int) bool {
 	}
 }
 
+func TestHTTPHandlers_WalletVerify_RejectsChallengePurposeMismatch(t *testing.T) {
+	challengeStore := NewInMemoryWalletChallengeStore()
+	identityStore := NewInMemoryWalletIdentityStore()
+
+	h := HTTPHandlers{
+		Tokens:           mustTokenService(t),
+		TTL:              time.Hour,
+		Users:            usermod.NewService(nil),
+		Challenges:       challengeStore,
+		WalletIdentities: identityStore,
+		ChallengeTTL:     5 * time.Minute,
+		PublicBaseURL:    "https://api.scavo.exchange",
+	}
+
+	address := testWalletAddress()
+	challengeSvc := NewWalletChallengeService(challengeStore, h.PublicBaseURL, h.ChallengeTTL)
+	challenge, err := challengeSvc.CreateWithOptions(context.Background(), address, "scavium", WalletChallengeOptions{
+		Purpose: WalletChallengePurposeLinkWallet,
+	})
+	if err != nil {
+		t.Fatalf("CreateWithOptions error: %v", err)
+	}
+
+	_, signature := signWalletMessageForTest(t, challenge.Message)
+	body := `{"challenge_id":"` + challenge.ID + `","address":"` + address + `","signature":"` + signature + `"}`
+	req := httptest.NewRequest(http.MethodPost, "/auth/wallet/verify", strings.NewReader(body))
+	rec := httptest.NewRecorder()
+
+	h.WalletVerify(rec, req)
+
+	if rec.Code != http.StatusConflict {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+
+	var payload map[string]any
+	if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("decode error: %v", err)
+	}
+	if payload["error"] != "wallet_challenge_purpose_mismatch" {
+		t.Fatalf("unexpected error payload: %#v", payload)
+	}
+}
 func TestHTTPHandlers_WalletLinkChallenge_Success(t *testing.T) {
 	store := NewInMemoryWalletChallengeStore()
 

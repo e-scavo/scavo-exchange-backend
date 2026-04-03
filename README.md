@@ -23,7 +23,7 @@ The backend follows a **wallet-first identity model** that progressively evolves
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.4 — Auth and User Stabilization  
-**Current Subphase:** **0.4.30 — Wallet Management Contract Consolidation**
+**Current Subphase:** **0.4.31 — Wallet Auth Bootstrap Purpose Enforcement**
 
 ---
 
@@ -1330,3 +1330,28 @@ Consolidate the already-stabilized wallet-management surfaces into one explicit 
 ### Result
 
 Phase 0.4 now closes with wallet management described as one consolidated, inventory-driven contract without changing handlers, stores, persistence, or ownership rules.
+
+
+## Phase 0.4.31 — Wallet Auth Bootstrap Purpose Enforcement
+
+### Objective
+
+Harden the wallet-auth bootstrap contract so `POST /auth/wallet/verify` only consumes `auth_bootstrap` challenges.
+
+### Delivered
+
+- service-level purpose enforcement in wallet verify/login
+- explicit rejection of `wallet_link` challenges during wallet-auth bootstrap
+- explicit rejection of `account_merge` challenges during wallet-auth bootstrap
+- handler-level conflict response with `wallet_challenge_purpose_mismatch`
+- test coverage proving the service and HTTP boundaries reject non-bootstrap challenges
+
+### Result
+
+The wallet lifecycle remains unchanged:
+
+- authenticated linking still uses `wallet_link`
+- wallet-owned account merge still uses `account_merge`
+- wallet login / rebound after detach still uses `auth_bootstrap`
+
+What changes is the contract enforcement: these challenge purposes are no longer interchangeable at the wallet-auth bootstrap boundary.

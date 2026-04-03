@@ -808,3 +808,17 @@ The authenticated wallet inventory and wallet action endpoints keep their existi
 - refreshed `GET /auth/wallets` is the post-action observable state
 
 This phase does not change handlers, stores, persistence, or domain rules. It closes the wallet-management flow as one consolidated inventory-driven contract.
+
+
+## Phase 0.4.31 — Wallet Auth Bootstrap Purpose Enforcement
+
+### Implemented
+- wallet verify/login now enforces `purpose = auth_bootstrap`
+- `wallet_link` and `account_merge` challenges are explicitly rejected by wallet-auth bootstrap
+- HTTP wallet verify now surfaces `wallet_challenge_purpose_mismatch` for wrong-purpose challenges
+- tests now cover service-level and handler-level purpose mismatch cases
+
+### Result
+- wallet login, detach rebound, authenticated linking, and wallet-owned account merge keep their existing runtime semantics
+- the remaining contract gap is closed: challenge purposes are no longer reusable across different wallet lifecycle entry points
+- Phase 0.4 closes with stricter purpose isolation and no ownership or persistence redesign

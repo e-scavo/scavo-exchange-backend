@@ -169,6 +169,8 @@ func (h HTTPHandlers) WalletVerify(w http.ResponseWriter, r *http.Request) {
 			writeJSON(w, http.StatusUnauthorized, map[string]any{"error": "wallet_challenge_expired"})
 		case errors.Is(err, ErrChallengeUsed):
 			writeJSON(w, http.StatusUnauthorized, map[string]any{"error": "wallet_challenge_used"})
+		case errors.Is(err, ErrWalletChallengePurpose):
+			writeJSON(w, http.StatusConflict, map[string]any{"error": "wallet_challenge_purpose_mismatch"})
 		default:
 			writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "wallet_verify_error"})
 		}

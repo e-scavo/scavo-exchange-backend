@@ -50,6 +50,7 @@ Status: ✅ Completed
 | 0.4.28 | Wallet management read flow closure | ✅ Completed |
 | 0.4.29 | Wallet detach execute read consistency | ✅ Completed |
 | 0.4.30 | Wallet management contract consolidation | ✅ Completed |
+| 0.4.31 | Wallet auth bootstrap purpose enforcement | ✅ Completed |
 
 ---
 
@@ -518,13 +519,33 @@ Phase 0.4.30 consolidates the authenticated wallet-management surfaces into one 
 - changes to detach or primary rules
 - store-level or persistence changes
 
-### 0.4.31 — To Be Defined Against Real ZIP
+## ✅ Phase 0.4.31 Closure Summary
+
+Phase 0.4.31 closes the remaining challenge-purpose enforcement gap at the wallet-auth bootstrap boundary without changing ownership semantics, stores, or persistence.
+
+### Delivered in 0.4.31
+
+- service-level enforcement that `POST /auth/wallet/verify` accepts only `auth_bootstrap` challenges
+- explicit rejection of `wallet_link` challenges in wallet-auth bootstrap
+- explicit rejection of `account_merge` challenges in wallet-auth bootstrap
+- handler-level `wallet_challenge_purpose_mismatch` response for purpose violations
+- test coverage proving non-bootstrap challenge purposes cannot be reused in wallet login
+
+## ❌ Not Included in 0.4.31
+
+- new wallet-management endpoints
+- ownership-rule changes
+- primary-wallet changes
+- detach-rule changes
+- store-level or persistence changes
+
+### 0.4.32 — To Be Defined Against Real ZIP
 
 Expected next focus:
 
-- open a new functional line only if the next ZIP shows a concrete need beyond wallet-management consolidation
-- preserve backward compatibility of the authenticated wallet inventory and wallet action endpoints
-- keep future work ownership-safe and avoid reopening stabilized invariants
+- only continue Phase 0.4 if the next ZIP shows a concrete remaining lifecycle gap
+- preserve strict challenge-purpose isolation across wallet login and wallet-management flows
+- keep detached-wallet reuse semantics backward-compatible and ownership-safe
 
 
 ## ✅ Phase 0.4.23 Closure Summary

@@ -16,7 +16,7 @@ It is intended to:
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.4 — Auth and User Stabilization  
-**Latest Completed Subphase:** 0.4.23 — Wallet Inventory Query Examples Closure
+**Latest Completed Subphase:** 0.4.31 — Wallet Auth Bootstrap Purpose Enforcement
 
 ---
 
@@ -69,7 +69,7 @@ Ownership is a first-class persisted concept.
 
 ## 🔗 Wallet Ownership Status (0.4.14)
 
-The backend now supports authenticated wallet-linking, authenticated wallet-owned account merge execution, authenticated primary-wallet switching, authenticated wallet detach-eligibility evaluation, authenticated detach execution for already eligible owned wallets, and explicitly validated post-detach wallet reattachment semantics.
+The backend now supports authenticated wallet-linking, authenticated wallet-owned account merge execution, authenticated primary-wallet switching, authenticated wallet detach-eligibility evaluation, authenticated detach execution for already eligible owned wallets, explicitly validated post-detach wallet reattachment semantics, and strict challenge-purpose isolation at the wallet-auth bootstrap boundary.
 
 ### Capabilities
 
@@ -172,7 +172,7 @@ The backend guarantees:
 - wallets cannot be reassigned across users
 - primary wallet uniqueness is maintained
 - link challenges are user-bound
-- link and login challenge purposes are not interchangeable
+- link, merge, and login challenge purposes are not interchangeable
 
 ---
 
@@ -232,20 +232,20 @@ The system intentionally does **not** yet support:
 
 ## 🧭 Next Phase
 
-### 0.4.30 — Wallet Management Contract Consolidation
+### 0.4.31 — Wallet Auth Bootstrap Purpose Enforcement
 
 Delivered:
 
-- wallet management is now described as one consolidated contract across `GET /auth/wallets`, `POST /auth/wallets/primary`, `POST /auth/wallets/detach/check`, and `POST /auth/wallets/detach`
-- inventory hints are explicitly documented as advisory, while check / execution endpoints remain authoritative
-- flows and testing guidance now describe the full inventory → action/check → refreshed inventory cycle as one coherent operational path
-- no changes were made to runtime rules, stores, persistence, or ownership semantics
+- `POST /auth/wallet/verify` now accepts only `auth_bootstrap` challenges
+- `wallet_link` and `account_merge` challenges are rejected at the wallet-auth bootstrap boundary
+- handler responses now expose `wallet_challenge_purpose_mismatch` for purpose violations
+- detached-wallet rebound through login remains supported, but only through the correct bootstrap-purpose challenge
 
 Expected next focus:
 
-- open a new functional line only if the next ZIP shows a concrete need beyond wallet-management consolidation
-- preserve backward compatibility of the authenticated wallet inventory and wallet action endpoints
-- keep future work ownership-safe and avoid reopening stabilized invariants
+- continue only if the next ZIP shows a real remaining lifecycle gap
+- preserve strict purpose separation across wallet login and wallet-management flows
+- keep ownership and persistence rules unchanged unless the real code requires otherwise
 
 ---
 
