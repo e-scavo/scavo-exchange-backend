@@ -561,13 +561,33 @@ Phase 0.4.32 closes the last permissive purpose-normalization gap in wallet chal
 - detach-rule changes
 - store schema or migration changes
 
-### 0.4.33 — To Be Defined Against Real ZIP
+## ✅ Phase 0.4.33 Closure Summary
 
-Expected next focus:
+Phase 0.4.33 formally closes Phase 0.4 at the documentation layer without changing handlers, stores, persistence, migrations, ownership rules, or wallet lifecycle behavior.
 
-- only continue Phase 0.4 if the next ZIP shows a concrete remaining runtime or documentation gap
-- keep challenge-purpose handling strict across wallet login and wallet-management flows
-- preserve detached-wallet reuse semantics and ownership invariants
+### Delivered in 0.4.33
+
+- explicit formal closure of Phase 0.4 as a completed foundation phase
+- cross-document alignment so README, phase status, handoff, flows, and phase documentation describe the same final state
+- removal of the remaining placeholder planning note that left 0.4.33 undefined in phase-status tracking
+- explicit transition guidance that the next work should start in a new phase instead of reopening Phase 0.4 without a real ZIP-validated gap
+
+## ❌ Not Included in 0.4.33
+
+- runtime handler changes
+- new wallet-management endpoints
+- ownership-rule changes
+- primary-wallet changes
+- detach-rule changes
+- challenge-purpose behavior changes
+- store-level or persistence changes
+- schema or migration changes
+
+### Next Expected Evolution
+
+- start the next phase from a ZIP-validated runtime or product need outside the already closed Phase 0.4 scope
+- preserve the finalized wallet-auth, wallet-link, wallet-merge, primary-switch, and detach contracts as the baseline
+- avoid reopening Phase 0.4 unless a future ZIP proves a real regression or contractual documentation gap
 
 
 ## ✅ Phase 0.4.23 Closure Summary

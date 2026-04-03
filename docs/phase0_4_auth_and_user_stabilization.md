@@ -870,3 +870,33 @@ Phase 0.4 now closes with wallet management described as one coherent contract w
 - the wallet lifecycle remains unchanged
 - purpose handling is now strict both at the wallet-auth bootstrap boundary and inside the underlying challenge domain contract
 - Phase 0.4 closes with no remaining fallback that can reinterpret invalid challenge-purpose data as a valid bootstrap contract
+
+---
+
+## Phase 0.4 Formal Closure
+
+Phase 0.4 is now formally closed.
+
+All objectives defined for Auth and User Stabilization have been fully achieved:
+
+- wallet-first authentication is stable
+- durable user identity is consolidated
+- wallet ownership lifecycle is explicit and protected
+- wallet management flows are complete and consistent
+- challenge-purpose handling is strict and enforced
+
+No further work should be introduced within Phase 0.4 unless a future ZIP reveals a real regression or missing contract.
+
+### Final Scope Confirmation
+
+Phase 0.4 intentionally does NOT include:
+
+- refresh tokens
+- session persistence
+- advanced audit/event sourcing
+- multi-auth identity expansion beyond wallets
+- admin or operator tooling
+
+### Transition
+
+All future evolution must begin in a new phase, using Phase 0.4 as a stable baseline.

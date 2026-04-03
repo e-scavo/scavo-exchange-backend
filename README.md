@@ -23,7 +23,7 @@ The backend follows a **wallet-first identity model** that progressively evolves
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.4 — Auth and User Stabilization  
-**Current Subphase:** **0.4.32 — Wallet Challenge Purpose Strictness Closure**
+**Current Subphase:** **0.4.33 — Phase 0.4 Formal Closure**
 
 ---
 
@@ -119,14 +119,6 @@ wallet management now also supports an authenticated detach-eligibility evaluati
 
 This allows the current authenticated user to ask the backend whether one owned wallet is currently safe to detach, without changing ownership and without executing unlink behavior.
 
-### 0.4.15 — Detached Identity Audit Readiness
-wallet identities now preserve minimal detached-lifecycle audit metadata:
-
-- `detached_at`
-
-This allows the backend to distinguish a wallet that has never been detached from a wallet identity that was previously detached and later reused through linking or wallet-login rebound.
-
-
 ### 0.4.13 — Protected Wallet Detach Execution
 wallet management now also supports an authenticated detach execution flow for already eligible owned wallets:
 
@@ -144,6 +136,13 @@ wallet lifecycle now explicitly clarifies what happens after detach, without int
 - detached wallet identities can also re-enter the wallet-login bootstrap flow and resolve back into a wallet-owned user
 
 This phase formalizes that detached wallets are reusable known wallet identities rather than archived or terminal identities.
+
+### 0.4.15 — Detached Identity Audit Readiness
+wallet identities now preserve minimal detached-lifecycle audit metadata:
+
+- `detached_at`
+
+This allows the backend to distinguish a wallet that has never been detached from a wallet identity that was previously detached and later reused through linking or wallet-login rebound.
 
 ---
 
@@ -219,63 +218,228 @@ Response:
 {
   "access_token": "...",
   "token_type": "Bearer",
-  "expires_in": 3600,
-  "user_id": "...",
-  "wallet_id": "...",
-  "wallet_address": "0x...",
-  "chain": "scavium",
-  "auth_method": "wallet_evm"
+  "user": {
+    "id": "..."
+  }
 }
 ```
 
+Behavior:
+- only `auth_bootstrap` wallet challenges are accepted at this endpoint
+- `wallet_link` challenges are rejected with `wallet_challenge_purpose_mismatch`
+- `account_merge` challenges are rejected with `wallet_challenge_purpose_mismatch`
+- unknown or malformed persisted challenge purposes are rejected and are no longer treated as valid bootstrap challenges
+- previously detached known wallets may still rebound through wallet login using a valid `auth_bootstrap` challenge
+
 ---
 
-### Wallet Ownership
+### Password Auth (dev only)
 
-#### `GET /auth/wallets`
+#### `POST /auth/login`
 
-Returns all wallet identities linked to the authenticated durable user.
+Authenticates a user with email and password for development/testing only.
+
+Request:
+
+```json
+{
+  "email": "admin@local",
+  "password": "admin123"
+}
+```
 
 Response:
 
 ```json
 {
-  "wallets": [
-    {
-      "id": "...",
-      "address": "0x...",
-      "user_id": "...",
-      "linked_at": "...",
-      "detached_at": null,
-      "is_primary": true,
-      "status": "active"
-    }
-  ],
-  "total": 1,
-  "limit": 0,
-  "offset": 0,
-  "returned": 1,
-  "has_more": false
+  "access_token": "...",
+  "token_type": "Bearer",
+  "user": {
+    "id": "...",
+    "email": "admin@local"
+  }
 }
 ```
 
-When the request uses bounded pagination (`limit > 0`), the response may also include:
+---
 
-- `next_offset`
-- `previous_offset`
+### Authenticated Wallet Management
 
-Response field semantics:
+Requires Bearer JWT.
 
-- `wallets`: current window of wallet inventory rows after filtering and sorting
-- `total`: total number of rows after filters and sort, before applying the window
-- `limit`: requested page size, or `0` when the request is unbounded
-- `offset`: requested starting offset
-- `returned`: number of rows actually present in `wallets`
-- `has_more`: whether another row exists after the current window
-- `next_offset`: suggested offset for the next bounded window when one exists
-- `previous_offset`: suggested offset for the previous bounded window when one exists
+#### `POST /auth/wallets/link/challenge`
 
-Supported optional query params:
+Creates a wallet-link confirmation challenge for the currently authenticated user.
+
+Request:
+
+```json
+{
+  "address": "0x...",
+  "chain": "scavium"
+}
+```
+
+Response:
+
+```json
+{
+  "challenge_id": "...",
+  "message": "..."
+}
+```
+
+Behavior:
+- creates a wallet challenge with purpose `wallet_link`
+- records `requested_by_user_id` as the authenticated durable user
+- allows later signed attachment of a secondary wallet to the authenticated account
+- rejects unknown or malformed challenge purposes during downstream consumption
+
+---
+
+#### `POST /auth/wallets/link/verify`
+
+Consumes a signed wallet-link challenge and attaches the wallet to the authenticated user.
+
+Request:
+
+```json
+{
+  "challenge_id": "...",
+  "address": "0x...",
+  "signature": "0x..."
+}
+```
+
+Behavior:
+- requires the authenticated user
+- challenge must belong to purpose `wallet_link`
+- challenge must have been requested by the same authenticated user
+- wallet becomes attached to the authenticated durable user
+- detached known wallets can be reattached through this flow
+- unknown or malformed persisted challenge purposes are rejected rather than being normalized at runtime
+
+---
+
+#### `POST /auth/account/merge/wallet/challenge`
+
+Creates a wallet-owned account merge challenge for the currently authenticated user.
+
+Request:
+
+```json
+{
+  "address": "0x...",
+  "chain": "scavium"
+}
+```
+
+Behavior:
+- creates a wallet challenge with purpose `account_merge`
+- records `requested_by_user_id` as the authenticated durable user
+- prepares the authenticated user to absorb a wallet-owned source account only after that source wallet explicitly signs
+
+---
+
+#### `POST /auth/account/merge/wallet/verify`
+
+Consumes a signed merge challenge and merges the source wallet-owned user into the authenticated target user.
+
+Request:
+
+```json
+{
+  "challenge_id": "...",
+  "address": "0x...",
+  "signature": "0x..."
+}
+```
+
+Behavior:
+- requires the authenticated user
+- challenge must belong to purpose `account_merge`
+- challenge must have been requested by the same authenticated user
+- source durable wallet-owned account is merged into the authenticated target account
+- wallet ownership is re-pointed safely to the target user
+- unknown or malformed persisted challenge purposes are rejected rather than being normalized at runtime
+
+---
+
+#### `POST /auth/wallets/primary`
+
+Promotes one owned wallet to primary.
+
+Request:
+
+```json
+{
+  "wallet_identity_id": "..."
+}
+```
+
+Behavior:
+- requires the authenticated user
+- target wallet must already belong to that user
+- exactly one owned wallet remains primary after the operation
+
+---
+
+#### `POST /auth/wallets/detach/check`
+
+Evaluates whether one owned wallet is currently detachable.
+
+Request:
+
+```json
+{
+  "wallet_identity_id": "..."
+}
+```
+
+Response example:
+
+```json
+{
+  "eligible": false,
+  "reasons": [
+    "wallet_is_primary"
+  ]
+}
+```
+
+Behavior:
+- requires the authenticated user
+- does not mutate ownership
+- acts as the authoritative detach-eligibility surface
+
+---
+
+#### `POST /auth/wallets/detach`
+
+Detaches one owned wallet when eligibility constraints allow it.
+
+Request:
+
+```json
+{
+  "wallet_identity_id": "..."
+}
+```
+
+Behavior:
+- requires the authenticated user
+- target wallet must be currently detachable
+- clears `user_id`, `linked_at`, and `is_primary`
+- stamps `detached_at`
+- detached wallet remains a known wallet identity that may later reattach or rebound through wallet login
+
+---
+
+#### `GET /auth/wallets`
+
+Returns the authenticated user wallet inventory.
+
+Supported query params:
 
 - `status=active|detached`
 - `primary=true|false`
@@ -284,187 +448,516 @@ Supported optional query params:
 - `limit=<positive integer>`
 - `offset=<non-negative integer>`
 
----
-
-### Authenticated Wallet Linking
-
-#### `POST /auth/wallets/link/challenge`
-
-Creates a wallet-linking challenge bound to the currently authenticated user.
-
-Request:
+Response example:
 
 ```json
 {
-  "address": "0x...",
-  "chain": "scavium"
-}
-```
-
-Behavior:
-
-- requires valid JWT
-- challenge purpose becomes `wallet_link`
-- challenge stores `requested_by_user_id`
-
----
-
-#### `POST /auth/wallets/link/verify`
-
-Verifies the linking signature and attaches the wallet to the current user as a **secondary wallet**.
-
-Request:
-
-```json
-{
-  "challenge_id": "...",
-  "address": "0x...",
-  "signature": "0x..."
-}
-```
-
-Response:
-
-```json
-{
-  "linked_wallet": {
-    "id": "...",
-    "address": "0x...",
-    "user_id": "...",
-    "linked_at": "...",
-    "is_primary": false
-  },
   "wallets": [
     {
       "id": "...",
-      "address": "0x...",
+      "address": "0xabc...",
       "user_id": "...",
-      "linked_at": "...",
-      "is_primary": true
+      "linked_at": "2026-03-27T00:00:00Z",
+      "detached_at": null,
+      "is_primary": true,
+      "status": "active",
+      "can_set_primary": false,
+      "can_detach": false,
+      "detach_block_reasons": [
+        "wallet_is_primary"
+      ]
     },
     {
       "id": "...",
-      "address": "0x...",
+      "address": "0xdef...",
       "user_id": "...",
-      "linked_at": "...",
-      "is_primary": false
+      "linked_at": "2026-03-27T00:05:00Z",
+      "detached_at": null,
+      "is_primary": false,
+      "status": "active",
+      "can_set_primary": true,
+      "can_detach": true,
+      "detach_block_reasons": []
     }
-  ]
-}
-```
-
----
-
-### Authenticated Wallet-Owned Account Merge
-
-#### `POST /auth/account/merge/wallet/challenge`
-
-Creates an account-merge challenge bound to the currently authenticated user.
-
-Request:
-
-```json
-{
-  "address": "0x...",
-  "chain": "scavium"
+  ],
+  "total": 2,
+  "limit": 2,
+  "offset": 0,
+  "returned": 2,
+  "has_more": false,
+  "next_offset": null,
+  "previous_offset": null
 }
 ```
 
 Behavior:
-
-- requires valid JWT
-- challenge purpose becomes `account_merge`
-- challenge stores `requested_by_user_id`
-
----
-
-#### `POST /auth/account/merge/wallet/verify`
-
-Verifies the merge signature and consolidates all wallets from the source wallet-owned account into the current user.
-
-Request:
-
-```json
-{
-  "challenge_id": "...",
-  "address": "0x...",
-  "signature": "0x..."
-}
-```
-
-Response:
-
-```json
-{
-  "merged_wallet": {
-    "id": "...",
-    "address": "0x...",
-    "user_id": "...",
-    "linked_at": "...",
-    "is_primary": false
-  },
-  "source_user_id": "u_wallet_...",
-  "target_user_id": "u_current_user",
-  "wallets": [
-    {
-      "id": "...",
-      "address": "0x...",
-      "user_id": "...",
-      "linked_at": "...",
-      "is_primary": true
-    }
-  ]
-}
-```
+- returns only wallets currently owned by the authenticated user
+- inventory fields are lifecycle-aware and advisory
+- `can_set_primary`, `can_detach`, and `detach_block_reasons` are hints, not execution authority
+- `POST /auth/wallets/primary`, `POST /auth/wallets/detach/check`, and `POST /auth/wallets/detach` remain authoritative
+- `order` requires `sort`
+- `sort=linked_at` defaults to ascending order when `order` is omitted
+- offset-only requests remain valid and unbounded
+- `returned`, `has_more`, `next_offset`, and `previous_offset` make bounded window navigation explicit
 
 ---
 
-## 🧾 JWT Claims
+## 🧪 Minimal Validation Commands
 
-JWT tokens include:
-
-- `user_id`
-- `wallet_id`
-- `wallet_address`
-- `auth_method`
-- `exp`
-- `iat`
-- `nbf`
-
-Wallet linking and wallet-owned account merge do **not** mint a new token. Both operate under the existing authenticated session.
-
----
-
-## 🧪 Testing
-
-Run:
-
+### Health
 ```bash
-go test ./...
+curl -i http://localhost:8080/health
 ```
 
-Focus areas added in 0.4.16:
+Expected:
 
-- wallet inventory read-model enrichment
-- explicit lifecycle-aware wallet inventory serialization
-- `status` derivation for owned-wallet inventory responses
-- visibility of `detached_at` after detach + reattach
-- existing link, merge, primary-switch, and detach coverage preserved
+```json
+{"ok":true}
+```
+
+### Version
+```bash
+curl -i http://localhost:8080/version
+```
+
+### Dev Login
+```bash
+curl -i -X POST http://localhost:8080/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@local","password":"admin123"}'
+```
+
+### Wallet Challenge
+```bash
+curl -i -X POST http://localhost:8080/auth/wallet/challenge \
+  -H "Content-Type: application/json" \
+  -d '{"address":"0xabc123","chain":"scavium"}'
+```
 
 ---
 
-## 🚧 What 0.4.16 Solves
+## ⚙️ Environment Variables
 
-- authenticated user-driven wallet linking
-- authenticated wallet-owned account merge execution
-- protected primary-wallet switching under an authenticated user session
-- authenticated wallet detach-eligibility evaluation under an authenticated user session
-- challenge purpose separation between login, linking, and merge
-- challenge-to-user binding through `requested_by_user_id`
-- protected secondary-wallet attachment
-- protected wallet-signed ownership consolidation
-- deterministic single-primary wallet reassignment
-- explicit detach rejection reasons for ownership-unsafe states
+Main configuration keys:
+
+- `APP_ENV`
+- `PORT`
+- `JWT_SECRET`
+- `POSTGRES_DSN`
+- `REDIS_ADDR`
+
+See `.env.sample` for the full current set.
+
+---
+
+## 🧱 Current Foundation Scope
+
+What Stage 0 / Phase 0.4 currently establishes:
+
+- service bootstrap
+- health/version endpoints
+- password auth (dev only)
+- wallet authentication
+- durable user identity
+- wallet registry persistence
+- wallet ↔ user ownership persistence
+- authenticated wallet linking
+- authenticated wallet-owned account merge
+- explicit primary-wallet switching
+- protected wallet detach eligibility and execution
+- detached wallet lifecycle clarification
+- lifecycle-aware wallet inventory projection
+- wallet inventory filtering, ordering, pagination, and navigation metadata
+- inventory-side actionability hints aligned with primary / detach endpoints
+- strict wallet challenge purpose enforcement across bootstrap, link, and merge flows
+- PostgreSQL-backed persistence with in-memory fallback for local/dev usage
+
+---
+
+## 🚫 Out of Scope (for now)
+
+Not yet included:
+
+- refresh tokens
+- token revocation
+- session persistence
+- production-grade password auth
+- wallet unlink beyond protected detach semantics
+- arbitrary user-to-user ownership transfer
+- admin identity tooling
+- non-wallet auth providers
+
+---
+
+## 📂 Documentation Map
+
+Detailed docs live under `docs/`:
+
+- `docs/architecture.md`
+- `docs/architecture-deep.md`
+- `docs/development.md`
+- `docs/development-environment.md`
+- `docs/testing.md`
+- `docs/decisions.md`
+- `docs/phase-status.md`
+- `docs/phase0_4_auth_and_user_stabilization.md`
+- `docs/flows.md`
+- `docs/handoff/backend-status.md`
+
+---
+
+## ✅ Current Status
+
+At the end of the current documented state:
+
+- auth service is stable
+- durable user identity exists
+- wallet ownership is explicit and persistent
+- authenticated wallet linking is available
+- wallet-owned account merge is available
+- primary wallet management is available
+- wallet detach eligibility and execution are available
+- detached wallet identities are reusable known identities
+- wallet inventory is lifecycle-aware and management-oriented
+- wallet inventory query semantics are documented and validated
+- wallet challenge purpose handling is strict across creation and consumption
+
+---
+
+## Phase 0.4.1 — Auth Base Setup
+
+### Objective
+
+Establish the initial authentication module structure with a working dev login flow, JWT issuance, and protected identity context.
+
+### Delivered
+
+- `POST /auth/login`
+- JWT creation and validation
+- HTTP auth middleware
+- user module and repository abstraction
+- protected context injection
+- basic auth route registration
+
+### Result
+
+The backend has a minimal but working authentication base suitable for local development and later wallet integration.
+
+---
+
+## Phase 0.4.2 — JWT Implementation and Auth Normalization
+
+### Objective
+
+Normalize the JWT and auth transport layer so the authentication contract is explicit and reusable across future auth methods.
+
+### Delivered
+
+- normalized Bearer parsing
+- JWT claims structure cleanup
+- shared auth middleware behavior
+- protected route consistency
+
+### Result
+
+The backend now has one consistent token transport and one protected-user context model.
+
+---
+
+## Phase 0.4.3 — Auth Endpoints Stabilization
+
+### Objective
+
+Stabilize the initial auth endpoints and close remaining gaps in HTTP responses and login behavior.
+
+### Delivered
+
+- predictable error handling for auth endpoints
+- test alignment around login behavior
+- route-level auth stabilization
+
+### Result
+
+The password-based dev auth flow is stable and ready to coexist with wallet auth.
+
+---
+
+## Phase 0.4.4 — Wallet Challenge Contract and Nonce Bootstrap
+
+### Objective
+
+Introduce the first wallet-auth contract by allowing the backend to mint signable login challenges.
+
+### Delivered
+
+- `POST /auth/wallet/challenge`
+- challenge message generation
+- challenge persistence abstraction
+- in-memory challenge store
+- expiration support
+- challenge nonce bootstrap
+
+### Result
+
+The backend can now initiate wallet login by producing signable challenges bound to wallet and chain.
+
+---
+
+## Phase 0.4.5 — Wallet Signature Verification and Token Issuance
+
+### Objective
+
+Complete the first wallet-auth execution path by verifying signatures and issuing JWTs.
+
+### Delivered
+
+- `POST /auth/wallet/verify`
+- EVM-style signature verification
+- wallet challenge consumption
+- token issuance after successful verification
+- wallet-auth HTTP tests
+
+### Result
+
+Wallets can now authenticate directly against the backend.
+
+---
+
+## Phase 0.4.6 — Wallet Identity Persistence and Durable Challenge Storage
+
+### Objective
+
+Make wallet authentication durable by persisting known wallet identities and supporting PostgreSQL-backed challenge storage.
+
+### Delivered
+
+- persistent wallet identity store abstraction
+- in-memory wallet identity store
+- PostgreSQL wallet identity store
+- PostgreSQL challenge store
+- wallet auth migration
+- wallet auth service wiring
+
+### Result
+
+Wallet authentication is no longer ephemeral. Known wallets and challenges can persist across process restarts when PostgreSQL is configured.
+
+---
+
+## Phase 0.4.7 — Wallet ↔ User Linking and Unified Identity Model
+
+### Objective
+
+Unify runtime identity and persistent ownership by explicitly linking wallet identities to durable users.
+
+### Delivered
+
+- wallet identities now persist `user_id`
+- wallet auth resolves or creates durable users
+- JWT identity is now issued around `user_id`
+- wallet identity and session identity become aligned
+- ownership-safe linking behavior covered in service tests
+
+### Result
+
+Wallet login now resolves to one durable platform identity instead of treating wallet records as isolated auth artifacts.
+
+---
+
+## Phase 0.4.8 — Multi-Wallet Ownership Foundations
+
+### Objective
+
+Prepare the backend for real wallet ownership management by allowing one durable user to own multiple wallets with explicit ownership metadata.
+
+### Delivered
+
+- wallet identities now persist:
+  - `user_id`
+  - `linked_at`
+  - `is_primary`
+- migration for wallet ownership metadata
+- wallet auth bootstrap assigns the first wallet as primary
+- wallet identity service behavior updated for explicit ownership handling
+- in-memory and PostgreSQL stores aligned with the new ownership model
+
+### Result
+
+The backend now supports one durable user owning multiple wallets while preserving primary-wallet semantics and explicit ownership persistence.
+
+---
+
+## Phase 0.4.9 — Authenticated Wallet Linking Contract
+
+### Objective
+
+Allow an already authenticated durable user to attach an additional wallet through an explicit signed flow instead of relying only on wallet login heuristics.
+
+### Delivered
+
+- `POST /auth/wallets/link/challenge`
+- `POST /auth/wallets/link/verify`
+- wallet-link challenge purpose support
+- `requested_by_user_id` persisted with linking challenges
+- authenticated linking service flow
+- HTTP coverage for successful wallet linking
+
+### Result
+
+Secondary-wallet attachment is now a protected authenticated flow that preserves durable ownership semantics without creating a new account or relying on implicit merge rules.
+
+---
+
+## Phase 0.4.10 — User-Driven Wallet-Owned Account Merge Execution
+
+### Objective
+
+Allow the authenticated user to safely absorb another wallet-owned account only after the source wallet explicitly signs a merge challenge.
+
+### Delivered
+
+- `POST /auth/account/merge/wallet/challenge`
+- `POST /auth/account/merge/wallet/verify`
+- merge challenge purpose support
+- authenticated merge flow
+- ownership-safe reassignment of wallet identities from source user to target user
+- source user deletion after merge
+- HTTP and service coverage for successful merge execution
+
+### Result
+
+Wallet-owned account merge is now explicit, wallet-signed, and controlled by the authenticated target user rather than inferred implicitly during login.
+
+---
+
+## Phase 0.4.11 — Explicit Primary-Wallet Switching
+
+### Objective
+
+Allow the authenticated user to explicitly promote one owned wallet to primary without changing ownership.
+
+### Delivered
+
+- `POST /auth/wallets/primary`
+- ownership-safe primary switch flow
+- service coverage for switching across two owned wallets
+- HTTP validation coverage for the primary-switch request path
+
+### Result
+
+Users can now explicitly control which owned wallet is primary while keeping the one-user/multi-wallet ownership model intact.
+
+---
+
+## Phase 0.4.12 — Wallet Detach Eligibility Contract
+
+### Objective
+
+Introduce a safe detach-evaluation flow so one authenticated user can know whether one owned wallet may currently be detached without executing the detach.
+
+### Delivered
+
+- `POST /auth/wallets/detach/check`
+- detach eligibility evaluation logic
+- explicit block reasons:
+  - `wallet_is_primary`
+  - `user_would_have_no_wallets`
+- service coverage for protected detach constraints
+- HTTP validation coverage for detach-check
+
+### Result
+
+The backend can now answer whether one owned wallet is detachable while preserving ownership safety and primary-wallet invariants.
+
+---
+
+## Phase 0.4.13 — Protected Wallet Detach Execution
+
+### Objective
+
+Allow the authenticated user to detach one owned wallet only when the detach-safety rules are satisfied.
+
+### Delivered
+
+- `POST /auth/wallets/detach`
+- detach execution flow reusing the existing safety checks
+- wallet identity ownership clearing:
+  - `user_id = nil`
+  - `linked_at = nil`
+  - `is_primary = false`
+- service coverage for successful and rejected detach execution
+- HTTP coverage for detach execution behavior
+
+### Result
+
+One owned secondary wallet can now be detached safely without breaking the invariant that the original user must retain at least one owned wallet.
+
+---
+
+## Phase 0.4.14 — Detached Wallet Reattachment Semantics and Lifecycle Clarification
+
+### Objective
+
+Clarify what a detached wallet becomes and formalize whether it can be reused later without introducing a new lifecycle table or terminal state model.
+
+### Delivered
+
+- detached wallets remain known wallet identities
+- detached wallet records are preserved after detach
+- detached wallets can be reattached through the authenticated link flow
+- detached wallets can also re-enter through wallet-login bootstrap
+- documentation and tests aligned with reusable detached-wallet semantics
+
+### Result
+
+Detached wallets are now explicitly modeled as reusable known identities rather than deleted or terminal records.
+
+---
+
+## Phase 0.4.15 — Detached Identity Audit Readiness
+
+### Objective
+
+Close the first detached-identity audit gap by preserving minimal lifecycle evidence on wallet identities without introducing heavy event history or lifecycle redesign.
+
+### Delivered
+
+- `detached_at` added to wallet identities
+- PostgreSQL migration for detached audit readiness
+- in-memory and PostgreSQL stores updated to persist `detached_at`
+- detach execution now stamps `detached_at`
+- reattachment and login rebound preserve detached audit metadata
+- tests aligned with reusable detached-wallet semantics plus minimal audit readiness
+
+### Result
+
+The backend now retains minimal evidence that one wallet identity was previously detached even if that wallet is later reused.
+
+---
+
+## Phase 0.4.16 — Wallet Identity Read Model Enrichment
+
+### Objective
+
+Expose a richer lifecycle-aware wallet inventory read model so authenticated clients can reason about current wallet ownership and minimal detached-lifecycle evidence.
+
+### Delivered
+
+- `GET /auth/wallets`
+- explicit wallet read model with:
+  - `id`
+  - `address`
+  - `user_id`
+  - `linked_at`
+  - `detached_at`
+  - `is_primary`
+  - `status`
+- lifecycle-aware inventory serialization
+- tests covering active and detached-history wallet visibility
+
+### Result
+
+Phase 0.4.16 closes the gap between the internal wallet identity lifecycle model and the authenticated wallet inventory API contract. The backend now exposes a richer wallet inventory read model while preserving all ownership guarantees stabilized in previous subphases.
 
 ---
 
@@ -482,26 +975,19 @@ Focus areas added in 0.4.16:
 
 ## 🧭 Next Phase
 
-### 0.4.30 — Wallet Management Contract Consolidation
-
-Delivered:
-
-- wallet management is now documented as one coherent contract spanning `GET /auth/wallets`, `POST /auth/wallets/primary`, `POST /auth/wallets/detach/check`, and `POST /auth/wallets/detach`
-- inventory hints are explicitly positioned as advisory read signals while primary / detach endpoints remain authoritative execution surfaces
-- operator guidance now describes the full inventory → action / check → refreshed inventory cycle as one consolidated flow
-- no changes were made to handlers, stores, persistence, or domain rules
+Phase 0.4 is now formally closed.
 
 Expected next focus:
 
-- continue beyond wallet-management consolidation only if the next ZIP shows a real functional need
+- start a new phase only when the next ZIP shows a real runtime, product, or documentation need outside the already stabilized Phase 0.4 scope
 - preserve backward compatibility of the authenticated wallet inventory and wallet-action endpoints
-- keep future work ownership-safe and avoid reopening already stabilized invariants
+- avoid reopening Phase 0.4 unless a future ZIP proves a real regression or contractual gap
 
 ---
 
 ## 🧩 Summary
 
-At the end of Phase 0.4.16:
+At the end of Phase 0.4:
 
 - wallet authentication remains stable
 - identity remains unified
@@ -516,805 +1002,293 @@ At the end of Phase 0.4.16:
 - detached wallet identities preserve minimal audit-ready lifecycle evidence through `detached_at`
 - `GET /auth/wallets` now exposes an enriched lifecycle-aware wallet inventory read model
 
-
 ---
-
-## Phase 0.4.16 — Wallet Identity Read Model Enrichment
-
-### Objective
-
-Expose a richer and more explicit wallet inventory read model through `GET /auth/wallets`, so authenticated clients can observe current ownership plus minimal lifecycle evidence already maintained by the backend.
-
-### Initial Context
-
-By the end of 0.4.15, the backend already supported wallet authentication, authenticated wallet linking, wallet-owned account merge, primary-wallet switching, detach eligibility and execution, detached-wallet reattachment semantics, and minimal detached-identity audit readiness through `detached_at`.
-
-The internal wallet identity model had already become more lifecycle-aware than the public wallet inventory response.
-
-### Problem Statement
-
-The backend already preserved wallet lifecycle fields such as:
-
-- `linked_at`
-- `detached_at`
-- `is_primary`
-
-However, `GET /auth/wallets` had not yet been explicitly upgraded into a lifecycle-aware read model contract. This created a visibility gap between internal state and client-facing inventory data.
-
-### Scope
-
-Included:
-
-- explicit wallet read-model mapping
-- exposure of:
-  - `id`
-  - `address`
-  - `user_id`
-  - `linked_at`
-  - `detached_at`
-  - `is_primary`
-  - derived `status`
-- handler-level validation for active wallet inventory and detached-then-reattached wallet visibility
-
-Excluded:
-
-- ownership rule changes
-- schema changes
-- detach/reattach business-rule changes
-- filtering, pagination, or reporting expansion
-
-### Root Cause Analysis
-
-The root issue was not missing domain behavior but an outdated API projection. The internal model already tracked richer lifecycle state, while the public inventory endpoint still behaved like a simpler list projection.
-
-### Files Affected
-
-- `internal/modules/auth/http_wallet_list.go`
-- `internal/modules/auth/http_handlers_test.go`
-- `README.md`
-- `docs/phase-status.md`
-- `docs/handoff/backend-status.md`
-- `docs/phase0_4_auth_and_user_stabilization.md`
-- `docs/architecture.md`
-- `docs/flows.md`
-- `docs/testing.md`
-
-### Implementation Characteristics
-
-The wallet inventory handler now maps wallet identities into an explicit `WalletReadModel` exposing:
-
-- `id`
-- `address`
-- `user_id`
-- `linked_at`
-- `detached_at`
-- `is_primary`
-- `status`
-
-The derived `status` semantics are conservative:
-
-- `active` when the wallet is currently linked to a user
-- `detached` when there is no current owner and `detached_at` is present
-- `unlinked` when there is no current owner and no detach evidence
-
-For `GET /auth/wallets`, the operational case remains `active`, because the route lists wallets currently owned by the authenticated user. The main value of the enrichment is that previously detached lifecycle evidence remains visible after reattachment.
-
-### Validation
-
-Validated with:
-
-```bash
-go test ./...
-```
-
-Result:
-
-- `internal/modules/auth` OK
-- no visible regressions in the rest of the backend tree
-
-### Release Impact
-
-This subphase is additive and read-oriented. It improves client visibility and debugging without changing authentication, ownership, linking, merge, primary-switch, or detach rules.
-
-### Risks
-
-Low risk. The change is limited to response projection and handler-level contract clarity.
-
-### What it does NOT solve
-
-This subphase does not add:
-
-- filtering
-- pagination
-- search
-- admin reporting
-- richer detached-identity history endpoints
-- advanced lifecycle analytics
-
-### Conclusion
-
-Phase 0.4.16 closes the gap between the internal wallet identity lifecycle model and the authenticated wallet inventory API contract. The backend now exposes a richer wallet inventory read model while preserving all ownership guarantees stabilized in previous subphases.
-
 
 ## Phase 0.4.17 — Wallet Inventory Query Filtering and Sorting
 
 ### Objective
 
-Make `GET /auth/wallets` operationally more useful for clients by adding small, explicit query semantics on top of the lifecycle-aware read model introduced in 0.4.16.
+Expose the authenticated wallet inventory as a small but explicitly queryable read surface without changing ownership rules or persistence behavior.
 
-### Initial Context
+### Delivered
 
-By the end of 0.4.16, the backend already exposed an explicit wallet read model including:
+- optional `status=active|detached` filter on `GET /auth/wallets`
+- optional `primary=true|false` filter on `GET /auth/wallets`
+- optional `sort=linked_at` with `order=asc|desc`
+- strict HTTP `400` handling for unsupported query values
+- tests covering filtering, sorting, and invalid query parameters
 
-- `linked_at`
-- `detached_at`
-- `is_primary`
-- `status`
+### Result
 
-However, the endpoint still behaved like a fixed inventory listing. Clients could observe richer lifecycle state, but could not yet request even basic filtered or ordered views of that same read model.
+Authenticated clients can now query owned-wallet inventory more precisely while the backend keeps ownership rules and wallet lifecycle behavior unchanged.
 
-### Problem Statement
-
-The real gap was not in domain behavior or persistence. The gap was in inventory query semantics.
-
-`GET /auth/wallets` returned the enriched lifecycle-aware projection, but it did not yet support:
-
-- filtering by `status`
-- filtering by `primary`
-- explicit ordering by `linked_at`
-
-This made the public API less useful for account-management and wallet-inventory UIs even though the underlying read model was already available.
-
-### Scope
-
-Included:
-
-- optional `status` filter with supported values:
-  - `active`
-  - `detached`
-- optional `primary` filter with supported values:
-  - `true`
-  - `false`
-- optional sorting contract:
-  - `sort=linked_at`
-  - `order=asc|desc`
-- strict query validation with explicit `400` errors for unsupported values
-- handler-level test coverage for filtering, sorting, and invalid query contracts
-
-Excluded:
-
-- ownership rule changes
-- store changes
-- SQL query changes
-- pagination
-- search
-- admin reporting
-- broader detached-history APIs
-
-### Root Cause Analysis
-
-The root issue remained in the HTTP read layer. The lifecycle-aware model already existed, but the endpoint had no safe query contract for clients to consume that richer projection in a structured way.
-
-### Files Affected
-
-- `internal/modules/auth/http_wallet_list.go`
-- `internal/modules/auth/http_handlers_test.go`
-- `README.md`
-- `docs/phase-status.md`
-- `docs/handoff/backend-status.md`
-- `docs/phase0_4_auth_and_user_stabilization.md`
-- `docs/flows.md`
-- `docs/testing.md`
-
-### Implementation Characteristics
-
-The implementation remains read-only and handler-local. It does not change domain or persistence behavior.
-
-`GET /auth/wallets` now accepts these optional query parameters:
-
-- `status=active|detached`
-- `primary=true|false`
-- `sort=linked_at`
-- `order=asc|desc`
-
-Compatibility is preserved:
-
-- when no query parameters are provided, the endpoint keeps the existing inventory behavior
-- the existing store-defined default ordering remains the default path
-- filtering and sorting are applied only after the owned-wallet inventory has already been resolved
-
-Validation is strict:
-
-- invalid `status` returns `400` with `invalid_status`
-- invalid `primary` returns `400` with `invalid_primary`
-- invalid `sort` returns `400` with `invalid_sort`
-- invalid `order` returns `400` with `invalid_order`
-- `order` without a supported `sort` also returns `400` with `invalid_sort`
-
-A practical note remains important: because `GET /auth/wallets` lists wallets currently owned by the authenticated user, `status=detached` is expected to return an empty result under the current contract. That is intentional and keeps the semantics explicit without widening the endpoint scope.
-
-### Validation
-
-Validation path for this subphase:
-
-```
-go test ./...
-```
-
-Focused coverage added in handler tests for:
-
-- backward-compatible inventory listing without query params
-- `primary=true`
-- `primary=false`
-- `status=active`
-- `status=detached` returning an empty result under the current owned-wallet contract
-- `sort=linked_at&order=desc`
-- invalid query parameters returning `400`
-
-### Release Impact
-
-This subphase is additive and read-oriented. It improves client query semantics without changing wallet auth, ownership, linking, merge, primary switch, detach execution, or detached-wallet reuse rules.
-
-### Risks
-
-Low risk. The change is restricted to the authenticated wallet inventory handler and its tests.
-
-Main guarded risks:
-
-- accidental breakage of existing default ordering
-- ambiguous invalid query behavior
-- accidental persistence or domain coupling for a read-only enhancement
-
-### What it does NOT solve
-
-This subphase does not add:
-
-- pagination
-- search
-- detached-wallet history listing
-- admin inventory views
-- new ownership operations
-- domain redesign
-
-### Conclusion
-
-Phase 0.4.17 makes the lifecycle-aware wallet inventory endpoint actually queryable in a small, controlled, backward-compatible way. The backend now exposes a safer and more useful inventory contract while keeping all Phase 0.4 ownership and lifecycle invariants intact.
-
+---
 
 ## Phase 0.4.18 — Wallet Inventory Pagination and Windowed Response
 
 ### Objective
 
-Add simple, explicit pagination to `GET /auth/wallets` on top of the filtered and sortable lifecycle-aware inventory contract introduced in 0.4.17.
+Add simple pagination semantics to the authenticated wallet inventory contract without changing stores, ownership rules, or lifecycle behavior.
 
-### Initial Context
-
-By the end of 0.4.17, the authenticated wallet inventory endpoint already supported:
-
-- lifecycle-aware wallet read-model projection
-- `status` filtering
-- `primary` filtering
-- `linked_at` ordering
-
-However, clients still had no way to request a bounded result window or receive explicit metadata about the size of the filtered inventory.
-
-### Problem Statement
-
-The remaining gap was not in ownership or persistence. The gap was in windowed inventory delivery.
-
-`GET /auth/wallets` could already return a filtered and sorted inventory, but it still lacked:
+### Delivered
 
 - optional `limit`
 - optional `offset`
-- explicit response metadata describing the filtered result size and the requested window
-
-This kept the API less practical for inventory UIs that need deterministic partial rendering while preserving the current authenticated ownership scope.
-
-### Scope
-
-Included:
-
-- optional `limit` query param
-- optional `offset` query param
-- strict validation for invalid pagination inputs
-- pagination applied only after filtering and sorting
-- additive response metadata:
+- response metadata:
   - `total`
   - `limit`
   - `offset`
-- handler-level tests for valid and invalid pagination scenarios
+- strict HTTP `400` handling for malformed pagination values
+- tests covering valid and invalid paginated requests
 
-Excluded:
+### Result
 
-- cursor pagination
-- `has_more` or next-page tokens
-- store changes
-- SQL pagination
-- detached-wallet history APIs
-- ownership-rule changes
-- new mutation flows
+The wallet inventory endpoint now supports bounded windows while preserving the same lifecycle-aware wallet read model introduced previously.
 
-### Root Cause Analysis
-
-The lifecycle-aware read model and basic query semantics already existed. The missing piece was a small read-layer contract for bounded inventory retrieval. This is a handler concern, not a domain or persistence concern.
-
-### Files Affected
-
-- `internal/modules/auth/http_wallet_list.go`
-- `internal/modules/auth/http_handlers_test.go`
-- `README.md`
-- `docs/phase-status.md`
-- `docs/handoff/backend-status.md`
-- `docs/phase0_4_auth_and_user_stabilization.md`
-- `docs/flows.md`
-- `docs/testing.md`
-
-### Implementation Characteristics
-
-`GET /auth/wallets` now remains authenticated and ownership-scoped, but also accepts:
-
-- `limit=<positive integer>`
-- `offset=<non-negative integer>`
-
-The response now includes additive pagination metadata:
-
-- `wallets`
-- `total`
-- `limit`
-- `offset`
-
-Important behavior:
-
-- filtering still happens first
-- sorting still happens second
-- pagination happens only after filtering and sorting
-- `total` reflects the number of wallets after filtering and sorting, before windowing
-- `limit=0` means no explicit page-size cap was requested
-- `offset=0` remains the default starting position
-
-Validation is strict:
-
-- invalid `limit` returns `400` with `invalid_limit`
-- invalid `offset` returns `400` with `invalid_offset`
-
-This keeps the contract explicit and avoids silently accepting malformed query values.
-
-### Validation
-
-Validation path for this subphase:
-
-```
-go test ./...
-```
-
-Focused handler coverage now includes:
-
-- backward-compatible wallet inventory listing with metadata defaults
-- `limit` only
-- `offset` only
-- `limit + offset`
-- valid empty window when the requested offset exceeds the filtered inventory length
-- invalid `limit` values returning `400`
-- invalid `offset` values returning `400`
-
-### Release Impact
-
-This subphase is additive and read-only. It improves the authenticated wallet inventory API contract without changing ownership, linking, merge, primary switching, detach execution, or detached-wallet reuse semantics.
-
-### Risks
-
-Low risk. The change remains constrained to the wallet inventory handler, its response contract, and handler-level tests.
-
-Main guarded risks:
-
-- accidental response-contract breakage for existing clients
-- incorrect pagination ordering if applied before filtering/sorting
-- silent acceptance of malformed pagination values
-
-### What it does NOT solve
-
-This subphase does not add:
-
-- cursor pagination
-- text search
-- detached-wallet history reporting
-- admin inventory views
-- store-level pagination
-- ownership-rule changes
-- new wallet mutation endpoints
-
-### Conclusion
-
-Phase 0.4.18 makes the lifecycle-aware wallet inventory endpoint windowable while preserving its authenticated ownership scope and all Phase 0.4 invariants. The backend now supports small, explicit pagination semantics on top of the queryable wallet inventory contract.
-
+---
 
 ## Phase 0.4.19 — Wallet Inventory Navigation Metadata
 
 ### Objective
 
-Add minimal navigation metadata to the paginated `GET /auth/wallets` response so clients can consume windowed inventory results without inferring navigation state on their own.
+Complete the paginated wallet inventory contract with additive navigation metadata.
 
-### Initial Context
-
-By the end of 0.4.18, the authenticated wallet inventory endpoint already supported lifecycle-aware projection, filtering, sorting, and explicit windowing through `limit` and `offset`.
-
-The response already exposed:
-
-- `wallets`
-- `total`
-- `limit`
-- `offset`
-
-However, clients still had to infer whether more results existed and how many items were effectively returned by the current window.
-
-### Problem Statement
-
-The remaining gap was not in ownership, persistence, or query parsing. The gap was in response navigation semantics.
-
-A paginated inventory response without explicit navigation metadata forces each client to replicate simple backend logic to determine:
-
-- how many items the current window actually returned
-- whether another page exists after the current window
-
-### Scope
-
-Included:
+### Delivered
 
 - additive response metadata:
   - `returned`
   - `has_more`
-- deterministic calculation after filtering, sorting, and pagination
-- handler-level tests covering default, paginated, empty-window, and filtered-window navigation behavior
+- deterministic post-filter/post-sort window calculations
+- tests covering default, paginated, filtered, and empty-window scenarios
 
-Excluded:
+### Result
 
-- cursor pagination
-- `next_offset` or `previous_offset`
-- new filters
-- store changes
-- SQL pagination
-- ownership changes
+Wallet inventory responses now expose enough metadata for clients to reason about current page shape without introducing cursor-based complexity.
 
-### Root Cause Analysis
+---
 
-Phase 0.4.18 made the wallet inventory endpoint windowable, but the response contract still stopped short of describing the returned window itself. This remained a read-model concern and did not require any domain or persistence expansion.
-
-### Files Affected
-
-- `internal/modules/auth/http_wallet_list.go`
-- `internal/modules/auth/http_handlers_test.go`
-- `README.md`
-- `docs/phase-status.md`
-- `docs/handoff/backend-status.md`
-- `docs/phase0_4_auth_and_user_stabilization.md`
-- `docs/flows.md`
-- `docs/testing.md`
-
-### Implementation Characteristics
-
-`GET /auth/wallets` now keeps all existing query semantics and response fields, and adds:
-
-- `returned`
-- `has_more`
-
-Important behavior:
-
-- `returned` equals the actual number of wallets present in `wallets` for the current response
-- `has_more` is calculated only after filtering, sorting, and applying the requested window
-- when `limit=0`, the response is treated as unbounded and `has_more=false`
-- the change is additive and backward compatible
-
-### Validation
-
-Validation path for this subphase:
-
-```
-go test ./...
-```
-
-Focused handler coverage now includes:
-
-- default wallet inventory response with navigation metadata
-- paginated windows with `has_more=true`
-- final windows with `has_more=false`
-- empty valid windows with `returned=0`
-- filtered and sorted windows with correct navigation metadata
-
-### Release Impact
-
-This subphase is additive and read-only. It improves the wallet inventory response contract without changing ownership, linking, detach, merge, or primary-wallet semantics.
-
-### Risks
-
-Low risk. The change remains constrained to the wallet inventory handler, response payload, and handler-level tests.
-
-Main guarded risks:
-
-- incorrect `has_more` calculation
-- accidental response-contract incompatibility
-- ambiguous behavior for unbounded (`limit=0`) requests
-
-### What it does NOT solve
-
-This subphase does not add:
-
-- cursor pagination
-- next-page tokens
-- search
-- detached-wallet history reporting
-- admin inventory views
-- store-level pagination
-- ownership-rule changes
-
-### Conclusion
-
-Phase 0.4.19 completes the basic navigation contract of the authenticated wallet inventory endpoint. The backend now exposes not only filtered, ordered, and windowed wallet inventory responses, but also explicit metadata describing the returned window itself.
-
-
-## Phase 0.4.22 — Wallet Inventory Response Contract Clarification
+## Phase 0.4.20 — Wallet Inventory Cursorless Navigation Hints
 
 ### Objective
-Clarify and document the complete `GET /auth/wallets` response contract so the visible API examples match the behavior already implemented in 0.4.17 through 0.4.21.
 
-### Problem Statement
-The wallet inventory endpoint already returned enriched lifecycle and navigation metadata, but the main README endpoint example still showed only a partial response contract. This created an avoidable gap between implementation and operator-facing documentation.
-
-### Scope
-- align the primary `GET /auth/wallets` README example with the real JSON contract
-- document the response semantics of:
-  - `wallets`
-  - `total`
-  - `limit`
-  - `offset`
-  - `returned`
-  - `has_more`
-  - `next_offset`
-  - `previous_offset`
-- clarify bounded vs unbounded response behavior
-- update phase and handoff documentation to mark the contract as clarified
-
-### Implementation Characteristics
-- documentation-only closure
-- no domain changes
-- no store changes
-- no persistence changes
-- no new endpoint capabilities
-
-### Validation
-- documentation reviewed against the real `GET /auth/wallets` handler contract
-- no behavioral change required
-- `go test ./...`
-
-### Release Impact
-Wallet inventory consumers now have a complete and explicit reference for the authenticated inventory response contract, including navigation metadata already exposed by the backend.
-
-### Risks
-- incomplete docs drifting again from the implementation
-
-### What it does NOT solve
-- new filters
-- new sort fields
-- cursor pagination
-- store-level pagination
-- ownership-rule changes
-
-### Conclusion
-Phase 0.4.22 closes the documentation gap around the wallet inventory response contract. The endpoint behavior remains unchanged, but the visible API contract is now explicit and aligned with the implementation.
-
-
-## Phase 0.4.23 — Wallet Inventory Query Examples Closure
-
-### Objective
-Close the operator-facing usage examples for `GET /auth/wallets` so the endpoint contract is not only documented abstractly, but also illustrated through concrete valid and invalid query examples aligned with the real handler behavior.
-
-### Scope
-- add concrete example requests for the wallet inventory endpoint
-- add concrete response examples for filtered, sorted, and paginated inventory queries
-- add at least one explicit contractual error example
-- keep the phase documentation aligned with the real handler behavior
-
-### Problem Statement
-By 0.4.22, the wallet inventory endpoint contract had already been clarified, but operators and client implementers still lacked a compact set of end-to-end examples showing how the query parameters and response metadata work together in practice.
+Clarify next/previous bounded-window navigation without introducing cursor semantics or changing the underlying pagination strategy.
 
 ### Delivered
-- example request without query parameters
-- example request with `primary=true`
-- example request with `sort=linked_at&order=desc`
-- example request with bounded pagination (`limit` and `offset`)
-- example request showing an invalid contractual combination: `order` without `sort`
-- documentation-only closure of the wallet inventory examples layer
 
-### Validation
-- documentation reviewed against the real `GET /auth/wallets` handler contract
-- `go test ./...`
+- additive response metadata:
+  - `next_offset`
+  - `previous_offset`
+- bounded-window navigation hints aligned with current `limit` / `offset`
+- test coverage for navigation-hint behavior across different windows
 
-### What it does NOT solve
-- new endpoint behavior
-- new filters or sort fields
-- cursor pagination
-- store-level pagination
-- ownership-rule changes
+### Result
 
-### Conclusion
-Phase 0.4.23 closes the remaining examples gap around `GET /auth/wallets` by documenting concrete request and response patterns without changing domain, stores, persistence, or handler behavior.
+Clients can now follow straightforward offset-based inventory navigation while the backend remains intentionally cursorless.
+
+---
 
 ## Phase 0.4.21 — Wallet Inventory Query Parameter Contract Hardening
 
 ### Objective
-Harden the `GET /auth/wallets` query-parameter contract without adding new inventory capabilities, stores, or persistence changes.
 
-### Scope
-- formalize that `order` requires an explicit `sort`
-- keep `sort=linked_at` as the only supported sort field
-- make the default sort order explicit as ascending when `sort=linked_at` is present without `order`
-- preserve offset-only requests as valid, unbounded windows
-- extend handler-level tests for contract-specific combinations and defaults
+Harden the query-parameter contract for authenticated wallet inventory without introducing new filters, new sorting fields, or runtime ownership changes.
 
 ### Delivered
-- explicit contract validation for `order` without `sort` via `invalid_order_requires_sort`
-- explicit defaulting of `order=asc` when `sort=linked_at` is provided without an `order`
-- preserved support for `offset` without `limit`, keeping the response unbounded and navigation hints unset
-- handler-level coverage for contract hardening scenarios and defaults
 
-### Validation
-- `go test ./...`
-- handler-level validation for `sort=linked_at` with implicit ascending order
-- handler-level validation for `order` without `sort`
-- handler-level validation for offset-only requests staying unbounded
+- `order` now requires an explicit `sort`
+- `sort=linked_at` defaults to ascending order when `order` is omitted
+- offset-only requests remain valid and unbounded
+- tests covering the hardened combinations and defaults
 
-### What it does NOT solve
-- new filters
-- additional sort fields
-- cursor pagination
-- continuation tokens
-- store-level pagination
-- ownership-rule changes
+### Result
 
-### Conclusion
-Phase 0.4.21 hardens the wallet inventory query contract by making parameter combinations and defaults explicit while preserving the existing read-only, ownership-scoped behavior.
+The wallet inventory query contract is now explicit, stricter, and less ambiguous while remaining backward-compatible for valid callers.
 
+---
+
+## Phase 0.4.22 — Wallet Inventory Response Contract Clarification
+
+### Objective
+
+Clarify the visible wallet inventory API contract so documentation matches the response behavior already implemented in previous subphases.
+
+### Delivered
+
+- `GET /auth/wallets` response examples now include:
+  - `returned`
+  - `has_more`
+  - `next_offset`
+  - `previous_offset`
+- explicit documentation of bounded vs unbounded window semantics
+- response-field contract alignment across docs
+
+### Result
+
+Phase 0.4.22 closes the documentation gap around the wallet inventory response contract. The endpoint behavior remains unchanged, but the visible API contract is now explicit and aligned with the implementation.
+
+---
+
+## Phase 0.4.23 — Wallet Inventory Query Examples Closure
+
+### Objective
+
+Close the examples layer around `GET /auth/wallets` so implementers can see concrete valid and invalid request patterns.
+
+### Delivered
+
+- base request example
+- filtered request example
+- sorted request example
+- paginated request example
+- invalid `order` without `sort` example
+- bounded-window response examples aligned with the existing handler contract
+
+### Result
+
+Phase 0.4.23 closes the remaining examples gap around `GET /auth/wallets` by documenting concrete request and response patterns without changing domain, stores, persistence, or handler behavior.
+
+---
 
 ## Phase 0.4.24 — Wallet Inventory Manual Validation Closure
 
 ### Objective
-Close the manual validation layer for `GET /auth/wallets` so operators have a compact, explicit checklist for verifying the already-implemented inventory contract end-to-end without changing code, stores, or persistence.
 
-### Scope
-- consolidate manual validation scenarios for the wallet inventory endpoint
-- cover base, filtered, sorted, paginated, bounded, and unbounded request patterns
-- document expected navigation metadata behavior for bounded and unbounded windows
-- document expected contractual errors for invalid query combinations
-- keep the phase documentation aligned with the real handler behavior
-
-### Problem Statement
-By 0.4.23, the wallet inventory endpoint already had clarified response fields and concrete request examples, but the documentation still lacked a compact manual-validation closure showing how operators should verify the endpoint end-to-end against the real contract.
+Close the manual-validation layer around `GET /auth/wallets` so operators have an explicit checklist for validating the already-implemented query contract end-to-end.
 
 ### Delivered
-- manual validation checklist for base inventory queries
-- manual validation checklist for `primary`, `status`, `sort`, `order`, `limit`, and `offset` combinations
-- explicit manual verification points for `returned`, `has_more`, `next_offset`, and `previous_offset`
-- explicit invalid-query manual checks such as `order` without `sort`
-- documentation-only closure of the wallet inventory manual validation layer
 
-### Validation
-- documentation reviewed against the real `GET /auth/wallets` handler contract
-- `go test ./...`
+- manual validation steps for:
+  - base inventory requests
+  - filtered inventory requests
+  - sorted inventory requests
+  - paginated inventory requests
+  - invalid contract requests
+- explicit checks for:
+  - `returned`
+  - `has_more`
+  - `next_offset`
+  - `previous_offset`
 
-### What it does NOT solve
-- new endpoint behavior
-- new filters or sort fields
-- cursor pagination
-- store-level pagination
-- ownership-rule changes
+### Result
 
-### Conclusion
 Phase 0.4.24 closes the manual-validation layer around `GET /auth/wallets` by documenting how to verify the existing contract end-to-end without changing domain, stores, persistence, or handler behavior.
 
+---
 
 ## Phase 0.4.25 — Wallet Actionability Read Model Preparation
 
 ### Objective
-Prepare `GET /auth/wallets` for wallet-management consumption by exposing minimal actionability hints per wallet without changing domain authority, stores, or persistence.
 
-### Scope
-- extend the wallet inventory read model with derived actionability hints
-- expose whether a listed wallet can be promoted to primary from the current inventory view
-- expose whether a listed wallet is detachable from the current inventory view
-- expose detach block reasons using the already-established detach-domain reason constants
-- keep all execution authority in the existing wallet action endpoints
-
-### Problem Statement
-By 0.4.24, the wallet inventory endpoint was contractually mature, but clients still had to infer wallet-management action state or call additional endpoints to know whether a listed wallet was actionable.
+Expose minimal wallet-management actionability hints inside authenticated wallet inventory without changing detach rules, primary-switch rules, stores, or persistence.
 
 ### Delivered
-- additive read-model fields: `can_set_primary`, `can_detach`, and `detach_block_reasons`
-- actionability derived entirely from the authenticated inventory read path
-- detach block reasons aligned with the existing detach-domain constants (`wallet_is_primary`, `user_would_have_no_wallets`)
-- handler-level coverage for single-wallet and two-wallet ownership scenarios
 
-### Validation
-- `go test ./...`
-- handler-level validation for actionability on a single primary wallet
-- handler-level validation for actionability on primary and secondary wallets in a two-wallet inventory
+- additive wallet inventory fields:
+  - `can_set_primary`
+  - `can_detach`
+  - `detach_block_reasons`
+- detach block reasons aligned with detach-check semantics:
+  - `wallet_is_primary`
+  - `user_would_have_no_wallets`
+- tests covering inventory actionability across single-wallet and multi-wallet ownership scenarios
 
-### What it does NOT solve
-- new wallet-management endpoints
-- changes to detach or primary-switch execution rules
-- new query parameters
-- store-level actionability persistence
-- ownership-rule changes
+### Result
 
-### Conclusion
-Phase 0.4.25 extends the authenticated wallet inventory read model with minimal, ownership-safe actionability hints so clients can prepare wallet-management UI decisions without changing domain authority or persistence behavior.
+Authenticated clients can now observe advisory wallet-management hints directly from inventory while the authoritative execution and eligibility endpoints remain unchanged.
 
+---
 
 ## Phase 0.4.26 — Wallet Detach Check Read Consistency
 
 ### Objective
-Close the consistency gap between wallet-inventory actionability hints and `POST /auth/wallets/detach/check` so both surfaces remain interpretably aligned for the same authenticated user and wallet set.
+
+Align inventory-side detach hints with the authoritative detach-check endpoint without changing detach rules, stores, or persistence.
 
 ### Delivered
-- handler-level consistency tests covering single-wallet and two-wallet inventories
-- explicit validation that inventory-side `can_detach` / `detach_block_reasons` remain compatible with detach-check `eligible` / `reasons`
-- documentation that keeps inventory hints advisory while leaving final execution authority in `detach/check` and `detach`
 
-### Conclusion
-Phase 0.4.26 does not change detach-domain rules or persistence behavior. It hardens the contract between the enriched read model and the dedicated detach-check endpoint so future wallet-management work can rely on both surfaces staying semantically aligned.
+- tests proving:
+  - `can_detach=false` remains aligned with `eligible=false`
+  - `can_detach=true` remains aligned with `eligible=true`
+  - detach block reasons remain coherent across inventory and detach-check
+- documentation alignment around advisory vs authoritative detach semantics
 
+### Result
+
+Inventory-side detach hints and `POST /auth/wallets/detach/check` now describe the same detach-eligibility reality while keeping authority at the detach-check endpoint.
+
+---
 
 ## Phase 0.4.27 — Wallet Primary Switch Read Consistency
 
 ### Objective
-Close the consistency gap between wallet-inventory primary actionability hints and `POST /auth/wallets/primary` so both surfaces remain interpretably aligned for the same authenticated user and wallet set.
+
+Align inventory-side primary actionability hints with the authoritative primary-switch endpoint without changing primary-switch rules, stores, or persistence.
 
 ### Delivered
-- handler-level consistency coverage for two-wallet inventories around primary-switch eligibility and post-switch inventory state
-- explicit validation that `can_set_primary=false` stays aligned with the current primary wallet before switching
-- explicit validation that a secondary wallet exposed as `can_set_primary=true` can be promoted successfully and becomes non-promotable after the switch
-- documentation that keeps inventory-side primary hints advisory while leaving final execution authority in `POST /auth/wallets/primary`
 
-### Conclusion
-Phase 0.4.27 does not change primary-switch domain rules or persistence behavior. It hardens the contract between the enriched wallet inventory read model and the dedicated primary-switch endpoint so future wallet-management work can rely on both surfaces staying semantically aligned.
+- tests proving:
+  - the current primary remains `can_set_primary=false`
+  - an eligible secondary wallet remains `can_set_primary=true`
+  - promoted wallets become non-promotable after the switch
+- documentation alignment around advisory vs authoritative primary semantics
+
+### Result
+
+Inventory-side primary hints and `POST /auth/wallets/primary` now describe one coherent primary-management contract while keeping authority at the execution endpoint.
+
+---
 
 ## Phase 0.4.28 — Wallet Management Read Flow Closure
 
 ### Objective
-Close the end-to-end consumption flow around authenticated wallet management by explicitly connecting wallet inventory, advisory actionability hints, primary switching, detach checking, detach execution, and the expected refreshed inventory state.
+
+Close the operational read flow around wallet inventory, primary switching, and detach operations without changing domain rules, stores, or persistence.
 
 ### Delivered
-- README and phase documentation now present wallet management as a complete read-flow: inventory → action decision → action/check endpoint → refreshed inventory
-- explicit operator guidance clarifying how `can_set_primary`, `can_detach`, and `detach_block_reasons` should be consumed before `POST /auth/wallets/primary`, `POST /auth/wallets/detach/check`, and `POST /auth/wallets/detach`
-- testing notes expanded with a manual end-to-end validation sequence covering inventory refresh after primary switching and detach execution
-- current-subphase summary corrected so the main README header matches the actual state already reflected by the rest of the ZIP
 
-### Conclusion
+- wallet-management flow documentation:
+  - inventory
+  - actionability hint
+  - action/check endpoint
+  - refreshed inventory
+- README header alignment with the real subphase state
+- manual validation guidance for refreshed inventory after wallet-management actions
+
+### Result
+
 Phase 0.4.28 does not change wallet-management rules, handlers, stores, or persistence. It closes the operational read flow around the existing wallet inventory and action endpoints so client and operator guidance now matches the real authenticated wallet-management surface end to end.
 
+---
 
 ## Phase 0.4.29 — Wallet Detach Execute Read Consistency
 
 ### Objective
-Close the consistency gap between wallet-inventory detach actionability hints and `POST /auth/wallets/detach` so pre-detach inventory state, detach execution, and refreshed post-detach inventory remain semantically aligned for the same authenticated user.
+
+Align inventory-side detach hints with the authoritative detach-execution endpoint without changing detach rules, stores, or persistence.
 
 ### Delivered
-- handler-level consistency coverage for a two-wallet inventory proving that a secondary wallet exposed as `can_detach=true` can be detached successfully
-- explicit validation that the detach execution payload remains compatible with the pre-detach inventory hints and eligibility snapshot
-- explicit validation that the refreshed inventory no longer exposes the detached wallet as attached to the user and recalculates detach hints coherently for the remaining wallet
-- documentation that keeps inventory-side detach hints advisory while preserving `POST /auth/wallets/detach` as the authoritative execution surface
 
-### Conclusion
-Phase 0.4.29 does not change detach-domain rules, handlers, stores, or persistence. It hardens the contract between the authenticated wallet inventory and detach execution so wallet-management consumers can rely on inventory hints, detach results, and refreshed inventory staying semantically aligned end to end.
+- tests proving:
+  - a detachable secondary wallet can be detached successfully
+  - the detach execute response remains compatible with pre-detach inventory hints
+  - refreshed inventory recalculates detach hints coherently after detach
+- documentation alignment around advisory inventory vs authoritative execution semantics
 
+### Result
+
+Inventory-side detach hints and `POST /auth/wallets/detach` now describe one coherent detach-management contract while keeping authority at the execution endpoint.
+
+---
 
 ## Phase 0.4.30 — Wallet Management Contract Consolidation
 
 ### Objective
 
-Consolidate the already-stabilized wallet-management surfaces into one explicit contract so inventory, eligibility, execution, and refreshed post-action state can be consumed as one coherent unit.
+Consolidate the authenticated wallet-management surface into one explicit contract without changing handlers, stores, persistence, or domain rules.
 
 ### Delivered
 
-- consolidated documentation for the authenticated wallet-management contract built around:
+- explicit consolidated wallet-management contract spanning:
   - `GET /auth/wallets`
   - `POST /auth/wallets/primary`
   - `POST /auth/wallets/detach/check`
@@ -1331,6 +1305,7 @@ Consolidate the already-stabilized wallet-management surfaces into one explicit 
 
 Phase 0.4 now closes with wallet management described as one consolidated, inventory-driven contract without changing handlers, stores, persistence, or ownership rules.
 
+---
 
 ## Phase 0.4.31 — Wallet Auth Bootstrap Purpose Enforcement
 
@@ -1356,6 +1331,7 @@ The wallet lifecycle remains unchanged:
 
 What changes is the contract enforcement: these challenge purposes are no longer interchangeable at the wallet-auth bootstrap boundary.
 
+---
 
 ## Phase 0.4.32 — Wallet Challenge Purpose Strictness Closure
 
@@ -1379,3 +1355,32 @@ Phase 0.4 closes with strict challenge-purpose handling across creation and cons
 - controlled creation still defaults empty purpose to `auth_bootstrap`
 - supported purposes remain `auth_bootstrap`, `wallet_link`, and `account_merge`
 - unknown or malformed purposes are no longer treated as valid bootstrap challenges at runtime
+
+---
+
+## Phase 0.4.33 — Phase 0.4 Formal Closure
+
+### Objective
+
+Formally close Phase 0.4 at the documentation layer now that wallet auth, ownership, wallet management, and challenge-purpose enforcement are already stabilized in the implementation and reflected across the ZIP.
+
+### Delivered
+
+- explicit formal closure of Phase 0.4 as a completed foundation phase
+- README alignment so the declared current subphase matches the final documented Phase 0.4 state
+- explicit transition guidance that the next work must begin in a new phase unless a future ZIP proves a real Phase 0.4 regression or documentation gap
+- no runtime, store, persistence, migration, or handler changes
+
+### Result
+
+Phase 0.4 is now formally closed. The backend keeps the already stabilized contracts for:
+
+- wallet auth bootstrap
+- wallet ↔ user linking
+- wallet-owned account merge
+- primary wallet switching
+- detach eligibility and detach execution
+- lifecycle-aware wallet inventory
+- strict wallet challenge purpose handling
+
+Any future continuation must start from a new phase rather than extending Phase 0.4 without a new ZIP-validated need.

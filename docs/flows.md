@@ -835,3 +835,31 @@ This phase does not change handlers, stores, persistence, or domain rules. It cl
 - auth bootstrap, wallet link, and account merge remain separate wallet lifecycle entry points
 - runtime challenge consumption no longer accepts malformed or unknown purposes through silent fallback
 - the flow contract is now strict both at creation time and at challenge-consumption time
+
+---
+
+## Phase 0.4 Formal Closure
+
+All flows described in this document are now considered stable and part of the finalized Phase 0.4 contract.
+
+This includes:
+
+- wallet authentication (challenge → verify)
+- authenticated wallet linking
+- wallet-owned account merge
+- primary wallet switching
+- detach eligibility and detach execution
+- lifecycle-aware wallet inventory flows
+
+### Closure Notes
+
+- all flows are aligned with strict challenge-purpose handling
+- no flow relies on implicit behavior or fallback normalization
+- ownership transitions are explicit and protected
+- detached-wallet reuse semantics are fully defined
+
+### Forward Direction
+
+No additional flows should be added within Phase 0.4.
+
+Any new flow must be introduced in a new phase and must not alter the guarantees established here unless a future ZIP proves a real regression.

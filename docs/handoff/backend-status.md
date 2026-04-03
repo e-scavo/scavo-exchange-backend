@@ -312,3 +312,19 @@ Phase 0.4.31 hardens the wallet-auth bootstrap boundary so `POST /auth/wallet/ve
 
 
 Phase 0.4.32 closes the last permissive challenge-purpose normalization gap. Controlled challenge creation still defaults empty purpose to `auth_bootstrap`, but unknown or malformed purpose values are now preserved as invalid runtime data and rejected by wallet verify/login, authenticated wallet link, and wallet-owned account merge.
+
+---
+
+## Phase 0.4 Formal Closure
+
+Phase 0.4 is now formally closed.
+
+All authentication, wallet identity, ownership, wallet management, and challenge-purpose contracts are fully stabilized and aligned with the current implementation.
+
+No further work should be added to Phase 0.4 unless a future ZIP proves a real regression or missing contract.
+
+### Next Direction
+
+- Begin a new phase for any further backend evolution
+- Preserve all Phase 0.4 contracts as baseline
+- Avoid reopening Phase 0.4 without a ZIP-validated reason

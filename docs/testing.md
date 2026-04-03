@@ -1275,3 +1275,23 @@ Expected result:
 - inventory remains the advisory entry point
 - check / execution endpoints remain authoritative
 - refreshed inventory remains the observable post-action state
+
+---
+
+## Phase 0.4 Formal Closure
+
+All testing scenarios defined in this document are now considered complete for Phase 0.4.
+
+### Closure Notes
+
+- all auth flows are covered end-to-end
+- wallet lifecycle scenarios are validated
+- wallet inventory contract is validated (filters, sorting, pagination, navigation)
+- actionability hints are consistent with execution endpoints
+- challenge-purpose handling is strictly validated
+
+### Forward Direction
+
+No additional test scenarios should be added within Phase 0.4.
+
+Future testing must be introduced in a new phase unless a real regression is detected from a future ZIP.
