@@ -203,6 +203,8 @@ This avoids reusing the same challenge semantics blindly across two very differe
 - `/auth/me`
 - `/auth/session`
 
+`/auth/me` is now the additive authenticated profile surface intended for application bootstrap, while `/auth/session` remains the raw session/claims-oriented contract and `/auth/wallets` remains the fuller inventory contract.
+
 ### Wallet ownership endpoints
 - `/auth/wallets`
 - `/auth/wallets/link/challenge`

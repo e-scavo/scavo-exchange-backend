@@ -91,9 +91,88 @@ func sessionClaims() *coreauth.Claims {
 
 func TestHTTPHandlers_Me_Success(t *testing.T) {
 	ts := mustTokenService(t)
+	store := NewInMemoryWalletIdentityStore()
+	address := testWalletAddress()
+
+	identity, err := store.GetOrCreate(context.Background(), address)
+	if err != nil {
+		t.Fatalf("GetOrCreate error: %v", err)
+	}
+	if _, err := store.AttachUser(context.Background(), identity.ID, "u_test_example_com", true); err != nil {
+		t.Fatalf("AttachUser error: %v", err)
+	}
+
+	claims := sessionClaims()
+	claims.AuthMethod = "wallet_evm"
+	claims.WalletID = identity.ID
+	claims.WalletAddress = address
+	claims.Chain = "scavium"
 
 	h := HTTPHandlers{
-		Tokens: ts,
+		Tokens:           ts,
+		TTL:              time.Hour,
+		Users:            usermod.NewService(nil),
+		WalletIdentities: store,
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/auth/me", nil)
+	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, claims))
+	rec := httptest.NewRecorder()
+
+	h.Me(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+
+	var payload MeResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("decode error: %v", err)
+	}
+
+	if payload.User == nil || payload.User.ID != "u_test_example_com" {
+		t.Fatalf("unexpected user payload: %#v", payload.User)
+	}
+	if payload.Profile == nil {
+		t.Fatal("expected profile payload")
+	}
+	if payload.Profile.UserID != "u_test_example_com" {
+		t.Fatalf("unexpected profile user id: %q", payload.Profile.UserID)
+	}
+	if payload.Profile.AuthMethod != "wallet_evm" {
+		t.Fatalf("unexpected auth method: %q", payload.Profile.AuthMethod)
+	}
+	if payload.Profile.PrimaryWallet == nil || payload.Profile.PrimaryWallet.Address != address {
+		t.Fatalf("unexpected primary wallet: %#v", payload.Profile.PrimaryWallet)
+	}
+	if payload.Profile.WalletCount != 1 || payload.Profile.ActiveWalletCount != 1 {
+		t.Fatalf("unexpected wallet counts: %#v", payload.Profile)
+	}
+	if !payload.Profile.HasWalletSession {
+		t.Fatal("expected wallet session flag")
+	}
+}
+
+func TestHTTPHandlers_Me_MissingClaims(t *testing.T) {
+	h := HTTPHandlers{
+		Tokens: mustTokenService(t),
+		TTL:    time.Hour,
+		Users:  usermod.NewService(nil),
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/auth/me", nil)
+	rec := httptest.NewRecorder()
+
+	h.Me(rec, req)
+
+	if rec.Code != http.StatusUnauthorized {
+		t.Fatalf("unexpected status: %d", rec.Code)
+	}
+}
+
+func TestHTTPHandlers_Me_PasswordSessionWithoutWallets(t *testing.T) {
+	h := HTTPHandlers{
+		Tokens: mustTokenService(t),
 		TTL:    time.Hour,
 		Users:  usermod.NewService(nil),
 	}
@@ -113,25 +192,17 @@ func TestHTTPHandlers_Me_Success(t *testing.T) {
 		t.Fatalf("decode error: %v", err)
 	}
 
-	if payload.User == nil || payload.User.ID != "u_test_example_com" {
-		t.Fatalf("unexpected user payload: %#v", payload.User)
+	if payload.Profile == nil {
+		t.Fatal("expected profile payload")
 	}
-}
-
-func TestHTTPHandlers_Me_MissingClaims(t *testing.T) {
-	h := HTTPHandlers{
-		Tokens: mustTokenService(t),
-		TTL:    time.Hour,
-		Users:  usermod.NewService(nil),
+	if payload.Profile.WalletCount != 0 {
+		t.Fatalf("expected wallet_count=0, got %d", payload.Profile.WalletCount)
 	}
-
-	req := httptest.NewRequest(http.MethodGet, "/auth/me", nil)
-	rec := httptest.NewRecorder()
-
-	h.Me(rec, req)
-
-	if rec.Code != http.StatusUnauthorized {
-		t.Fatalf("unexpected status: %d", rec.Code)
+	if payload.Profile.PrimaryWallet != nil {
+		t.Fatalf("expected no primary wallet, got %#v", payload.Profile.PrimaryWallet)
+	}
+	if payload.Profile.HasWalletSession {
+		t.Fatal("expected non-wallet session")
 	}
 }
 

@@ -15,8 +15,8 @@ It is intended to:
 ## 📌 Current State
 
 **Stage:** 0 — Foundation  
-**Phase:** 0.4 — Auth and User Stabilization  
-**Latest Completed Subphase:** 0.4.32 — Wallet Challenge Purpose Strictness Closure
+**Phase:** 0.5 — User Interaction & Application Surface  
+**Latest Completed Subphase:** 0.5.1 — Authenticated User Profile Surface
 
 ---
 
@@ -130,6 +130,20 @@ The backend now supports authenticated wallet-linking, authenticated wallet-owne
 - `GET /auth/me`
 - `GET /auth/session`
 
+`GET /auth/me` now acts as the first authenticated application bootstrap surface. In addition to the existing `user` payload, it returns an additive `profile` object with:
+
+- `user_id`
+- `auth_method`
+- `wallet_id`
+- `wallet_address`
+- `chain`
+- `primary_wallet`
+- `wallets`
+- `wallet_count`
+- `active_wallet_count`
+- `detached_wallet_count`
+- `has_wallet_session`
+
 ### Ownership endpoints
 - `GET /auth/wallets`
 
@@ -232,21 +246,21 @@ The system intentionally does **not** yet support:
 
 ## 🧭 Next Phase
 
-### 0.4.32 — Wallet Challenge Purpose Strictness Closure
+### 0.5.1 — Authenticated User Profile Surface
 
 Delivered:
 
-- controlled challenge creation now defaults empty purpose values only during explicit challenge issuance
-- unknown or malformed challenge purposes are no longer silently normalized to `auth_bootstrap` during runtime loading
-- wallet verify/login rejects unknown challenge purposes
-- authenticated wallet link rejects unknown challenge purposes
-- authenticated wallet-owned account merge rejects unknown challenge purposes
+- `GET /auth/me` now returns an additive authenticated `profile` surface
+- current durable user identity remains exposed through the existing `user` field
+- wallet-backed sessions now expose first-class application bootstrap data without requiring multiple initial calls
+- primary wallet summary and wallet counters are derived from the existing ownership store
+- `/auth/session` remains the raw session-focused endpoint and `/auth/wallets` remains the fuller inventory endpoint
 
 Expected next focus:
 
-- continue only if the next ZIP shows a real remaining runtime or documentation gap
-- preserve strict purpose separation across wallet login and wallet-management flows
-- keep ownership and persistence rules unchanged unless the real code requires otherwise
+- extend non-wallet user metadata only if the real code introduces it
+- keep the new profile surface additive and backward compatible
+- avoid collapsing `/auth/me`, `/auth/session`, and `/auth/wallets` into one overloaded contract
 
 ---
 

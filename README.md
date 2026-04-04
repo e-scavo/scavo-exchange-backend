@@ -22,8 +22,8 @@ The backend follows a **wallet-first identity model** that progressively evolves
 ## 🚧 Current Stage
 
 **Stage:** 0 — Foundation  
-**Phase:** 0.4 — Auth and User Stabilization  
-**Current Subphase:** **0.4.33 — Phase 0.4 Formal Closure**
+**Phase:** 0.5 — User Interaction & Application Surface  
+**Current Subphase:** **0.5.1 — Authenticated User Profile Surface**
 
 ---
 
@@ -1384,3 +1384,18 @@ Phase 0.4 is now formally closed. The backend keeps the already stabilized contr
 - strict wallet challenge purpose handling
 
 Any future continuation must start from a new phase rather than extending Phase 0.4 without a new ZIP-validated need.
+
+
+## ✅ Phase 0.5.1 Closure Summary
+
+Phase 0.5.1 opens the first application-facing user surface on top of the identity and ownership work completed in Phase 0.4.
+
+`GET /auth/me` now remains backward compatible through the existing `user` field while also returning an additive `profile` object that summarizes:
+
+- authenticated durable user identity
+- auth method and current wallet-backed session context
+- primary wallet summary when present
+- owned wallet list projection suitable for application bootstrap
+- aggregated wallet counters
+
+This keeps `/auth/session` focused on raw authenticated session claims and `/auth/wallets` focused on the fuller inventory contract, while giving clients one small surface for authenticated application bootstrap.

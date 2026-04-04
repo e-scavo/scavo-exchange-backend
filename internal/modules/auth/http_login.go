@@ -23,7 +23,8 @@ type LoginResponse struct {
 }
 
 type MeResponse struct {
-	User *usermod.User `json:"user"`
+	User    *usermod.User `json:"user"`
+	Profile *ProfileView  `json:"profile,omitempty"`
 }
 
 type SessionResponse struct {
@@ -79,8 +80,7 @@ func (h HTTPHandlers) Me(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	svc := NewService(h.Tokens, h.Users, h.TTL)
-	user, err := svc.ResolveCurrentUserClaims(r.Context(), claims)
+	profile, err := buildProfileView(r.Context(), claims, h.Users, h.WalletIdentities)
 	if err != nil {
 		switch {
 		case errors.Is(err, ErrUnauthorized):
@@ -91,7 +91,10 @@ func (h HTTPHandlers) Me(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeJSON(w, http.StatusOK, MeResponse{User: user})
+	writeJSON(w, http.StatusOK, MeResponse{
+		User:    profile.User,
+		Profile: profile,
+	})
 }
 
 func (h HTTPHandlers) Session(w http.ResponseWriter, r *http.Request) {

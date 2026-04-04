@@ -14,6 +14,9 @@ Status: ✅ Completed
 ### Phase 0.4 — Auth and User Stabilization
 Status: ✅ Completed
 
+### Phase 0.5 — User Interaction & Application Surface
+Status: 🟡 In Progress
+
 ---
 
 ## Phase 0.4 Subphase Status
@@ -610,3 +613,10 @@ Phase 0.4.23 closes the concrete examples layer for `GET /auth/wallets` so opera
 - store-level pagination
 - ownership-rule changes
 
+
+
+## Phase 0.5 Subphase Status
+
+| Subphase | Description | Status |
+|----------|-------------|--------|
+| 0.5.1 | Authenticated user profile surface | ✅ Completed |

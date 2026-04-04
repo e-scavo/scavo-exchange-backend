@@ -323,7 +323,10 @@ curl -s http://localhost:8080/auth/me \
 Expected:
 
 - unified durable user identity
+- additive authenticated `profile` surface
 - wallet-backed context still valid
+- primary wallet summary when applicable
+- wallet counters suitable for application bootstrap
 
 ### `/auth/session`
 

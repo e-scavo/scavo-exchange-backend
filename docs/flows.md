@@ -79,6 +79,7 @@ Phase 0.4 focuses on:
 #### Implemented
 - session abstraction
 - `/auth/me` and `/auth/session` endpoints
+- additive authenticated `/auth/me` profile object for application bootstrap
 - claims hydration
 
 #### Result
