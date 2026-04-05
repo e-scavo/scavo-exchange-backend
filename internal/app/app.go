@@ -16,6 +16,7 @@ import (
 	authmod "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth"
 	"github.com/e-scavo/scavo-exchange-backend/internal/modules/system"
 	usermod "github.com/e-scavo/scavo-exchange-backend/internal/modules/user"
+	usersettingsmod "github.com/e-scavo/scavo-exchange-backend/internal/modules/usersettings"
 )
 
 type App struct {
@@ -32,6 +33,7 @@ type App struct {
 	statusSvc   *status.Service
 
 	userService          *usermod.Service
+	userSettingsService  *usersettingsmod.Service
 	authService          *authmod.Service
 	walletChallengeStore authmod.WalletChallengeStore
 	walletIdentityStore  authmod.WalletIdentityStore
@@ -66,11 +68,17 @@ func New(cfg config.Config) *App {
 	}
 
 	var userService *usermod.Service
+	var userSettingsService *usersettingsmod.Service
+
 	if dbClient != nil && dbClient.Enabled() && dbClient.Pool() != nil {
 		userRepo := usermod.NewPostgresRepository(dbClient.Pool(), lg)
 		userService = usermod.NewService(userRepo)
+
+		userSettingsRepo := usersettingsmod.NewPostgresRepository(dbClient.Pool())
+		userSettingsService = usersettingsmod.NewService(userSettingsRepo)
 	} else {
 		userService = usermod.NewService(nil)
+		userSettingsService = usersettingsmod.NewService(nil)
 	}
 
 	var walletChallengeStore authmod.WalletChallengeStore
@@ -128,6 +136,7 @@ func New(cfg config.Config) *App {
 		TokenService:        tokens,
 		Status:              statusSvc,
 		UserService:         userService,
+		UserSettingsService: userSettingsService,
 		ChallengeStore:      walletChallengeStore,
 		WalletIdentityStore: walletIdentityStore,
 		ChallengeTTL:        time.Duration(cfg.AuthChallengeTTLMinutes) * time.Minute,
@@ -150,6 +159,7 @@ func New(cfg config.Config) *App {
 		cacheClient:          cacheClient,
 		statusSvc:            statusSvc,
 		userService:          userService,
+		userSettingsService:  userSettingsService,
 		authService:          authService,
 		walletChallengeStore: walletChallengeStore,
 		walletIdentityStore:  walletIdentityStore,
