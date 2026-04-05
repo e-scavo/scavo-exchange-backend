@@ -15,6 +15,7 @@ import (
 	"github.com/e-scavo/scavo-exchange-backend/internal/core/ws"
 	authmod "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth"
 	usermod "github.com/e-scavo/scavo-exchange-backend/internal/modules/user"
+	usersettingsmod "github.com/e-scavo/scavo-exchange-backend/internal/modules/usersettings"
 )
 
 type RouterParams struct {
@@ -26,6 +27,7 @@ type RouterParams struct {
 	TokenService        *coreauth.TokenService
 	Status              *status.Service
 	UserService         *usermod.Service
+	UserSettingsService *usersettingsmod.Service
 	ChallengeStore      authmod.WalletChallengeStore
 	WalletIdentityStore authmod.WalletIdentityStore
 	ChallengeTTL        time.Duration
@@ -91,6 +93,7 @@ func NewRouter(p RouterParams) http.Handler {
 			Tokens:           p.TokenService,
 			TTL:              time.Duration(p.Config.JWTTTLHrs) * time.Hour,
 			Users:            p.UserService,
+			UserSettings:     p.UserSettingsService,
 			PublicBaseURL:    p.PublicBaseURL,
 			ChallengeTTL:     p.ChallengeTTL,
 			Challenges:       p.ChallengeStore,
@@ -106,6 +109,7 @@ func NewRouter(p RouterParams) http.Handler {
 		r.With(RequireAuth(p.TokenService, false)).Post("/auth/account/merge/wallet/verify", handlers.WalletAccountMergeVerify)
 		r.With(RequireAuth(p.TokenService, false)).Get("/auth/me", handlers.Me)
 		r.With(RequireAuth(p.TokenService, false)).Patch("/auth/me", handlers.UpdateMe)
+		r.With(RequireAuth(p.TokenService, false)).Get("/auth/me/settings", handlers.MeSettings)
 		r.With(RequireAuth(p.TokenService, false)).Get("/auth/session", handlers.Session)
 		r.With(RequireAuth(p.TokenService, false)).Get("/auth/wallets", handlers.Wallets)
 		r.With(RequireAuth(p.TokenService, false)).Post("/auth/wallets/detach/check", handlers.WalletDetachCheck)
