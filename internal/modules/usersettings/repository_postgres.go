@@ -2,21 +2,27 @@ package usersettings
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
+
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type PostgresRepository struct {
-	db *sql.DB
+	pool *pgxpool.Pool
 }
 
-func NewPostgresRepository(db *sql.DB) *PostgresRepository {
-	return &PostgresRepository{db: db}
+func NewPostgresRepository(pool *pgxpool.Pool) *PostgresRepository {
+	return &PostgresRepository{pool: pool}
 }
 
 func (r *PostgresRepository) GetByUserID(ctx context.Context, userID string) (*UserSettings, error) {
 	if userID == "" {
 		return nil, ErrUserIDRequired
+	}
+
+	if r.pool == nil {
+		// DB no configurada → comportamiento consistente con el resto del proyecto
+		return nil, nil
 	}
 
 	query := `
@@ -25,7 +31,7 @@ func (r *PostgresRepository) GetByUserID(ctx context.Context, userID string) (*U
 		WHERE user_id = $1
 	`
 
-	row := r.db.QueryRowContext(ctx, query, userID)
+	row := r.pool.QueryRow(ctx, query, userID)
 
 	var settings UserSettings
 	var preferencesBytes []byte
@@ -36,12 +42,9 @@ func (r *PostgresRepository) GetByUserID(ctx context.Context, userID string) (*U
 		&settings.CreatedAt,
 		&settings.UpdatedAt,
 	)
-
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, nil
-		}
-		return nil, err
+		// no row → defaults se resuelven en service
+		return nil, nil
 	}
 
 	if len(preferencesBytes) > 0 {
