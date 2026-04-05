@@ -9,6 +9,7 @@ import (
 
 	coreauth "github.com/e-scavo/scavo-exchange-backend/internal/core/auth"
 	usermod "github.com/e-scavo/scavo-exchange-backend/internal/modules/user"
+	usersettingsmod "github.com/e-scavo/scavo-exchange-backend/internal/modules/usersettings"
 )
 
 type LoginRequest struct {
@@ -32,6 +33,10 @@ type MeResponse struct {
 	Profile *ProfileView  `json:"profile,omitempty"`
 }
 
+type MeSettingsResponse struct {
+	Settings usersettingsmod.View `json:"settings"`
+}
+
 type SessionResponse struct {
 	Session *SessionView `json:"session"`
 }
@@ -40,6 +45,7 @@ type HTTPHandlers struct {
 	Tokens           *coreauth.TokenService
 	TTL              time.Duration
 	Users            *usermod.Service
+	UserSettings     *usersettingsmod.Service
 	PublicBaseURL    string
 	ChallengeTTL     time.Duration
 	Challenges       WalletChallengeStore
@@ -145,6 +151,28 @@ func (h HTTPHandlers) UpdateMe(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, MeResponse{
 		User:    profile.User,
 		Profile: profile,
+	})
+}
+
+func (h HTTPHandlers) MeSettings(w http.ResponseWriter, r *http.Request) {
+	claims, ok := coreauth.ClaimsFromContext(r.Context())
+	if !ok {
+		writeJSON(w, http.StatusUnauthorized, map[string]any{"error": "unauthorized"})
+		return
+	}
+	if h.UserSettings == nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "auth_service_error"})
+		return
+	}
+
+	settings, err := h.UserSettings.GetOrDefault(r.Context(), claims.UserID)
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "auth_service_error"})
+		return
+	}
+
+	writeJSON(w, http.StatusOK, MeSettingsResponse{
+		Settings: usersettingsmod.ToView(settings),
 	})
 }
 
