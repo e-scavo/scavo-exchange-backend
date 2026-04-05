@@ -16,7 +16,7 @@ It is intended to:
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.5 — User Interaction & Application Surface  
-**Latest Completed Subphase:** 0.5.1 — Authenticated User Profile Surface
+**Latest Completed Subphase:** 0.5.2 — User Metadata (Non-Wallet)
 
 ---
 
@@ -128,9 +128,12 @@ The backend now supports authenticated wallet-linking, authenticated wallet-owne
 - `POST /auth/wallet/challenge`
 - `POST /auth/wallet/verify`
 - `GET /auth/me`
+- `PATCH /auth/me`
 - `GET /auth/session`
 
-`GET /auth/me` now acts as the first authenticated application bootstrap surface. In addition to the existing `user` payload, it returns an additive `profile` object with:
+`GET /auth/me` acts as the authenticated application bootstrap surface, while `PATCH /auth/me` now allows the authenticated user to update only `display_name` as minimal non-wallet profile metadata.
+
+The read shape remains additive and includes:
 
 - `user_id`
 - `auth_method`
@@ -246,21 +249,20 @@ The system intentionally does **not** yet support:
 
 ## 🧭 Next Phase
 
-### 0.5.1 — Authenticated User Profile Surface
+### 0.5.2 — User Metadata (Non-Wallet)
 
 Delivered:
 
-- `GET /auth/me` now returns an additive authenticated `profile` surface
-- current durable user identity remains exposed through the existing `user` field
-- wallet-backed sessions now expose first-class application bootstrap data without requiring multiple initial calls
-- primary wallet summary and wallet counters are derived from the existing ownership store
-- `/auth/session` remains the raw session-focused endpoint and `/auth/wallets` remains the fuller inventory endpoint
+- `PATCH /auth/me` now updates only `display_name` for the authenticated user
+- update validation is intentionally small: trimmed non-empty value, max length 120
+- response remains aligned with `GET /auth/me` by returning `user` plus the additive `profile` surface
+- wallet ownership rules, email identity, and settings remain unchanged
 
 Expected next focus:
 
-- extend non-wallet user metadata only if the real code introduces it
-- keep the new profile surface additive and backward compatible
-- avoid collapsing `/auth/me`, `/auth/session`, and `/auth/wallets` into one overloaded contract
+- add broader user settings only through a dedicated contract
+- keep `/auth/me` additive and self-scoped
+- avoid mixing metadata editing with wallet lifecycle or session semantics
 
 ---
 

@@ -3,6 +3,7 @@ package auth
 import (
 	"encoding/json"
 	"errors"
+	"io"
 	"net/http"
 	"time"
 
@@ -47,7 +48,7 @@ type HTTPHandlers struct {
 
 func (h HTTPHandlers) Login(w http.ResponseWriter, r *http.Request) {
 	var req LoginRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONBody(r, &req, 4<<10); err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "bad_request"})
 		return
 	}
@@ -113,27 +114,24 @@ func (h HTTPHandlers) UpdateMe(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var req UpdateMeRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSONBody(r, &req, 4<<10); err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "bad_request"})
 		return
 	}
 
 	updatedUser, err := h.Users.UpdateDisplayName(r.Context(), claims.UserID, req.DisplayName)
 	if err != nil {
-		switch err.Error() {
-		case "empty user id":
+		switch {
+		case errors.Is(err, usermod.ErrEmptyUserID):
 			writeJSON(w, http.StatusUnauthorized, map[string]any{"error": "unauthorized"})
-		case "empty display name":
+		case errors.Is(err, usermod.ErrEmptyDisplayName):
 			writeJSON(w, http.StatusBadRequest, map[string]any{"error": "invalid_display_name"})
-		case "display name too long":
+		case errors.Is(err, usermod.ErrDisplayNameTooLong):
 			writeJSON(w, http.StatusBadRequest, map[string]any{"error": "display_name_too_long"})
+		case errors.Is(err, usermod.ErrUserNotFound):
+			writeJSON(w, http.StatusNotFound, map[string]any{"error": "user_not_found"})
 		default:
-			switch {
-			case errors.Is(err, usermod.ErrUserNotFound):
-				writeJSON(w, http.StatusNotFound, map[string]any{"error": "user_not_found"})
-			default:
-				writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "auth_service_error"})
-			}
+			writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "auth_service_error"})
 		}
 		return
 	}
@@ -176,4 +174,31 @@ func writeJSON(w http.ResponseWriter, code int, v any) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(code)
 	_ = json.NewEncoder(w).Encode(v)
+}
+
+func decodeJSONBody(r *http.Request, dst any, maxBodyBytes int64) error {
+	if r == nil {
+		return errors.New("nil request")
+	}
+
+	body := r.Body
+	if maxBodyBytes > 0 {
+		body = http.MaxBytesReader(nil, r.Body, maxBodyBytes)
+	}
+
+	dec := json.NewDecoder(body)
+	dec.DisallowUnknownFields()
+
+	if err := dec.Decode(dst); err != nil {
+		return err
+	}
+
+	if err := dec.Decode(&struct{}{}); err != nil {
+		if errors.Is(err, io.EOF) {
+			return nil
+		}
+		return errors.New("unexpected trailing data")
+	}
+
+	return errors.New("unexpected trailing data")
 }

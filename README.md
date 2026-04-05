@@ -23,7 +23,7 @@ The backend follows a **wallet-first identity model** that progressively evolves
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.5 — User Interaction & Application Surface  
-**Current Subphase:** **0.5.1 — Authenticated User Profile Surface**
+**Current Subphase:** **0.5.2 — User Metadata (Non-Wallet)**
 
 ---
 
@@ -1386,16 +1386,20 @@ Phase 0.4 is now formally closed. The backend keeps the already stabilized contr
 Any future continuation must start from a new phase rather than extending Phase 0.4 without a new ZIP-validated need.
 
 
-## ✅ Phase 0.5.1 Closure Summary
+## ✅ Phase 0.5.2 Closure Summary
 
-Phase 0.5.1 opens the first application-facing user surface on top of the identity and ownership work completed in Phase 0.4.
+Phase 0.5.2 adds the first authenticated mutation on top of the application-facing user surface opened in Phase 0.5.1.
 
-`GET /auth/me` now remains backward compatible through the existing `user` field while also returning an additive `profile` object that summarizes:
+`PATCH /auth/me` now allows the authenticated user to update only `display_name` as minimal non-wallet metadata. The response remains aligned with `GET /auth/me` by returning both:
 
-- authenticated durable user identity
-- auth method and current wallet-backed session context
-- primary wallet summary when present
-- owned wallet list projection suitable for application bootstrap
-- aggregated wallet counters
+- the updated top-level `user` payload
+- the additive `profile` object introduced in 0.5.1
 
-This keeps `/auth/session` focused on raw authenticated session claims and `/auth/wallets` focused on the fuller inventory contract, while giving clients one small surface for authenticated application bootstrap.
+This keeps user metadata editing intentionally small and safe:
+
+- no email mutation
+- no wallet lifecycle changes
+- no settings contract yet
+- no new ownership rules
+
+The backend now supports both profile bootstrap (`GET /auth/me`) and minimal authenticated profile metadata update (`PATCH /auth/me`) without reopening identity design from Phase 0.4.

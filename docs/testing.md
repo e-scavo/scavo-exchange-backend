@@ -328,6 +328,27 @@ Expected:
 - primary wallet summary when applicable
 - wallet counters suitable for application bootstrap
 
+### `PATCH /auth/me`
+
+```bash
+curl -s -X PATCH http://localhost:8080/auth/me \
+  -H "Authorization: Bearer <ACCESS_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"display_name":"SCAVO Operator"}'
+```
+
+Expected:
+
+- `200 OK`
+- top-level `user.display_name` updated
+- additive `profile.user.display_name` aligned with the same value
+- wallet summary preserved when session is wallet-backed
+
+Validation errors:
+
+- empty or whitespace-only `display_name` => `400 invalid_display_name`
+- display name longer than 120 chars => `400 display_name_too_long`
+
 ### `/auth/session`
 
 Expected:

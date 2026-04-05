@@ -620,3 +620,4 @@ Phase 0.4.23 closes the concrete examples layer for `GET /auth/wallets` so opera
 | Subphase | Description | Status |
 |----------|-------------|--------|
 | 0.5.1 | Authenticated user profile surface | ✅ Completed |
+| 0.5.2 | User metadata (non-wallet) | ✅ Completed |

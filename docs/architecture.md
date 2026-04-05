@@ -202,8 +202,9 @@ This avoids reusing the same challenge semantics blindly across two very differe
 - `/auth/wallet/verify`
 - `/auth/me`
 - `/auth/session`
+- `PATCH /auth/me`
 
-`/auth/me` is now the additive authenticated profile surface intended for application bootstrap, while `/auth/session` remains the raw session/claims-oriented contract and `/auth/wallets` remains the fuller inventory contract.
+`/auth/me` is now the additive authenticated profile surface intended for application bootstrap, while `PATCH /auth/me` is the minimal self-scoped non-wallet metadata mutation for `display_name`. `/auth/session` remains the raw session/claims-oriented contract and `/auth/wallets` remains the fuller inventory contract.
 
 ### Wallet ownership endpoints
 - `/auth/wallets`

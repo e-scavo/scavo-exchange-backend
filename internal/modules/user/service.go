@@ -2,9 +2,17 @@ package user
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
+	"unicode/utf8"
+)
+
+var (
+	ErrEmptyUserID        = errors.New("empty user id")
+	ErrEmptyDisplayName   = errors.New("empty display name")
+	ErrDisplayNameTooLong = errors.New("display name too long")
 )
 
 type Service struct {
@@ -66,7 +74,7 @@ func (s *Service) GetByID(ctx context.Context, id string, emailHint string) (*Us
 	emailHint = normalizeEmail(emailHint)
 
 	if id == "" {
-		return nil, fmt.Errorf("empty user id")
+		return nil, ErrEmptyUserID
 	}
 
 	if s == nil || s.repo == nil {
@@ -88,13 +96,13 @@ func (s *Service) UpdateDisplayName(ctx context.Context, id, displayName string)
 	displayName = normalizeDisplayName(displayName)
 
 	if id == "" {
-		return nil, fmt.Errorf("empty user id")
+		return nil, ErrEmptyUserID
 	}
 	if displayName == "" {
-		return nil, fmt.Errorf("empty display name")
+		return nil, ErrEmptyDisplayName
 	}
-	if len(displayName) > 120 {
-		return nil, fmt.Errorf("display name too long")
+	if utf8.RuneCountInString(displayName) > 120 {
+		return nil, ErrDisplayNameTooLong
 	}
 
 	if s == nil || s.repo == nil {

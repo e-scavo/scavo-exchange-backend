@@ -19,6 +19,7 @@
 
 ### Phase 0.5 — User Interaction & Application Surface
 - authenticated user profile surface
+- minimal non-wallet user metadata update contract
 - user-facing read models for application bootstrap
 - lightweight application-facing identity summary
 

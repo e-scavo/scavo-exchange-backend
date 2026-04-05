@@ -2187,3 +2187,72 @@ func TestHTTPHandlers_UpdateMe_DisplayNameTooLong(t *testing.T) {
 		t.Fatalf("unexpected body: %s", rec.Body.String())
 	}
 }
+
+func TestHTTPHandlers_UpdateMe_UnknownFields(t *testing.T) {
+	h := HTTPHandlers{
+		Tokens: mustTokenService(t),
+		TTL:    time.Hour,
+		Users:  usermod.NewService(nil),
+	}
+
+	req := httptest.NewRequest(http.MethodPatch, "/auth/me", strings.NewReader(`{"display_name":"SCAVO","unexpected":"x"}`))
+	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	rec := httptest.NewRecorder()
+
+	h.UpdateMe(rec, req)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+	if !strings.Contains(rec.Body.String(), "bad_request") {
+		t.Fatalf("unexpected body: %s", rec.Body.String())
+	}
+}
+
+func TestHTTPHandlers_UpdateMe_TrailingJSONRejected(t *testing.T) {
+	h := HTTPHandlers{
+		Tokens: mustTokenService(t),
+		TTL:    time.Hour,
+		Users:  usermod.NewService(nil),
+	}
+
+	req := httptest.NewRequest(http.MethodPatch, "/auth/me", strings.NewReader(`{"display_name":"SCAVO"}{"extra":true}`))
+	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	rec := httptest.NewRecorder()
+
+	h.UpdateMe(rec, req)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+	if !strings.Contains(rec.Body.String(), "bad_request") {
+		t.Fatalf("unexpected body: %s", rec.Body.String())
+	}
+}
+
+func TestHTTPHandlers_UpdateMe_UserNotFound(t *testing.T) {
+	repo := &stubUserRepo{
+		updateDisplayNameFn: func(ctx context.Context, id, displayName string) (*usermod.User, error) {
+			return nil, usermod.ErrUserNotFound
+		},
+	}
+
+	h := HTTPHandlers{
+		Tokens: mustTokenService(t),
+		TTL:    time.Hour,
+		Users:  usermod.NewService(repo),
+	}
+
+	req := httptest.NewRequest(http.MethodPatch, "/auth/me", strings.NewReader(`{"display_name":"SCAVO"}`))
+	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	rec := httptest.NewRecorder()
+
+	h.UpdateMe(rec, req)
+
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+	if !strings.Contains(rec.Body.String(), "user_not_found") {
+		t.Fatalf("unexpected body: %s", rec.Body.String())
+	}
+}

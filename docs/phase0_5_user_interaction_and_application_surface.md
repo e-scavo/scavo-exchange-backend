@@ -2,143 +2,139 @@
 
 ## Objective
 
-Open the first authenticated application-facing read surface on top of the durable identity and wallet ownership model stabilized in Phase 0.4.
+Extend the authenticated user surface opened in Phase 0.5.1 with the smallest safe non-wallet metadata mutation for the authenticated user.
 
 ## Initial Context
 
-Phase 0.4 closed with:
+Phase 0.5.1 already delivered:
 
-- durable user identity
-- wallet-backed JWT authentication
-- wallet ownership persistence
-- wallet inventory reads
-- strict challenge-purpose enforcement
+- additive authenticated `GET /auth/me`
+- durable user resolution through the existing auth/session path
+- wallet-aware profile projection for application bootstrap
 
-The backend already exposed `GET /auth/me`, `GET /auth/session`, and `GET /auth/wallets`, but those endpoints still reflected internal auth concerns more than a small application bootstrap surface.
+At that point the backend could expose authenticated identity, but it still could not mutate even the smallest self-scoped user metadata field through an authenticated contract.
 
 ## Problem Statement
 
-Authenticated clients still needed to compose multiple calls or infer meaning from lower-level auth responses to bootstrap the application surface for the current user.
+The backend already persisted `display_name` inside the durable `users` model, but there was no authenticated contract to update it.
 
-The gap was not authentication correctness anymore. The gap was an additive, stable, authenticated profile surface that could expose:
+That left the application surface asymmetric:
 
-- current durable user identity
-- current auth method and wallet session context
-- primary wallet summary
-- lightweight owned-wallet projection
-- wallet counters
+- the current user could be read through `GET /auth/me`
+- the current user could not update basic non-wallet metadata
 
-without reworking the wallet inventory contract or overloading the session contract.
+The missing piece was not identity, wallets, or ownership. It was a minimal self-scoped user metadata update contract.
 
 ## Scope
 
-Phase 0.5.1 includes:
+Phase 0.5.2 includes:
 
-- additive authenticated profile projection for `GET /auth/me`
-- primary-wallet summary derived from existing wallet ownership state
-- wallet counters derived from the existing ownership store
-- handler-level coverage for wallet-backed and non-wallet-backed authenticated sessions
-- documentation alignment for the new application-facing user surface
+- authenticated `PATCH /auth/me`
+- update of `display_name` only
+- repository/service support for persisting the new display name
+- handler-level validation for trimmed non-empty values and a bounded maximum length
+- response alignment with the existing `MeResponse`
+- documentation and testing updates for the new mutation contract
 
-Phase 0.5.1 does not include:
+Phase 0.5.2 does not include:
 
+- email updates
+- wallet metadata changes
 - user settings
-- non-wallet profile editing
-- account flags
+- soft account flags
 - audit/event history
-- exchange-specific user logic
-- session persistence or refresh tokens
+- exchange-specific user fields
 
 ## Root Cause Analysis
 
-The backend solved identity durability before it solved client-facing identity ergonomics.
+The backend had already stabilized the identity model and opened a read surface, but it still lacked a minimal writable self profile contract.
 
-`/auth/session` already exposed authenticated claims, but it was claim/session oriented. `/auth/wallets` already exposed inventory, but it was an inventory endpoint. `/auth/me` only returned the user model.
-
-That left no small, additive, application-facing surface that represented “who is the authenticated user right now, and what wallet context should the client immediately know about?”
+`display_name` was the only clearly non-wallet field already present in the durable user model and safe to expose for authenticated editing without reopening auth design.
 
 ## Files Affected
 
 ### Code
 
+- `internal/core/httpx/router.go`
 - `internal/modules/auth/http_login.go`
 - `internal/modules/auth/profile.go`
 - `internal/modules/auth/http_handlers_test.go`
+- `internal/modules/user/repository.go`
+- `internal/modules/user/repository_postgres.go`
+- `internal/modules/user/repository_postgres_test.go`
+- `internal/modules/user/service.go`
+- `internal/modules/user/service_test.go`
 
 ### Documentation
 
 - `README.md`
-- `docs/index.md`
-- `docs/architecture.md`
-- `docs/testing.md`
 - `docs/roadmap.md`
 - `docs/phase-status.md`
+- `docs/testing.md`
 - `docs/handoff/backend-status.md`
 - `docs/phase0_5_user_interaction_and_application_surface.md`
 
 ## Implementation Characteristics
 
-`GET /auth/me` remains backward compatible by preserving the existing top-level `user` field.
+`PATCH /auth/me` accepts:
 
-The endpoint now also returns an additive `profile` object with:
+- `display_name`
 
-- `user_id`
-- `auth_method`
-- `wallet_id`
-- `wallet_address`
-- `chain`
-- `primary_wallet`
-- `wallets`
-- `wallet_count`
-- `active_wallet_count`
-- `detached_wallet_count`
-- `has_wallet_session`
+Validation is intentionally small and explicit:
 
-The profile surface is derived from already stabilized primitives:
+- request body must decode correctly
+- authenticated user context must exist
+- `display_name` is trimmed before validation
+- empty trimmed value is rejected
+- maximum length is limited to `120`
 
-- JWT claims from the authenticated request
-- durable user resolution already used by auth/session flows
-- wallet ownership reads from the existing wallet identity store
+The response remains aligned with `GET /auth/me` by returning:
 
-No new persistence layer, ownership rule, or mutation contract was introduced.
+- top-level `user`
+- additive `profile`
+
+Wallet session context, wallet counters, and primary wallet projection remain derived from the existing ownership store and are not changed by this mutation.
 
 ## Validation
 
-Validated at code level through handler coverage for:
+Validated at code level through:
 
-- wallet-backed authenticated `GET /auth/me`
-- password/dev authenticated `GET /auth/me` without owned wallets
-- missing-claims unauthorized behavior
-
-Full `go test ./...` execution could not be completed inside this environment because the repository requires Go `1.25.0` and the container attempted to download that toolchain from `proxy.golang.org`, which is blocked in this session.
+- service fallback update behavior
+- repository-backed service update behavior
+- invalid empty display name rejection
+- too-long display name rejection
+- handler success path for authenticated `PATCH /auth/me`
+- handler invalid body rejection
+- handler unauthorized behavior
+- handler validation failures
+- postgres repository update test guarded by `SCAVO_TEST_POSTGRES_URL`
 
 ## Release Impact
 
 Impact is additive and low risk:
 
-- existing `GET /auth/me` consumers can keep reading `user`
-- new consumers can bootstrap directly from `profile`
-- `/auth/session` and `/auth/wallets` remain available with their existing roles
+- authenticated clients can now update a minimal profile field without a new resource tree
+- `GET /auth/me` remains backward compatible
+- wallet identity and ownership contracts remain unchanged
 
 ## Risks
 
-- clients might start treating `profile.wallets` as a replacement for the fuller `/auth/wallets` inventory contract
-- future profile expansion could overload `/auth/me` if additive boundaries are not preserved
+- future profile editing could overload `/auth/me` if unrelated metadata keeps accumulating there
+- clients might assume email or settings are also mutable even though this phase intentionally restricts updates to `display_name`
 
 ## What it does NOT solve
 
 This phase does not solve:
 
-- editable profile metadata
-- user settings
-- soft account flags
+- email mutation
+- settings contract
+- user preferences
+- profile avatars
 - audit history
-- refresh tokens
-- persistent sessions
-- exchange domain reads
+- richer user lifecycle flags
 
 ## Conclusion
 
-Phase 0.5.1 establishes the first authenticated application surface on top of the identity work completed in Phase 0.4.
+Phase 0.5.2 closes the smallest safe writable gap in the authenticated application surface.
 
-The backend now exposes a small, additive, user-facing profile read on `GET /auth/me` without reopening auth lifecycle design or changing wallet ownership rules.
+The backend now supports both reading the authenticated user bootstrap surface and updating the authenticated user `display_name` without reopening wallet lifecycle or identity ownership design.

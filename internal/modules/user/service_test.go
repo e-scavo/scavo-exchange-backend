@@ -2,6 +2,8 @@ package user
 
 import (
 	"context"
+	"errors"
+	"strings"
 	"testing"
 )
 
@@ -207,6 +209,31 @@ func TestUpdateDisplayName_DisplayNameTooLong(t *testing.T) {
 	u, err := svc.UpdateDisplayName(context.Background(), "u_test", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
 	if err == nil {
 		t.Fatal("expected error for display name too long")
+	}
+	if u != nil {
+		t.Fatalf("expected nil user, got %#v", u)
+	}
+}
+
+func TestUpdateDisplayName_EmptyUserID(t *testing.T) {
+	svc := NewService(nil)
+
+	u, err := svc.UpdateDisplayName(context.Background(), "   ", "SCAVO")
+	if !errors.Is(err, ErrEmptyUserID) {
+		t.Fatalf("expected ErrEmptyUserID, got %v", err)
+	}
+	if u != nil {
+		t.Fatalf("expected nil user, got %#v", u)
+	}
+}
+
+func TestUpdateDisplayName_DisplayNameTooLongUnicodeAware(t *testing.T) {
+	svc := NewService(nil)
+
+	displayName := strings.Repeat("á", 121)
+	u, err := svc.UpdateDisplayName(context.Background(), "u_test", displayName)
+	if !errors.Is(err, ErrDisplayNameTooLong) {
+		t.Fatalf("expected ErrDisplayNameTooLong, got %v", err)
 	}
 	if u != nil {
 		t.Fatalf("expected nil user, got %#v", u)
