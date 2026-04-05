@@ -33,12 +33,12 @@ type MeResponse struct {
 	Profile *ProfileView  `json:"profile,omitempty"`
 }
 
-type MeSettingsResponse struct {
-	Settings usersettingsmod.View `json:"settings"`
-}
-
 type SessionResponse struct {
 	Session *SessionView `json:"session"`
+}
+
+type MeSettingsResponse struct {
+	Settings usersettingsmod.View `json:"settings"`
 }
 
 type HTTPHandlers struct {
@@ -160,6 +160,7 @@ func (h HTTPHandlers) MeSettings(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusUnauthorized, map[string]any{"error": "unauthorized"})
 		return
 	}
+
 	if h.UserSettings == nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "auth_service_error"})
 		return
@@ -167,12 +168,19 @@ func (h HTTPHandlers) MeSettings(w http.ResponseWriter, r *http.Request) {
 
 	settings, err := h.UserSettings.GetOrDefault(r.Context(), claims.UserID)
 	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "auth_service_error"})
+		switch {
+		case errors.Is(err, usersettingsmod.ErrUserIDRequired):
+			writeJSON(w, http.StatusUnauthorized, map[string]any{"error": "unauthorized"})
+		default:
+			writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "auth_service_error"})
+		}
 		return
 	}
 
+	view := usersettingsmod.ToView(settings)
+
 	writeJSON(w, http.StatusOK, MeSettingsResponse{
-		Settings: usersettingsmod.ToView(settings),
+		Settings: view,
 	})
 }
 
