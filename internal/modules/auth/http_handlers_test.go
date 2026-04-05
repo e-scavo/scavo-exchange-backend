@@ -13,7 +13,19 @@ import (
 
 	coreauth "github.com/e-scavo/scavo-exchange-backend/internal/core/auth"
 	usermod "github.com/e-scavo/scavo-exchange-backend/internal/modules/user"
+	usersettingsmod "github.com/e-scavo/scavo-exchange-backend/internal/modules/usersettings"
 )
+
+type stubUserSettingsRepo struct {
+	getByUserIDFn func(ctx context.Context, userID string) (*usersettingsmod.UserSettings, error)
+}
+
+func (s *stubUserSettingsRepo) GetByUserID(ctx context.Context, userID string) (*usersettingsmod.UserSettings, error) {
+	if s.getByUserIDFn != nil {
+		return s.getByUserIDFn(ctx, userID)
+	}
+	return nil, nil
+}
 
 func mustTokenService(t *testing.T) *coreauth.TokenService {
 	t.Helper()
@@ -2253,6 +2265,134 @@ func TestHTTPHandlers_UpdateMe_UserNotFound(t *testing.T) {
 		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
 	}
 	if !strings.Contains(rec.Body.String(), "user_not_found") {
+		t.Fatalf("unexpected body: %s", rec.Body.String())
+	}
+}
+
+func TestHTTPHandlers_MeSettings_Success_Defaults(t *testing.T) {
+	h := HTTPHandlers{
+		Tokens:       mustTokenService(t),
+		TTL:          time.Hour,
+		Users:        usermod.NewService(nil),
+		UserSettings: usersettingsmod.NewService(&stubUserSettingsRepo{}),
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/auth/me/settings", nil)
+	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	rec := httptest.NewRecorder()
+
+	h.MeSettings(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+
+	var payload MeSettingsResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("decode error: %v", err)
+	}
+
+	if payload.Settings.UserID != "u_test_example_com" {
+		t.Fatalf("unexpected settings user id: %q", payload.Settings.UserID)
+	}
+	if payload.Settings.Version != 1 {
+		t.Fatalf("unexpected settings version: %d", payload.Settings.Version)
+	}
+	if payload.Settings.Preferences == nil {
+		t.Fatal("expected preferences map")
+	}
+	if len(payload.Settings.Preferences) != 0 {
+		t.Fatalf("expected empty preferences, got %#v", payload.Settings.Preferences)
+	}
+}
+
+func TestHTTPHandlers_MeSettings_Success_Persisted(t *testing.T) {
+	repo := &stubUserSettingsRepo{
+		getByUserIDFn: func(ctx context.Context, userID string) (*usersettingsmod.UserSettings, error) {
+			if userID != "u_test_example_com" {
+				t.Fatalf("unexpected user id: %q", userID)
+			}
+			return &usersettingsmod.UserSettings{
+				UserID: "u_test_example_com",
+				Preferences: map[string]any{
+					"compact_mode": true,
+				},
+			}, nil
+		},
+	}
+
+	h := HTTPHandlers{
+		Tokens:       mustTokenService(t),
+		TTL:          time.Hour,
+		Users:        usermod.NewService(nil),
+		UserSettings: usersettingsmod.NewService(repo),
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/auth/me/settings", nil)
+	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	rec := httptest.NewRecorder()
+
+	h.MeSettings(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+
+	var payload MeSettingsResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("decode error: %v", err)
+	}
+
+	if payload.Settings.UserID != "u_test_example_com" {
+		t.Fatalf("unexpected settings user id: %q", payload.Settings.UserID)
+	}
+	if payload.Settings.Version != 1 {
+		t.Fatalf("unexpected settings version: %d", payload.Settings.Version)
+	}
+	value, ok := payload.Settings.Preferences["compact_mode"]
+	if !ok || value != true {
+		t.Fatalf("unexpected preferences payload: %#v", payload.Settings.Preferences)
+	}
+}
+
+func TestHTTPHandlers_MeSettings_MissingClaims(t *testing.T) {
+	h := HTTPHandlers{
+		Tokens:       mustTokenService(t),
+		TTL:          time.Hour,
+		Users:        usermod.NewService(nil),
+		UserSettings: usersettingsmod.NewService(&stubUserSettingsRepo{}),
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/auth/me/settings", nil)
+	rec := httptest.NewRecorder()
+
+	h.MeSettings(rec, req)
+
+	if rec.Code != http.StatusUnauthorized {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+	if !strings.Contains(rec.Body.String(), "unauthorized") {
+		t.Fatalf("unexpected body: %s", rec.Body.String())
+	}
+}
+
+func TestHTTPHandlers_MeSettings_ServiceUnavailable(t *testing.T) {
+	h := HTTPHandlers{
+		Tokens: mustTokenService(t),
+		TTL:    time.Hour,
+		Users:  usermod.NewService(nil),
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/auth/me/settings", nil)
+	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	rec := httptest.NewRecorder()
+
+	h.MeSettings(rec, req)
+
+	if rec.Code != http.StatusInternalServerError {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+	if !strings.Contains(rec.Body.String(), "auth_service_error") {
 		t.Fatalf("unexpected body: %s", rec.Body.String())
 	}
 }
