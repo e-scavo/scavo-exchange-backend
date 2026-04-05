@@ -1,140 +1,202 @@
-# Phase 0.5 — User Interaction & Application Surface
+# Phase 0.5 - User Interaction & Application Surface
+
+## Subphase 0.5.2 - User Metadata (Non-Wallet)
 
 ## Objective
 
-Extend the authenticated user surface opened in Phase 0.5.1 with the smallest safe non-wallet metadata mutation for the authenticated user.
+Introduce the first authenticated write capability over user metadata, strictly limited to a non-sensitive field (`display_name`), without impacting identity, wallet ownership, or authentication flows.
+
+This subphase completes the minimal read/write application surface initiated in 0.5.1.
 
 ## Initial Context
 
-Phase 0.5.1 already delivered:
+After Phase 0.5.1:
 
-- additive authenticated `GET /auth/me`
-- durable user resolution through the existing auth/session path
-- wallet-aware profile projection for application bootstrap
+- The backend exposes an authenticated read surface via `GET /auth/me`.
+- User identity is wallet-first, durable, and stabilized in Phase 0.4.
+- The system persists user fields such as `display_name`, `email`, and timestamps.
 
-At that point the backend could expose authenticated identity, but it still could not mutate even the smallest self-scoped user metadata field through an authenticated contract.
+However:
+
+- There was no contract to mutate user-owned metadata.
+- The application surface was read-only.
 
 ## Problem Statement
 
-The backend already persisted `display_name` inside the durable `users` model, but there was no authenticated contract to update it.
+The backend lacked a safe and minimal mechanism for allowing an authenticated user to update their own non-wallet metadata.
 
-That left the application surface asymmetric:
+This prevented:
 
-- the current user could be read through `GET /auth/me`
-- the current user could not update basic non-wallet metadata
-
-The missing piece was not identity, wallets, or ownership. It was a minimal self-scoped user metadata update contract.
+- Basic profile personalization.
+- Evolution of user-facing features.
+- Alignment with a real application surface.
 
 ## Scope
 
-Phase 0.5.2 includes:
+Included:
 
-- authenticated `PATCH /auth/me`
-- update of `display_name` only
-- repository/service support for persisting the new display name
-- handler-level validation for trimmed non-empty values and a bounded maximum length
-- response alignment with the existing `MeResponse`
-- documentation and testing updates for the new mutation contract
+- Authenticated endpoint `PATCH /auth/me`.
+- Update limited to `display_name`.
+- Validation and normalization of input.
+- Persistence through `user.Repository`.
+- Response reuse of `GET /auth/me` contract.
+- Minimal test coverage expansion.
+- Hardening of request validation.
 
-Phase 0.5.2 does not include:
+Explicitly excluded:
 
-- email updates
-- wallet metadata changes
-- user settings
-- soft account flags
-- audit/event history
-- exchange-specific user fields
+- Email mutation.
+- Wallet mutation.
+- User settings.
+- Preferences.
+- Profile extensions (avatar, bio, etc.).
+- Audit logging.
+- Multi-field updates.
+- Business rules beyond validation.
 
 ## Root Cause Analysis
 
-The backend had already stabilized the identity model and opened a read surface, but it still lacked a minimal writable self profile contract.
+The backend already had a stable identity model, a persisted `User` entity, and metadata fields available.
 
-`display_name` was the only clearly non-wallet field already present in the durable user model and safe to expose for authenticated editing without reopening auth design.
+But it lacked a write contract aligned with authentication context and a safe way to expose controlled mutation.
+
+This gap emerged naturally after enabling `GET /auth/me`.
+
+## Implementation Summary
+
+Endpoint:
+
+```http
+PATCH /auth/me
+```
+
+Request:
+
+```json
+{
+  "display_name": "SCAVO Operator"
+}
+```
+
+Response:
+
+Reuses the same shape as `GET /auth/me`.
+
+```json
+{
+  "user": { ... },
+  "profile": { ... }
+}
+```
+
+## Validation Rules
+
+Input normalization:
+
+- `display_name` is trimmed.
+
+Constraints:
+
+- Must not be empty after trim.
+- Maximum length: 120 characters (Unicode-aware).
+
+## Error Mapping
+
+- Missing/invalid JSON -> `400 bad_request`
+- Unknown fields -> `400 bad_request`
+- Trailing JSON -> `400 bad_request`
+- Empty `display_name` -> `400 invalid_display_name`
+- Too long `display_name` -> `400 display_name_too_long`
+- Missing auth -> `401 unauthorized`
+- User not found -> `404 user_not_found`
+
+## Hardening Applied
+
+Sentinel errors:
+
+- `ErrEmptyUserID`
+- `ErrEmptyDisplayName`
+- `ErrDisplayNameTooLong`
+
+This removes dependency on string comparisons.
+
+Unicode-safe validation:
+
+- Validation uses rune count instead of byte count.
+
+Strict JSON decoding:
+
+- `DisallowUnknownFields`
+- Rejection of trailing JSON
+- Body size limit (4KB)
+
+Extended test coverage:
+
+- Invalid JSON
+- Unknown fields
+- Trailing payloads
+- Empty `display_name`
+- Length violations
+- `user_not_found`
+- Unauthorized access
 
 ## Files Affected
 
-### Code
+Auth module:
 
-- `internal/core/httpx/router.go`
 - `internal/modules/auth/http_login.go`
 - `internal/modules/auth/profile.go`
 - `internal/modules/auth/http_handlers_test.go`
-- `internal/modules/user/repository.go`
-- `internal/modules/user/repository_postgres.go`
-- `internal/modules/user/repository_postgres_test.go`
+
+User module:
+
 - `internal/modules/user/service.go`
 - `internal/modules/user/service_test.go`
-
-### Documentation
-
-- `README.md`
-- `docs/roadmap.md`
-- `docs/phase-status.md`
-- `docs/testing.md`
-- `docs/handoff/backend-status.md`
-- `docs/phase0_5_user_interaction_and_application_surface.md`
+- `internal/modules/user/repository.go`
+- `internal/modules/user/repository_postgres.go`
 
 ## Implementation Characteristics
 
-`PATCH /auth/me` accepts:
-
-- `display_name`
-
-Validation is intentionally small and explicit:
-
-- request body must decode correctly
-- authenticated user context must exist
-- `display_name` is trimmed before validation
-- empty trimmed value is rejected
-- maximum length is limited to `120`
-
-The response remains aligned with `GET /auth/me` by returning:
-
-- top-level `user`
-- additive `profile`
-
-Wallet session context, wallet counters, and primary wallet projection remain derived from the existing ownership store and are not changed by this mutation.
+- Additive
+- Backward compatible
+- No schema changes
+- No breaking changes
+- No modification of existing auth flows
+- No impact on wallet lifecycle
 
 ## Validation
 
-Validated at code level through:
-
-- service fallback update behavior
-- repository-backed service update behavior
-- invalid empty display name rejection
-- too-long display name rejection
-- handler success path for authenticated `PATCH /auth/me`
-- handler invalid body rejection
-- handler unauthorized behavior
-- handler validation failures
-- postgres repository update test guarded by `SCAVO_TEST_POSTGRES_URL`
+- `go test ./...` passes successfully
+- No regressions detected
+- Auth flows remain stable
+- Wallet linking and verification unaffected
 
 ## Release Impact
 
-Impact is additive and low risk:
+Low risk:
 
-- authenticated clients can now update a minimal profile field without a new resource tree
-- `GET /auth/me` remains backward compatible
-- wallet identity and ownership contracts remain unchanged
+- Introduces a single controlled write path.
+- Does not alter existing contracts.
+- Maintains backward compatibility.
 
 ## Risks
 
-- future profile editing could overload `/auth/me` if unrelated metadata keeps accumulating there
-- clients might assume email or settings are also mutable even though this phase intentionally restricts updates to `display_name`
+- `/auth/me` could accumulate unrelated responsibilities in future phases.
+- Clients may assume broader edit capabilities than currently supported.
 
-## What it does NOT solve
+## What It Does Not Solve
 
-This phase does not solve:
-
-- email mutation
-- settings contract
-- user preferences
-- profile avatars
-- audit history
-- richer user lifecycle flags
+- Email updates
+- Settings contract
+- User preferences
+- Profile extensions (avatar, bio)
+- Audit history
+- Advanced lifecycle flags
 
 ## Conclusion
 
-Phase 0.5.2 closes the smallest safe writable gap in the authenticated application surface.
+Phase 0.5.2 introduces the smallest safe writable surface for the authenticated user.
 
-The backend now supports both reading the authenticated user bootstrap surface and updating the authenticated user `display_name` without reopening wallet lifecycle or identity ownership design.
+It completes the transition from a read-only identity surface (0.5.1) to a minimal read/write user interaction layer without reopening identity, wallet ownership, or authentication design.
+
+This establishes the correct foundation for upcoming phases such as user settings, extended profile metadata, and application-level behavior tied to user context.
