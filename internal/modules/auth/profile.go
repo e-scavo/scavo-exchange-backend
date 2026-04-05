@@ -40,6 +40,10 @@ func buildProfileView(ctx context.Context, claims *coreauth.Claims, users *userm
 		return nil, err
 	}
 
+	return buildProfileViewWithUser(ctx, claims, user, walletStore)
+}
+
+func buildProfileViewWithUser(ctx context.Context, claims *coreauth.Claims, user *usermod.User, walletStore WalletIdentityStore) (*ProfileView, error) {
 	view := &ProfileView{
 		User:             user,
 		UserID:           strings.TrimSpace(claims.UserID),

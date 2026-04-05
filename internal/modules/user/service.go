@@ -83,12 +83,43 @@ func (s *Service) GetByID(ctx context.Context, id string, emailHint string) (*Us
 	return s.repo.GetByID(ctx, id)
 }
 
+func (s *Service) UpdateDisplayName(ctx context.Context, id, displayName string) (*User, error) {
+	id = strings.TrimSpace(id)
+	displayName = normalizeDisplayName(displayName)
+
+	if id == "" {
+		return nil, fmt.Errorf("empty user id")
+	}
+	if displayName == "" {
+		return nil, fmt.Errorf("empty display name")
+	}
+	if len(displayName) > 120 {
+		return nil, fmt.Errorf("display name too long")
+	}
+
+	if s == nil || s.repo == nil {
+		now := time.Now().UTC()
+		return &User{
+			ID:          id,
+			DisplayName: displayName,
+			CreatedAt:   now,
+			UpdatedAt:   now,
+		}, nil
+	}
+
+	return s.repo.UpdateDisplayName(ctx, id, displayName)
+}
+
 func normalizeEmail(email string) string {
 	return strings.TrimSpace(strings.ToLower(email))
 }
 
 func normalizeWalletAddress(address string) string {
 	return strings.TrimSpace(strings.ToLower(address))
+}
+
+func normalizeDisplayName(displayName string) string {
+	return strings.TrimSpace(displayName)
 }
 
 func devUserID(email string) string {

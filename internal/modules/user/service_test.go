@@ -6,10 +6,11 @@ import (
 )
 
 type stubRepo struct {
-	lastEmail string
-	lastID    string
-	result    *User
-	err       error
+	lastEmail       string
+	lastID          string
+	lastDisplayName string
+	result          *User
+	err             error
 }
 
 func (s *stubRepo) UpsertDevUser(ctx context.Context, email string) (*User, error) {
@@ -132,5 +133,82 @@ func TestGetByID_UsesRepository(t *testing.T) {
 
 	if u == nil || u.ID != "u_repo" {
 		t.Fatalf("unexpected user: %#v", u)
+	}
+}
+
+func (s *stubRepo) UpdateDisplayName(ctx context.Context, id, displayName string) (*User, error) {
+	s.lastID = id
+	s.lastDisplayName = displayName
+	return s.result, s.err
+}
+
+func TestUpdateDisplayName_FallbackWithoutRepo(t *testing.T) {
+	svc := NewService(nil)
+
+	u, err := svc.UpdateDisplayName(context.Background(), "u_test", "  SCAVO Operator  ")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if u == nil {
+		t.Fatal("expected user, got nil")
+	}
+
+	if u.ID != "u_test" {
+		t.Fatalf("unexpected user id: %q", u.ID)
+	}
+
+	if u.DisplayName != "SCAVO Operator" {
+		t.Fatalf("unexpected display name: %q", u.DisplayName)
+	}
+}
+
+func TestUpdateDisplayName_UsesRepository(t *testing.T) {
+	repo := &stubRepo{
+		result: &User{
+			ID:          "u_repo",
+			DisplayName: "Persisted Name",
+		},
+	}
+
+	svc := NewService(repo)
+
+	u, err := svc.UpdateDisplayName(context.Background(), "u_repo", "  Persisted Name  ")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if repo.lastID != "u_repo" {
+		t.Fatalf("repository received unexpected id: %q", repo.lastID)
+	}
+	if repo.lastDisplayName != "Persisted Name" {
+		t.Fatalf("repository received unexpected display name: %q", repo.lastDisplayName)
+	}
+	if u == nil || u.DisplayName != "Persisted Name" {
+		t.Fatalf("unexpected user: %#v", u)
+	}
+}
+
+func TestUpdateDisplayName_EmptyDisplayName(t *testing.T) {
+	svc := NewService(nil)
+
+	u, err := svc.UpdateDisplayName(context.Background(), "u_test", "   ")
+	if err == nil {
+		t.Fatal("expected error for empty display name")
+	}
+	if u != nil {
+		t.Fatalf("expected nil user, got %#v", u)
+	}
+}
+
+func TestUpdateDisplayName_DisplayNameTooLong(t *testing.T) {
+	svc := NewService(nil)
+
+	u, err := svc.UpdateDisplayName(context.Background(), "u_test", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+	if err == nil {
+		t.Fatal("expected error for display name too long")
+	}
+	if u != nil {
+		t.Fatalf("expected nil user, got %#v", u)
 	}
 }

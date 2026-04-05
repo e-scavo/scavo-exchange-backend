@@ -2059,3 +2059,131 @@ func TestHTTPHandlers_Wallets_ReattachedWalletPreservesDetachedAt(t *testing.T) 
 		t.Fatalf("unexpected detached_at payload: %#v", payload.Wallets[0].DetachedAt)
 	}
 }
+
+func TestHTTPHandlers_UpdateMe_Success(t *testing.T) {
+	store := NewInMemoryWalletIdentityStore()
+	address := testWalletAddress()
+
+	identity, err := store.GetOrCreate(context.Background(), address)
+	if err != nil {
+		t.Fatalf("GetOrCreate error: %v", err)
+	}
+	if _, err := store.AttachUser(context.Background(), identity.ID, "u_test_example_com", true); err != nil {
+		t.Fatalf("AttachUser error: %v", err)
+	}
+
+	h := HTTPHandlers{
+		Tokens:           mustTokenService(t),
+		TTL:              time.Hour,
+		Users:            usermod.NewService(nil),
+		WalletIdentities: store,
+	}
+
+	claims := sessionClaims()
+	claims.AuthMethod = "wallet_evm"
+	claims.WalletID = identity.ID
+	claims.WalletAddress = address
+	claims.Chain = "scavium"
+
+	req := httptest.NewRequest(http.MethodPatch, "/auth/me", strings.NewReader(`{"display_name":"  SCAVO Operator  "}`))
+	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, claims))
+	rec := httptest.NewRecorder()
+
+	h.UpdateMe(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+
+	var payload MeResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("decode error: %v", err)
+	}
+
+	if payload.User == nil || payload.User.DisplayName != "SCAVO Operator" {
+		t.Fatalf("unexpected updated user: %#v", payload.User)
+	}
+	if payload.Profile == nil || payload.Profile.User == nil || payload.Profile.User.DisplayName != "SCAVO Operator" {
+		t.Fatalf("unexpected updated profile: %#v", payload.Profile)
+	}
+	if payload.Profile.PrimaryWallet == nil || payload.Profile.PrimaryWallet.Address != address {
+		t.Fatalf("unexpected primary wallet: %#v", payload.Profile.PrimaryWallet)
+	}
+}
+
+func TestHTTPHandlers_UpdateMe_InvalidBody(t *testing.T) {
+	h := HTTPHandlers{
+		Tokens: mustTokenService(t),
+		TTL:    time.Hour,
+		Users:  usermod.NewService(nil),
+	}
+
+	req := httptest.NewRequest(http.MethodPatch, "/auth/me", strings.NewReader(`{"display_name":`))
+	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	rec := httptest.NewRecorder()
+
+	h.UpdateMe(rec, req)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("unexpected status: %d", rec.Code)
+	}
+}
+
+func TestHTTPHandlers_UpdateMe_MissingClaims(t *testing.T) {
+	h := HTTPHandlers{
+		Tokens: mustTokenService(t),
+		TTL:    time.Hour,
+		Users:  usermod.NewService(nil),
+	}
+
+	req := httptest.NewRequest(http.MethodPatch, "/auth/me", strings.NewReader(`{"display_name":"SCAVO"}`))
+	rec := httptest.NewRecorder()
+
+	h.UpdateMe(rec, req)
+
+	if rec.Code != http.StatusUnauthorized {
+		t.Fatalf("unexpected status: %d", rec.Code)
+	}
+}
+
+func TestHTTPHandlers_UpdateMe_InvalidDisplayName(t *testing.T) {
+	h := HTTPHandlers{
+		Tokens: mustTokenService(t),
+		TTL:    time.Hour,
+		Users:  usermod.NewService(nil),
+	}
+
+	req := httptest.NewRequest(http.MethodPatch, "/auth/me", strings.NewReader(`{"display_name":"   "}`))
+	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	rec := httptest.NewRecorder()
+
+	h.UpdateMe(rec, req)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+	if !strings.Contains(rec.Body.String(), "invalid_display_name") {
+		t.Fatalf("unexpected body: %s", rec.Body.String())
+	}
+}
+
+func TestHTTPHandlers_UpdateMe_DisplayNameTooLong(t *testing.T) {
+	h := HTTPHandlers{
+		Tokens: mustTokenService(t),
+		TTL:    time.Hour,
+		Users:  usermod.NewService(nil),
+	}
+
+	req := httptest.NewRequest(http.MethodPatch, "/auth/me", strings.NewReader(`{"display_name":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}`))
+	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	rec := httptest.NewRecorder()
+
+	h.UpdateMe(rec, req)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+	if !strings.Contains(rec.Body.String(), "display_name_too_long") {
+		t.Fatalf("unexpected body: %s", rec.Body.String())
+	}
+}

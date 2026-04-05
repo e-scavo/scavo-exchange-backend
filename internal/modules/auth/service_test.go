@@ -12,9 +12,32 @@ import (
 )
 
 type stubUserRepo struct {
-	upsertResult *usermod.User
-	upsertErr    error
-	getByIDFn    func(ctx context.Context, id string) (*usermod.User, error)
+	upsertResult        *usermod.User
+	upsertErr           error
+	getByIDFn           func(ctx context.Context, id string) (*usermod.User, error)
+	updateDisplayNameFn func(ctx context.Context, id, displayName string) (*usermod.User, error)
+}
+
+func (s *stubUserRepo) UpdateDisplayName(ctx context.Context, id, displayName string) (*usermod.User, error) {
+	if s.updateDisplayNameFn != nil {
+		return s.updateDisplayNameFn(ctx, id, displayName)
+	}
+
+	if s.getByIDFn != nil {
+		u, err := s.getByIDFn(ctx, id)
+		if err != nil {
+			return nil, err
+		}
+		if u != nil {
+			u.DisplayName = displayName
+			return u, nil
+		}
+	}
+
+	return &usermod.User{
+		ID:          id,
+		DisplayName: displayName,
+	}, nil
 }
 
 func (s *stubUserRepo) UpsertDevUser(ctx context.Context, email string) (*usermod.User, error) {

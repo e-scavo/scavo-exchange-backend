@@ -151,3 +151,38 @@ WHERE id = $1
 
 	return u, nil
 }
+
+func (r *PostgresRepository) UpdateDisplayName(ctx context.Context, id, displayName string) (*User, error) {
+	const q = `
+UPDATE users
+SET
+    display_name = $2,
+    updated_at = NOW()
+WHERE id = $1
+RETURNING
+    id,
+    email,
+    display_name,
+    created_at,
+    updated_at,
+    last_login_at
+`
+
+	u := &User{}
+	err := r.pool.QueryRow(ctx, q, id, displayName).Scan(
+		&u.ID,
+		&u.Email,
+		&u.DisplayName,
+		&u.CreatedAt,
+		&u.UpdatedAt,
+		&u.LastLoginAt,
+	)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, ErrUserNotFound
+		}
+		return nil, err
+	}
+
+	return u, nil
+}
