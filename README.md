@@ -23,7 +23,7 @@ The backend follows a **wallet-first identity model** that progressively evolves
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.5 — User Interaction & Application Surface  
-**Current Subphase:** **0.5.2 — User Metadata (Non-Wallet)**
+**Current Subphase:** **0.5.3 — User Settings Contract Foundation**
 
 ---
 
@@ -176,6 +176,18 @@ stores durable platform users:
 
 - wallet-backed users
 - future multi-auth identities
+
+#### `user_settings`
+stores authenticated user settings separately from core durable user identity:
+
+- `user_id`
+- `preferences`
+- `created_at`
+- `updated_at`
+
+Used for:
+- authenticated settings contract bootstrap
+- future user preference evolution without coupling settings to the `users` core record
 
 ---
 
@@ -359,7 +371,7 @@ Behavior:
 - requires the authenticated user
 - challenge must belong to purpose `account_merge`
 - challenge must have been requested by the same authenticated user
-- source durable wallet-owned account is merged into the authenticated target account
+- source durable wallet-owned account is merged into the authenticated target user
 - wallet ownership is re-pointed safely to the target user
 - unknown or malformed persisted challenge purposes are rejected rather than being normalized at runtime
 
@@ -502,6 +514,94 @@ Behavior:
 
 ---
 
+## 👤 Authenticated User Surface
+
+Requires Bearer JWT.
+
+#### `GET /auth/me`
+
+Returns the authenticated durable user and the additive profile view.
+
+Response example:
+
+```json
+{
+  "user": {
+    "id": "...",
+    "email": "admin@local",
+    "display_name": "SCAVO Operator"
+  },
+  "profile": {
+    "auth_method": "wallet",
+    "primary_wallet_address": "0xabc..."
+  }
+}
+```
+
+Behavior:
+- acts as the authenticated profile bootstrap surface
+- does not mutate user state
+- remains separate from wallet-management execution endpoints
+
+---
+
+#### `PATCH /auth/me`
+
+Updates minimal authenticated non-wallet metadata.
+
+Request:
+
+```json
+{
+  "display_name": "SCAVO Operator"
+}
+```
+
+Behavior:
+- currently only allows `display_name`
+- trims input before validation
+- rejects empty values after trim
+- enforces a Unicode-aware maximum length
+- returns the same `user` + `profile` shape as `GET /auth/me`
+
+---
+
+#### `GET /auth/me/settings`
+
+Returns the authenticated user settings contract.
+
+Response example:
+
+```json
+{
+  "settings": {
+    "user_id": "...",
+    "version": 1,
+    "preferences": {}
+  }
+}
+```
+
+Behavior:
+- is authenticated and independent from wallet lifecycle
+- is separate from `GET /auth/me` so profile metadata and settings do not collapse into one surface
+- resolves persisted settings when available
+- returns safe defaults when no settings row exists yet
+- does not create or mutate settings as a side effect of reading
+
+---
+
+#### `GET /auth/session`
+
+Returns the authenticated session projection resolved from JWT claims and durable identity context.
+
+Behavior:
+- is authenticated
+- exposes session-oriented auth context
+- does not change durable identity, profile metadata, or settings
+
+---
+
 ## 🧪 Minimal Validation Commands
 
 ### Health
@@ -571,6 +671,10 @@ What Stage 0 / Phase 0.4 currently establishes:
 - inventory-side actionability hints aligned with primary / detach endpoints
 - strict wallet challenge purpose enforcement across bootstrap, link, and merge flows
 - PostgreSQL-backed persistence with in-memory fallback for local/dev usage
+- authenticated profile bootstrap via `GET /auth/me`
+- minimal authenticated profile metadata update via `PATCH /auth/me`
+- dedicated authenticated settings contract via `GET /auth/me/settings`
+- authenticated session read surface via `GET /auth/session`
 
 ---
 
@@ -586,6 +690,8 @@ Not yet included:
 - arbitrary user-to-user ownership transfer
 - admin identity tooling
 - non-wallet auth providers
+- settings mutation (`PATCH /auth/me/settings` or equivalent)
+- concrete user preference fields beyond the minimal settings contract foundation
 
 ---
 
@@ -601,6 +707,7 @@ Detailed docs live under `docs/`:
 - `docs/decisions.md`
 - `docs/phase-status.md`
 - `docs/phase0_4_auth_and_user_stabilization.md`
+- `docs/phase0_5_user_interaction_and_application_surface.md`
 - `docs/flows.md`
 - `docs/handoff/backend-status.md`
 
@@ -621,6 +728,10 @@ At the end of the current documented state:
 - wallet inventory is lifecycle-aware and management-oriented
 - wallet inventory query semantics are documented and validated
 - wallet challenge purpose handling is strict across creation and consumption
+- authenticated profile bootstrap is available
+- minimal authenticated profile metadata update is available
+- authenticated user settings contract bootstrap is available
+- authenticated session read surface is available
 
 ---
 
@@ -898,19 +1009,19 @@ One owned secondary wallet can now be detached safely without breaking the invar
 
 ### Objective
 
-Clarify what a detached wallet becomes and formalize whether it can be reused later without introducing a new lifecycle table or terminal state model.
+Clarify the lifecycle meaning of detached wallet identities so detach becomes a reversible ownership change rather than an archived or terminal wallet state.
 
 ### Delivered
 
-- detached wallets remain known wallet identities
-- detached wallet records are preserved after detach
-- detached wallets can be reattached through the authenticated link flow
-- detached wallets can also re-enter through wallet-login bootstrap
-- documentation and tests aligned with reusable detached-wallet semantics
+- explicit detached-wallet lifecycle semantics documented and enforced by the already existing ownership model
+- clarification that detach keeps the wallet identity record and address known to the system
+- clarification that detach clears ownership metadata while preserving future reusability
+- reattachment and rebound guidance aligned with the existing wallet-link and wallet-login flows
+- cross-document contract cleanup for detach lifecycle behavior
 
 ### Result
 
-Detached wallets are now explicitly modeled as reusable known identities rather than deleted or terminal records.
+Detached wallet identities are now explicitly treated as reusable known wallet identities. The backend does not archive, destroy, or permanently blacklist detached wallets as part of detach.
 
 ---
 
@@ -918,33 +1029,34 @@ Detached wallets are now explicitly modeled as reusable known identities rather 
 
 ### Objective
 
-Close the first detached-identity audit gap by preserving minimal lifecycle evidence on wallet identities without introducing heavy event history or lifecycle redesign.
+Preserve minimal detached-lifecycle audit metadata so the system can distinguish wallets that were never detached from wallets that were previously detached and later reused.
 
 ### Delivered
 
-- `detached_at` added to wallet identities
-- PostgreSQL migration for detached audit readiness
-- in-memory and PostgreSQL stores updated to persist `detached_at`
-- detach execution now stamps `detached_at`
-- reattachment and login rebound preserve detached audit metadata
-- tests aligned with reusable detached-wallet semantics plus minimal audit readiness
+- `detached_at` persisted on wallet identities
+- detach execution stamps `detached_at`
+- wallet reattachment clears `detached_at`
+- wallet-login rebound clears `detached_at`
+- in-memory and PostgreSQL stores aligned with detached audit semantics
+- tests covering detached lifecycle audit transitions
 
 ### Result
 
-The backend now retains minimal evidence that one wallet identity was previously detached even if that wallet is later reused.
+The backend now preserves minimal detached-lifecycle history while keeping the wallet lifecycle model simple and reversible.
 
 ---
 
-## Phase 0.4.16 — Wallet Identity Read Model Enrichment
+## Phase 0.4.16 — Authenticated Wallet Inventory Base Contract
 
 ### Objective
 
-Expose a richer lifecycle-aware wallet inventory read model so authenticated clients can reason about current wallet ownership and minimal detached-lifecycle evidence.
+Expose the first authenticated wallet inventory read surface without changing wallet ownership rules, linking behavior, or lifecycle semantics.
 
 ### Delivered
 
 - `GET /auth/wallets`
-- explicit wallet read model with:
+- authenticated wallet inventory response scoped to the current durable user
+- wallet inventory base response fields:
   - `id`
   - `address`
   - `user_id`
@@ -952,208 +1064,144 @@ Expose a richer lifecycle-aware wallet inventory read model so authenticated cli
   - `detached_at`
   - `is_primary`
   - `status`
-- lifecycle-aware inventory serialization
-- tests covering active and detached-history wallet visibility
+- service and HTTP coverage for wallet inventory bootstrap behavior
 
 ### Result
 
-Phase 0.4.16 closes the gap between the internal wallet identity lifecycle model and the authenticated wallet inventory API contract. The backend now exposes a richer wallet inventory read model while preserving all ownership guarantees stabilized in previous subphases.
+Authenticated clients can now query their owned wallet inventory through a stable read surface while wallet management remains on the existing action endpoints.
 
 ---
 
-## ❌ What 0.4.16 Does Not Solve Yet
-
-- wallet unlink API
-- arbitrary cross-user ownership transfer outside wallet-signed merge
-- merge between wallet-backed and other auth methods
-- refresh tokens
-- token revocation
-- persistent authenticated sessions
-- archival or alias records for merged source users
-
----
-
-## 🧭 Next Phase
-
-Phase 0.4 is now formally closed.
-
-Expected next focus:
-
-- start a new phase only when the next ZIP shows a real runtime, product, or documentation need outside the already stabilized Phase 0.4 scope
-- preserve backward compatibility of the authenticated wallet inventory and wallet-action endpoints
-- avoid reopening Phase 0.4 unless a future ZIP proves a real regression or contractual gap
-
----
-
-## 🧩 Summary
-
-At the end of Phase 0.4:
-
-- wallet authentication remains stable
-- identity remains unified
-- ownership remains protected
-- authenticated wallet linking is available
-- wallet-owned account merge execution is available
-- explicit primary-wallet switching is available
-- wallet detach eligibility is available under authenticated control
-- wallet detach execution is available for already eligible owned wallets
-- detached wallet identities are explicitly reusable known identities
-- detached wallets can be reattached via protected linking or via wallet-login bootstrap rebound
-- detached wallet identities preserve minimal audit-ready lifecycle evidence through `detached_at`
-- `GET /auth/wallets` now exposes an enriched lifecycle-aware wallet inventory read model
-
----
-
-## Phase 0.4.17 — Wallet Inventory Query Filtering and Sorting
+## Phase 0.4.17 — Wallet Inventory Query Filtering Foundations
 
 ### Objective
 
-Expose the authenticated wallet inventory as a small but explicitly queryable read surface without changing ownership rules or persistence behavior.
+Prepare the authenticated wallet inventory for real client consumption by introducing bounded query filtering without changing ownership, lifecycle, or wallet-management rules.
 
 ### Delivered
 
-- optional `status=active|detached` filter on `GET /auth/wallets`
-- optional `primary=true|false` filter on `GET /auth/wallets`
-- optional `sort=linked_at` with `order=asc|desc`
-- strict HTTP `400` handling for unsupported query values
-- tests covering filtering, sorting, and invalid query parameters
+- `status=active|detached`
+- `primary=true|false`
+- filter validation and normalization
+- HTTP coverage for valid and invalid inventory filter requests
+- no changes to wallet identity ownership rules or persistence model
 
 ### Result
 
-Authenticated clients can now query owned-wallet inventory more precisely while the backend keeps ownership rules and wallet lifecycle behavior unchanged.
+Wallet inventory can now be narrowed through explicit query filters while preserving the same underlying ownership and lifecycle semantics.
 
 ---
 
-## Phase 0.4.18 — Wallet Inventory Pagination and Windowed Response
+## Phase 0.4.18 — Wallet Inventory Ordering Contract
 
 ### Objective
 
-Add simple pagination semantics to the authenticated wallet inventory contract without changing stores, ownership rules, or lifecycle behavior.
+Allow authenticated wallet inventory results to be returned in explicit and predictable order without changing ownership or lifecycle semantics.
 
 ### Delivered
 
-- optional `limit`
-- optional `offset`
-- response metadata:
+- `sort=linked_at`
+- `order=asc|desc`
+- validation that `order` requires `sort`
+- deterministic linked-at ordering behavior
+- HTTP and service coverage for ordered inventory responses
+
+### Result
+
+Authenticated wallet inventory now supports predictable ordering, making it safer for client rendering and manual operational inspection.
+
+---
+
+## Phase 0.4.19 — Wallet Inventory Pagination Contract
+
+### Objective
+
+Make wallet inventory consumable in bounded windows without changing ownership, lifecycle, or existing management endpoints.
+
+### Delivered
+
+- `limit`
+- `offset`
+- response pagination fields:
   - `total`
   - `limit`
   - `offset`
-- strict HTTP `400` handling for malformed pagination values
-- tests covering valid and invalid paginated requests
-
-### Result
-
-The wallet inventory endpoint now supports bounded windows while preserving the same lifecycle-aware wallet read model introduced previously.
-
----
-
-## Phase 0.4.19 — Wallet Inventory Navigation Metadata
-
-### Objective
-
-Complete the paginated wallet inventory contract with additive navigation metadata.
-
-### Delivered
-
-- additive response metadata:
-  - `returned`
-  - `has_more`
-- deterministic post-filter/post-sort window calculations
-- tests covering default, paginated, filtered, and empty-window scenarios
-
-### Result
-
-Wallet inventory responses now expose enough metadata for clients to reason about current page shape without introducing cursor-based complexity.
-
----
-
-## Phase 0.4.20 — Wallet Inventory Cursorless Navigation Hints
-
-### Objective
-
-Clarify next/previous bounded-window navigation without introducing cursor semantics or changing the underlying pagination strategy.
-
-### Delivered
-
-- additive response metadata:
-  - `next_offset`
-  - `previous_offset`
-- bounded-window navigation hints aligned with current `limit` / `offset`
-- test coverage for navigation-hint behavior across different windows
-
-### Result
-
-Clients can now follow straightforward offset-based inventory navigation while the backend remains intentionally cursorless.
-
----
-
-## Phase 0.4.21 — Wallet Inventory Query Parameter Contract Hardening
-
-### Objective
-
-Harden the query-parameter contract for authenticated wallet inventory without introducing new filters, new sorting fields, or runtime ownership changes.
-
-### Delivered
-
-- `order` now requires an explicit `sort`
-- `sort=linked_at` defaults to ascending order when `order` is omitted
-- offset-only requests remain valid and unbounded
-- tests covering the hardened combinations and defaults
-
-### Result
-
-The wallet inventory query contract is now explicit, stricter, and less ambiguous while remaining backward-compatible for valid callers.
-
----
-
-## Phase 0.4.22 — Wallet Inventory Response Contract Clarification
-
-### Objective
-
-Clarify the visible wallet inventory API contract so documentation matches the response behavior already implemented in previous subphases.
-
-### Delivered
-
-- `GET /auth/wallets` response examples now include:
   - `returned`
   - `has_more`
   - `next_offset`
   - `previous_offset`
-- explicit documentation of bounded vs unbounded window semantics
-- response-field contract alignment across docs
+- validation for invalid pagination inputs
+- HTTP and service coverage for paginated inventory behavior
 
 ### Result
 
-Phase 0.4.22 closes the documentation gap around the wallet inventory response contract. The endpoint behavior remains unchanged, but the visible API contract is now explicit and aligned with the implementation.
+Authenticated wallet inventory now supports offset pagination with explicit navigation metadata.
 
 ---
 
-## Phase 0.4.23 — Wallet Inventory Query Examples Closure
+## Phase 0.4.20 — Wallet Inventory Read Model Stabilization
 
 ### Objective
 
-Close the examples layer around `GET /auth/wallets` so implementers can see concrete valid and invalid request patterns.
+Stabilize the authenticated wallet inventory read contract so filtering, ordering, pagination, and lifecycle projection behave as one coherent surface.
 
 ### Delivered
 
-- base request example
-- filtered request example
-- sorted request example
-- paginated request example
-- invalid `order` without `sort` example
-- bounded-window response examples aligned with the existing handler contract
+- inventory read-model consistency cleanup
+- test coverage for combined query scenarios
+- documentation alignment across inventory filtering, ordering, and pagination semantics
 
 ### Result
 
-Phase 0.4.23 closes the remaining examples gap around `GET /auth/wallets` by documenting concrete request and response patterns without changing domain, stores, persistence, or handler behavior.
+`GET /auth/wallets` now behaves as a stable, composable authenticated read surface for wallet ownership inspection.
 
 ---
 
-## Phase 0.4.24 — Wallet Inventory Manual Validation Closure
+## Phase 0.4.21 — Wallet Inventory Operational Documentation Closure
 
 ### Objective
 
-Close the manual-validation layer around `GET /auth/wallets` so operators have an explicit checklist for validating the already-implemented query contract end-to-end.
+Close the documentation and operational guidance layer around the authenticated wallet inventory contract without changing the runtime implementation.
+
+### Delivered
+
+- manual validation guidance for inventory requests
+- documentation alignment across README, flows, testing, and handoff status
+- no runtime or persistence changes
+
+### Result
+
+The wallet inventory contract is now documented not only as code behavior but also as an operator-facing authenticated read surface.
+
+---
+
+## Phase 0.4.22 — Wallet Inventory Navigation Semantics Closure
+
+### Objective
+
+Clarify and document the practical meaning of pagination navigation fields so clients can consume wallet inventory windows without ambiguity.
+
+### Delivered
+
+- explicit semantics for:
+  - `returned`
+  - `has_more`
+  - `next_offset`
+  - `previous_offset`
+- cross-document pagination navigation guidance
+- no runtime or persistence changes
+
+### Result
+
+Wallet inventory pagination now has a fully documented navigation contract suitable for client and operator use.
+
+---
+
+## Phase 0.4.23 — Wallet Inventory Manual Validation Closure
+
+### Objective
+
+Complete the manual validation guidance for the authenticated wallet inventory contract without changing handlers, stores, or persistence.
 
 ### Delivered
 
@@ -1171,7 +1219,25 @@ Close the manual-validation layer around `GET /auth/wallets` so operators have a
 
 ### Result
 
-Phase 0.4.24 closes the manual-validation layer around `GET /auth/wallets` by documenting how to verify the existing contract end-to-end without changing domain, stores, persistence, or handler behavior.
+Phase 0.4.23 closes the manual-validation layer around `GET /auth/wallets` by documenting how to verify the existing contract end to end without changing domain, stores, persistence, or handler behavior.
+
+---
+
+## Phase 0.4.24 — Wallet Inventory Contract Validation Closure
+
+### Objective
+
+Close the contract-validation layer around the authenticated wallet inventory surface by aligning code, tests, and documentation around the already delivered read behavior.
+
+### Delivered
+
+- explicit README and testing guidance for inventory validation
+- no runtime or persistence changes
+- cross-document cleanup for wallet inventory contract wording
+
+### Result
+
+The authenticated wallet inventory contract is now closed not only at the runtime layer but also at the validation and documentation layers.
 
 ---
 
@@ -1385,7 +1451,6 @@ Phase 0.4 is now formally closed. The backend keeps the already stabilized contr
 
 Any future continuation must start from a new phase rather than extending Phase 0.4 without a new ZIP-validated need.
 
-
 ## ✅ Phase 0.5.2 Closure Summary
 
 Phase 0.5.2 adds the first authenticated mutation on top of the application-facing user surface opened in Phase 0.5.1.
@@ -1403,3 +1468,35 @@ This keeps user metadata editing intentionally small and safe:
 - no new ownership rules
 
 The backend now supports both profile bootstrap (`GET /auth/me`) and minimal authenticated profile metadata update (`PATCH /auth/me`) without reopening identity design from Phase 0.4.
+
+## ✅ Phase 0.5.3 Closure Summary
+
+Phase 0.5.3 introduces the first dedicated authenticated user settings contract without reopening identity, wallet ownership, or metadata editing semantics.
+
+`GET /auth/me/settings` now provides a separate authenticated surface for user settings with this minimal contract:
+
+- `user_id`
+- `version`
+- `preferences`
+
+This keeps the application surface intentionally separated:
+
+- `GET /auth/me` remains the profile bootstrap surface
+- `PATCH /auth/me` remains limited to minimal non-wallet metadata
+- `GET /auth/me/settings` becomes the dedicated settings read surface
+
+The settings foundation also remains intentionally small and safe:
+
+- settings persistence is separated from `users`
+- defaults are returned when no settings row exists yet
+- no implicit write happens during read
+- no concrete preference fields are forced prematurely
+- no settings mutation contract is introduced yet
+
+The backend now supports a three-part authenticated user surface:
+
+- profile bootstrap
+- minimal profile metadata update
+- dedicated settings contract bootstrap
+
+This establishes the first formal boundary between durable user metadata and future user configuration.
