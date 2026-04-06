@@ -152,7 +152,7 @@ The backend now supports authenticated wallet-linking, authenticated wallet-owne
 
 The settings surface returns persisted data when available and safe defaults when no settings row exists yet, without creating or mutating settings during read.
 
-The read shape for `GET /auth/me` remains additive and includes:
+The read shape remains additive and includes:
 
 - `user_id`
 - `auth_method`
@@ -209,10 +209,11 @@ The backend guarantees:
 - primary wallet uniqueness is maintained
 - link challenges are user-bound
 - link, merge, and login challenge purposes are not interchangeable
-- authenticated settings are exposed through a dedicated contract instead of being merged into `/auth/me`
-- settings reads do not implicitly create rows or mutate persistence state
+- settings reads are side-effect free
+- settings defaults are resolved without implicit persistence
 
 ---
+
 
 ## 📦 Wallet Inventory Read Model
 
@@ -250,7 +251,6 @@ Coverage now includes:
 - detached-wallet reattachment semantics
 - enriched wallet inventory read-model serialization
 - wallet inventory filtering and sorting query semantics
-- authenticated user metadata update (`PATCH /auth/me`)
 - authenticated user settings default resolution
 - authenticated user settings persisted read behavior
 - authenticated user settings unauthorized access handling
@@ -291,9 +291,8 @@ Delivered:
 Expected next focus:
 
 - add settings mutation only through a dedicated settings contract
-- keep profile metadata and settings separated
-- avoid mixing settings evolution with wallet lifecycle or session semantics
-- introduce typed preference fields only when a real application need requires them
+- keep profile/bootstrap data and settings separated
+- introduce typed settings fields only when a real application need requires them
 
 ---
 
@@ -307,8 +306,7 @@ When continuing development:
 - preserve backward compatibility of wallet login
 - keep challenge-to-user binding explicit in wallet-management flows
 - maintain documentation alignment with implementation
-- keep `/auth/me` and `/auth/me/settings` as separate contracts
-- do not couple future settings evolution to the `users` core record unless a future ZIP proves that need explicitly
+- keep settings separated from `/auth/me` and from the core `users` record
 
 ---
 
@@ -329,23 +327,36 @@ At the end of Phase 0.4.16:
 - the authenticated wallet inventory endpoint now exposes an enriched lifecycle-aware read model
 - the authenticated wallet inventory endpoint now supports filtering, sorting, and simple pagination semantics without changing ownership rules
 
+
+
 Phase 0.4.21 hardens the authenticated wallet inventory query contract by making parameter combinations and defaults explicit (`order` now requires `sort`, and `sort=linked_at` defaults to ascending order when `order` is omitted). The implementation stays entirely in the handler/read-model layer and does not modify ownership, stores, or persistence.
+
 
 Phase 0.4.22 closes the documentation gap around the authenticated wallet inventory response contract. The main endpoint example is now aligned with the implemented JSON fields, including returned-window metadata and bounded navigation hints, without changing domain, stores, or persistence.
 
+
 Phase 0.4.23 closes the operator-facing examples layer for `GET /auth/wallets` by documenting concrete valid and invalid query patterns, plus bounded-window response examples, without changing domain, stores, persistence, or handler behavior.
+
 
 Phase 0.4.24 closes the manual-validation layer around the authenticated wallet inventory endpoint. The implementation remains documentation-only, but operators now have an explicit checklist for validating base, filtered, sorted, paginated, bounded, unbounded, and invalid query scenarios against the real `GET /auth/wallets` contract.
 
+
+
 Phase 0.4.25 prepares the authenticated wallet inventory for wallet-management consumption by exposing minimal actionability hints per listed wallet. The implementation stays in the read-model/handler layer, reuses the established detach-domain reasons, and leaves execution authority in the existing detach and primary-switch endpoints.
+
+
 
 Phase 0.4.26 closes the consistency gap between the enriched wallet inventory read model and `POST /auth/wallets/detach/check`. The implementation adds handler-level coverage proving that inventory-side detach hints remain semantically aligned with detach-check eligibility and reasons for single-wallet and two-wallet ownership scenarios, while leaving detach authority in the existing check and execute endpoints.
 
+
 Phase 0.4.28 closes the wallet-management read flow around the authenticated inventory and the existing primary / detach actions. The implementation is documentation-only, but it corrects the README phase summary and consolidates the real inventory → actionability hint → action/check endpoint → refreshed inventory flow so client and operator guidance now matches the authenticated wallet-management surface end to end.
+
 
 Phase 0.4.30 consolidates the final wallet-management contract layer. Inventory, eligibility, execution, and refreshed post-action inventory are now documented as one coherent surface so future work can move beyond Phase 0.4 without reopening already-stabilized wallet-management semantics.
 
+
 Phase 0.4.31 hardens the wallet-auth bootstrap boundary so `POST /auth/wallet/verify` can no longer consume `wallet_link` or `account_merge` challenges. Detached-wallet rebound remains supported, but only through the correct bootstrap-purpose challenge.
+
 
 Phase 0.4.32 closes the last permissive challenge-purpose normalization gap. Controlled challenge creation still defaults empty purpose to `auth_bootstrap`, but unknown or malformed purpose values are now preserved as invalid runtime data and rejected by wallet verify/login, authenticated wallet link, and wallet-owned account merge.
 
