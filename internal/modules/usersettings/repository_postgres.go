@@ -57,3 +57,59 @@ func (r *PostgresRepository) GetByUserID(ctx context.Context, userID string) (*U
 
 	return &settings, nil
 }
+
+func (r *PostgresRepository) UpsertPreferences(ctx context.Context, userID string, preferences map[string]any) (*UserSettings, error) {
+	if userID == "" {
+		return nil, ErrUserIDRequired
+	}
+
+	if preferences == nil {
+		preferences = map[string]any{}
+	}
+
+	if r.pool == nil {
+		return &UserSettings{
+			UserID:      userID,
+			Preferences: preferences,
+		}, nil
+	}
+
+	preferencesBytes, err := json.Marshal(preferences)
+	if err != nil {
+		return nil, err
+	}
+
+	query := `
+		INSERT INTO user_settings (user_id, preferences)
+		VALUES ($1, $2::jsonb)
+		ON CONFLICT (user_id)
+		DO UPDATE SET
+			preferences = EXCLUDED.preferences,
+			updated_at = NOW()
+		RETURNING user_id, preferences, created_at, updated_at
+	`
+
+	row := r.pool.QueryRow(ctx, query, userID, preferencesBytes)
+
+	var settings UserSettings
+	var storedPreferencesBytes []byte
+
+	if err := row.Scan(
+		&settings.UserID,
+		&storedPreferencesBytes,
+		&settings.CreatedAt,
+		&settings.UpdatedAt,
+	); err != nil {
+		return nil, err
+	}
+
+	if len(storedPreferencesBytes) > 0 {
+		if err := json.Unmarshal(storedPreferencesBytes, &settings.Preferences); err != nil {
+			return nil, err
+		}
+	} else {
+		settings.Preferences = map[string]any{}
+	}
+
+	return &settings, nil
+}

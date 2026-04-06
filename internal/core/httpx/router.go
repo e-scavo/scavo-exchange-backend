@@ -110,6 +110,7 @@ func NewRouter(p RouterParams) http.Handler {
 		r.With(RequireAuth(p.TokenService, false)).Get("/auth/me", handlers.Me)
 		r.With(RequireAuth(p.TokenService, false)).Patch("/auth/me", handlers.UpdateMe)
 		r.With(RequireAuth(p.TokenService, false)).Get("/auth/me/settings", handlers.MeSettings)
+		r.With(RequireAuth(p.TokenService, false)).Patch("/auth/me/settings", handlers.UpdateMeSettings)
 		r.With(RequireAuth(p.TokenService, false)).Get("/auth/session", handlers.Session)
 		r.With(RequireAuth(p.TokenService, false)).Get("/auth/wallets", handlers.Wallets)
 		r.With(RequireAuth(p.TokenService, false)).Post("/auth/wallets/detach/check", handlers.WalletDetachCheck)

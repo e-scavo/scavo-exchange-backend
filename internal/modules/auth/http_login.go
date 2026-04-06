@@ -37,6 +37,10 @@ type SessionResponse struct {
 	Session *SessionView `json:"session"`
 }
 
+type UpdateMeSettingsRequest struct {
+	Preferences json.RawMessage `json:"preferences"`
+}
+
 type MeSettingsResponse struct {
 	Settings usersettingsmod.View `json:"settings"`
 }
@@ -151,6 +155,55 @@ func (h HTTPHandlers) UpdateMe(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, MeResponse{
 		User:    profile.User,
 		Profile: profile,
+	})
+}
+
+func (h HTTPHandlers) UpdateMeSettings(w http.ResponseWriter, r *http.Request) {
+	claims, ok := coreauth.ClaimsFromContext(r.Context())
+	if !ok {
+		writeJSON(w, http.StatusUnauthorized, map[string]any{"error": "unauthorized"})
+		return
+	}
+
+	if h.UserSettings == nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "auth_service_error"})
+		return
+	}
+
+	var req UpdateMeSettingsRequest
+	if err := decodeJSONBody(r, &req, 32<<10); err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "bad_request"})
+		return
+	}
+
+	if len(req.Preferences) == 0 {
+		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "invalid_preferences"})
+		return
+	}
+
+	var patch map[string]any
+	if err := json.Unmarshal(req.Preferences, &patch); err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "invalid_preferences"})
+		return
+	}
+
+	settings, err := h.UserSettings.UpdatePreferences(r.Context(), claims.UserID, patch)
+	if err != nil {
+		switch {
+		case errors.Is(err, usersettingsmod.ErrUserIDRequired):
+			writeJSON(w, http.StatusUnauthorized, map[string]any{"error": "unauthorized"})
+		case errors.Is(err, usersettingsmod.ErrInvalidPreferences), errors.Is(err, usersettingsmod.ErrNullPreferenceValue):
+			writeJSON(w, http.StatusBadRequest, map[string]any{"error": "invalid_preferences"})
+		default:
+			writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "auth_service_error"})
+		}
+		return
+	}
+
+	view := usersettingsmod.ToView(settings)
+
+	writeJSON(w, http.StatusOK, MeSettingsResponse{
+		Settings: view,
 	})
 }
 
