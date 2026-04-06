@@ -1500,3 +1500,41 @@ The backend now supports a three-part authenticated user surface:
 - dedicated settings contract bootstrap
 
 This establishes the first formal boundary between durable user metadata and future user configuration.
+
+---
+
+## Phase 0.5.3 — User Settings Contract Foundation
+
+This subphase introduces the first dedicated authenticated user settings contract, extending the application surface without modifying identity, wallet ownership, or authentication flows.
+
+### What was introduced
+
+- new authenticated endpoint: `GET /auth/me/settings`
+- dedicated `user_settings` persistence, separated from `users`
+- minimal settings response contract:
+  - `user_id`
+  - `version`
+  - `preferences`
+
+### Behavior
+
+- settings are resolved from authenticated context
+- persisted settings are returned when available
+- safe defaults are returned when no settings row exists
+- no implicit insert or mutation occurs during read
+
+### Architectural impact
+
+This establishes a strict separation between:
+
+- identity (Phase 0.4)
+- profile metadata (`/auth/me`, `PATCH /auth/me`)
+- user configuration (`/auth/me/settings`)
+
+The `/auth/me` endpoint remains focused on authenticated profile/bootstrap concerns and does not absorb settings responsibilities.
+
+### Notes
+
+- settings are currently read-only
+- no typed preference fields are enforced yet
+- future evolution should extend settings through a dedicated contract, not through `/auth/me`
