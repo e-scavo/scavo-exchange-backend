@@ -1538,3 +1538,79 @@ The `/auth/me` endpoint remains focused on authenticated profile/bootstrap conce
 - settings are currently read-only
 - no typed preference fields are enforced yet
 - future evolution should extend settings through a dedicated contract, not through `/auth/me`
+
+---
+
+## Phase 0.5.4 — User Settings Mutation
+
+The backend now supports **authenticated mutation of user settings** through a controlled and safe partial update mechanism.
+
+### New Endpoint
+
+```
+PATCH /auth/me/settings
+```
+
+### Characteristics
+
+* Requires JWT authentication
+* Fully independent from `/auth/me` (profile)
+* Uses **merge-based updates** (no full overwrite)
+* Preserves existing settings
+* Prevents destructive writes
+
+### Request Format
+
+```json
+{
+  "preferences": {
+    "key": "value"
+  }
+}
+```
+
+### Behavior
+
+* Only provided keys are updated
+* Existing keys remain unchanged
+* New keys are added
+* Null values are rejected
+
+### Persistence
+
+* Backed by `user_settings`
+* Upsert behavior:
+
+  * Creates record if not exists
+  * Merges and updates if exists
+* Maintains `created_at`
+* Updates `updated_at`
+
+### Validation
+
+* Ensures valid JSON
+* Requires `preferences` object
+* Rejects invalid types
+* No schema enforcement (intentionally minimal)
+
+### Compatibility
+
+* Fully backward compatible
+* Does not modify existing endpoints
+* Does not impact authentication or wallet lifecycle
+
+### Purpose
+
+This phase completes the **settings contract** by transitioning from:
+
+```
+READ ONLY → READ + WRITE
+```
+
+Enabling:
+
+* Frontend persistence of user preferences
+* Future feature-level customization
+* Progressive enhancement without architectural changes
+
+---
