@@ -17,7 +17,7 @@ Status: ✅ Completed
 ### Phase 0.5 — User Interaction & Application Surface
 Status: 🟡 In Progress
 
-Current closed subphase: **0.5.3 — User Settings Contract Foundation**
+Latest completed subphase: **0.5.3 — User Settings Contract Foundation**
 
 ---
 
@@ -420,154 +420,200 @@ Phase 0.4.25 prepares the authenticated wallet inventory for wallet-management c
 
 - additive wallet inventory fields: `can_set_primary`, `can_detach`, and `detach_block_reasons`
 - detach block reasons aligned with the existing detach-domain reasons (`wallet_is_primary`, `user_would_have_no_wallets`)
-- handler and service coverage for actionability projection under multi-wallet and single-wallet ownership scenarios
-- documentation updates clarifying that inventory remains advisory while primary and detach endpoints remain authoritative
+- handler-level validation for single-wallet and two-wallet inventory scenarios
+- inventory-side actionability semantics kept explicitly advisory, with execution authority left to the existing action endpoints
 
 ## ❌ Not Included in 0.4.25
 
-- new wallet mutation endpoints
-- ownership-rule changes
+- new wallet-management endpoints
+- changes to detach or primary-switch execution behavior
+- new query parameters
 - store-level actionability persistence
-- admin inventory views
-- settings / profile surfaces
-- non-wallet identity changes
+- ownership-rule changes
 
 ## ✅ Phase 0.4.26 Closure Summary
 
-Phase 0.4.26 aligns inventory-side detach hints with the existing authoritative detach-check contract without changing stores, persistence, or ownership rules.
+Phase 0.4.26 closes the consistency gap between wallet inventory actionability hints and `POST /auth/wallets/detach/check` without changing detach rules, stores, or persistence.
 
 ### Delivered in 0.4.26
 
-- coverage proving `can_detach` and `detach_block_reasons` remain coherent with the existing detach-check eligibility logic
-- documentation alignment clarifying that inventory hints and detach-check describe the same current detach reality
-- no new detach-domain rules and no new persistence fields
+- handler-level consistency coverage for single-primary and two-wallet inventories
+- explicit validation that `can_detach=false` remains compatible with `eligible=false` under the same detach reasons
+- explicit validation that detachable secondary wallets stay aligned with `eligible=true` and empty detach reasons
+- documentation that keeps inventory-side hints advisory while preserving detach-check authority
 
 ## ❌ Not Included in 0.4.26
 
-- new wallet mutation endpoints
-- ownership-rule changes
 - new detach rules
-- store-level materialization of actionability hints
-- settings / profile surfaces
+- new wallet-management endpoints
+- changes to detach execution behavior
+- new inventory query parameters
+- ownership-rule changes
 
 ## ✅ Phase 0.4.27 Closure Summary
 
-Phase 0.4.27 aligns inventory-side primary hints with the authoritative primary-switch contract without changing stores, persistence, or ownership rules.
+Phase 0.4.27 closes the consistency gap between wallet inventory primary-actionability hints and `POST /auth/wallets/primary` without changing primary-switch rules, stores, or persistence.
 
 ### Delivered in 0.4.27
 
-- coverage proving current primary wallets remain non-promotable and eligible secondary wallets remain promotable
-- documentation alignment clarifying that inventory hints stay advisory while the primary-switch endpoint remains authoritative
-- no new primary-domain rules and no new persistence fields
+- handler-level consistency coverage for a two-wallet inventory before and after primary switching
+- explicit validation that the current primary stays `can_set_primary=false` before the switch
+- explicit validation that a secondary wallet exposed as `can_set_primary=true` can be promoted and then becomes non-promotable after the switch
+- documentation that keeps inventory-side primary hints advisory while preserving primary-switch authority
 
 ## ❌ Not Included in 0.4.27
 
-- new wallet mutation endpoints
+- new primary-switch rules
+- new wallet-management endpoints
+- new inventory fields
 - ownership-rule changes
-- new primary-domain rules
-- store-level materialization of actionability hints
-- settings / profile surfaces
+- store-level actionability persistence
 
 ## ✅ Phase 0.4.28 Closure Summary
 
-Phase 0.4.28 closes the wallet-management read flow around inventory, actionability hints, and authoritative wallet action endpoints without changing handlers, stores, persistence, or domain rules.
+Phase 0.4.28 closes the wallet-management read flow around the authenticated inventory and the existing primary / detach actions without changing domain rules, stores, or persistence.
 
 ### Delivered in 0.4.28
 
-- documentation alignment covering the operator/client flow:
-  - `GET /auth/wallets`
-  - inspect advisory actionability hints
-  - call the authoritative primary or detach-check/detach endpoint
-  - refresh inventory
-- README and handoff updates aligning the documented flow with the already-implemented wallet-management contract
-- no new runtime behavior
+- main README header corrected so the declared current subphase matches the actual state already reflected across the ZIP
+- explicit documentation of the end-to-end wallet-management flow: inventory → actionability hint → action/check endpoint → refreshed inventory
+- operator guidance clarifying that inventory hints remain advisory while action and check endpoints remain authoritative
+- manual validation guidance covering refreshed inventory expectations after primary switching and detach execution
 
 ## ❌ Not Included in 0.4.28
 
-- new wallet mutation endpoints
+- new wallet-management endpoints
+- new inventory fields
+- changes to primary-switch or detach rules
 - ownership-rule changes
-- store-level query expansion
-- settings / profile surfaces
+- store-level or persistence changes
 
 ## ✅ Phase 0.4.29 Closure Summary
 
-Phase 0.4.29 aligns inventory-side detach hints with the authoritative detach-execution endpoint without changing detach rules, stores, or persistence.
+Phase 0.4.29 closes the consistency gap between authenticated wallet inventory detach hints and `POST /auth/wallets/detach` without changing domain rules, stores, or persistence.
 
 ### Delivered in 0.4.29
 
-- coverage proving a wallet marked detachable by inventory hints can be detached successfully through the existing execution endpoint
-- coverage proving refreshed inventory recalculates actionability coherently after detach
-- documentation alignment clarifying that inventory remains advisory while detach execution remains authoritative
+- handler-level coverage proving that a secondary wallet exposed as detachable can be detached successfully
+- explicit validation that the detach execute response stays compatible with the pre-detach inventory hints and eligibility snapshot
+- explicit validation that refreshed inventory removes the detached wallet from the attached inventory and recalculates detach hints coherently for the remaining wallet
+- documentation clarifying that inventory-side detach hints remain advisory while detach execution remains authoritative
 
 ## ❌ Not Included in 0.4.29
 
-- new wallet mutation endpoints
+- new detach rules
+- new wallet-management endpoints
+- new inventory fields
 - ownership-rule changes
-- new detach-domain rules
-- settings / profile surfaces
+- store-level or persistence changes
 
 ## ✅ Phase 0.4.30 Closure Summary
 
-Phase 0.4.30 consolidates the authenticated wallet-management contract at the documentation and testing layer without changing handlers, stores, persistence, or ownership rules.
+Phase 0.4.30 consolidates the authenticated wallet-management surfaces into one explicit contract without changing handlers, stores, persistence, or domain rules.
 
 ### Delivered in 0.4.30
 
-- explicit consolidated contract spanning:
-  - `GET /auth/wallets`
-  - `POST /auth/wallets/primary`
-  - `POST /auth/wallets/detach/check`
-  - `POST /auth/wallets/detach`
-- explicit guidance clarifying:
-  - inventory is advisory
-  - detach-check is the eligibility surface
-  - primary and detach are execution surfaces
-  - refreshed inventory is the post-action observable state
-- cross-document cleanup aligning README, testing, and handoff status with the existing wallet-management behavior
+- consolidated wallet-management contract across inventory, primary switch, detach eligibility, and detach execution
+- explicit documentation of advisory versus authoritative wallet-management surfaces
+- unified operator/testing guidance for the inventory → action/check → refreshed inventory cycle
+- cross-document alignment so handoff, flows, README, and testing describe the same final wallet-management model
 
 ## ❌ Not Included in 0.4.30
 
-- new wallet mutation endpoints
-- ownership-rule changes
-- settings / profile surfaces
-- non-wallet identity changes
+- new wallet-management endpoints
+- new inventory fields
+- changes to detach or primary rules
+- store-level or persistence changes
 
 ## ✅ Phase 0.4.31 Closure Summary
 
-Phase 0.4.31 hardens wallet-auth bootstrap so `POST /auth/wallet/verify` only consumes `auth_bootstrap` challenges.
+Phase 0.4.31 closes the remaining challenge-purpose enforcement gap at the wallet-auth bootstrap boundary without changing ownership semantics, stores, or persistence.
 
 ### Delivered in 0.4.31
 
-- explicit purpose enforcement in wallet verify/login
-- rejection of `wallet_link` challenges at wallet-auth bootstrap
-- rejection of `account_merge` challenges at wallet-auth bootstrap
-- conflict response contract for purpose mismatch
-- service and HTTP coverage for non-bootstrap challenge rejection
+- service-level enforcement that `POST /auth/wallet/verify` accepts only `auth_bootstrap` challenges
+- explicit rejection of `wallet_link` challenges in wallet-auth bootstrap
+- explicit rejection of `account_merge` challenges in wallet-auth bootstrap
+- handler-level `wallet_challenge_purpose_mismatch` response for purpose violations
+- test coverage proving non-bootstrap challenge purposes cannot be reused in wallet login
 
 ## ❌ Not Included in 0.4.31
 
-- changes to wallet linking flow
-- changes to wallet-owned account merge flow
-- changes to detach / reattach lifecycle
-- changes to settings / profile surfaces
+- new wallet-management endpoints
+- ownership-rule changes
+- primary-wallet changes
+- detach-rule changes
+- store-level or persistence changes
 
 ## ✅ Phase 0.4.32 Closure Summary
 
-Phase 0.4.32 closes the remaining permissive challenge-purpose normalization gap so unknown or malformed runtime purposes are no longer silently treated as bootstrap challenges.
+Phase 0.4.32 closes the last permissive purpose-normalization gap in wallet challenges without changing stores, persistence, ownership, or lifecycle semantics.
 
 ### Delivered in 0.4.32
 
-- strict runtime handling for supported challenge purposes
-- explicit rejection of unknown challenge purposes during wallet verify/login
-- explicit rejection of unknown challenge purposes during wallet link consumption
-- explicit rejection of unknown challenge purposes during wallet-owned account merge consumption
-- preservation of controlled creation defaults while rejecting unknown persisted runtime purposes
+- strict creation-time purpose resolution with controlled defaulting only for empty purpose
+- unknown purpose values are no longer normalized to `auth_bootstrap` at runtime
+- wallet verify/login rejects unknown challenge purposes
+- authenticated wallet link rejects unknown challenge purposes
+- authenticated wallet-owned account merge rejects unknown challenge purposes
+- tests proving invalid purpose values are preserved and rejected instead of silently reclassified
 
 ## ❌ Not Included in 0.4.32
 
-- new challenge purposes
-- changes to wallet ownership rules
-- changes to settings / profile surfaces
-- refresh-token or session-store work
+- new wallet lifecycle operations
+- ownership-rule changes
+- primary-wallet changes
+- detach-rule changes
+- store schema or migration changes
+
+## ✅ Phase 0.4.33 Closure Summary
+
+Phase 0.4.33 formally closes Phase 0.4 at the documentation layer without changing handlers, stores, persistence, migrations, ownership rules, or wallet lifecycle behavior.
+
+### Delivered in 0.4.33
+
+- explicit formal closure of Phase 0.4 as a completed foundation phase
+- cross-document alignment so README, phase status, handoff, flows, and phase documentation describe the same final state
+- removal of the remaining placeholder planning note that left 0.4.33 undefined in phase-status tracking
+- explicit transition guidance that the next work should start in a new phase instead of reopening Phase 0.4 without a real ZIP-validated gap
+
+## ❌ Not Included in 0.4.33
+
+- runtime handler changes
+- new wallet-management endpoints
+- ownership-rule changes
+- primary-wallet changes
+- detach-rule changes
+- challenge-purpose behavior changes
+- store-level or persistence changes
+- schema or migration changes
+
+### Next Expected Evolution
+
+- start the next phase from a ZIP-validated runtime or product need outside the already closed Phase 0.4 scope
+- preserve the finalized wallet-auth, wallet-link, wallet-merge, primary-switch, and detach contracts as the baseline
+- avoid reopening Phase 0.4 unless a future ZIP proves a real regression or contractual documentation gap
+
+
+## ✅ Phase 0.4.23 Closure Summary
+
+Phase 0.4.23 closes the concrete examples layer for `GET /auth/wallets` so operators and client implementers can see valid and invalid request patterns alongside bounded-window response examples.
+
+### Delivered in 0.4.23
+
+- request examples for base, filtered, sorted, and paginated wallet inventory queries
+- an explicit invalid example for `order` without `sort`
+- response examples showing bounded-window metadata and navigation hints
+- accumulated documentation aligned with the real handler contract
+
+## ❌ Not Included in 0.4.23
+
+- new endpoint behavior
+- new filters
+- new sort fields
+- cursor pagination
+- store-level pagination
+- ownership-rule changes
 
 
 
@@ -579,50 +625,54 @@ Phase 0.4.32 closes the remaining permissive challenge-purpose normalization gap
 | 0.5.2 | User metadata (non-wallet) | ✅ Completed |
 | 0.5.3 | User settings contract foundation | ✅ Completed |
 
+---
+
 ## ✅ Phase 0.5.3 Closure Summary
 
 Phase 0.5.3 introduces the first dedicated authenticated user settings contract without reopening identity, wallet ownership, or the minimal metadata editing semantics already established in 0.5.1 and 0.5.2.
 
-The backend now exposes:
-
-- `GET /auth/me/settings`
-
-This endpoint establishes a separate authenticated settings surface so user profile metadata and future application configuration do not collapse into a single mixed contract.
-
 ### Delivered in 0.5.3
 
 - authenticated `GET /auth/me/settings`
-- dedicated `user_settings` persistence separated from `users`
-- a minimal settings response contract containing:
+- dedicated `user_settings` persistence foundation separated from `users`
+- minimal settings response contract containing:
   - `user_id`
   - `version`
   - `preferences`
-- safe default settings resolution when no persisted row exists yet
+- safe default resolution when no persisted settings row exists
 - no implicit write or row creation during read
-- dedicated settings service/repository foundation
-- test coverage for the new authenticated settings read surface
+- dedicated `usersettings` module and service/repository foundation
+- test coverage for:
+  - default settings read
+  - persisted settings read
+  - unauthorized access
+  - unavailable settings service
 
-## 🔍 Functional Result
+### Result
 
 The backend now exposes three distinct authenticated user-facing surfaces:
 
-1. `GET /auth/me` for profile bootstrap
-2. `PATCH /auth/me` for minimal non-wallet metadata update
-3. `GET /auth/me/settings` for dedicated settings contract bootstrap
+- `GET /auth/me` for profile/bootstrap data
+- `PATCH /auth/me` for minimal non-wallet metadata update
+- `GET /auth/me/settings` for dedicated settings bootstrap
 
-This preserves the separation between:
+This preserves a clean separation between:
 
 - durable user identity
 - minimal profile metadata
-- user configuration/settings
+- authenticated user settings
 
 ## ❌ Not Included in 0.5.3
 
-The following items remain intentionally out of scope:
-
-- settings mutation (`PATCH /auth/me/settings` or equivalent)
-- concrete preference fields such as theme, locale, or notifications
-- settings audit history
+- settings mutation
+- typed preference fields such as theme, locale, or notifications
+- settings audit/history
 - wallet lifecycle interaction
 - identity-model changes
 - merging settings into `/auth/me`
+
+### Next Expected Evolution
+
+- add settings mutation only through a dedicated settings contract
+- keep profile/bootstrap data and settings separated
+- introduce typed settings fields only when a real application need requires them
