@@ -17,7 +17,7 @@ Status: ✅ Completed
 ### Phase 0.5 — User Interaction & Application Surface
 Status: 🟡 In Progress
 
-Latest completed subphase: **0.5.3 — User Settings Contract Foundation**
+Latest completed subphase: **0.5.5.1 — User Settings Hardening (Soft Contract Guard Layer)**
 
 ---
 
@@ -624,6 +624,8 @@ Phase 0.4.23 closes the concrete examples layer for `GET /auth/wallets` so opera
 | 0.5.1 | Authenticated user profile surface | ✅ Completed |
 | 0.5.2 | User metadata (non-wallet) | ✅ Completed |
 | 0.5.3 | User settings contract foundation | ✅ Completed |
+| 0.5.4 | User settings mutation | ✅ Completed |
+| 0.5.5.1 | User settings hardening (soft contract guard layer) | ✅ Completed |
 
 ---
 
@@ -676,3 +678,88 @@ This preserves a clean separation between:
 - add settings mutation only through a dedicated settings contract
 - keep profile/bootstrap data and settings separated
 - introduce typed settings fields only when a real application need requires them
+
+---
+
+## ✅ Phase 0.5.4 Closure Summary
+
+Phase 0.5.4 introduces the first authenticated user settings mutation surface through `PATCH /auth/me/settings`, preserving the separation between profile/bootstrap metadata and dedicated user settings.
+
+### Delivered in 0.5.4
+
+- authenticated `PATCH /auth/me/settings`
+- merge-based mutation for `preferences`
+- partial updates without destructive overwrite of the entire settings object
+- safe persistence through `user_settings`
+- minimal validation for malformed settings payloads
+- handler-level and service-level test coverage for mutation behavior
+
+### Result
+
+The backend now exposes a dedicated authenticated read/write settings surface while preserving the same separation principles established in 0.5.3:
+
+- `GET /auth/me` for profile/bootstrap data
+- `PATCH /auth/me` for minimal non-wallet metadata update
+- `GET /auth/me/settings` for dedicated settings read
+- `PATCH /auth/me/settings` for dedicated settings mutation
+
+This keeps settings evolution out of `/auth/me` and away from the core `users` record.
+
+## ❌ Not Included in 0.5.4
+
+- strict schema enforcement
+- typed preference catalog
+- settings version negotiation
+- audit/history for settings mutation
+- wallet lifecycle interaction
+- identity-model changes
+- merging settings into `/auth/me`
+
+### Next Expected Evolution
+
+- introduce lightweight hardening to prevent structural drift in `preferences`
+- preserve backward compatibility of the settings mutation contract
+- keep settings flexible while improving consistency guarantees
+
+---
+
+## ✅ Phase 0.5.5.1 Closure Summary
+
+Phase 0.5.5.1 introduces the first hardening layer over the authenticated user settings contract without converting the settings surface into a schema-heavy or rigid system.
+
+### Delivered in 0.5.5.1
+
+- recursive normalization of `preferences`
+- rejection of `null` values, including nested values
+- rejection of non JSON-compatible values
+- top-level key trimming
+- top-level shape compatibility protection across object / array / scalar categories
+- soft observation of unknown top-level keys through warning logs
+- expanded service-level and HTTP-level test coverage for the hardened contract
+
+### Result
+
+The backend now protects the authenticated settings contract from structural drift while preserving:
+
+- backward compatibility
+- merge-based mutation semantics
+- flexibility of `preferences`
+- separation between user profile and user settings
+
+This means the settings surface remains extensible, but no longer accepts obviously unsafe or structurally incompatible mutations as freely as before.
+
+## ❌ Not Included in 0.5.5.1
+
+- strict JSON schema enforcement
+- hard key whitelisting
+- typed preference governance
+- settings migration/versioning
+- semantic validation of specific preference families
+- changes to auth, wallet lifecycle, or durable identity behavior
+
+### Next Expected Evolution
+
+- introduce typed settings only when a real application need justifies them
+- preserve the flexible authenticated settings contract while hardening incrementally
+- continue Phase 0.5 application-surface evolution without reopening Phase 0.4
+

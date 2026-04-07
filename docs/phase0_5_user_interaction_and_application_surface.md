@@ -12,14 +12,14 @@ This subphase completes the minimal read/write application surface initiated in 
 
 After Phase 0.5.1:
 
-- The backend exposes an authenticated read surface via `GET /auth/me`.
-- User identity is wallet-first, durable, and stabilized in Phase 0.4.
-- The system persists user fields such as `display_name`, `email`, and timestamps.
+* The backend exposes an authenticated read surface via `GET /auth/me`.
+* User identity is wallet-first, durable, and stabilized in Phase 0.4.
+* The system persists user fields such as `display_name`, `email`, and timestamps.
 
 However:
 
-- There was no contract to mutate user-owned metadata.
-- The application surface was read-only.
+* There was no contract to mutate user-owned metadata.
+* The application surface was read-only.
 
 ## Problem Statement
 
@@ -27,32 +27,32 @@ The backend lacked a safe and minimal mechanism for allowing an authenticated us
 
 This prevented:
 
-- Basic profile personalization.
-- Evolution of user-facing features.
-- Alignment with a real application surface.
+* Basic profile personalization.
+* Evolution of user-facing features.
+* Alignment with a real application surface.
 
 ## Scope
 
 Included:
 
-- Authenticated endpoint `PATCH /auth/me`.
-- Update limited to `display_name`.
-- Validation and normalization of input.
-- Persistence through `user.Repository`.
-- Response reuse of `GET /auth/me` contract.
-- Minimal test coverage expansion.
-- Hardening of request validation.
+* Authenticated endpoint `PATCH /auth/me`.
+* Update limited to `display_name`.
+* Validation and normalization of input.
+* Persistence through `user.Repository`.
+* Response reuse of `GET /auth/me` contract.
+* Minimal test coverage expansion.
+* Hardening of request validation.
 
 Explicitly excluded:
 
-- Email mutation.
-- Wallet mutation.
-- User settings.
-- Preferences.
-- Profile extensions (avatar, bio, etc.).
-- Audit logging.
-- Multi-field updates.
-- Business rules beyond validation.
+* Email mutation.
+* Wallet mutation.
+* User settings.
+* Preferences.
+* Profile extensions (avatar, bio, etc.).
+* Audit logging.
+* Multi-field updates.
+* Business rules beyond validation.
 
 ## Root Cause Analysis
 
@@ -66,132 +66,126 @@ This gap emerged naturally after enabling `GET /auth/me`.
 
 Endpoint:
 
-```http
 PATCH /auth/me
-```
 
 Request:
 
-```json
 {
-  "display_name": "SCAVO Operator"
+"display_name": "SCAVO Operator"
 }
-```
 
 Response:
 
 Reuses the same shape as `GET /auth/me`.
 
-```json
 {
-  "user": { ... },
-  "profile": { ... }
+"user": { ... },
+"profile": { ... }
 }
-```
 
 ## Validation Rules
 
 Input normalization:
 
-- `display_name` is trimmed.
+* `display_name` is trimmed.
 
 Constraints:
 
-- Must not be empty after trim.
-- Maximum length: 120 characters (Unicode-aware).
+* Must not be empty after trim.
+* Maximum length: 120 characters (Unicode-aware).
 
 ## Error Mapping
 
-- Missing/invalid JSON -> `400 bad_request`
-- Unknown fields -> `400 bad_request`
-- Trailing JSON -> `400 bad_request`
-- Empty `display_name` -> `400 invalid_display_name`
-- Too long `display_name` -> `400 display_name_too_long`
-- Missing auth -> `401 unauthorized`
-- User not found -> `404 user_not_found`
+* Missing/invalid JSON -> `400 bad_request`
+* Unknown fields -> `400 bad_request`
+* Trailing JSON -> `400 bad_request`
+* Empty `display_name` -> `400 invalid_display_name`
+* Too long `display_name` -> `400 display_name_too_long`
+* Missing auth -> `401 unauthorized`
+* User not found -> `404 user_not_found`
 
 ## Hardening Applied
 
 Sentinel errors:
 
-- `ErrEmptyUserID`
-- `ErrEmptyDisplayName`
-- `ErrDisplayNameTooLong`
+* `ErrEmptyUserID`
+* `ErrEmptyDisplayName`
+* `ErrDisplayNameTooLong`
 
 This removes dependency on string comparisons.
 
 Unicode-safe validation:
 
-- Validation uses rune count instead of byte count.
+* Validation uses rune count instead of byte count.
 
 Strict JSON decoding:
 
-- `DisallowUnknownFields`
-- Rejection of trailing JSON
-- Body size limit (4KB)
+* `DisallowUnknownFields`
+* Rejection of trailing JSON
+* Body size limit (4KB)
 
 Extended test coverage:
 
-- Invalid JSON
-- Unknown fields
-- Trailing payloads
-- Empty `display_name`
-- Length violations
-- `user_not_found`
-- Unauthorized access
+* Invalid JSON
+* Unknown fields
+* Trailing payloads
+* Empty `display_name`
+* Length violations
+* `user_not_found`
+* Unauthorized access
 
 ## Files Affected
 
 Auth module:
 
-- `internal/modules/auth/http_login.go`
-- `internal/modules/auth/profile.go`
-- `internal/modules/auth/http_handlers_test.go`
+* `internal/modules/auth/http_login.go`
+* `internal/modules/auth/profile.go`
+* `internal/modules/auth/http_handlers_test.go`
 
 User module:
 
-- `internal/modules/user/service.go`
-- `internal/modules/user/service_test.go`
-- `internal/modules/user/repository.go`
-- `internal/modules/user/repository_postgres.go`
+* `internal/modules/user/service.go`
+* `internal/modules/user/service_test.go`
+* `internal/modules/user/repository.go`
+* `internal/modules/user/repository_postgres.go`
 
 ## Implementation Characteristics
 
-- Additive
-- Backward compatible
-- No schema changes
-- No breaking changes
-- No modification of existing auth flows
-- No impact on wallet lifecycle
+* Additive
+* Backward compatible
+* No schema changes
+* No breaking changes
+* No modification of existing auth flows
+* No impact on wallet lifecycle
 
 ## Validation
 
-- `go test ./...` passes successfully
-- No regressions detected
-- Auth flows remain stable
-- Wallet linking and verification unaffected
+* `go test ./...` passes successfully
+* No regressions detected
+* Auth flows remain stable
+* Wallet linking and verification unaffected
 
 ## Release Impact
 
 Low risk:
 
-- Introduces a single controlled write path.
-- Does not alter existing contracts.
-- Maintains backward compatibility.
+* Introduces a single controlled write path.
+* Does not alter existing contracts.
+* Maintains backward compatibility.
 
 ## Risks
 
-- `/auth/me` could accumulate unrelated responsibilities in future phases.
-- Clients may assume broader edit capabilities than currently supported.
+* `/auth/me` could accumulate unrelated responsibilities in future phases.
+* Clients may assume broader edit capabilities than currently supported.
 
 ## What It Does Not Solve
 
-- Email updates
-- Settings contract
-- User preferences
-- Profile extensions (avatar, bio)
-- Audit history
-- Advanced lifecycle flags
+* Email updates
+* Settings contract
+* User preferences
+* Profile extensions (avatar, bio)
+* Audit history
+* Advanced lifecycle flags
 
 ## Conclusion
 
@@ -211,24 +205,24 @@ Introduce the first dedicated authenticated settings contract, separated from th
 
 This subphase extends the application surface by creating the first explicit boundary between:
 
-- authenticated profile/bootstrap data
-- minimal non-wallet metadata editing
-- authenticated user settings
+* authenticated profile/bootstrap data
+* minimal non-wallet metadata editing
+* authenticated user settings
 
 ## Initial Context
 
 After Phase 0.5.2:
 
-- The backend already exposes an authenticated read surface via `GET /auth/me`.
-- The backend already exposes a minimal authenticated write surface via `PATCH /auth/me`, limited to `display_name`.
-- User identity remains wallet-first, durable, and stabilized in Phase 0.4.
-- The system persists core user fields such as `display_name`, `email`, and timestamps in `users`.
+* The backend already exposes an authenticated read surface via `GET /auth/me`.
+* The backend already exposes a minimal authenticated write surface via `PATCH /auth/me`, limited to `display_name`.
+* User identity remains wallet-first, durable, and stabilized in Phase 0.4.
+* The system persists core user fields such as `display_name`, `email`, and timestamps in `users`.
 
 However:
 
-- There was still no dedicated contract for authenticated user settings.
-- There was still no persistence surface separated from `users` for future configuration.
-- `/auth/me` remained at risk of absorbing unrelated responsibilities if settings were added there later.
+* There was still no dedicated contract for authenticated user settings.
+* There was still no persistence surface separated from `users` for future configuration.
+* `/auth/me` remained at risk of absorbing unrelated responsibilities if settings were added there later.
 
 ## Problem Statement
 
@@ -236,31 +230,31 @@ The backend lacked a safe and minimal mechanism for exposing authenticated user 
 
 Without that separation:
 
-- `/auth/me` could accumulate unrelated concerns.
-- profile metadata and user configuration could collapse into one mixed contract.
-- future settings evolution would likely become coupled to the `users` core record.
+* `/auth/me` could accumulate unrelated concerns.
+* profile metadata and user configuration could collapse into one mixed contract.
+* future settings evolution would likely become coupled to the `users` core record.
 
 ## Scope
 
 Included:
 
-- Authenticated endpoint `GET /auth/me/settings`.
-- Dedicated `user_settings` persistence foundation.
-- Minimal settings response contract.
-- Safe default resolution when no persisted settings row exists.
-- Separation of settings persistence from `users`.
-- Minimal service/repository foundation for future settings evolution.
-- Test coverage expansion for the new authenticated settings surface.
+* Authenticated endpoint `GET /auth/me/settings`.
+* Dedicated `user_settings` persistence foundation.
+* Minimal settings response contract.
+* Safe default resolution when no persisted settings row exists.
+* Separation of settings persistence from `users`.
+* Minimal service/repository foundation for future settings evolution.
+* Test coverage expansion for the new authenticated settings surface.
 
 Explicitly excluded:
 
-- Settings mutation.
-- Concrete preference fields (theme, locale, notifications, etc.).
-- Wallet mutation.
-- Identity redesign.
-- Audit logging/history for settings.
-- Multi-surface merging of profile and settings.
-- Business rules beyond safe default resolution.
+* Settings mutation.
+* Concrete preference fields (theme, locale, notifications, etc.).
+* Wallet mutation.
+* Identity redesign.
+* Audit logging/history for settings.
+* Multi-surface merging of profile and settings.
+* Business rules beyond safe default resolution.
 
 ## Root Cause Analysis
 
@@ -270,197 +264,189 @@ But it still lacked a dedicated contract aligned with authentication context for
 
 This gap emerged naturally after enabling:
 
-- `GET /auth/me`
-- `PATCH /auth/me`
+* `GET /auth/me`
+* `PATCH /auth/me`
 
 ## Implementation Summary
 
 Endpoint:
 
-```http
 GET /auth/me/settings
-```
 
 Response:
 
-```json
 {
-  "settings": {
-    "user_id": "user_123",
-    "version": 1,
-    "preferences": {}
-  }
+"settings": {
+"user_id": "user_123",
+"version": 1,
+"preferences": {}
 }
-```
+}
 
 Behavior:
 
-- Reuses authenticated context.
-- Returns persisted settings when present.
-- Returns safe defaults when no settings row exists.
-- Does not create or mutate settings during read.
+* Reuses authenticated context.
+* Returns persisted settings when present.
+* Returns safe defaults when no settings row exists.
+* Does not create or mutate settings during read.
 
 ## Contract Characteristics
 
 Settings response fields:
 
-- `user_id`
-- `version`
-- `preferences`
+* `user_id`
+* `version`
+* `preferences`
 
 Contract guarantees:
 
-- `version` is explicit from the first release of the settings surface.
-- `preferences` is always returned as an object, never `null`.
-- Response remains valid even when no settings row exists yet.
+* `version` is explicit from the first release of the settings surface.
+* `preferences` is always returned as an object, never `null`.
+* Response remains valid even when no settings row exists yet.
 
 ## Persistence Model
 
 New table:
 
-```sql
 user_settings
-```
 
 Fields:
 
-- `user_id`
-- `preferences`
-- `created_at`
-- `updated_at`
+* `user_id`
+* `preferences`
+* `created_at`
+* `updated_at`
 
 Characteristics:
 
-- 1:1 relationship with durable user identity
-- decoupled from `users`
-- extensible through `JSONB`
-- no forced concrete setting fields in this subphase
+* 1:1 relationship with durable user identity
+* decoupled from `users`
+* extensible through `JSONB`
+* no forced concrete setting fields in this subphase
 
 ## Default Resolution Strategy
 
 When no `user_settings` row exists for the authenticated user:
 
-- no implicit insert is performed
-- no side effect is triggered
-- service returns a default in-memory settings object
+* no implicit insert is performed
+* no side effect is triggered
+* service returns a default in-memory settings object
 
 Default behavior:
 
-```json
 {
-  "settings": {
-    "user_id": "user_123",
-    "version": 1,
-    "preferences": {}
-  }
+"settings": {
+"user_id": "user_123",
+"version": 1,
+"preferences": {}
 }
-```
+}
 
 This keeps the first settings contract:
 
-- read-only
-- deterministic
-- backward compatible
-- operationally simple
+* read-only
+* deterministic
+* backward compatible
+* operationally simple
 
 ## Error Mapping
 
-- Missing auth -> `401 unauthorized`
-- Settings service unavailable -> `500 auth_service_error`
-- Unexpected settings load failure -> `500 auth_service_error`
+* Missing auth -> `401 unauthorized`
+* Settings service unavailable -> `500 auth_service_error`
+* Unexpected settings load failure -> `500 auth_service_error`
 
 ## Hardening Applied
 
 Dedicated module separation:
 
-- `internal/modules/usersettings/model.go`
-- `internal/modules/usersettings/repository.go`
-- `internal/modules/usersettings/repository_postgres.go`
-- `internal/modules/usersettings/service.go`
+* `internal/modules/usersettings/model.go`
+* `internal/modules/usersettings/repository.go`
+* `internal/modules/usersettings/repository_postgres.go`
+* `internal/modules/usersettings/service.go`
 
 Contract hardening:
 
-- explicit settings response envelope
-- explicit contract version
-- `preferences` normalization to `{}`
+* explicit settings response envelope
+* explicit contract version
+* `preferences` normalization to `{}`
 
 Behavior hardening:
 
-- no implicit row creation on read
-- no mutation side effect inside `GET /auth/me/settings`
-- no coupling of settings to `PATCH /auth/me`
+* no implicit row creation on read
+* no mutation side effect inside `GET /auth/me/settings`
+* no coupling of settings to `PATCH /auth/me`
 
 Extended test coverage:
 
-- authenticated settings read with default resolution
-- authenticated settings read with persisted settings
-- unauthorized access
-- unavailable settings service
+* authenticated settings read with default resolution
+* authenticated settings read with persisted settings
+* unauthorized access
+* unavailable settings service
 
 ## Files Affected
 
 Migrations:
 
-- `migrations/000010_user_settings.sql`
+* `migrations/000010_user_settings.sql`
 
 Settings module:
 
-- `internal/modules/usersettings/model.go`
-- `internal/modules/usersettings/repository.go`
-- `internal/modules/usersettings/repository_postgres.go`
-- `internal/modules/usersettings/service.go`
-- `internal/modules/usersettings/service_test.go`
+* `internal/modules/usersettings/model.go`
+* `internal/modules/usersettings/repository.go`
+* `internal/modules/usersettings/repository_postgres.go`
+* `internal/modules/usersettings/service.go`
+* `internal/modules/usersettings/service_test.go`
 
 App / routing / auth surface:
 
-- `internal/app/app.go`
-- `internal/core/httpx/router.go`
-- `internal/modules/auth/http_login.go`
-- `internal/modules/auth/http_handlers_test.go`
+* `internal/app/app.go`
+* `internal/core/httpx/router.go`
+* `internal/modules/auth/http_login.go`
+* `internal/modules/auth/http_handlers_test.go`
 
 ## Implementation Characteristics
 
-- Additive
-- Backward compatible
-- Minimal schema extension
-- No breaking changes
-- No modification of existing wallet/auth flows
-- No impact on wallet lifecycle
-- No reopening of Phase 0.4
-- Clear separation between metadata and settings
+* Additive
+* Backward compatible
+* Minimal schema extension
+* No breaking changes
+* No modification of existing wallet/auth flows
+* No impact on wallet lifecycle
+* No reopening of Phase 0.4
+* Clear separation between metadata and settings
 
 ## Validation
 
-- `go test ./...` passes successfully
-- Existing auth flows remain stable
-- Existing `/auth/me` and `/auth/session` behavior remains unchanged
-- Wallet linking, merge, primary switch, detach, and inventory contracts remain unaffected
+* `go test ./...` passes successfully
+* Existing auth flows remain stable
+* Existing `/auth/me` and `/auth/session` behavior remains unchanged
+* Wallet linking, merge, primary switch, detach, and inventory contracts remain unaffected
 
 ## Release Impact
 
 Low risk:
 
-- Introduces a single controlled authenticated read path.
-- Introduces one small dedicated persistence table.
-- Does not alter existing profile or wallet contracts.
-- Maintains backward compatibility.
+* Introduces a single controlled authenticated read path.
+* Introduces one small dedicated persistence table.
+* Does not alter existing profile or wallet contracts.
+* Maintains backward compatibility.
 
 ## Risks
 
-- Future phases could still overuse `preferences` as an unstructured bag if contract discipline is not preserved.
-- Clients may assume settings mutation exists even though 0.5.3 is read-only.
-- Future settings fields may require typed validation if product requirements become stricter.
+* Future phases could still overuse `preferences` as an unstructured bag if contract discipline is not preserved.
+* Clients may assume settings mutation exists even though 0.5.3 is read-only.
+* Future settings fields may require typed validation if product requirements become stricter.
 
 ## What It Does Not Solve
 
-- Settings mutation
-- Theme / locale / notification preferences
-- Typed settings validation rules
-- Settings audit history
-- Advanced profile metadata
-- Email updates
-- Wallet lifecycle extensions
-- Identity/provider expansion
+* Settings mutation
+* Theme / locale / notification preferences
+* Typed settings validation rules
+* Settings audit history
+* Advanced profile metadata
+* Email updates
+* Wallet lifecycle extensions
+* Identity/provider expansion
 
 ## Conclusion
 
@@ -469,3 +455,80 @@ Phase 0.5.3 introduces the smallest safe dedicated settings surface for the auth
 It extends the application-facing layer opened in 0.5.1 and 0.5.2 by separating profile metadata from user configuration without reopening identity, wallet ownership, or authentication design.
 
 This establishes the correct foundation for upcoming phases such as writable settings, typed preferences, and richer application behavior tied to authenticated user context.
+
+---
+
+## Subphase 0.5.4 - User Settings Mutation
+
+## Objective
+
+Introduce the first authenticated write capability over user settings, extending the settings contract introduced in 0.5.3 while preserving separation from profile metadata and identity.
+
+## Initial Context
+
+After Phase 0.5.3:
+
+* The backend exposes `GET /auth/me/settings`.
+* Settings are persisted in `user_settings`.
+* The contract is read-only.
+
+## Problem Statement
+
+The backend lacked a mutation surface for user settings, preventing:
+
+* user configuration persistence
+* evolution of application behavior tied to preferences
+
+## Scope
+
+Included:
+
+* `PATCH /auth/me/settings`
+* merge-based updates for `preferences`
+* partial mutation without overwrite
+* persistence through `user_settings`
+
+Explicitly excluded:
+
+* schema enforcement
+* typed preferences
+* audit/history
+* identity or wallet changes
+
+## Implementation Summary
+
+Endpoint:
+
+PATCH /auth/me/settings
+
+Behavior:
+
+* merges incoming `preferences`
+* preserves existing keys
+* no destructive overwrite
+
+## Conclusion
+
+Phase 0.5.4 extends the settings surface to support mutation while preserving flexibility and backward compatibility.
+
+---
+
+## Subphase 0.5.5.1 - User Settings Hardening
+
+## Objective
+
+Harden the settings mutation contract to prevent structural drift without introducing rigid schema enforcement.
+
+## Scope
+
+Included:
+
+* recursive normalization
+* rejection of null values
+* rejection of invalid values
+* key trimming
+* shape compatibility protection
+
+## Conclusion
+
+Phase 0.5.5.1 stabilizes the settings contract while preserving flexibility, enabling safe future evolution of user preferences.

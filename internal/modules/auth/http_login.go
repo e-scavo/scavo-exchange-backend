@@ -192,7 +192,10 @@ func (h HTTPHandlers) UpdateMeSettings(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case errors.Is(err, usersettingsmod.ErrUserIDRequired):
 			writeJSON(w, http.StatusUnauthorized, map[string]any{"error": "unauthorized"})
-		case errors.Is(err, usersettingsmod.ErrInvalidPreferences), errors.Is(err, usersettingsmod.ErrNullPreferenceValue):
+		case errors.Is(err, usersettingsmod.ErrInvalidPreferences),
+			errors.Is(err, usersettingsmod.ErrNullPreferenceValue),
+			errors.Is(err, usersettingsmod.ErrInvalidPreferenceValue),
+			errors.Is(err, usersettingsmod.ErrIncompatiblePreference):
 			writeJSON(w, http.StatusBadRequest, map[string]any{"error": "invalid_preferences"})
 		default:
 			writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "auth_service_error"})

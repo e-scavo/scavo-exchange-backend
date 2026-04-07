@@ -2,6 +2,7 @@ package usersettings
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"testing"
 )
@@ -91,11 +92,16 @@ func TestService_GetOrDefault_ReturnsDefaultWhenNotPersisted(t *testing.T) {
 	}
 }
 
-func TestService_GetOrDefault_InitializesNilPreferencesFromRepository(t *testing.T) {
+func TestService_GetOrDefault_NormalizesRepositoryPreferences(t *testing.T) {
 	repo := &stubRepository{
 		result: &UserSettings{
-			UserID:      "u_test",
-			Preferences: nil,
+			UserID: "u_test",
+			Preferences: map[string]any{
+				" theme ": json.Number("2"),
+				"nested": map[string]any{
+					"enabled": true,
+				},
+			},
 		},
 	}
 
@@ -110,12 +116,38 @@ func TestService_GetOrDefault_InitializesNilPreferencesFromRepository(t *testing
 		t.Fatal("expected settings, got nil")
 	}
 
-	if settings.Preferences == nil {
-		t.Fatal("expected preferences to be initialized")
+	if _, exists := settings.Preferences[" theme "]; exists {
+		t.Fatalf("expected key to be normalized, got %#v", settings.Preferences)
 	}
 
-	if len(settings.Preferences) != 0 {
-		t.Fatalf("expected empty preferences, got %#v", settings.Preferences)
+	if value, ok := settings.Preferences["theme"]; !ok || value != float64(2) {
+		t.Fatalf("unexpected normalized preferences: %#v", settings.Preferences)
+	}
+}
+
+func TestService_GetOrDefault_RejectsInvalidPersistedPreferences(t *testing.T) {
+	repo := &stubRepository{
+		result: &UserSettings{
+			UserID: "u_test",
+			Preferences: map[string]any{
+				"broken": nil,
+			},
+		},
+	}
+
+	svc := NewService(repo)
+
+	settings, err := svc.GetOrDefault(context.Background(), "u_test")
+	if err == nil {
+		t.Fatal("expected error for invalid persisted preferences")
+	}
+
+	if !errors.Is(err, ErrNullPreferenceValue) {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if settings != nil {
+		t.Fatalf("expected nil settings, got %#v", settings)
 	}
 }
 
@@ -238,6 +270,53 @@ func TestService_UpdatePreferences_UsesDefaultsWhenNoRowExists(t *testing.T) {
 	}
 }
 
+func TestService_UpdatePreferences_NormalizesPatchBeforePersisting(t *testing.T) {
+	repo := &stubRepository{
+		upsertResult: &UserSettings{
+			UserID: "u_test",
+			Preferences: map[string]any{
+				"theme": float64(1),
+				"nested": map[string]any{
+					"count": float64(3),
+				},
+			},
+		},
+	}
+
+	svc := NewService(repo)
+
+	settings, err := svc.UpdatePreferences(context.Background(), "u_test", map[string]any{
+		" theme ": json.Number("1"),
+		"nested": map[string]int{
+			"count": 3,
+		},
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if _, exists := repo.lastUpsertPrefs[" theme "]; exists {
+		t.Fatalf("expected trimmed key, got %#v", repo.lastUpsertPrefs)
+	}
+
+	if repo.lastUpsertPrefs["theme"] != float64(1) {
+		t.Fatalf("expected normalized number, got %#v", repo.lastUpsertPrefs["theme"])
+	}
+
+	nested, ok := repo.lastUpsertPrefs["nested"].(map[string]any)
+	if !ok {
+		t.Fatalf("expected nested map[string]any, got %#v", repo.lastUpsertPrefs["nested"])
+	}
+
+	if nested["count"] != float64(3) {
+		t.Fatalf("expected normalized nested number, got %#v", nested["count"])
+	}
+
+	if settings == nil {
+		t.Fatal("expected settings, got nil")
+	}
+}
+
 func TestService_UpdatePreferences_RejectsNilPatch(t *testing.T) {
 	svc := NewService(&stubRepository{})
 
@@ -268,6 +347,25 @@ func TestService_UpdatePreferences_RejectsNullValue(t *testing.T) {
 	}
 }
 
+func TestService_UpdatePreferences_RejectsNestedNullValue(t *testing.T) {
+	svc := NewService(&stubRepository{})
+
+	settings, err := svc.UpdatePreferences(context.Background(), "u_test", map[string]any{
+		"notifications": map[string]any{
+			"email": nil,
+		},
+	})
+	if err == nil {
+		t.Fatal("expected error for nested null value")
+	}
+	if !errors.Is(err, ErrNullPreferenceValue) {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if settings != nil {
+		t.Fatalf("expected nil settings, got %#v", settings)
+	}
+}
+
 func TestService_UpdatePreferences_RejectsEmptyPreferenceKey(t *testing.T) {
 	svc := NewService(&stubRepository{})
 
@@ -276,6 +374,51 @@ func TestService_UpdatePreferences_RejectsEmptyPreferenceKey(t *testing.T) {
 		t.Fatal("expected error for empty preference key")
 	}
 	if !errors.Is(err, ErrInvalidPreferences) {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if settings != nil {
+		t.Fatalf("expected nil settings, got %#v", settings)
+	}
+}
+
+func TestService_UpdatePreferences_RejectsInvalidPreferenceValue(t *testing.T) {
+	svc := NewService(&stubRepository{})
+
+	settings, err := svc.UpdatePreferences(context.Background(), "u_test", map[string]any{
+		"theme": func() {},
+	})
+	if err == nil {
+		t.Fatal("expected error for invalid preference value")
+	}
+	if !errors.Is(err, ErrInvalidPreferenceValue) {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if settings != nil {
+		t.Fatalf("expected nil settings, got %#v", settings)
+	}
+}
+
+func TestService_UpdatePreferences_RejectsTopLevelShapeMismatch(t *testing.T) {
+	repo := &stubRepository{
+		result: &UserSettings{
+			UserID: "u_test",
+			Preferences: map[string]any{
+				"notifications": map[string]any{
+					"email": true,
+				},
+			},
+		},
+	}
+
+	svc := NewService(repo)
+
+	settings, err := svc.UpdatePreferences(context.Background(), "u_test", map[string]any{
+		"notifications": true,
+	})
+	if err == nil {
+		t.Fatal("expected error for incompatible top-level shape")
+	}
+	if !errors.Is(err, ErrIncompatiblePreference) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	if settings != nil {
