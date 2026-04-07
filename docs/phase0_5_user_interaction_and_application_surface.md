@@ -532,3 +532,30 @@ Included:
 ## Conclusion
 
 Phase 0.5.5.1 stabilizes the settings contract while preserving flexibility, enabling safe future evolution of user preferences.
+
+
+## Subphase 0.5.5.2 - User Settings Deep Merge Preservation & Known-Branch Semantics
+
+## Objective
+
+Preserve nested settings branches during partial mutation and introduce minimal structural semantics for already-known settings namespaces without converting the settings contract into a rigid schema.
+
+## Scope
+
+Included:
+
+* deep merge preservation for nested objects
+* sibling-key preservation during partial nested updates
+* recursive shape compatibility enforcement during deep merge
+* object-only semantics for known top-level branches: `notifications`, `preferences`, `ui`
+
+Explicitly excluded:
+
+* strict schema enforcement
+* typed settings catalogs
+* migration/versioning
+* hard rejection of unknown top-level keys
+
+## Conclusion
+
+Phase 0.5.5.2 makes `PATCH /auth/me/settings` behave like a true non-destructive partial update for nested object settings while keeping the overall settings surface flexible and application-oriented.

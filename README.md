@@ -23,7 +23,7 @@ The backend follows a **wallet-first identity model** that progressively evolves
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.5 — User Interaction & Application Surface  
-**Current Subphase:** **0.5.3 — User Settings Contract Foundation**
+**Current Subphase:** **0.5.5.2 — User Settings Deep Merge Preservation & Known-Branch Semantics**
 
 ---
 

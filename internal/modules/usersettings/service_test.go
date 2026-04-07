@@ -418,7 +418,7 @@ func TestService_UpdatePreferences_RejectsTopLevelShapeMismatch(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error for incompatible top-level shape")
 	}
-	if !errors.Is(err, ErrIncompatiblePreference) {
+	if !errors.Is(err, ErrInvalidPreferences) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	if settings != nil {
@@ -435,6 +435,119 @@ func TestService_UpdatePreferences_PropagatesRepositoryError(t *testing.T) {
 		t.Fatal("expected repository error")
 	}
 	if err.Error() != "boom" {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if settings != nil {
+		t.Fatalf("expected nil settings, got %#v", settings)
+	}
+}
+
+func TestService_UpdatePreferences_DeepMergesNestedObjects(t *testing.T) {
+	repo := &stubRepository{
+		result: &UserSettings{
+			UserID: "u_test",
+			Preferences: map[string]any{
+				"notifications": map[string]any{
+					"email": true,
+					"sms":   true,
+				},
+			},
+		},
+		upsertResult: &UserSettings{UserID: "u_test"},
+	}
+
+	svc := NewService(repo)
+
+	settings, err := svc.UpdatePreferences(context.Background(), "u_test", map[string]any{
+		"notifications": map[string]any{
+			"email": false,
+		},
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	notifications, ok := repo.lastUpsertPrefs["notifications"].(map[string]any)
+	if !ok {
+		t.Fatalf("expected notifications object, got %#v", repo.lastUpsertPrefs["notifications"])
+	}
+	if notifications["email"] != false {
+		t.Fatalf("expected email=false, got %#v", notifications["email"])
+	}
+	if notifications["sms"] != true {
+		t.Fatalf("expected sms to be preserved, got %#v", notifications["sms"])
+	}
+	if settings == nil {
+		t.Fatal("expected settings, got nil")
+	}
+	returnedNotifications, ok := settings.Preferences["notifications"].(map[string]any)
+	if !ok {
+		t.Fatalf("expected returned notifications object, got %#v", settings.Preferences["notifications"])
+	}
+	if returnedNotifications["sms"] != true {
+		t.Fatalf("expected returned sms to be preserved, got %#v", returnedNotifications["sms"])
+	}
+}
+
+func TestService_UpdatePreferences_RejectsKnownTopLevelScalarValue(t *testing.T) {
+	svc := NewService(&stubRepository{})
+
+	settings, err := svc.UpdatePreferences(context.Background(), "u_test", map[string]any{
+		"notifications": true,
+	})
+	if err == nil {
+		t.Fatal("expected error for invalid known top-level scalar value")
+	}
+	if !errors.Is(err, ErrInvalidPreferences) {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if settings != nil {
+		t.Fatalf("expected nil settings, got %#v", settings)
+	}
+}
+
+func TestService_UpdatePreferences_RejectsKnownTopLevelArrayValue(t *testing.T) {
+	svc := NewService(&stubRepository{})
+
+	settings, err := svc.UpdatePreferences(context.Background(), "u_test", map[string]any{
+		"ui": []any{"compact"},
+	})
+	if err == nil {
+		t.Fatal("expected error for invalid known top-level array value")
+	}
+	if !errors.Is(err, ErrInvalidPreferences) {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if settings != nil {
+		t.Fatalf("expected nil settings, got %#v", settings)
+	}
+}
+
+func TestService_UpdatePreferences_RejectsNestedShapeMismatchDuringDeepMerge(t *testing.T) {
+	repo := &stubRepository{
+		result: &UserSettings{
+			UserID: "u_test",
+			Preferences: map[string]any{
+				"notifications": map[string]any{
+					"channels": map[string]any{
+						"email": true,
+					},
+				},
+			},
+		},
+	}
+
+	svc := NewService(repo)
+
+	settings, err := svc.UpdatePreferences(context.Background(), "u_test", map[string]any{
+		"notifications": map[string]any{
+			"channels": false,
+		},
+	})
+	if err == nil {
+		t.Fatal("expected error for nested shape mismatch")
+	}
+	if !errors.Is(err, ErrIncompatiblePreference) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	if settings != nil {

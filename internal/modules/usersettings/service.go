@@ -94,10 +94,21 @@ func (s *Service) UpdatePreferences(ctx context.Context, userID string, patch ma
 		merged[key] = value
 	}
 	for key, value := range normalizedPatch {
-		if existing, exists := merged[key]; exists && !preferenceShapesCompatible(existing, value) {
-			slog.Warn("[usersettings] incompatible preference patch rejected", "key", key, "user_id", normalizedUserID)
-			return nil, fmt.Errorf("%w: %s", ErrIncompatiblePreference, key)
+		if err := validateKnownTopLevelPreferenceValue(key, value); err != nil {
+			slog.Warn("[usersettings] invalid known top-level preference value rejected", "key", key, "user_id", normalizedUserID)
+			return nil, fmt.Errorf("%w: %s", err, key)
 		}
+
+		if existing, exists := merged[key]; exists {
+			mergedValue, err := mergePreferenceValues(existing, value)
+			if err != nil {
+				slog.Warn("[usersettings] incompatible preference patch rejected", "key", key, "user_id", normalizedUserID)
+				return nil, fmt.Errorf("%w: %s", ErrIncompatiblePreference, key)
+			}
+			merged[key] = mergedValue
+			continue
+		}
+
 		merged[key] = value
 	}
 
@@ -114,6 +125,9 @@ func (s *Service) UpdatePreferences(ctx context.Context, userID string, patch ma
 	}
 	if updated.UserID == "" {
 		updated.UserID = normalizedUserID
+	}
+	if updated.Preferences == nil {
+		updated.Preferences = merged
 	}
 
 	normalizedUpdated, err := normalizePreferences(updated.Preferences)
@@ -255,6 +269,54 @@ func normalizePreferenceValue(value any) (any, error) {
 	default:
 		return nil, ErrInvalidPreferenceValue
 	}
+}
+
+func validateKnownTopLevelPreferenceValue(key string, value any) error {
+	if !isKnownTopLevelPreference(key) {
+		return nil
+	}
+
+	if preferenceShape(value) != "object" {
+		return ErrInvalidPreferences
+	}
+
+	return nil
+}
+
+func mergePreferenceValues(existing any, incoming any) (any, error) {
+	if !preferenceShapesCompatible(existing, incoming) {
+		return nil, ErrIncompatiblePreference
+	}
+
+	existingMap, existingOk := existing.(map[string]any)
+	incomingMap, incomingOk := incoming.(map[string]any)
+	if existingOk && incomingOk {
+		return mergePreferenceMaps(existingMap, incomingMap)
+	}
+
+	return incoming, nil
+}
+
+func mergePreferenceMaps(existing map[string]any, incoming map[string]any) (map[string]any, error) {
+	merged := make(map[string]any, len(existing)+len(incoming))
+	for key, value := range existing {
+		merged[key] = value
+	}
+
+	for key, value := range incoming {
+		if current, exists := merged[key]; exists {
+			mergedValue, err := mergePreferenceValues(current, value)
+			if err != nil {
+				return nil, err
+			}
+			merged[key] = mergedValue
+			continue
+		}
+
+		merged[key] = value
+	}
+
+	return merged, nil
 }
 
 func preferenceShapesCompatible(existing any, incoming any) bool {

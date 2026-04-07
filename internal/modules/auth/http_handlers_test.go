@@ -2699,3 +2699,84 @@ func TestHTTPHandlers_UpdateMeSettings_RejectsIncompatiblePreferenceShape(t *tes
 		t.Fatalf("unexpected body: %s", rec.Body.String())
 	}
 }
+
+func TestHTTPHandlers_UpdateMeSettings_Success_DeepMergesNestedPreferences(t *testing.T) {
+	repo := &stubUserSettingsRepo{
+		getByUserIDFn: func(ctx context.Context, userID string) (*usersettingsmod.UserSettings, error) {
+			if userID != "u_test_example_com" {
+				t.Fatalf("unexpected user id: %q", userID)
+			}
+			return &usersettingsmod.UserSettings{
+				UserID: userID,
+				Preferences: map[string]any{
+					"notifications": map[string]any{
+						"email": true,
+						"sms":   true,
+					},
+				},
+			}, nil
+		},
+		upsertPreferencesFn: func(ctx context.Context, userID string, preferences map[string]any) (*usersettingsmod.UserSettings, error) {
+			notifications, ok := preferences["notifications"].(map[string]any)
+			if !ok {
+				t.Fatalf("expected notifications object, got %#v", preferences["notifications"])
+			}
+			if notifications["email"] != false || notifications["sms"] != true {
+				t.Fatalf("unexpected merged notifications: %#v", notifications)
+			}
+			return &usersettingsmod.UserSettings{UserID: userID, Preferences: preferences}, nil
+		},
+	}
+
+	h := HTTPHandlers{
+		Tokens:       mustTokenService(t),
+		TTL:          time.Hour,
+		Users:        usermod.NewService(nil),
+		UserSettings: usersettingsmod.NewService(repo),
+	}
+
+	req := httptest.NewRequest(http.MethodPatch, "/auth/me/settings", strings.NewReader(`{"preferences":{"notifications":{"email":false}}}`))
+	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	rec := httptest.NewRecorder()
+
+	h.UpdateMeSettings(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+
+	var payload MeSettingsResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("decode error: %v", err)
+	}
+
+	notifications, ok := payload.Settings.Preferences["notifications"].(map[string]any)
+	if !ok {
+		t.Fatalf("expected notifications object, got %#v", payload.Settings.Preferences["notifications"])
+	}
+	if notifications["email"] != false || notifications["sms"] != true {
+		t.Fatalf("unexpected payload notifications: %#v", notifications)
+	}
+}
+
+func TestHTTPHandlers_UpdateMeSettings_RejectsKnownTopLevelScalarPreference(t *testing.T) {
+	h := HTTPHandlers{
+		Tokens:       mustTokenService(t),
+		TTL:          time.Hour,
+		Users:        usermod.NewService(nil),
+		UserSettings: usersettingsmod.NewService(&stubUserSettingsRepo{}),
+	}
+
+	req := httptest.NewRequest(http.MethodPatch, "/auth/me/settings", strings.NewReader(`{"preferences":{"notifications":true}}`))
+	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	rec := httptest.NewRecorder()
+
+	h.UpdateMeSettings(rec, req)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+	if !strings.Contains(rec.Body.String(), "invalid_preferences") {
+		t.Fatalf("unexpected body: %s", rec.Body.String())
+	}
+}

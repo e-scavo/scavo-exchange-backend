@@ -349,3 +349,153 @@ Instead, it protects the surface created in 0.5.4 from avoidable structural drif
 * lightweight observability for unknown keys
 
 This is the correct next step for stabilizing `user_settings` before the application surface grows further.
+
+
+---
+
+## Phase 0.5.5.2 — User Settings Deep Merge Preservation & Known-Branch Semantics
+
+## Objective
+
+Close the remaining destructive partial-update gap in authenticated user settings by preserving nested object branches during mutation, while also introducing minimal structural semantics for already-known top-level settings namespaces.
+
+## Initial Context
+
+After 0.5.5.1, the backend already normalized incoming preferences, rejected `null` and invalid values, trimmed top-level keys, and blocked incompatible top-level shape replacements.
+
+However, one important mutation issue remained:
+
+* when both persisted and incoming values were objects at the same top-level key, the update still replaced the entire branch instead of preserving sibling keys below that branch
+
+This meant the settings surface was structurally safer than in 0.5.4, but still not fully aligned with the expected semantics of non-destructive partial updates.
+
+## Problem Statement
+
+The backend still allowed nested sibling loss during valid partial updates.
+
+Example:
+
+Persisted:
+
+{
+  "notifications": {
+    "email": true,
+    "sms": true
+  }
+}
+
+Patch:
+
+{
+  "preferences": {
+    "notifications": {
+      "email": false
+    }
+  }
+}
+
+Without deep merge preservation, `sms` could be lost even though the patch only intended to change `email`.
+
+In addition, the system already recognized a small set of known top-level namespaces (`notifications`, `preferences`, `ui`) but did not yet enforce even minimal structural semantics for those branches.
+
+## Scope
+
+Included:
+
+* deep merge preservation for nested objects
+* recursive compatibility enforcement during nested merge
+* preservation of sibling keys under persisted object branches
+* object-only semantics for known top-level branches: `notifications`, `preferences`, `ui`
+* expanded service-level and handler-level test coverage
+
+Explicitly excluded:
+
+* strict schema validation for the whole settings tree
+* typed preference governance
+* semantic validation of concrete keys such as theme values or locale catalogs
+* migration/versioning of settings
+* changes to auth, wallet lifecycle, or durable identity behavior
+
+## Implementation Summary
+
+The `usersettings.Service` merge path now distinguishes between:
+
+* incompatible shape replacement
+* compatible scalar replacement
+* compatible nested object merge
+
+When both persisted and incoming values are objects, the service now performs recursive deep merge instead of destructive branch replacement.
+
+This preserves sibling keys already stored below that branch while still applying the new nested values from the patch.
+
+The service also now treats the known top-level namespaces:
+
+* `notifications`
+* `preferences`
+* `ui`
+
+as object-only branches.
+
+Unknown top-level keys remain allowed and observable through warnings, preserving the flexible contract direction established earlier in Phase 0.5.5.
+
+## Validation
+
+Coverage expanded to include:
+
+* nested object deep merge preservation
+* sibling-key preservation below known branches
+* rejection of known top-level scalar values
+* rejection of known top-level array values
+* rejection of nested shape mismatch during recursive merge
+* HTTP-level validation continuity for invalid known-branch payloads
+
+As with prior phases, full manual project execution of `go test ./...` must still be performed in the real development environment after applying the changes.
+
+## Release Impact
+
+This phase is low risk and backward compatible.
+
+It does not change:
+
+* route paths
+* authentication behavior
+* wallet identity behavior
+* base response envelope semantics
+
+It strengthens only the behavior of the authenticated settings mutation path so valid nested partial updates become non-destructive.
+
+## Risks
+
+Residual risks remain intentionally accepted:
+
+* unknown top-level keys are still allowed
+* semantic meaning of specific nested keys is still not enforced
+* previously persisted odd-but-JSON-compatible data is not migrated
+* future product requirements may still justify typed settings families
+
+These are acceptable because this phase closes a merge-semantics gap without prematurely freezing the settings model.
+
+## What It Does Not Solve
+
+This phase does not solve:
+
+* strict schema enforcement
+* full key catalog governance
+* settings migration/versioning
+* cross-field consistency rules
+* analytics or auditing of settings mutation
+* frontend-defined preference taxonomy
+
+Those remain later concerns only if the real product surface proves they are needed.
+
+## Conclusion
+
+Phase 0.5.5.2 completes the next safe hardening step for authenticated user settings.
+
+It keeps the settings surface flexible, but makes mutation behavior much more trustworthy by:
+
+* preserving nested object branches during partial update
+* enforcing recursive shape compatibility during merge
+* adding minimal semantics for the known settings namespaces already present in the backend
+
+This is the correct continuation of Phase 0.5.5 because it improves contract stability without turning user settings into a schema-heavy subsystem.

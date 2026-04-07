@@ -17,7 +17,7 @@ Status: ✅ Completed
 ### Phase 0.5 — User Interaction & Application Surface
 Status: 🟡 In Progress
 
-Latest completed subphase: **0.5.5.1 — User Settings Hardening (Soft Contract Guard Layer)**
+Latest completed subphase: **0.5.5.2 — User Settings Deep Merge Preservation & Known-Branch Semantics**
 
 ---
 
@@ -626,6 +626,7 @@ Phase 0.4.23 closes the concrete examples layer for `GET /auth/wallets` so opera
 | 0.5.3 | User settings contract foundation | ✅ Completed |
 | 0.5.4 | User settings mutation | ✅ Completed |
 | 0.5.5.1 | User settings hardening (soft contract guard layer) | ✅ Completed |
+| 0.5.5.2 | User settings deep merge preservation and known-branch semantics | ✅ Completed |
 
 ---
 
@@ -763,3 +764,43 @@ This means the settings surface remains extensible, but no longer accepts obviou
 - preserve the flexible authenticated settings contract while hardening incrementally
 - continue Phase 0.5 application-surface evolution without reopening Phase 0.4
 
+
+
+## ✅ Phase 0.5.5.2 Closure Summary
+
+Phase 0.5.5.2 closes the main destructive-partial-update gap that still remained in authenticated user settings after 0.5.5.1.
+
+The backend now preserves nested object branches during partial settings mutation and introduces minimal structural semantics for the already-known top-level settings families without turning the settings surface into a rigid schema-driven subsystem.
+
+### Delivered in 0.5.5.2
+
+- deep merge preservation for nested object branches inside `preferences`
+- sibling-key preservation during partial updates of nested settings families
+- recursive compatibility enforcement during nested merge operations
+- minimal known-branch semantics requiring `notifications`, `preferences`, and `ui` top-level values to remain objects
+- expanded service-level and HTTP-level test coverage for nested merge preservation and known-branch rejection
+
+### Result
+
+The authenticated settings contract now better matches real partial-update expectations:
+
+- nested object patches no longer destructively replace entire persisted branches
+- known settings namespaces keep object semantics instead of accepting arbitrary scalars or arrays
+- the backend remains flexible for unknown keys while providing stronger guarantees for the families it already recognizes
+
+This keeps the application surface incremental and backward compatible while making `PATCH /auth/me/settings` substantially safer for frontend-driven partial mutations.
+
+## ❌ Not Included in 0.5.5.2
+
+- strict schema enforcement for all preference families
+- per-key semantic validation such as theme catalogs or locale normalization
+- hard rejection of unknown top-level keys
+- settings migration/versioning
+- audit/history for settings mutation
+- changes to auth, wallet lifecycle, or durable identity behavior
+
+### Next Expected Evolution
+
+- continue contract stabilization only where real application needs justify it
+- introduce typed settings selectively instead of freezing the whole settings tree prematurely
+- preserve Phase 0.5 application-surface scope without reopening Phase 0.4
