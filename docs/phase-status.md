@@ -17,7 +17,7 @@ Status: ✅ Completed
 ### Phase 0.5 — User Interaction & Application Surface
 Status: 🟡 In Progress
 
-Latest completed subphase: **0.5.5.2 — User Settings Deep Merge Preservation & Known-Branch Semantics**
+Latest completed subphase: **0.5.5.3 — User Settings Contract Surface Stabilization**
 
 ---
 
@@ -804,3 +804,18 @@ This keeps the application surface incremental and backward compatible while mak
 - continue contract stabilization only where real application needs justify it
 - introduce typed settings selectively instead of freezing the whole settings tree prematurely
 - preserve Phase 0.5 application-surface scope without reopening Phase 0.4
+
+---
+
+
+## ✅ Phase 0.5.5.3 Closure Summary
+
+Phase 0.5.5.3 closes the next contract-surface gap in authenticated user settings by exposing persisted resource timestamps through the stable `settings` view returned by both `GET /auth/me/settings` and `PATCH /auth/me/settings`.
+
+### Delivered in 0.5.5.3
+
+- `usersettings.View` now exposes `created_at` when persistence metadata exists
+- `usersettings.View` now exposes `updated_at` when persistence metadata exists
+- settings responses remain backward compatible with the existing envelope and `preferences` payload
+- zero-value timestamps are omitted so default, non-persisted settings resolution does not fabricate persistence state
+- HTTP-level coverage now validates timestamp exposure and omission semantics for the authenticated settings surface

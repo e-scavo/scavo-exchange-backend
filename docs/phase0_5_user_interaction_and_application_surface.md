@@ -559,3 +559,22 @@ Explicitly excluded:
 ## Conclusion
 
 Phase 0.5.5.2 makes `PATCH /auth/me/settings` behave like a true non-destructive partial update for nested object settings while keeping the overall settings surface flexible and application-oriented.
+
+
+## Subphase 0.5.5.3 - User Settings Contract Surface Stabilization
+
+After 0.5.5.2, the settings mutation path already behaved as a non-destructive deep-merge surface for nested object branches. The next remaining stabilization gap was not internal merge safety, but the visibility of the resource state returned to authenticated clients.
+
+This subphase keeps the existing authenticated settings endpoints unchanged:
+
+* `GET /auth/me/settings`
+* `PATCH /auth/me/settings`
+
+The returned `settings` resource now exposes persisted timestamp metadata when available:
+
+* `created_at`
+* `updated_at`
+
+Those fields are omitted when the settings view is being resolved from safe defaults and no persisted timestamps exist yet.
+
+This makes the settings contract more explicit and self-descriptive for frontend consumers without introducing schema-heavy settings governance, optimistic locking, or version negotiation.

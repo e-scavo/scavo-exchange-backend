@@ -16,7 +16,7 @@ It is intended to:
 
 **Stage:** 0 — Foundation
 **Phase:** 0.5 — User Interaction & Application Surface
-**Latest Completed Subphase:** 0.5.5.1 — User Settings Hardening (Soft Contract Guard Layer)
+**Latest Completed Subphase:** 0.5.5.3 — User Settings Contract Surface Stabilization
 
 ---
 
@@ -368,3 +368,15 @@ No further work should be added to Phase 0.4 unless a future ZIP proves a real r
 * Begin a new phase for any further backend evolution
 * Preserve all Phase 0.4 contracts as baseline
 * Avoid reopening Phase 0.4 without a ZIP-validated reason
+
+
+### 0.5.5.3 — User Settings Contract Surface Stabilization
+
+This subphase makes the authenticated settings resource more self-descriptive without changing endpoint paths or introducing schema-heavy settings governance.
+
+Delivered:
+
+* `settings.created_at` is now exposed when persisted metadata exists
+* `settings.updated_at` is now exposed when persisted metadata exists
+* `GET /auth/me/settings` and `PATCH /auth/me/settings` now return the same stable resource-oriented settings shape
+* zero-value timestamps remain omitted so default resolution without persistence metadata does not fabricate stored state

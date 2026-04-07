@@ -499,3 +499,103 @@ It keeps the settings surface flexible, but makes mutation behavior much more tr
 * adding minimal semantics for the known settings namespaces already present in the backend
 
 This is the correct continuation of Phase 0.5.5 because it improves contract stability without turning user settings into a schema-heavy subsystem.
+
+
+## Phase 0.5.5.3 — User Settings Contract Surface Stabilization
+
+## Objective
+
+Make the authenticated user settings resource more explicit and self-descriptive by exposing persisted resource timestamps through the stable settings view, without redesigning the envelope or introducing schema-heavy governance.
+
+## Initial Context
+
+After 0.5.5.2, the backend already provided:
+
+* recursive normalization of accepted preferences
+* invalid-value rejection
+* non-destructive deep merge for nested object branches
+* object-only semantics for known top-level settings namespaces
+
+However, the public settings resource still exposed only `user_id`, `version`, and `preferences`, which left part of the persisted resource state implicit.
+
+## Problem Statement
+
+The authenticated settings endpoints already returned the final resource content, but not enough resource metadata to make the persisted state fully self-descriptive for frontend consumers.
+
+Without stable timestamp visibility:
+
+* clients cannot distinguish persisted-resource metadata from default-only resolution through the response body alone
+* settings reads and writes remain correct but less explicit than they could be
+* the contract still relies more on documentation and implementation knowledge than on the returned resource shape itself
+
+## Scope
+
+Included:
+
+* stable exposure of `created_at` when persisted metadata exists
+* stable exposure of `updated_at` when persisted metadata exists
+* omission of zero-value timestamps so default-only resolution does not fabricate persistence metadata
+* HTTP-level coverage for both timestamp exposure and timestamp omission
+
+Explicitly excluded:
+
+* schema-heavy validation of preferences
+* settings version negotiation
+* optimistic locking / revision identifiers
+* ETag support
+* mutation of auth/session/wallet flows
+* typed settings governance
+
+## Implementation Summary
+
+The `usersettings.View` contract now includes optional `created_at` and `updated_at` fields.
+
+`usersettings.ToView(...)` keeps the existing stable envelope semantics:
+
+* `user_id`
+* `version`
+* `preferences`
+
+and enriches the resource view with timestamps only when the backing `UserSettings` entity carries persisted timestamp metadata.
+
+That means:
+
+* persisted rows expose `created_at` and `updated_at`
+* safe defaults resolved without persisted timestamps do not fabricate those fields
+* `GET /auth/me/settings` and `PATCH /auth/me/settings` remain aligned on the same returned resource shape
+
+## Validation
+
+Coverage expanded to include:
+
+* omission of timestamps when the resource carries zero-value timestamps
+* exposure of `created_at` in authenticated settings responses when present
+* exposure of `updated_at` in authenticated settings responses when present
+* continuity of the existing `version` and `preferences` response contract
+
+## Release Impact
+
+This subphase is backward compatible.
+
+It does not change:
+
+* routes
+* request payload shape
+* authentication semantics
+* merge semantics introduced in earlier settings phases
+
+It only makes the returned settings resource more explicit.
+
+## Risks
+
+The remaining accepted limitations are deliberate:
+
+* settings still use a flexible `preferences` object
+* there is still no typed governance for concrete preference families
+* there is still no optimistic concurrency contract
+
+## Conclusion
+
+Phase 0.5.5.3 completes the next logical portion of User Settings Contract Stabilization by making the authenticated settings resource itself more expressive.
+
+The system still avoids premature schema heaviness, but the returned contract now better communicates persisted resource state to frontend consumers.

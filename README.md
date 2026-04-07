@@ -23,7 +23,7 @@ The backend follows a **wallet-first identity model** that progressively evolves
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.5 — User Interaction & Application Surface  
-**Current Subphase:** **0.5.5.2 — User Settings Deep Merge Preservation & Known-Branch Semantics**
+**Current Subphase:** **0.5.5.3 — User Settings Contract Surface Stabilization**
 
 ---
 
@@ -577,7 +577,9 @@ Response example:
   "settings": {
     "user_id": "...",
     "version": 1,
-    "preferences": {}
+    "preferences": {},
+    "created_at": "2026-04-06T22:00:00Z",
+    "updated_at": "2026-04-06T22:15:00Z"
   }
 }
 ```
@@ -588,6 +590,8 @@ Behavior:
 - resolves persisted settings when available
 - returns safe defaults when no settings row exists yet
 - does not create or mutate settings as a side effect of reading
+- exposes `created_at` and `updated_at` when persisted settings metadata is available
+- omits timestamp fields when the settings resource is still being resolved from safe defaults without persistence metadata
 
 ---
 
@@ -1614,3 +1618,17 @@ Enabling:
 * Progressive enhancement without architectural changes
 
 ---
+
+
+## Phase 0.5.5.3 — User Settings Contract Surface Stabilization
+
+Phase 0.5.5.3 closes the next contract gap in authenticated user settings by making the resource surface more explicit without introducing schema-heavy governance or changing the endpoint envelope.
+
+Delivered in this subphase:
+
+- `usersettings.View` now exposes `created_at` and `updated_at` when persisted metadata exists
+- `GET /auth/me/settings` and `PATCH /auth/me/settings` now return the same resource-oriented settings view with stable timestamp visibility
+- zero-value timestamps remain omitted so default, non-persisted settings resolution does not fabricate persistence metadata
+- HTTP-level tests now assert both timestamp omission and timestamp exposure behavior
+
+This keeps the authenticated settings contract backward compatible while making the resource state more self-descriptive for frontend consumers.

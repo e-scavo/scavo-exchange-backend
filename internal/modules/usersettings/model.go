@@ -13,6 +13,8 @@ type View struct {
 	UserID      string         `json:"user_id"`
 	Version     int            `json:"version"`
 	Preferences map[string]any `json:"preferences"`
+	CreatedAt   *time.Time     `json:"created_at,omitempty"`
+	UpdatedAt   *time.Time     `json:"updated_at,omitempty"`
 }
 
 func Default(userID string) *UserSettings {
@@ -35,9 +37,20 @@ func ToView(settings *UserSettings) View {
 		preferences = map[string]any{}
 	}
 
-	return View{
+	view := View{
 		UserID:      settings.UserID,
 		Version:     1,
 		Preferences: preferences,
 	}
+
+	if !settings.CreatedAt.IsZero() {
+		createdAt := settings.CreatedAt.UTC()
+		view.CreatedAt = &createdAt
+	}
+	if !settings.UpdatedAt.IsZero() {
+		updatedAt := settings.UpdatedAt.UTC()
+		view.UpdatedAt = &updatedAt
+	}
+
+	return view
 }

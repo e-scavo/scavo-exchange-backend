@@ -2357,9 +2357,65 @@ func TestHTTPHandlers_MeSettings_Success_Persisted(t *testing.T) {
 	if payload.Settings.Version != 1 {
 		t.Fatalf("unexpected settings version: %d", payload.Settings.Version)
 	}
+	if payload.Settings.CreatedAt != nil {
+		t.Fatalf("expected no created_at for zero-value settings timestamp, got %#v", payload.Settings.CreatedAt)
+	}
+	if payload.Settings.UpdatedAt != nil {
+		t.Fatalf("expected no updated_at for zero-value settings timestamp, got %#v", payload.Settings.UpdatedAt)
+	}
 	value, ok := payload.Settings.Preferences["compact_mode"]
 	if !ok || value != true {
 		t.Fatalf("unexpected preferences payload: %#v", payload.Settings.Preferences)
+	}
+}
+
+func TestHTTPHandlers_MeSettings_Success_IncludesResourceTimestamps(t *testing.T) {
+	createdAt := time.Date(2026, time.April, 6, 22, 0, 0, 0, time.UTC)
+	updatedAt := createdAt.Add(15 * time.Minute)
+
+	repo := &stubUserSettingsRepo{
+		getByUserIDFn: func(ctx context.Context, userID string) (*usersettingsmod.UserSettings, error) {
+			if userID != "u_test_example_com" {
+				t.Fatalf("unexpected user id: %q", userID)
+			}
+			return &usersettingsmod.UserSettings{
+				UserID: "u_test_example_com",
+				Preferences: map[string]any{
+					"theme": "dark",
+				},
+				CreatedAt: createdAt,
+				UpdatedAt: updatedAt,
+			}, nil
+		},
+	}
+
+	h := HTTPHandlers{
+		Tokens:       mustTokenService(t),
+		TTL:          time.Hour,
+		Users:        usermod.NewService(nil),
+		UserSettings: usersettingsmod.NewService(repo),
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/auth/me/settings", nil)
+	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	rec := httptest.NewRecorder()
+
+	h.MeSettings(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+
+	var payload MeSettingsResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("decode error: %v", err)
+	}
+
+	if payload.Settings.CreatedAt == nil || !payload.Settings.CreatedAt.Equal(createdAt) {
+		t.Fatalf("unexpected created_at: %#v", payload.Settings.CreatedAt)
+	}
+	if payload.Settings.UpdatedAt == nil || !payload.Settings.UpdatedAt.Equal(updatedAt) {
+		t.Fatalf("unexpected updated_at: %#v", payload.Settings.UpdatedAt)
 	}
 }
 
@@ -2454,6 +2510,57 @@ func TestHTTPHandlers_UpdateMeSettings_Success_MergesPreferences(t *testing.T) {
 
 	if payload.Settings.Preferences["compact_mode"] != true || payload.Settings.Preferences["theme"] != "dark" {
 		t.Fatalf("unexpected payload: %#v", payload.Settings.Preferences)
+	}
+}
+
+func TestHTTPHandlers_UpdateMeSettings_Success_IncludesResourceTimestamps(t *testing.T) {
+	createdAt := time.Date(2026, time.April, 6, 22, 0, 0, 0, time.UTC)
+	updatedAt := createdAt.Add(30 * time.Minute)
+
+	repo := &stubUserSettingsRepo{
+		upsertPreferencesFn: func(ctx context.Context, userID string, preferences map[string]any) (*usersettingsmod.UserSettings, error) {
+			if userID != "u_test_example_com" {
+				t.Fatalf("unexpected user id: %q", userID)
+			}
+			return &usersettingsmod.UserSettings{
+				UserID:      userID,
+				Preferences: preferences,
+				CreatedAt:   createdAt,
+				UpdatedAt:   updatedAt,
+			}, nil
+		},
+	}
+
+	h := HTTPHandlers{
+		Tokens:       mustTokenService(t),
+		TTL:          time.Hour,
+		Users:        usermod.NewService(nil),
+		UserSettings: usersettingsmod.NewService(repo),
+	}
+
+	req := httptest.NewRequest(http.MethodPatch, "/auth/me/settings", strings.NewReader(`{"preferences":{"theme":"dark"}}`))
+	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	rec := httptest.NewRecorder()
+
+	h.UpdateMeSettings(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+
+	var payload MeSettingsResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("decode error: %v", err)
+	}
+
+	if payload.Settings.CreatedAt == nil || !payload.Settings.CreatedAt.Equal(createdAt) {
+		t.Fatalf("unexpected created_at: %#v", payload.Settings.CreatedAt)
+	}
+	if payload.Settings.UpdatedAt == nil || !payload.Settings.UpdatedAt.Equal(updatedAt) {
+		t.Fatalf("unexpected updated_at: %#v", payload.Settings.UpdatedAt)
+	}
+	if payload.Settings.Preferences["theme"] != "dark" {
+		t.Fatalf("unexpected preferences payload: %#v", payload.Settings.Preferences)
 	}
 }
 
