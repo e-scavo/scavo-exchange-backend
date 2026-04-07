@@ -226,6 +226,122 @@ func TestHTTPHandlers_Me_PasswordSessionWithoutWallets(t *testing.T) {
 	}
 }
 
+func TestHTTPHandlers_Me_SurfaceBoundary(t *testing.T) {
+	ts := mustTokenService(t)
+	store := NewInMemoryWalletIdentityStore()
+	address := testWalletAddress()
+
+	identity, err := store.GetOrCreate(context.Background(), address)
+	if err != nil {
+		t.Fatalf("GetOrCreate error: %v", err)
+	}
+	if _, err := store.AttachUser(context.Background(), identity.ID, "u_test_example_com", true); err != nil {
+		t.Fatalf("AttachUser error: %v", err)
+	}
+
+	claims := sessionClaims()
+	claims.AuthMethod = "wallet_evm"
+	claims.WalletID = identity.ID
+	claims.WalletAddress = address
+	claims.Chain = "scavium"
+
+	h := HTTPHandlers{
+		Tokens:           ts,
+		TTL:              time.Hour,
+		Users:            usermod.NewService(nil),
+		WalletIdentities: store,
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/auth/me", nil)
+	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, claims))
+	rec := httptest.NewRecorder()
+
+	h.Me(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+
+	var payload map[string]any
+	if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("decode error: %v", err)
+	}
+
+	if _, ok := payload["user"]; !ok {
+		t.Fatal("expected user field in /auth/me response")
+	}
+	if _, ok := payload["profile"]; !ok {
+		t.Fatal("expected profile field in /auth/me response")
+	}
+	if _, ok := payload["session"]; ok {
+		t.Fatal("did not expect session field in /auth/me response")
+	}
+
+	profile, ok := payload["profile"].(map[string]any)
+	if !ok {
+		t.Fatalf("expected profile object, got %#v", payload["profile"])
+	}
+
+	for _, forbidden := range []string{"authenticated", "token_type", "issuer", "subject", "expires_at"} {
+		if _, ok := profile[forbidden]; ok {
+			t.Fatalf("did not expect %q in /auth/me profile payload", forbidden)
+		}
+	}
+
+	for _, required := range []string{"user_id", "auth_method", "wallet_count", "active_wallet_count", "detached_wallet_count", "has_wallet_session", "wallets"} {
+		if _, ok := profile[required]; !ok {
+			t.Fatalf("expected %q in /auth/me profile payload", required)
+		}
+	}
+}
+
+func TestHTTPHandlers_Session_SurfaceBoundary(t *testing.T) {
+	h := HTTPHandlers{
+		Tokens: mustTokenService(t),
+		TTL:    time.Hour,
+		Users:  usermod.NewService(nil),
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/auth/session", nil)
+	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	rec := httptest.NewRecorder()
+
+	h.Session(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+
+	var payload map[string]any
+	if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("decode error: %v", err)
+	}
+
+	if _, ok := payload["session"]; !ok {
+		t.Fatal("expected session field in /auth/session response")
+	}
+	if _, ok := payload["profile"]; ok {
+		t.Fatal("did not expect profile field in /auth/session response")
+	}
+
+	session, ok := payload["session"].(map[string]any)
+	if !ok {
+		t.Fatalf("expected session object, got %#v", payload["session"])
+	}
+
+	for _, required := range []string{"authenticated", "token_type", "user_id", "subject", "issuer", "expires_at", "user"} {
+		if _, ok := session[required]; !ok {
+			t.Fatalf("expected %q in /auth/session payload", required)
+		}
+	}
+
+	for _, forbidden := range []string{"wallet_count", "active_wallet_count", "detached_wallet_count", "wallets", "primary_wallet", "has_wallet_session"} {
+		if _, ok := session[forbidden]; ok {
+			t.Fatalf("did not expect %q in /auth/session payload", forbidden)
+		}
+	}
+}
+
 func TestHTTPHandlers_Session_Success(t *testing.T) {
 	h := HTTPHandlers{
 		Tokens: mustTokenService(t),
