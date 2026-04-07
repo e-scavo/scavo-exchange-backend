@@ -31,6 +31,19 @@
 * `phase0_5_user_interaction_and_application_surface.md`
 * `phase0_5_4_user_settings_mutation.md`
 * `phase0_5_5_user_settings_hardening_and_contract_stabilization.md`
+* `phase0_6_authenticated_application_bootstrap_consolidation_and_session_ready_surface.md`
+
+---
+
+## 🚧 Current Phase Focus
+
+* `phase0_6_authenticated_application_bootstrap_consolidation_and_session_ready_surface.md`
+  * `0.6.1 — Bootstrap Surface Boundary Clarification`
+  * `0.6.2 — Authenticated Surface Contract Alignment`
+  * `0.6.3 — Session-Ready Bootstrap Read Model`
+  * `0.6.4 — Application Surface Consistency Hardening`
+
+---
 
 ## 🔄 Handoff
 

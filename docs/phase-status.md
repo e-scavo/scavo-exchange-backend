@@ -15,9 +15,12 @@ Status: ✅ Completed
 Status: ✅ Completed
 
 ### Phase 0.5 — User Interaction & Application Surface
+Status: ✅ Completed
+
+### Phase 0.6 — Authenticated Application Bootstrap Consolidation & Session-Ready Surface
 Status: 🟡 In Progress
 
-Latest completed subphase: **0.5.5.3 — User Settings Contract Surface Stabilization**
+Latest completed subphase: **0.6.1 — Bootstrap Surface Boundary Clarification**
 
 ---
 
@@ -819,3 +822,75 @@ Phase 0.5.5.3 closes the next contract-surface gap in authenticated user setting
 - settings responses remain backward compatible with the existing envelope and `preferences` payload
 - zero-value timestamps are omitted so default, non-persisted settings resolution does not fabricate persistence state
 - HTTP-level coverage now validates timestamp exposure and omission semantics for the authenticated settings surface
+
+
+---
+
+## Phase 0.6 Subphase Status
+
+| Subphase | Description | Status |
+|----------|-------------|--------|
+| 0.6.1 | Bootstrap Surface Boundary Clarification | ✅ Completed |
+| 0.6.2 | Authenticated Surface Contract Alignment | ⬜ Pending |
+| 0.6.3 | Session-Ready Bootstrap Read Model | ⬜ Pending |
+| 0.6.4 | Application Surface Consistency Hardening | ⬜ Pending |
+
+### Phase 0.6 Goal
+
+Phase 0.6 continues Stage 0 without introducing new business domains. Its purpose is to consolidate the already authenticated application surface into a coherent bootstrap layer for frontend consumption by clarifying the boundary between identity, session, settings, and wallet inventory reads.
+
+### Included in Phase 0.6
+
+- consolidation of the authenticated bootstrap surface already present in the backend
+- alignment of `/auth/me`, `/auth/session`, `/auth/me/settings`, and `/auth/wallets`
+- semantic and contractual clarification across related authenticated reads
+- consistency hardening backed by focused tests and documentation
+
+### Excluded from Phase 0.6
+
+- new business endpoints
+- payments, billing, trading, or domain expansion
+- wallet lifecycle redesign
+- settings migrations or advanced typed-settings redesign
+- changes to the durable auth model already stabilized in Phase 0.4 and Phase 0.5
+
+## ✅ Phase 0.6.1 Closure Summary
+
+Phase 0.6.1 establishes an explicit semantic boundary across the authenticated application bootstrap surface without changing existing public payloads. The subphase locks in the intended separation of responsibilities between session context, authenticated identity bootstrap, settings retrieval, and wallet inventory reads.
+
+### Delivered in 0.6.1
+
+- explicit boundary coverage now distinguishes `/auth/me` from `/auth/session`
+- `/auth/me` is now contractually protected as the authenticated bootstrap identity surface
+- `/auth/session` is now contractually protected as the token/session context surface
+- the authenticated settings surface remains anchored at `/auth/me/settings`
+- wallet inventory remains anchored at `/auth/wallets`
+- no handler, router, service, persistence, or payload contract changes were required
+- focused HTTP tests now guard against accidental surface overlap between bootstrap identity data and token-derived session metadata
+
+### Result
+
+The authenticated application surface is now clearer for downstream consumers:
+
+- `/auth/me` represents authenticated identity/bootstrap data
+- `/auth/session` represents token-derived session state
+- `/auth/me/settings` represents authenticated settings retrieval and mutation
+- `/auth/wallets` represents wallet ownership inventory
+
+This gives Phase 0.6 a stable starting point for the next alignment step, where response shapes and metadata consistency can be refined without ambiguity about endpoint responsibilities.
+
+## ❌ Not Included in 0.6.1
+
+- response shape normalization across authenticated endpoints
+- metadata unification between identity and session payloads
+- a new aggregate bootstrap endpoint
+- frontend-specific orchestration behavior
+- changes to wallet lifecycle semantics
+- settings schema redesign
+- business-surface expansion beyond the authenticated foundation
+
+### Next Expected Evolution
+
+- align related authenticated response shapes where doing so improves bootstrap consumption without breaking compatibility
+- preserve the boundary clarified in 0.6.1 while improving cross-endpoint coherence in 0.6.2
+- continue treating authenticated bootstrap consolidation as a Stage 0 concern rather than a new domain feature

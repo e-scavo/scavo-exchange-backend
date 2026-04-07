@@ -22,8 +22,8 @@ The backend follows a **wallet-first identity model** that progressively evolves
 ## 🚧 Current Stage
 
 **Stage:** 0 — Foundation  
-**Phase:** 0.5 — User Interaction & Application Surface  
-**Current Subphase:** **0.5.5.3 — User Settings Contract Surface Stabilization**
+**Phase:** 0.6 — Authenticated Application Bootstrap Consolidation & Session-Ready Surface  
+**Current Subphase:** **0.6.1 — Bootstrap Surface Boundary Clarification**
 
 ---
 
@@ -1632,3 +1632,133 @@ Delivered in this subphase:
 - HTTP-level tests now assert both timestamp omission and timestamp exposure behavior
 
 This keeps the authenticated settings contract backward compatible while making the resource state more self-descriptive for frontend consumers.
+
+
+---
+
+## Phase 0.6 — Authenticated Application Bootstrap Consolidation & Session-Ready Surface
+
+Phase 0.6 opens the next authenticated surface consolidation layer by treating the already existing authenticated endpoints as part of a single application bootstrap boundary that must remain semantically explicit, contract-safe, and frontend-ready without introducing new business domains.
+
+This phase is intentionally limited to authenticated application bootstrap semantics and does not introduce billing, trading, payment, settlement, or any other business-facing feature surface.
+
+The authenticated bootstrap layer covered by Phase 0.6 is composed of:
+
+- `GET /auth/me`
+- `GET /auth/session`
+- `GET /auth/me/settings`
+- `GET /auth/wallets`
+
+The purpose of this phase is to ensure that these endpoints can be consumed together as a coherent authenticated application entry surface while preserving their individual responsibilities.
+
+---
+
+## Phase 0.6.1 — Bootstrap Surface Boundary Clarification
+
+Phase 0.6.1 clarifies the semantic boundaries of the authenticated application bootstrap surface without modifying the production handlers, endpoint shapes, persistence model, or JWT lifecycle.
+
+Before this subphase, the authenticated endpoints were already functional, but the separation between identity bootstrap semantics and token-derived session semantics remained mostly implicit in the code and tests.
+
+This subphase makes that separation explicit and contractual.
+
+### Boundary clarified in 0.6.1
+
+#### `GET /auth/me`
+
+`/auth/me` is the authenticated **bootstrap identity surface**.
+
+Its responsibility is to expose the authenticated user read model together with profile-level authenticated context such as:
+
+- durable user identity
+- authenticated profile projection
+- wallet ownership summary
+- wallet session awareness
+- profile-side wallet counters and primary wallet context
+
+`/auth/me` is **not** the source of truth for token metadata such as issuer, subject, token type, authenticated session status, or expiration metadata.
+
+#### `GET /auth/session`
+
+`/auth/session` is the authenticated **session surface**.
+
+Its responsibility is to expose token-derived session context, including:
+
+- authenticated flag
+- token type
+- issuer
+- subject
+- expiration metadata
+- session-level wallet claim context
+- attached user summary for convenience
+
+`/auth/session` is **not** the endpoint for wallet inventory, wallet counters, primary-wallet bootstrap projection, or profile-side ownership summarization.
+
+#### `GET /auth/me/settings`
+
+`/auth/me/settings` remains the authenticated **settings surface**.
+
+Its responsibility is limited to user settings retrieval and mutation contract continuity.
+
+It does not become a profile endpoint, session endpoint, or wallet inventory endpoint as part of Phase 0.6.1.
+
+#### `GET /auth/wallets`
+
+`/auth/wallets` remains the authenticated **wallet inventory surface**.
+
+Its responsibility is to expose the detailed wallet ownership read model and wallet-level actionability/inventory metadata.
+
+It is not promoted into a generic authenticated session or profile bootstrap endpoint.
+
+### Delivered in this subphase
+
+Delivered in Phase 0.6.1:
+
+- explicit authenticated bootstrap boundary clarification between `/auth/me` and `/auth/session`
+- explicit preservation of `/auth/me/settings` as settings-only surface
+- explicit preservation of `/auth/wallets` as wallet inventory surface
+- contract-level HTTP tests that assert the separation between identity bootstrap payload concerns and session payload concerns
+- preservation of full backward compatibility for all authenticated endpoints
+
+### Test-level enforcement added in 0.6.1
+
+The subphase is enforced through authenticated HTTP handler tests that now explicitly verify:
+
+- `/auth/me` returns `user` and `profile`
+- `/auth/me` does not return `session`
+- `/auth/me` profile payload does not absorb session-only fields such as `authenticated`, `token_type`, `issuer`, `subject`, or `expires_at`
+- `/auth/session` returns `session`
+- `/auth/session` does not return `profile`
+- `/auth/session` preserves session-only fields such as `authenticated`, `token_type`, `issuer`, `subject`, and `expires_at`
+- `/auth/session` does not absorb profile-side wallet inventory counters or wallet ownership summary fields
+
+### Compatibility
+
+Phase 0.6.1 is fully backward compatible.
+
+No production handler behavior was redesigned in this subphase.
+
+Specifically:
+
+- no endpoint was renamed
+- no payload envelope was changed
+- no settings schema was introduced
+- no wallet lifecycle behavior was modified
+- no JWT issuance or validation behavior was changed
+- no migration was added
+
+### Why this subphase matters
+
+This clarification is necessary because the frontend-authenticated application bootstrap layer must be able to distinguish:
+
+- who the authenticated user is
+- what the current token/session says
+- what the persisted user settings are
+- what wallets belong to the authenticated user
+
+Without ambiguity about which endpoint owns which responsibility.
+
+Phase 0.6.1 closes that semantic ambiguity and prepares the backend for the next consolidation steps:
+
+- contract alignment across authenticated surfaces
+- session-ready bootstrap read model clarification
+- final authenticated application surface consistency hardening

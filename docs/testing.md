@@ -1319,3 +1319,51 @@ All testing scenarios defined in this document are now considered complete for P
 No additional test scenarios should be added within Phase 0.4.
 
 Future testing must be introduced in a new phase unless a real regression is detected from a future ZIP.
+
+
+---
+
+## Phase 0.6.1 Testing Notes
+
+### Goal
+Validate the semantic boundary between the authenticated bootstrap identity surface and the authenticated session surface without changing public response contracts.
+
+### Scope
+This subphase adds contract-level regression coverage for:
+
+- `GET /auth/me`
+- `GET /auth/session`
+
+The purpose is to ensure these endpoints remain clearly separated in responsibility even when they share authenticated context and partially overlapping identity data.
+
+### Coverage Added
+Handler-level coverage now verifies:
+
+- `GET /auth/me` continues to expose `user` and `profile` as the authenticated bootstrap identity surface
+- `GET /auth/me` does not expose a top-level `session` object
+- `profile` in `GET /auth/me` does not absorb session/token metadata such as `authenticated`, `token_type`, `issuer`, `subject`, or `expires_at`
+- `GET /auth/session` continues to expose a top-level `session` object as the token-derived authenticated session surface
+- `GET /auth/session` does not expose a top-level `profile` object
+- `session` in `GET /auth/session` retains session-specific metadata and does not absorb wallet inventory summary fields such as `wallet_count`, `active_wallet_count`, `detached_wallet_count`, `wallets`, `primary_wallet`, or `has_wallet_session`
+
+### Tests Added
+The following tests were introduced in `internal/modules/auth/http_handlers_test.go`:
+
+- `TestHTTPHandlers_Me_SurfaceBoundary`
+- `TestHTTPHandlers_Session_SurfaceBoundary`
+
+### Validation Command
+
+```
+go test ./...
+```
+
+### Expected Result
+
+- `/auth/me` remains the authenticated bootstrap identity surface
+- `/auth/session` remains the authenticated session/token surface
+- no product handler changes are required for this subphase
+- contract separation becomes explicit and regression-protected through tests
+
+### Validation Status
+Validated successfully against the updated project state corresponding to Phase 0.6.1.

@@ -864,3 +864,69 @@ This includes:
 No additional flows should be added within Phase 0.4.
 
 Any new flow must be introduced in a new phase and must not alter the guarantees established here unless a future ZIP proves a real regression.
+
+
+## Phase 0.6.1 — Bootstrap Surface Boundary Clarification
+
+Phase 0.6.1 does not introduce new authenticated business flows. Instead, it closes a semantic boundary inside the already available authenticated application surface so that frontend bootstrap and authenticated consumers can use the existing endpoints without ambiguity.
+
+### Authenticated bootstrap surface map
+The authenticated surface now has an explicit bootstrap-oriented separation:
+
+- `GET /auth/session` is the authenticated session-context surface
+- `GET /auth/me` is the authenticated identity/bootstrap surface
+- `GET /auth/me/settings` is the authenticated settings surface
+- `GET /auth/wallets` is the authenticated wallet inventory surface
+
+### Flow intent by endpoint
+#### `GET /auth/session`
+Use this flow when the client must confirm token-derived authenticated runtime state. The response is the session-oriented entry point and should be treated as the source for:
+
+- authenticated state
+- token type
+- issuer
+- subject
+- expiration
+- token-derived wallet/session context
+
+This flow is not the wallet inventory flow and is not the profile bootstrap read model.
+
+#### `GET /auth/me`
+Use this flow when the client must bootstrap the authenticated user identity surface used by the application after authentication is already established. The response is the identity/profile-oriented entry point and should be treated as the source for:
+
+- authenticated user snapshot
+- profile-level auth method visibility
+- wallet ownership summary
+- wallet counters
+- wallet-session summary flags
+
+This flow is not the token metadata surface.
+
+#### `GET /auth/me/settings`
+Use this flow when the client must load authenticated user preferences/settings independently from token/session metadata and independently from wallet inventory expansion.
+
+This flow is not the identity bootstrap surface and is not the wallet listing flow.
+
+#### `GET /auth/wallets`
+Use this flow when the client must expand from bootstrap into the authenticated wallet inventory for ownership detail, actionability visibility, and inventory pagination.
+
+This flow is not the session contract and is not the authenticated profile/bootstrap contract.
+
+### Recommended authenticated bootstrap consumption order
+A frontend or authenticated consumer that needs a stable bootstrap sequence should treat the surface in this order:
+
+1. `GET /auth/session` to validate authenticated session context
+2. `GET /auth/me` to load the authenticated identity/bootstrap read model
+3. `GET /auth/me/settings` to load authenticated preferences
+4. `GET /auth/wallets` when detailed wallet inventory is required beyond the bootstrap summary already exposed by `/auth/me`
+
+### Boundary guarantees introduced in 0.6.1
+Phase 0.6.1 does not change runtime handlers or payload shapes, but the flow contract is now explicitly protected by tests and documentation so that:
+
+- `/auth/me` does not drift into a token/session metadata surface
+- `/auth/session` does not drift into a profile/bootstrap inventory surface
+- `/auth/me/settings` remains isolated as the settings bootstrap flow
+- `/auth/wallets` remains isolated as the detailed wallet inventory flow
+
+### Outcome
+The backend keeps the existing authenticated flows unchanged at runtime, but the bootstrap relationship between them is now explicit. This prepares the next phase to align shapes and metadata across the authenticated surface without reopening Phase 0.5 behavior or introducing new business domains.

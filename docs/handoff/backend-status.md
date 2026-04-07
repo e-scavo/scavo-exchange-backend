@@ -15,8 +15,8 @@ It is intended to:
 ## 📌 Current State
 
 **Stage:** 0 — Foundation
-**Phase:** 0.5 — User Interaction & Application Surface
-**Latest Completed Subphase:** 0.5.5.3 — User Settings Contract Surface Stabilization
+**Phase:** 0.6 — Authenticated Application Bootstrap Consolidation & Session-Ready Surface
+**Latest Completed Subphase:** 0.6.1 — Bootstrap Surface Boundary Clarification
 
 ---
 
@@ -380,3 +380,41 @@ Delivered:
 * `settings.updated_at` is now exposed when persisted metadata exists
 * `GET /auth/me/settings` and `PATCH /auth/me/settings` now return the same stable resource-oriented settings shape
 * zero-value timestamps remain omitted so default resolution without persistence metadata does not fabricate stored state
+
+--- 
+### 0.6.1 — Bootstrap Surface Boundary Clarification
+
+This subphase clarifies the authenticated application bootstrap boundary without modifying public endpoint shapes, handlers, services, stores, or persistence.
+
+Delivered:
+
+* explicit contract-level tests now distinguish the role of `GET /auth/me` from `GET /auth/session`
+* `/auth/me` is now formally protected as the authenticated bootstrap identity surface
+* `/auth/session` is now formally protected as the token-derived session surface
+* settings and wallet inventory remain separate authenticated resources under `GET /auth/me/settings` and `GET /auth/wallets`
+* the authenticated surface can now move into 0.6.x alignment work without reopening 0.5.x contracts
+
+### Phase 0.6 Direction
+
+Phase 0.6 consolidates the authenticated application surface into a coherent bootstrap layer for frontend consumption.
+
+Current boundary after 0.6.1:
+
+* `GET /auth/me` → authenticated bootstrap identity surface
+* `GET /auth/session` → authenticated session / token context surface
+* `GET /auth/me/settings` → authenticated settings surface
+* `GET /auth/wallets` → authenticated wallet inventory surface
+
+0.6.1 is intentionally non-invasive:
+
+* no public payloads were changed
+* no router changes were introduced
+* no product handlers were modified
+* no stores or persistence contracts were changed
+* the clarification is enforced through explicit boundary tests and aligned documentation
+
+### Updated Next Direction
+
+* continue with 0.6.2 — Authenticated Surface Contract Alignment
+* preserve the semantic boundary now established between bootstrap identity and session context
+* avoid re-opening Phase 0.5 unless the ZIP proves a real contract regression
