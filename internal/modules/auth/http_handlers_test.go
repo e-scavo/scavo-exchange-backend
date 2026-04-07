@@ -2599,3 +2599,103 @@ func TestHTTPHandlers_UpdateMeSettings_ServiceUnavailable(t *testing.T) {
 		t.Fatalf("unexpected body: %s", rec.Body.String())
 	}
 }
+
+func TestHTTPHandlers_UpdateMeSettings_NormalizesPreferenceKeysAndNumbers(t *testing.T) {
+	repo := &stubUserSettingsRepo{
+		upsertPreferencesFn: func(ctx context.Context, userID string, preferences map[string]any) (*usersettingsmod.UserSettings, error) {
+			if userID != "u_test_example_com" {
+				t.Fatalf("unexpected user id: %q", userID)
+			}
+			if _, exists := preferences[" theme "]; exists {
+				t.Fatalf("expected normalized keys, got %#v", preferences)
+			}
+			if preferences["theme"] != float64(2) {
+				t.Fatalf("expected normalized numeric value, got %#v", preferences["theme"])
+			}
+			return &usersettingsmod.UserSettings{UserID: userID, Preferences: preferences}, nil
+		},
+	}
+
+	h := HTTPHandlers{
+		Tokens:       mustTokenService(t),
+		TTL:          time.Hour,
+		Users:        usermod.NewService(nil),
+		UserSettings: usersettingsmod.NewService(repo),
+	}
+
+	req := httptest.NewRequest(http.MethodPatch, "/auth/me/settings", strings.NewReader(`{"preferences":{" theme ":2}}`))
+	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	rec := httptest.NewRecorder()
+
+	h.UpdateMeSettings(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+
+	var payload MeSettingsResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("decode error: %v", err)
+	}
+
+	if payload.Settings.Preferences["theme"] != float64(2) {
+		t.Fatalf("unexpected normalized payload: %#v", payload.Settings.Preferences)
+	}
+}
+
+func TestHTTPHandlers_UpdateMeSettings_RejectsNestedNullPreferenceValue(t *testing.T) {
+	h := HTTPHandlers{
+		Tokens:       mustTokenService(t),
+		TTL:          time.Hour,
+		Users:        usermod.NewService(nil),
+		UserSettings: usersettingsmod.NewService(&stubUserSettingsRepo{}),
+	}
+
+	req := httptest.NewRequest(http.MethodPatch, "/auth/me/settings", strings.NewReader(`{"preferences":{"notifications":{"email":null}}}`))
+	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	rec := httptest.NewRecorder()
+
+	h.UpdateMeSettings(rec, req)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+	if !strings.Contains(rec.Body.String(), "invalid_preferences") {
+		t.Fatalf("unexpected body: %s", rec.Body.String())
+	}
+}
+
+func TestHTTPHandlers_UpdateMeSettings_RejectsIncompatiblePreferenceShape(t *testing.T) {
+	repo := &stubUserSettingsRepo{
+		getByUserIDFn: func(ctx context.Context, userID string) (*usersettingsmod.UserSettings, error) {
+			return &usersettingsmod.UserSettings{
+				UserID: userID,
+				Preferences: map[string]any{
+					"notifications": map[string]any{
+						"email": true,
+					},
+				},
+			}, nil
+		},
+	}
+
+	h := HTTPHandlers{
+		Tokens:       mustTokenService(t),
+		TTL:          time.Hour,
+		Users:        usermod.NewService(nil),
+		UserSettings: usersettingsmod.NewService(repo),
+	}
+
+	req := httptest.NewRequest(http.MethodPatch, "/auth/me/settings", strings.NewReader(`{"preferences":{"notifications":true}}`))
+	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	rec := httptest.NewRecorder()
+
+	h.UpdateMeSettings(rec, req)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+	if !strings.Contains(rec.Body.String(), "invalid_preferences") {
+		t.Fatalf("unexpected body: %s", rec.Body.String())
+	}
+}

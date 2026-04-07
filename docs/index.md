@@ -2,35 +2,36 @@
 
 ## 🧠 Core Docs
 
-- `roadmap.md`
-- `architecture.md`
-- `architecture-deep.md`
-- `flows.md`
-- `decisions.md`
-- `development.md`
-- `development-environment.md`
-- `observability.md`
-- `testing.md`
-- `phase-status.md`
+* `roadmap.md`
+* `architecture.md`
+* `architecture-deep.md`
+* `flows.md`
+* `decisions.md`
+* `development.md`
+* `development-environment.md`
+* `observability.md`
+* `testing.md`
+* `phase-status.md`
 
 ---
 
 ## 🔐 Advanced Docs (planned)
 
-- `security.md`
-- `release.md`
-- `api-rest.md`
-- `api-websocket.md`
-- `data-model.md`
+* `security.md`
+* `release.md`
+* `api-rest.md`
+* `api-websocket.md`
+* `data-model.md`
 
 ---
 
 ## 🔐 Phase Docs
 
-- `phase0_4_auth_and_user_stabilization.md`
-- `phase0_5_user_interaction_and_application_surface.md`
+* `phase0_4_auth_and_user_stabilization.md`
+* `phase0_5_user_interaction_and_application_surface.md`
+* `phase0_5_4_user_settings_mutation.md`
+* `phase0_5_5_user_settings_hardening_and_contract_stabilization.md`
 
 ## 🔄 Handoff
 
-- `handoff/backend-status.md`
-
+* `handoff/backend-status.md`
