@@ -342,6 +342,192 @@ func TestHTTPHandlers_Session_SurfaceBoundary(t *testing.T) {
 	}
 }
 
+func TestHTTPHandlers_MeAndSession_ContextAlignment(t *testing.T) {
+	ts := mustTokenService(t)
+	store := NewInMemoryWalletIdentityStore()
+	address := testWalletAddress()
+
+	identity, err := store.GetOrCreate(context.Background(), address)
+	if err != nil {
+		t.Fatalf("GetOrCreate error: %v", err)
+	}
+	if _, err := store.AttachUser(context.Background(), identity.ID, "u_test_example_com", true); err != nil {
+		t.Fatalf("AttachUser error: %v", err)
+	}
+
+	claims := sessionClaims()
+	claims.AuthMethod = "wallet_evm"
+	claims.WalletID = identity.ID
+	claims.WalletAddress = address
+	claims.Chain = "scavium"
+
+	h := HTTPHandlers{
+		Tokens:           ts,
+		TTL:              time.Hour,
+		Users:            usermod.NewService(nil),
+		WalletIdentities: store,
+	}
+
+	meReq := httptest.NewRequest(http.MethodGet, "/auth/me", nil)
+	meReq = meReq.WithContext(context.WithValue(meReq.Context(), coreauth.ClaimsContextKey, claims))
+	meRec := httptest.NewRecorder()
+	h.Me(meRec, meReq)
+
+	if meRec.Code != http.StatusOK {
+		t.Fatalf("unexpected /auth/me status: %d body=%s", meRec.Code, meRec.Body.String())
+	}
+
+	sessionReq := httptest.NewRequest(http.MethodGet, "/auth/session", nil)
+	sessionReq = sessionReq.WithContext(context.WithValue(sessionReq.Context(), coreauth.ClaimsContextKey, claims))
+	sessionRec := httptest.NewRecorder()
+	h.Session(sessionRec, sessionReq)
+
+	if sessionRec.Code != http.StatusOK {
+		t.Fatalf("unexpected /auth/session status: %d body=%s", sessionRec.Code, sessionRec.Body.String())
+	}
+
+	var mePayload MeResponse
+	if err := json.Unmarshal(meRec.Body.Bytes(), &mePayload); err != nil {
+		t.Fatalf("decode /auth/me error: %v", err)
+	}
+	var sessionPayload SessionResponse
+	if err := json.Unmarshal(sessionRec.Body.Bytes(), &sessionPayload); err != nil {
+		t.Fatalf("decode /auth/session error: %v", err)
+	}
+
+	if mePayload.Profile == nil || sessionPayload.Session == nil {
+		t.Fatalf("expected both profile and session payloads: %#v %#v", mePayload.Profile, sessionPayload.Session)
+	}
+
+	if mePayload.Profile.UserID != sessionPayload.Session.UserID {
+		t.Fatalf("expected aligned user_id, got profile=%q session=%q", mePayload.Profile.UserID, sessionPayload.Session.UserID)
+	}
+	if mePayload.Profile.AuthMethod != sessionPayload.Session.AuthMethod {
+		t.Fatalf("expected aligned auth_method, got profile=%q session=%q", mePayload.Profile.AuthMethod, sessionPayload.Session.AuthMethod)
+	}
+	if mePayload.Profile.WalletID != sessionPayload.Session.WalletID {
+		t.Fatalf("expected aligned wallet_id, got profile=%q session=%q", mePayload.Profile.WalletID, sessionPayload.Session.WalletID)
+	}
+	if mePayload.Profile.WalletAddress != sessionPayload.Session.WalletAddress {
+		t.Fatalf("expected aligned wallet_address, got profile=%q session=%q", mePayload.Profile.WalletAddress, sessionPayload.Session.WalletAddress)
+	}
+	if mePayload.Profile.Chain != sessionPayload.Session.Chain {
+		t.Fatalf("expected aligned chain, got profile=%q session=%q", mePayload.Profile.Chain, sessionPayload.Session.Chain)
+	}
+	if mePayload.User == nil || sessionPayload.Session.User == nil {
+		t.Fatalf("expected aligned user payloads: %#v %#v", mePayload.User, sessionPayload.Session.User)
+	}
+	if mePayload.User.ID != sessionPayload.Session.User.ID {
+		t.Fatalf("expected aligned user identity, got me=%q session=%q", mePayload.User.ID, sessionPayload.Session.User.ID)
+	}
+	if mePayload.Profile.User == nil {
+		t.Fatal("expected profile.user in /auth/me payload")
+	}
+	if mePayload.Profile.User.ID != mePayload.User.ID {
+		t.Fatalf("expected /auth/me user and profile.user to match, got user=%q profile.user=%q", mePayload.User.ID, mePayload.Profile.User.ID)
+	}
+}
+
+func TestHTTPHandlers_MeAndWallets_PrimaryWalletAlignment(t *testing.T) {
+	store := NewInMemoryWalletIdentityStore()
+	addressPrimary := "0x9999999999999999999999999999999999999901"
+	addressSecondary := "0x9999999999999999999999999999999999999902"
+
+	primaryIdentity, err := store.GetOrCreate(context.Background(), addressPrimary)
+	if err != nil {
+		t.Fatalf("GetOrCreate primary error: %v", err)
+	}
+	if _, err := store.AttachUser(context.Background(), primaryIdentity.ID, "u_test_example_com", true); err != nil {
+		t.Fatalf("AttachUser primary error: %v", err)
+	}
+
+	secondaryIdentity, err := store.GetOrCreate(context.Background(), addressSecondary)
+	if err != nil {
+		t.Fatalf("GetOrCreate secondary error: %v", err)
+	}
+	if _, err := store.AttachUser(context.Background(), secondaryIdentity.ID, "u_test_example_com", false); err != nil {
+		t.Fatalf("AttachUser secondary error: %v", err)
+	}
+
+	h := HTTPHandlers{
+		Tokens:           mustTokenService(t),
+		TTL:              time.Hour,
+		Users:            usermod.NewService(nil),
+		WalletIdentities: store,
+	}
+
+	claims := sessionClaims()
+	claims.AuthMethod = "wallet_evm"
+	claims.WalletID = primaryIdentity.ID
+	claims.WalletAddress = addressPrimary
+	claims.Chain = "scavium"
+
+	meReq := httptest.NewRequest(http.MethodGet, "/auth/me", nil)
+	meReq = meReq.WithContext(context.WithValue(meReq.Context(), coreauth.ClaimsContextKey, claims))
+	meRec := httptest.NewRecorder()
+	h.Me(meRec, meReq)
+
+	if meRec.Code != http.StatusOK {
+		t.Fatalf("unexpected /auth/me status: %d body=%s", meRec.Code, meRec.Body.String())
+	}
+
+	walletsReq := httptest.NewRequest(http.MethodGet, "/auth/wallets", nil)
+	walletsReq = walletsReq.WithContext(context.WithValue(walletsReq.Context(), coreauth.ClaimsContextKey, claims))
+	walletsRec := httptest.NewRecorder()
+	h.Wallets(walletsRec, walletsReq)
+
+	if walletsRec.Code != http.StatusOK {
+		t.Fatalf("unexpected /auth/wallets status: %d body=%s", walletsRec.Code, walletsRec.Body.String())
+	}
+
+	var mePayload MeResponse
+	if err := json.Unmarshal(meRec.Body.Bytes(), &mePayload); err != nil {
+		t.Fatalf("decode /auth/me error: %v", err)
+	}
+	var walletsPayload WalletsResponse
+	if err := json.Unmarshal(walletsRec.Body.Bytes(), &walletsPayload); err != nil {
+		t.Fatalf("decode /auth/wallets error: %v", err)
+	}
+
+	if mePayload.Profile == nil || mePayload.Profile.PrimaryWallet == nil {
+		t.Fatalf("expected primary wallet in /auth/me payload: %#v", mePayload.Profile)
+	}
+
+	var primaryWallet *WalletReadModel
+	for i := range walletsPayload.Wallets {
+		wallet := walletsPayload.Wallets[i]
+		if wallet != nil && wallet.IsPrimary {
+			primaryWallet = wallet
+			break
+		}
+	}
+	if primaryWallet == nil {
+		t.Fatalf("expected primary wallet in /auth/wallets payload: %#v", walletsPayload.Wallets)
+	}
+
+	if mePayload.Profile.PrimaryWallet.ID != primaryWallet.ID {
+		t.Fatalf("expected aligned primary wallet id, got me=%q wallets=%q", mePayload.Profile.PrimaryWallet.ID, primaryWallet.ID)
+	}
+	if mePayload.Profile.PrimaryWallet.Address != primaryWallet.Address {
+		t.Fatalf("expected aligned primary wallet address, got me=%q wallets=%q", mePayload.Profile.PrimaryWallet.Address, primaryWallet.Address)
+	}
+	if mePayload.Profile.PrimaryWallet.Status != primaryWallet.Status {
+		t.Fatalf("expected aligned primary wallet status, got me=%q wallets=%q", mePayload.Profile.PrimaryWallet.Status, primaryWallet.Status)
+	}
+	if mePayload.Profile.PrimaryWallet.IsPrimary != primaryWallet.IsPrimary {
+		t.Fatalf("expected aligned primary wallet flag, got me=%v wallets=%v", mePayload.Profile.PrimaryWallet.IsPrimary, primaryWallet.IsPrimary)
+	}
+	if (mePayload.Profile.PrimaryWallet.LinkedAt == nil) != (primaryWallet.LinkedAt == nil) {
+		t.Fatalf("expected aligned primary wallet linked_at presence, got me=%#v wallets=%#v", mePayload.Profile.PrimaryWallet.LinkedAt, primaryWallet.LinkedAt)
+	}
+	if mePayload.Profile.PrimaryWallet.LinkedAt != nil && !mePayload.Profile.PrimaryWallet.LinkedAt.Equal(*primaryWallet.LinkedAt) {
+		t.Fatalf("expected aligned primary wallet linked_at, got me=%#v wallets=%#v", mePayload.Profile.PrimaryWallet.LinkedAt, primaryWallet.LinkedAt)
+	}
+	if (mePayload.Profile.PrimaryWallet.DetachedAt == nil) != (primaryWallet.DetachedAt == nil) {
+		t.Fatalf("expected aligned primary wallet detached_at presence, got me=%#v wallets=%#v", mePayload.Profile.PrimaryWallet.DetachedAt, primaryWallet.DetachedAt)
+	}
+}
+
 func TestHTTPHandlers_Session_Success(t *testing.T) {
 	h := HTTPHandlers{
 		Tokens: mustTokenService(t),

@@ -2,7 +2,6 @@ package auth
 
 import (
 	"context"
-	"strings"
 	"time"
 
 	coreauth "github.com/e-scavo/scavo-exchange-backend/internal/core/auth"
@@ -44,19 +43,17 @@ func buildProfileView(ctx context.Context, claims *coreauth.Claims, users *userm
 }
 
 func buildProfileViewWithUser(ctx context.Context, claims *coreauth.Claims, user *usermod.User, walletStore WalletIdentityStore) (*ProfileView, error) {
+	ctxView := buildAuthenticatedContextView(claims)
+
 	view := &ProfileView{
 		User:             user,
-		UserID:           strings.TrimSpace(claims.UserID),
-		AuthMethod:       strings.TrimSpace(claims.AuthMethod),
-		WalletID:         strings.TrimSpace(claims.WalletID),
-		WalletAddress:    normalizeWalletAddress(claims.WalletAddress),
-		Chain:            normalizeChain(claims.Chain),
+		UserID:           ctxView.UserID,
+		AuthMethod:       ctxView.AuthMethod,
+		WalletID:         ctxView.WalletID,
+		WalletAddress:    ctxView.WalletAddress,
+		Chain:            ctxView.Chain,
 		Wallets:          []*ProfileWalletView{},
-		HasWalletSession: strings.TrimSpace(claims.WalletAddress) != "",
-	}
-
-	if view.AuthMethod == "" {
-		view.AuthMethod = "password_dev"
+		HasWalletSession: ctxView.HasWalletSession,
 	}
 	if walletStore == nil || view.UserID == "" {
 		return view, nil
