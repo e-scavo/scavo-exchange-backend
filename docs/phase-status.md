@@ -18,9 +18,7 @@ Status: ✅ Completed
 Status: ✅ Completed
 
 ### Phase 0.6 — Authenticated Application Bootstrap Consolidation & Session-Ready Surface
-Status: 🟡 In Progress
-
-Latest completed subphase: **0.6.3 — Session-Ready Bootstrap Read Model**
+Status: ✅ Completed
 
 ---
 
@@ -968,3 +966,37 @@ The authenticated surface is now:
 ### Next Expected Evolution
 
 0.6.4 — Application Surface Consistency Hardening
+
+### Phase 0.6 — Subphase Status (Final)
+
+| Subphase | Description | Status |
+|----------|------------|--------|
+| 0.6.1 | Bootstrap Surface Boundary Clarification | ✔ Completed |
+| 0.6.2 | Authenticated Surface Contract Alignment | ✔ Completed |
+| 0.6.3 | Session-Ready Bootstrap Read Model | ✔ Completed |
+| 0.6.4 | Application Surface Consistency Hardening | ✔ Completed |
+
+---
+
+## ✅ Phase 0.6 Closure Summary
+
+### Delivered in Phase 0.6
+
+- Explicit authenticated surface boundaries
+- Shared authenticated context normalization
+- Session-ready bootstrap read model
+- Canonical wallet envelope and structural hardening
+- Cross-endpoint contract consistency guarantees
+
+### Final Result
+
+The authenticated application surface is now:
+
+- fully defined
+- internally consistent
+- contractually aligned
+- bootstrap-ready for frontend consumption
+
+### Next Phase
+
+Phase 1 — Foundation evolution beyond authenticated surface consolidation

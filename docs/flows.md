@@ -1019,3 +1019,43 @@ Flows are now:
 ### Next Evolution
 
 0.6.4 will harden consistency guarantees across all surfaces.
+
+## Phase 0.6.4 — Application Surface Consistency Hardening
+
+### Consistency Rules Applied
+
+The authenticated application surface now enforces strict structural consistency across all flows.
+
+### Wallet Flow Consistency
+
+- `/auth/wallets` exposes:
+  - `items` (canonical)
+  - `wallets` (legacy)
+- Both representations must remain identical in content
+
+### Bootstrap Flow Hardening
+
+- `/auth/bootstrap` is now the canonical read model
+- Wallet data is exposed only as:
+  - `wallets.items`
+  - `wallets.total`
+- No legacy wallet structures are allowed inside bootstrap
+
+### Flow Guarantees
+
+- Deterministic structure across all authenticated endpoints
+- No ambiguity between canonical and legacy representations
+- Stable contract for frontend consumption
+
+### Result
+
+Flows are now:
+
+- boundary-defined (0.6.1)
+- contract-aligned (0.6.2)
+- bootstrap-consolidated (0.6.3)
+- consistency-hardened (0.6.4)
+
+### Final State
+
+The authenticated flow surface is now stable and ready for higher-level feature evolution.

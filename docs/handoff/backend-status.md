@@ -490,3 +490,33 @@ After 0.6.3, the authenticated surface is:
 ### Next Step
 
 0.6.4 — Application Surface Consistency Hardening
+
+## Phase 0.6.4 — Application Surface Consistency Hardening
+
+### Summary
+
+This subphase finalizes the authenticated application surface by enforcing a consistent structural contract across all related endpoints.
+
+### Key Improvements
+
+- Introduced canonical wallet envelope (`items`, `total`)
+- Preserved legacy compatibility (`wallets`)
+- Hardened `/auth/bootstrap` structure to avoid drift
+- Added structural tests to freeze contract expectations
+
+### Resulting System State
+
+After 0.6.4, the authenticated surface is:
+
+- boundary-defined (0.6.1)
+- contract-aligned (0.6.2)
+- bootstrap-ready (0.6.3)
+- structurally consistent (0.6.4)
+
+### Phase 0.6 Closure
+
+The system now provides a stable, deterministic, and consistent authenticated surface for frontend consumption.
+
+### Next Step
+
+Phase 1 — Foundation evolution beyond authenticated surface consolidation

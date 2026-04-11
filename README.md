@@ -1897,3 +1897,49 @@ Authenticated surface is now:
 ### Next
 
 0.6.4 — Application Surface Consistency Hardening
+
+## Phase 0.6.4 — Application Surface Consistency Hardening
+
+### Objective
+
+Harden the authenticated application surface by freezing a consistent structural contract across the bootstrap and wallet surfaces without breaking existing consumers.
+
+### Implementation
+
+- Added canonical `items` support to `/auth/wallets` while preserving legacy `wallets`
+- Hardened `/auth/bootstrap` wallet block to expose only the canonical shape
+- Added structural hardening tests for:
+  - `/auth/wallets`
+  - `/auth/bootstrap`
+
+### Guarantees
+
+- No breaking path changes
+- No removal of legacy compatibility fields from `/auth/wallets`
+- No business logic expansion
+- No lifecycle changes
+- Canonical wallet envelope consistency across authenticated surfaces
+
+### Result
+
+Authenticated surface is now:
+
+- boundary-defined (0.6.1)
+- contract-aligned (0.6.2)
+- bootstrap-ready (0.6.3)
+- consistency-hardened (0.6.4)
+
+### Phase 0.6 Closure
+
+Phase 0.6 is now complete.
+
+It delivered:
+
+- explicit authenticated surface boundaries
+- aligned shared authenticated context
+- session-ready bootstrap aggregation
+- structural hardening of the authenticated application surface
+
+### Next
+
+Phase 1 — next foundation evolution beyond authenticated bootstrap consolidation

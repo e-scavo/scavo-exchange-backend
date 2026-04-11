@@ -49,8 +49,15 @@
 
 * `handoff/backend-status.md`
 
+--- 
+
 ### Phase 0.6 — Authenticated Application Bootstrap Consolidation
 
 - 0.6.1 ✔ Bootstrap Surface Boundary Clarification
 - 0.6.2 ✔ Authenticated Surface Contract Alignment
 - 0.6.3 ✔ Session-Ready Bootstrap Read Model
+- 0.6.4 ✔ Application Surface Consistency Hardening
+
+Phase 0.6 ✔ Completed
+
+---

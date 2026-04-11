@@ -3314,3 +3314,130 @@ func TestHTTPHandlers_UpdateMeSettings_RejectsKnownTopLevelScalarPreference(t *t
 		t.Fatalf("unexpected body: %s", rec.Body.String())
 	}
 }
+
+func TestHTTPHandlers_Wallets_ResponseIncludesCanonicalItems(t *testing.T) {
+	store := NewInMemoryWalletIdentityStore()
+	address := testWalletAddress()
+
+	identity, err := store.GetOrCreate(context.Background(), address)
+	if err != nil {
+		t.Fatalf("GetOrCreate error: %v", err)
+	}
+	if _, err := store.AttachUser(context.Background(), identity.ID, "u_test_example_com", true); err != nil {
+		t.Fatalf("AttachUser error: %v", err)
+	}
+
+	h := HTTPHandlers{
+		Tokens:           mustTokenService(t),
+		TTL:              time.Hour,
+		Users:            usermod.NewService(nil),
+		WalletIdentities: store,
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/auth/wallets", nil)
+	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	rec := httptest.NewRecorder()
+
+	h.Wallets(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+
+	var payload map[string]any
+	if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("decode error: %v", err)
+	}
+
+	items, ok := payload["items"].([]any)
+	if !ok {
+		t.Fatalf("expected items array in wallets response, got %#v", payload["items"])
+	}
+	legacy, ok := payload["wallets"].([]any)
+	if !ok {
+		t.Fatalf("expected legacy wallets array in wallets response, got %#v", payload["wallets"])
+	}
+	if len(items) != len(legacy) {
+		t.Fatalf("expected items and wallets arrays to be aligned, got %d and %d", len(items), len(legacy))
+	}
+}
+
+func TestHTTPHandlers_Bootstrap_CanonicalShape(t *testing.T) {
+	store := NewInMemoryWalletIdentityStore()
+	address := testWalletAddress()
+
+	identity, err := store.GetOrCreate(context.Background(), address)
+	if err != nil {
+		t.Fatalf("GetOrCreate error: %v", err)
+	}
+	if _, err := store.AttachUser(context.Background(), identity.ID, "u_test_example_com", true); err != nil {
+		t.Fatalf("AttachUser error: %v", err)
+	}
+
+	createdAt := time.Date(2026, time.April, 7, 10, 0, 0, 0, time.UTC)
+	updatedAt := createdAt.Add(10 * time.Minute)
+	repo := &stubUserSettingsRepo{
+		getByUserIDFn: func(ctx context.Context, userID string) (*usersettingsmod.UserSettings, error) {
+			return &usersettingsmod.UserSettings{
+				UserID: userID,
+				Preferences: map[string]any{
+					"theme": "dark",
+				},
+				CreatedAt: createdAt,
+				UpdatedAt: updatedAt,
+			}, nil
+		},
+	}
+
+	claims := sessionClaims()
+	claims.AuthMethod = "wallet_evm"
+	claims.WalletID = identity.ID
+	claims.WalletAddress = address
+	claims.Chain = "scavium"
+
+	h := HTTPHandlers{
+		Tokens:           mustTokenService(t),
+		TTL:              time.Hour,
+		Users:            usermod.NewService(nil),
+		UserSettings:     usersettingsmod.NewService(repo),
+		WalletIdentities: store,
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/auth/bootstrap", nil)
+	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, claims))
+	rec := httptest.NewRecorder()
+
+	h.Bootstrap(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+
+	var payload map[string]any
+	if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("decode error: %v", err)
+	}
+
+	for _, key := range []string{"session", "user", "profile", "settings", "wallets"} {
+		if _, ok := payload[key]; !ok {
+			t.Fatalf("expected %q in bootstrap response", key)
+		}
+	}
+	if _, ok := payload["items"]; ok {
+		t.Fatal("did not expect top-level items in bootstrap response")
+	}
+
+	wallets, ok := payload["wallets"].(map[string]any)
+	if !ok {
+		t.Fatalf("expected wallets object, got %#v", payload["wallets"])
+	}
+	if _, ok := wallets["items"]; !ok {
+		t.Fatal("expected canonical wallets.items in bootstrap response")
+	}
+	if _, ok := wallets["wallets"]; ok {
+		t.Fatal("did not expect legacy wallets.wallets field in bootstrap response")
+	}
+	if _, ok := wallets["total"]; !ok {
+		t.Fatal("expected wallets.total in bootstrap response")
+	}
+}

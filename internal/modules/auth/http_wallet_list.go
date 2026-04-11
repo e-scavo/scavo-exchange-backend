@@ -24,6 +24,7 @@ type WalletReadModel struct {
 }
 
 type WalletsResponse struct {
+	Items          []*WalletReadModel `json:"items"`
 	Wallets        []*WalletReadModel `json:"wallets"`
 	Total          int                `json:"total"`
 	Limit          int                `json:"limit"`
@@ -360,6 +361,7 @@ func buildWalletsResponse(window []*WalletReadModel, total int, q WalletsQuery) 
 	}
 
 	return WalletsResponse{
+		Items:          window,
 		Wallets:        window,
 		Total:          total,
 		Limit:          q.Limit,

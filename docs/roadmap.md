@@ -52,6 +52,26 @@ This subphase introduces a unified bootstrap endpoint that aggregates all authen
 
 ---
 
+### 0.6.4 — Application Surface Consistency Hardening ✔
+Completed
+
+This subphase finalizes the authenticated application surface by enforcing a consistent structural contract across all endpoints, introducing canonical envelopes while preserving backward compatibility.
+
+### Phase 0.6 — Completed
+
+Phase 0.6 is now fully completed.
+
+It delivered:
+
+- explicit authenticated surface boundaries
+- aligned shared authenticated context
+- unified bootstrap read model
+- structural contract hardening across endpoints
+
+### Next
+
+Phase 1 — Foundation evolution beyond authenticated surface consolidation
+
 ## 👤 Stage 1 — Identity & Wallets
 
 - User model

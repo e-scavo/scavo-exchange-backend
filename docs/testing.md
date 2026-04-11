@@ -1450,3 +1450,45 @@ Testing surface now guarantees:
 - boundary correctness (0.6.1)
 - contract alignment (0.6.2)
 - bootstrap integrity (0.6.3)
+
+## Phase 0.6.4 — Application Surface Consistency Hardening
+
+### Purpose
+
+Ensure that all authenticated endpoints follow a consistent structural contract and that canonical envelopes are enforced without breaking legacy compatibility.
+
+### Coverage Added
+
+#### Wallet envelope consistency
+
+- `/auth/wallets` must expose:
+  - `items` (canonical)
+  - `wallets` (legacy)
+- Both must remain aligned in length and content
+
+#### Bootstrap structural integrity
+
+- `/auth/bootstrap` must expose:
+  - `session`
+  - `user`
+  - `profile`
+  - `settings`
+  - `wallets`
+- `wallets` must contain:
+  - `items`
+  - `total`
+- No legacy `wallets.wallets` allowed inside bootstrap
+
+#### Structural guarantees
+
+- No top-level unexpected fields
+- No drift between canonical and legacy structures
+
+### Result
+
+Testing surface now guarantees:
+
+- boundary correctness (0.6.1)
+- contract alignment (0.6.2)
+- bootstrap integrity (0.6.3)
+- structural consistency (0.6.4)

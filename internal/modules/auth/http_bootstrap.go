@@ -15,6 +15,17 @@ type BootstrapWalletsView struct {
 	Total int                `json:"total"`
 }
 
+func buildBootstrapWalletsView(wallets []*WalletReadModel) BootstrapWalletsView {
+	if wallets == nil {
+		wallets = []*WalletReadModel{}
+	}
+
+	return BootstrapWalletsView{
+		Items: wallets,
+		Total: len(wallets),
+	}
+}
+
 type BootstrapResponse struct {
 	Session  *SessionView         `json:"session"`
 	User     *usermod.User        `json:"user,omitempty"`
@@ -91,9 +102,6 @@ func (h HTTPHandlers) Bootstrap(w http.ResponseWriter, r *http.Request) {
 		User:     user,
 		Profile:  profile,
 		Settings: usersettingsmod.ToView(settings),
-		Wallets: BootstrapWalletsView{
-			Items: wallets,
-			Total: len(wallets),
-		},
+		Wallets:  buildBootstrapWalletsView(wallets),
 	})
 }
