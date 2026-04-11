@@ -25,6 +25,22 @@
 
 ---
 
+## Phase 0.6 — Authenticated Application Bootstrap Consolidation
+
+### 0.6.1 — Bootstrap Surface Boundary Clarification ✔
+Completed
+
+### 0.6.2 — Authenticated Surface Contract Alignment ✔
+Completed
+
+This subphase aligns all authenticated endpoints under a shared normalized context, ensuring contract-level consistency without breaking existing APIs.
+
+### Next
+
+0.6.3 — Session-Ready Bootstrap Read Model
+
+---
+
 ## 👤 Stage 1 — Identity & Wallets
 
 - User model

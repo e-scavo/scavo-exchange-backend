@@ -418,3 +418,40 @@ Current boundary after 0.6.1:
 * continue with 0.6.2 — Authenticated Surface Contract Alignment
 * preserve the semantic boundary now established between bootstrap identity and session context
 * avoid re-opening Phase 0.5 unless the ZIP proves a real contract regression
+
+### 0.6.2 — Authenticated Surface Contract Alignment
+
+This subphase consolidates the authenticated bootstrap surface by aligning the shared identity and wallet-context fields exposed across related authenticated endpoints without changing public endpoint paths or breaking existing response contracts.
+
+Delivered:
+
+* introduced a shared authenticated context normalization layer used by the authenticated surface
+* aligned `/auth/me` and `/auth/session` so common identity, wallet, and chain context now derive from the same internal source
+* normalized empty wallet-context handling so partial wallet metadata does not drift between authenticated surfaces
+* reinforced contract consistency between `/auth/me`, `/auth/session`, and `/auth/wallets` through explicit alignment tests
+* preserved compatibility by keeping the public JSON envelopes and endpoint boundaries established in 0.6.1
+
+### Phase 0.6 Direction
+
+Phase 0.6 continues consolidating the authenticated application surface into a coherent bootstrap layer for frontend consumption.
+
+Current boundary after 0.6.2:
+
+* `GET /auth/me` → authenticated bootstrap identity surface with aligned shared context
+* `GET /auth/session` → authenticated session / token context surface with aligned shared context
+* `GET /auth/me/settings` → authenticated settings surface
+* `GET /auth/wallets` → authenticated wallet inventory surface aligned with the authenticated bootstrap wallet view
+
+0.6.2 remains intentionally compatibility-safe:
+
+* no public endpoint paths were changed
+* no public JSON field names were renamed or removed
+* no wallet lifecycle rules were changed
+* no settings resource redesign was introduced
+* alignment is enforced through shared internal normalization and expanded contract tests
+
+### Updated Next Direction
+
+* continue with 0.6.3 — Session-Ready Bootstrap Read Model
+* build a frontend-ready authenticated bootstrap read model on top of the now aligned authenticated surface
+* preserve the semantic boundary from 0.6.1 and the contract alignment from 0.6.2 while avoiding unnecessary expansion of Phase 0

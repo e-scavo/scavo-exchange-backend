@@ -1367,3 +1367,45 @@ go test ./...
 
 ### Validation Status
 Validated successfully against the updated project state corresponding to Phase 0.6.1.
+
+## Phase 0.6.2 — Authenticated Surface Contract Alignment
+
+### Purpose
+
+This subphase extends the testing surface to validate that all authenticated endpoints share a consistent, normalized context derived from a single internal source.
+
+### Coverage Added
+
+The following contract-level guarantees are now enforced:
+
+#### Cross-endpoint alignment
+
+For identical claims and user context:
+
+- `/auth/me` and `/auth/session` must expose consistent:
+  - `user_id`
+  - `auth_method`
+  - `wallet_id`
+  - `wallet_address`
+  - `chain`
+
+#### Wallet surface alignment
+
+- The primary wallet exposed in `/auth/me` must match:
+  - the corresponding wallet in `/auth/wallets`
+  - including `id`, `address`, `status`, and timestamps
+
+#### Internal consistency
+
+- `/auth/me` must maintain consistency between:
+  - top-level `user`
+  - `profile.user`
+
+### Result
+
+The authenticated surface is now:
+
+- boundary-defined (0.6.1)
+- contract-aligned (0.6.2)
+
+All future evolution must preserve these guarantees.

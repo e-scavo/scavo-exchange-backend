@@ -23,7 +23,7 @@ The backend follows a **wallet-first identity model** that progressively evolves
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.6 — Authenticated Application Bootstrap Consolidation & Session-Ready Surface  
-**Current Subphase:** **0.6.1 — Bootstrap Surface Boundary Clarification**
+**Current Subphase:** **0.6.2 — Authenticated Surface Contract Alignment**
 
 ---
 
@@ -1762,3 +1762,98 @@ Phase 0.6.1 closes that semantic ambiguity and prepares the backend for the next
 - contract alignment across authenticated surfaces
 - session-ready bootstrap read model clarification
 - final authenticated application surface consistency hardening
+
+
+---
+
+## Phase 0.6.2 — Authenticated Surface Contract Alignment
+
+Phase 0.6.2 consolidates the authenticated bootstrap surface by aligning the shared authenticated context exposed by the existing endpoints without introducing breaking contract changes.
+
+While Phase 0.6.1 clarified boundary ownership between `/auth/me`, `/auth/session`, `/auth/me/settings`, and `/auth/wallets`, the construction of the authenticated context still depended on separate internal builders. That left a future drift risk between identity bootstrap data and token-derived session data.
+
+This subphase removes that drift risk by aligning the shared authenticated context behind a common internal normalizer and by freezing cross-endpoint consistency with dedicated tests.
+
+### Delivered in 0.6.2
+
+Delivered in Phase 0.6.2:
+
+- introduction of a shared authenticated context normalizer for profile-side and session-side authenticated projections
+- explicit normalization of wallet-derived authenticated context so partial wallet claim state cannot leak inconsistent `wallet_id` or `chain` values when `wallet_address` is absent
+- alignment of `/auth/me` and `/auth/session` around the same internal source of truth for shared authenticated context fields
+- contract-level test coverage that freezes cross-endpoint consistency between `/auth/me`, `/auth/session`, and `/auth/wallets`
+- preservation of existing public JSON envelopes and endpoint compatibility
+
+### Internal alignment introduced in 0.6.2
+
+The shared authenticated context now centrally derives and aligns:
+
+- `user_id`
+- `email`
+- `auth_method`
+- `wallet_id`
+- `wallet_address`
+- `chain`
+- `has_wallet_session`
+
+This shared derivation is now used by both the profile-side bootstrap projection and the session-side JWT/session projection.
+
+### `/auth/me` and `/auth/session` alignment
+
+Phase 0.6.2 keeps the responsibilities established in 0.6.1 unchanged, but aligns their shared authenticated fields so that both endpoints remain semantically separated while still projecting the same authenticated context when they originate from the same claims.
+
+The alignment now ensures consistency for:
+
+- authenticated user identity
+- auth method
+- wallet session context
+- wallet address context
+- wallet chain context
+- attached user summary consistency
+
+### `/auth/me` and `/auth/wallets` alignment
+
+The authenticated bootstrap profile and the wallet inventory surface remain separate endpoints, but 0.6.2 hardens their relationship by validating that the primary wallet projected by `/auth/me` stays aligned with the primary wallet represented in `/auth/wallets`.
+
+This protects the bootstrap surface from future drift in:
+
+- primary wallet identity
+- wallet address projection
+- primary wallet status
+- linked and detached timestamps
+- primary designation semantics
+
+### Test-level enforcement added in 0.6.2
+
+The subphase is now enforced with contract-oriented authenticated handler tests that verify:
+
+- `/auth/me` and `/auth/session` expose aligned shared authenticated context fields when built from the same claims
+- `/auth/me` top-level `user` and profile-side `user` remain internally consistent
+- `/auth/me` primary wallet projection stays aligned with `/auth/wallets` inventory output
+- wallet-session normalization remains consistent when wallet-address context is absent
+
+### Compatibility
+
+Phase 0.6.2 remains fully backward compatible.
+
+Specifically:
+
+- no endpoint was renamed
+- no response envelope was removed
+- no public field was renamed
+- no authenticated route was moved
+- no settings contract was changed
+- no wallet lifecycle operation was changed
+- no pagination contract was changed
+
+### Why this subphase matters
+
+Phase 0.6.2 turns the authenticated bootstrap boundary defined in 0.6.1 into a contract-aligned authenticated surface.
+
+This matters because frontend bootstrap consumers must be able to rely not only on endpoint responsibility boundaries, but also on stable cross-endpoint consistency for the authenticated context that those endpoints share.
+
+Phase 0.6.2 therefore prepares the backend for the next step of Phase 0.6:
+
+- session-ready bootstrap read model consolidation
+- authenticated bootstrap consumption without ambiguity across surfaces
+- final authenticated application surface hardening

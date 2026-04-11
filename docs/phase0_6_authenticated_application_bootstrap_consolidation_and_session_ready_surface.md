@@ -540,3 +540,37 @@ With 0.6.1 complete:
 This creates the right base for the next subphases of Phase 0.6, where contract alignment and session-ready bootstrap composition can proceed without semantic ambiguity.
 
 ---
+
+---
+
+## 0.6.2 — Authenticated Surface Contract Alignment
+
+### Objective
+
+Align all authenticated surfaces under a shared normalized context to eliminate drift and ensure consistent contract behavior across endpoints.
+
+### Implementation
+
+- Introduced shared `auth_context` normalization layer
+- Refactored `/auth/me` and `/auth/session` to derive common fields from a single source
+- Standardized wallet context propagation (id, address, chain)
+- Added cross-endpoint contract validation tests
+
+### Guarantees
+
+- `/auth/me` and `/auth/session` now share consistent identity and wallet context
+- `/auth/me` and `/auth/wallets` maintain aligned primary wallet representation
+- No breaking changes introduced
+
+### Result
+
+Authenticated surface is now:
+
+- boundary-defined (0.6.1)
+- contract-aligned (0.6.2)
+
+This enables safe evolution toward a unified bootstrap read model.
+
+### Next
+
+0.6.3 — Session-Ready Bootstrap Read Model

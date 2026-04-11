@@ -20,7 +20,7 @@ Status: ✅ Completed
 ### Phase 0.6 — Authenticated Application Bootstrap Consolidation & Session-Ready Surface
 Status: 🟡 In Progress
 
-Latest completed subphase: **0.6.1 — Bootstrap Surface Boundary Clarification**
+Latest completed subphase: **0.6.2 — Authenticated Surface Contract Alignment**
 
 ---
 
@@ -831,7 +831,7 @@ Phase 0.5.5.3 closes the next contract-surface gap in authenticated user setting
 | Subphase | Description | Status |
 |----------|-------------|--------|
 | 0.6.1 | Bootstrap Surface Boundary Clarification | ✅ Completed |
-| 0.6.2 | Authenticated Surface Contract Alignment | ⬜ Pending |
+| 0.6.2 | Authenticated Surface Contract Alignment | ✅ Completed |
 | 0.6.3 | Session-Ready Bootstrap Read Model | ⬜ Pending |
 | 0.6.4 | Application Surface Consistency Hardening | ⬜ Pending |
 
@@ -894,3 +894,45 @@ This gives Phase 0.6 a stable starting point for the next alignment step, where 
 - align related authenticated response shapes where doing so improves bootstrap consumption without breaking compatibility
 - preserve the boundary clarified in 0.6.1 while improving cross-endpoint coherence in 0.6.2
 - continue treating authenticated bootstrap consolidation as a Stage 0 concern rather than a new domain feature
+
+
+---
+
+## ✅ Phase 0.6.2 Closure Summary
+
+Phase 0.6.2 aligns the authenticated bootstrap surface without breaking existing public payloads by introducing a shared internal normalization path for authenticated context and by expanding cross-endpoint contract coverage across identity, session, and wallet reads.
+
+### Delivered in 0.6.2
+
+- a shared authenticated-context helper now normalizes `user_id`, `email`, `wallet_id`, `wallet_address`, `auth_method`, `chain`, and `has_wallet_session`
+- `/auth/me` now derives its shared authenticated context from the same logical source used by `/auth/session`
+- wallet-context normalization is now explicit, so missing `wallet_address` also clears partial wallet context such as `wallet_id` and `chain`
+- cross-endpoint contract coverage now validates consistency between `/auth/me` and `/auth/session` for shared authenticated fields
+- bootstrap coherence coverage now validates that top-level `user` and nested `profile.user` remain aligned inside `/auth/me`
+- wallet-surface coherence coverage now validates that the primary wallet exposed by `/auth/me` remains aligned with the primary wallet returned by `/auth/wallets`
+- the subphase preserves backward compatibility by keeping existing JSON envelopes and field names unchanged
+
+### Result
+
+The authenticated bootstrap surface now remains semantically separated while also becoming more contractually aligned for downstream consumers:
+
+- `/auth/me` and `/auth/session` share a normalized authenticated context instead of relying on separate drift-prone derivations
+- partial wallet claim state is now less likely to diverge across bootstrap-related reads
+- `/auth/me` and `/auth/wallets` now have stronger tested coherence around primary wallet representation
+- consumers can rely on tighter internal consistency without requiring any migration of existing response contracts
+
+This positions Phase 0.6 for the next step, where the bootstrap read model can be consolidated more explicitly without reopening boundary semantics or introducing contract instability.
+
+## ❌ Not Included in 0.6.2
+
+- removal of duplicated identity data kept for compatibility inside `/auth/me`
+- JSON field renames or envelope redesign across authenticated endpoints
+- creation of a new aggregate bootstrap endpoint
+- changes to `/auth/me/settings` contract shape or settings persistence semantics
+- wallet lifecycle redesign, pagination redesign, or business-domain expansion
+
+### Next Expected Evolution
+
+- consolidate a clearer session-ready bootstrap read model on top of the now-aligned authenticated context
+- preserve compatibility while reducing frontend ambiguity around which endpoint should be treated as the primary bootstrap source for each authenticated concern
+- continue hardening the authenticated application surface as a Stage 0 foundation concern before new business domains are introduced

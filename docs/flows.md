@@ -930,3 +930,50 @@ Phase 0.6.1 does not change runtime handlers or payload shapes, but the flow con
 
 ### Outcome
 The backend keeps the existing authenticated flows unchanged at runtime, but the bootstrap relationship between them is now explicit. This prepares the next phase to align shapes and metadata across the authenticated surface without reopening Phase 0.5 behavior or introducing new business domains.
+
+## Phase 0.6.2 — Authenticated Surface Contract Alignment
+
+### Overview
+
+This subphase extends the authenticated bootstrap flows by enforcing contract-level alignment across all authenticated surfaces.
+
+### Flow Guarantees Introduced
+
+The following guarantees now apply to all authenticated flows:
+
+#### Shared Auth Context
+
+All flows that depend on authenticated identity now derive their context from a unified normalization layer:
+
+- user identity
+- authentication method
+- wallet context (id, address, chain)
+
+#### Cross-surface consistency
+
+For any authenticated request lifecycle:
+
+1. `/auth/session` defines the session context
+2. `/auth/me` exposes the bootstrap identity surface
+3. `/auth/wallets` reflects the same wallet state
+
+These must now remain consistent across the full request lifecycle.
+
+#### Wallet consistency flow
+
+- The primary wallet exposed in `/auth/me` must always match:
+  - the wallet returned as primary in `/auth/wallets`
+- Detached or inactive wallets must not appear as active in any surface
+
+### Result
+
+Flows are now:
+
+- boundary-defined (0.6.1)
+- contract-aligned (0.6.2)
+
+This ensures deterministic behavior for frontend bootstrap consumption.
+
+### Next Evolution
+
+Phase 0.6.3 will introduce a consolidated bootstrap read model built on top of these aligned flows.
