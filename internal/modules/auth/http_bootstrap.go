@@ -56,52 +56,19 @@ func (h HTTPHandlers) Bootstrap(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusUnauthorized, map[string]any{"error": "unauthorized"})
 		return
 	}
-	if h.UserSettings == nil {
-		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "auth_service_error"})
-		return
-	}
 
-	svc := NewService(h.Tokens, h.Users, h.TTL)
-	user, err := svc.ResolveCurrentUserClaims(r.Context(), claims)
+	payload, err := h.Application().GetBootstrap(r.Context(), claims)
 	if err != nil {
 		switch {
-		case errors.Is(err, ErrUnauthorized):
+		case errors.Is(err, ErrUnauthorized), errors.Is(err, usersettingsmod.ErrUserIDRequired):
 			writeJSON(w, http.StatusUnauthorized, map[string]any{"error": "unauthorized"})
+		case errors.Is(err, ErrWalletIdentityStore):
+			writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "wallet_identity_error"})
 		default:
 			writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "auth_service_error"})
 		}
 		return
 	}
 
-	session := buildSessionViewWithUser(claims, user)
-	profile, err := buildProfileViewWithUser(r.Context(), claims, user, h.WalletIdentities)
-	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "auth_service_error"})
-		return
-	}
-
-	settings, err := h.UserSettings.GetOrDefault(r.Context(), session.UserID)
-	if err != nil {
-		switch {
-		case errors.Is(err, usersettingsmod.ErrUserIDRequired):
-			writeJSON(w, http.StatusUnauthorized, map[string]any{"error": "unauthorized"})
-		default:
-			writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "auth_service_error"})
-		}
-		return
-	}
-
-	wallets, err := listWalletReadModelsForUser(r.Context(), session.UserID, h.WalletIdentities)
-	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "wallet_identity_error"})
-		return
-	}
-
-	writeJSON(w, http.StatusOK, BootstrapResponse{
-		Session:  session,
-		User:     user,
-		Profile:  profile,
-		Settings: usersettingsmod.ToView(settings),
-		Wallets:  buildBootstrapWalletsView(wallets),
-	})
+	writeJSON(w, http.StatusOK, payload)
 }

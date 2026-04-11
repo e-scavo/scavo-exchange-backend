@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -2701,6 +2702,78 @@ func TestHTTPHandlers_Bootstrap_ServiceUnavailable(t *testing.T) {
 	}
 	if !strings.Contains(rec.Body.String(), "auth_service_error") {
 		t.Fatalf("unexpected body: %s", rec.Body.String())
+	}
+}
+
+func TestApplication_GetBootstrap_Success(t *testing.T) {
+	store := NewInMemoryWalletIdentityStore()
+	address := testWalletAddress()
+
+	identity, err := store.GetOrCreate(context.Background(), address)
+	if err != nil {
+		t.Fatalf("GetOrCreate error: %v", err)
+	}
+	attached, err := store.AttachUser(context.Background(), identity.ID, "u_test_example_com", true)
+	if err != nil {
+		t.Fatalf("AttachUser error: %v", err)
+	}
+
+	createdAt := time.Date(2026, time.April, 7, 10, 0, 0, 0, time.UTC)
+	updatedAt := createdAt.Add(10 * time.Minute)
+	repo := &stubUserSettingsRepo{
+		getByUserIDFn: func(ctx context.Context, userID string) (*usersettingsmod.UserSettings, error) {
+			return &usersettingsmod.UserSettings{
+				UserID: userID,
+				Preferences: map[string]any{
+					"theme": "dark",
+				},
+				CreatedAt: createdAt,
+				UpdatedAt: updatedAt,
+			}, nil
+		},
+	}
+
+	claims := sessionClaims()
+	claims.AuthMethod = "wallet_evm"
+	claims.WalletID = identity.ID
+	claims.WalletAddress = address
+	claims.Chain = "scavium"
+
+	app := NewApplication(
+		mustTokenService(t),
+		usermod.NewService(nil),
+		usersettingsmod.NewService(repo),
+		store,
+	)
+
+	payload, err := app.GetBootstrap(context.Background(), claims)
+	if err != nil {
+		t.Fatalf("GetBootstrap error: %v", err)
+	}
+
+	if payload.Session == nil || payload.Profile == nil || payload.User == nil {
+		t.Fatalf("unexpected bootstrap payload: %#v", payload)
+	}
+	if payload.Session.UserID != payload.Profile.UserID || payload.Session.UserID != payload.User.ID {
+		t.Fatalf("unexpected user alignment: session=%q profile=%q user=%q", payload.Session.UserID, payload.Profile.UserID, payload.User.ID)
+	}
+	if payload.Settings.UserID != payload.Session.UserID {
+		t.Fatalf("unexpected settings alignment: %q", payload.Settings.UserID)
+	}
+	if payload.Wallets.Total != 1 || len(payload.Wallets.Items) != 1 {
+		t.Fatalf("unexpected wallets payload: %#v", payload.Wallets)
+	}
+	if payload.Wallets.Items[0].ID != attached.ID || payload.Wallets.Items[0].Address != address {
+		t.Fatalf("unexpected bootstrap wallet: %#v", payload.Wallets.Items[0])
+	}
+}
+
+func TestApplication_GetBootstrap_NotConfigured(t *testing.T) {
+	app := NewApplication(mustTokenService(t), usermod.NewService(nil), nil, nil)
+
+	_, err := app.GetBootstrap(context.Background(), sessionClaims())
+	if !errors.Is(err, ErrApplicationNotConfigured) {
+		t.Fatalf("expected ErrApplicationNotConfigured, got %v", err)
 	}
 }
 
