@@ -999,4 +999,34 @@ The authenticated application surface is now:
 
 ### Next Phase
 
-Phase 1 — Foundation evolution beyond authenticated surface consolidation
+Phase 0.7 — Application Layer Foundation
+
+## 🔄 Phase 0.7 — Application Layer Foundation
+
+### Subphase Status
+
+| Subphase | Description | Status |
+|----------|------------|--------|
+| 0.7.1 | Application Layer Boundary Definition | ✔ Completed |
+| 0.7.2 | Authenticated Surface Use Cases Extraction | ⬜ Pending |
+| 0.7.3 | Wallet Management Use Cases Consolidation | ⬜ Pending |
+| 0.7.4 | Handler Simplification & Contract Preservation | ⬜ Pending |
+
+---
+
+## ✅ Phase 0.7.1 Summary
+
+### Delivered
+
+- Introduced explicit application layer (`Application`)
+- Established handler → application → services boundary
+- Migrated bootstrap orchestration out of HTTP layer
+- Added application-level test coverage
+
+### Result
+
+The backend now has a formal entry point for use-case orchestration, enabling controlled evolution of business logic without overloading HTTP handlers.
+
+### Next
+
+0.7.2 — Authenticated Surface Use Cases Extraction

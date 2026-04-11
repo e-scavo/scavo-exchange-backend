@@ -1059,3 +1059,44 @@ Flows are now:
 ### Final State
 
 The authenticated flow surface is now stable and ready for higher-level feature evolution.
+
+## Phase 0.7.1 — Application Layer Boundary Definition
+
+### Updated Flow Structure
+
+The authenticated flow is now structured as:
+
+HTTP Request  
+→ HTTP Handler (transport)  
+→ Application Layer (use-case orchestration)  
+→ Services / Stores (execution)  
+→ Response  
+
+### Bootstrap Flow (Updated)
+
+1. `GET /auth/bootstrap`
+2. Handler extracts context
+3. Delegates to `Application.GetBootstrap(...)`
+4. Application orchestrates:
+   - session
+   - user
+   - profile
+   - settings
+   - wallets
+5. Handler maps result to HTTP response
+
+### Flow Guarantees
+
+- No business orchestration inside handlers
+- Deterministic execution via application layer
+- Stable contracts preserved across layers
+
+### Result
+
+Flows are now:
+
+- boundary-defined (0.6.1)
+- contract-aligned (0.6.2)
+- bootstrap-consolidated (0.6.3)
+- consistency-hardened (0.6.4)
+- application-layer structured (0.7.1)

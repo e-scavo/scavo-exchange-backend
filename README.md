@@ -1943,3 +1943,44 @@ It delivered:
 ### Next
 
 Phase 1 — next foundation evolution beyond authenticated bootstrap consolidation
+
+## Phase 0.7.1 — Application Layer Boundary Definition
+
+### Objective
+
+Introduce the first explicit application-layer boundary so HTTP handlers stop owning full orchestration of authenticated use cases.
+
+### Implementation
+
+- Introduced `internal/modules/auth/application.go`
+- Added an explicit `Application` entry point for authenticated use cases
+- Moved bootstrap orchestration into `Application.GetBootstrap(...)`
+- Reduced `/auth/bootstrap` handler responsibilities to:
+  - request context extraction
+  - application invocation
+  - HTTP error/status mapping
+  - response writing
+
+### Guarantees
+
+- No public contract changes
+- No route changes
+- No business-domain expansion
+- No broad refactor of all handlers
+- Existing builders, services, and stores remain the underlying execution units
+
+### Result
+
+Stage 0 foundation now progresses beyond authenticated surface hardening into application-structure enablement.
+
+Current application evolution state:
+
+- 0.6.1 → authenticated surface boundaries
+- 0.6.2 → authenticated contract alignment
+- 0.6.3 → bootstrap read model
+- 0.6.4 → structural hardening
+- 0.7.1 → first explicit application-layer boundary
+
+### Next
+
+0.7.2 — Authenticated Surface Use Cases Extraction

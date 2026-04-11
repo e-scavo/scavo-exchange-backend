@@ -61,3 +61,7 @@
 Phase 0.6 ✔ Completed
 
 ---
+
+### Phase 0.7 — Application Layer Foundation
+
+- 0.7.1 ✔ Application Layer Boundary Definition

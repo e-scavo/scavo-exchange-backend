@@ -519,4 +519,37 @@ The system now provides a stable, deterministic, and consistent authenticated su
 
 ### Next Step
 
-Phase 1 — Foundation evolution beyond authenticated surface consolidation
+Phase 0.7 — Application Layer Foundation
+
+## Phase 0.7.1 — Application Layer Boundary Definition
+
+### Summary
+
+This subphase introduces the first explicit application layer, establishing a clear boundary between HTTP transport and use-case orchestration.
+
+### Key Changes
+
+- Introduced `Application` layer in `internal/modules/auth`
+- Moved bootstrap orchestration out of HTTP handlers
+- Established handler → application → service/store flow
+- Preserved all public contracts and routes
+
+### Architectural Impact
+
+- HTTP handlers are now transport-only components
+- Application layer owns use-case orchestration
+- Existing services and stores remain the execution layer
+
+### Resulting System State
+
+After 0.7.1, the backend evolves from:
+
+- handler-driven orchestration
+
+to:
+
+- structured application-layer orchestration
+
+### Next Step
+
+0.7.2 — Authenticated Surface Use Cases Extraction

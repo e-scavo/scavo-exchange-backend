@@ -1492,3 +1492,39 @@ Testing surface now guarantees:
 - contract alignment (0.6.2)
 - bootstrap integrity (0.6.3)
 - structural consistency (0.6.4)
+
+## Phase 0.7.1 — Application Layer Boundary Definition
+
+### Purpose
+
+Validate that the newly introduced application layer correctly encapsulates use-case orchestration independently of HTTP handlers.
+
+### Coverage Added
+
+#### Application layer validation
+
+- `Application.GetBootstrap(...)` must:
+  - resolve authenticated context
+  - aggregate session, user, profile, settings, and wallets
+  - return consistent data independent of HTTP layer
+
+#### Handler delegation
+
+- `/auth/bootstrap` handler must:
+  - delegate orchestration to application layer
+  - not contain aggregation logic
+
+#### Error propagation
+
+- Application errors must propagate correctly to HTTP layer
+- Handler must translate errors without altering application semantics
+
+### Result
+
+Testing surface now guarantees:
+
+- boundary correctness (0.6.1)
+- contract alignment (0.6.2)
+- bootstrap integrity (0.6.3)
+- structural consistency (0.6.4)
+- application-layer isolation (0.7.1)

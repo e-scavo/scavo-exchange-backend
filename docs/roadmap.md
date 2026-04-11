@@ -66,8 +66,17 @@ Phase 0.7 — Application Layer Foundation
 
 ## 🧱 Stage 0 — Foundation (Remaining Phases)
 
-### 0.7 — Application Layer Foundation ⬜ Pending
+### 0.7 — Application Layer Foundation 🔄 In Progress
 Introduce an application layer to separate HTTP from business logic.
+
+#### 0.7.1 — Application Layer Boundary Definition ✔ Completed
+Initial application layer boundary defined and bootstrap use-case migrated.
+
+#### 0.7.2 — Authenticated Surface Use Cases Extraction ⬜ Pending
+
+#### 0.7.3 — Wallet Management Use Cases Consolidation ⬜ Pending
+
+#### 0.7.4 — Handler Simplification & Contract Preservation ⬜ Pending
 
 ### 0.8 — Standardized Error Model ⬜ Pending
 Define a consistent error contract across all endpoints.
