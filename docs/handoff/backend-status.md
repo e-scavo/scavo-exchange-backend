@@ -553,3 +553,39 @@ to:
 ### Next Step
 
 0.7.2 — Authenticated Surface Use Cases Extraction
+
+## Phase 0.7.2 — Authenticated Surface Use Cases Extraction
+
+### Summary
+
+This subphase completes the migration of the authenticated surface core use cases into the application layer, removing handler-driven orchestration for login, session, and user identity flows.
+
+### Key Changes
+
+- Introduced application-level use cases:
+  - `Application.Login(...)`
+  - `Application.GetMe(...)`
+  - `Application.GetSession(...)`
+- Preserved `Application.GetBootstrap(...)` from 0.7.1
+- Reduced HTTP handlers to transport-only responsibilities
+- Centralized authenticated flow orchestration in application layer
+
+### Architectural Impact
+
+- Authenticated surface is now fully application-driven
+- Handlers act purely as transport adapters
+- Services and stores remain execution layer components
+
+### Resulting System State
+
+After 0.7.2, the backend evolves from:
+
+- partial application-layer adoption (0.7.1)
+
+to:
+
+- full application-layer orchestration of authenticated surface (0.7.2)
+
+### Next Step
+
+0.7.3 — Wallet Management Use Cases Consolidation

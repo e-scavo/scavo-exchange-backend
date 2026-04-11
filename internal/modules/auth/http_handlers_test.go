@@ -3514,3 +3514,99 @@ func TestHTTPHandlers_Bootstrap_CanonicalShape(t *testing.T) {
 		t.Fatal("expected wallets.total in bootstrap response")
 	}
 }
+
+func TestApplication_Login_Success(t *testing.T) {
+	app := NewApplication(mustTokenService(t), usermod.NewService(nil), nil, nil)
+
+	resp, err := app.Login(context.Background(), "test@example.com", "dev")
+	if err != nil {
+		t.Fatalf("Login error: %v", err)
+	}
+	if resp.AccessToken == "" {
+		t.Fatal("expected access token")
+	}
+	if resp.UserID != "u_test_example_com" {
+		t.Fatalf("unexpected user id: %q", resp.UserID)
+	}
+}
+
+func TestApplication_Login_InvalidCredentials(t *testing.T) {
+	app := NewApplication(mustTokenService(t), usermod.NewService(nil), nil, nil)
+
+	_, err := app.Login(context.Background(), "test@example.com", "wrong")
+	if !errors.Is(err, ErrInvalidCredentials) {
+		t.Fatalf("expected ErrInvalidCredentials, got %v", err)
+	}
+}
+
+func TestApplication_GetMe_Success(t *testing.T) {
+	ts := mustTokenService(t)
+	store := NewInMemoryWalletIdentityStore()
+	address := testWalletAddress()
+
+	identity, err := store.GetOrCreate(context.Background(), address)
+	if err != nil {
+		t.Fatalf("GetOrCreate error: %v", err)
+	}
+	if _, err := store.AttachUser(context.Background(), identity.ID, "u_test_example_com", true); err != nil {
+		t.Fatalf("AttachUser error: %v", err)
+	}
+
+	claims := sessionClaims()
+	claims.AuthMethod = "wallet_evm"
+	claims.WalletID = identity.ID
+	claims.WalletAddress = address
+	claims.Chain = "scavium"
+
+	app := NewApplication(ts, usermod.NewService(nil), nil, store)
+
+	resp, err := app.GetMe(context.Background(), claims)
+	if err != nil {
+		t.Fatalf("GetMe error: %v", err)
+	}
+	if resp.User == nil || resp.User.ID != "u_test_example_com" {
+		t.Fatalf("unexpected user: %#v", resp.User)
+	}
+	if resp.Profile == nil || resp.Profile.UserID != "u_test_example_com" {
+		t.Fatalf("unexpected profile: %#v", resp.Profile)
+	}
+	if resp.Profile.PrimaryWallet == nil || resp.Profile.PrimaryWallet.Address != address {
+		t.Fatalf("unexpected primary wallet: %#v", resp.Profile.PrimaryWallet)
+	}
+}
+
+func TestApplication_GetMe_Unauthorized(t *testing.T) {
+	app := NewApplication(mustTokenService(t), usermod.NewService(nil), nil, nil)
+
+	_, err := app.GetMe(context.Background(), nil)
+	if !errors.Is(err, ErrUnauthorized) {
+		t.Fatalf("expected ErrUnauthorized, got %v", err)
+	}
+}
+
+func TestApplication_GetSession_Success(t *testing.T) {
+	app := NewApplication(mustTokenService(t), usermod.NewService(nil), nil, nil)
+
+	resp, err := app.GetSession(context.Background(), sessionClaims())
+	if err != nil {
+		t.Fatalf("GetSession error: %v", err)
+	}
+	if resp.Session == nil {
+		t.Fatal("expected session payload")
+	}
+	if resp.Session.UserID != "u_test_example_com" {
+		t.Fatalf("unexpected session user id: %q", resp.Session.UserID)
+	}
+	if !resp.Session.Authenticated {
+		t.Fatal("expected authenticated session")
+	}
+}
+
+func TestApplication_GetSession_Unauthorized(t *testing.T) {
+	app := NewApplication(mustTokenService(t), usermod.NewService(nil), nil, nil)
+
+	_, err := app.GetSession(context.Background(), nil)
+	if !errors.Is(err, ErrUnauthorized) {
+		t.Fatalf("expected ErrUnauthorized, got %v", err)
+	}
+}

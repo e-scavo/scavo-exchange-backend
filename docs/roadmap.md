@@ -72,7 +72,7 @@ Introduce an application layer to separate HTTP from business logic.
 #### 0.7.1 — Application Layer Boundary Definition ✔ Completed
 Initial application layer boundary defined and bootstrap use-case migrated.
 
-#### 0.7.2 — Authenticated Surface Use Cases Extraction ⬜ Pending
+#### 0.7.2 — Authenticated Surface Use Cases Extraction ✔ Completed
 
 #### 0.7.3 — Wallet Management Use Cases Consolidation ⬜ Pending
 

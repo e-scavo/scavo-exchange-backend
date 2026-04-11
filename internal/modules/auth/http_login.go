@@ -63,8 +63,7 @@ func (h HTTPHandlers) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	svc := NewService(h.Tokens, h.Users, h.TTL)
-	result, err := svc.LoginDev(r.Context(), req.Email, req.Password)
+	resp, err := h.Application().Login(r.Context(), req.Email, req.Password)
 	if err != nil {
 		switch {
 		case errors.Is(err, ErrInvalidCredentials):
@@ -75,17 +74,7 @@ func (h HTTPHandlers) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID := ""
-	if result.User != nil {
-		userID = result.User.ID
-	}
-
-	writeJSON(w, http.StatusOK, LoginResponse{
-		AccessToken: result.AccessToken,
-		TokenType:   result.TokenType,
-		ExpiresIn:   result.ExpiresIn,
-		UserID:      userID,
-	})
+	writeJSON(w, http.StatusOK, resp)
 }
 
 func (h HTTPHandlers) Me(w http.ResponseWriter, r *http.Request) {
@@ -95,7 +84,7 @@ func (h HTTPHandlers) Me(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	profile, err := buildProfileView(r.Context(), claims, h.Users, h.WalletIdentities)
+	resp, err := h.Application().GetMe(r.Context(), claims)
 	if err != nil {
 		switch {
 		case errors.Is(err, ErrUnauthorized):
@@ -106,10 +95,7 @@ func (h HTTPHandlers) Me(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeJSON(w, http.StatusOK, MeResponse{
-		User:    profile.User,
-		Profile: profile,
-	})
+	writeJSON(w, http.StatusOK, resp)
 }
 
 func (h HTTPHandlers) UpdateMe(w http.ResponseWriter, r *http.Request) {
@@ -247,8 +233,7 @@ func (h HTTPHandlers) Session(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	svc := NewService(h.Tokens, h.Users, h.TTL)
-	session, err := svc.ResolveSessionClaims(r.Context(), claims)
+	resp, err := h.Application().GetSession(r.Context(), claims)
 	if err != nil {
 		switch {
 		case errors.Is(err, ErrUnauthorized):
@@ -259,7 +244,7 @@ func (h HTTPHandlers) Session(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeJSON(w, http.StatusOK, SessionResponse{Session: session})
+	writeJSON(w, http.StatusOK, resp)
 }
 
 func writeJSON(w http.ResponseWriter, code int, v any) {

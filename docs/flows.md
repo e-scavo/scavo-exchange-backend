@@ -1100,3 +1100,41 @@ Flows are now:
 - bootstrap-consolidated (0.6.3)
 - consistency-hardened (0.6.4)
 - application-layer structured (0.7.1)
+
+## Phase 0.7.2 — Authenticated Surface Use Cases Extraction
+
+### Updated Authenticated Flow
+
+All authenticated endpoints now follow a unified flow:
+
+HTTP Request  
+→ HTTP Handler (transport only)  
+→ Application Layer (use-case execution)  
+→ Services / Stores (execution)  
+→ Response  
+
+### Authenticated Endpoints (Unified)
+
+- `/auth/login`
+- `/auth/me`
+- `/auth/session`
+- `/auth/bootstrap`
+
+All now delegate orchestration to application layer.
+
+### Flow Guarantees
+
+- No business logic in handlers
+- Deterministic use-case execution in application layer
+- Stable contract across all authenticated endpoints
+
+### Result
+
+Authenticated flows are now:
+
+- boundary-defined (0.6.1)
+- contract-aligned (0.6.2)
+- bootstrap-consolidated (0.6.3)
+- consistency-hardened (0.6.4)
+- application-boundary defined (0.7.1)
+- fully application-driven (0.7.2)

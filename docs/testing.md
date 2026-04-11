@@ -1528,3 +1528,45 @@ Testing surface now guarantees:
 - bootstrap integrity (0.6.3)
 - structural consistency (0.6.4)
 - application-layer isolation (0.7.1)
+
+## Phase 0.7.2 — Authenticated Surface Use Cases Extraction
+
+### Purpose
+
+Ensure that all authenticated surface core use cases are validated at the application layer and no longer depend on handler-level orchestration.
+
+### Coverage Added
+
+#### Application layer coverage
+
+- `Application.Login(...)`
+- `Application.GetMe(...)`
+- `Application.GetSession(...)`
+- `Application.GetBootstrap(...)`
+
+All must:
+
+- operate independently of HTTP layer
+- return deterministic and contract-compliant results
+
+#### Handler validation
+
+- `/auth/login`, `/auth/me`, `/auth/session`, `/auth/bootstrap` must:
+  - delegate to application layer
+  - not contain business orchestration
+
+#### Error propagation
+
+- Application errors must propagate consistently to handlers
+- Handlers must translate errors without modifying semantics
+
+### Result
+
+Testing surface now guarantees:
+
+- boundary correctness (0.6.1)
+- contract alignment (0.6.2)
+- bootstrap integrity (0.6.3)
+- structural consistency (0.6.4)
+- application boundary (0.7.1)
+- full authenticated surface extraction (0.7.2)

@@ -1984,3 +1984,44 @@ Current application evolution state:
 ### Next
 
 0.7.2 — Authenticated Surface Use Cases Extraction
+
+## Phase 0.7.2 — Authenticated Surface Use Cases Extraction
+
+### Objective
+
+Extend the new application layer so the main authenticated surface no longer depends on handler-driven orchestration.
+
+### Implementation
+
+- Extended `internal/modules/auth/application.go`
+- Added explicit authenticated use cases for:
+  - `Login(...)`
+  - `GetMe(...)`
+  - `GetSession(...)`
+- Preserved `GetBootstrap(...)` introduced in 0.7.1
+- Reduced authenticated handlers to:
+  - request parsing / context extraction
+  - application invocation
+  - HTTP status / error mapping
+  - response writing
+
+### Guarantees
+
+- No public contract changes
+- No route changes
+- No wallet-management migration yet
+- No global error model introduced
+- Existing services, builders, and stores remain the execution layer
+
+### Result
+
+The authenticated surface is now application-driven for its core use cases:
+
+- 0.7.1 → application-layer boundary introduced
+- 0.7.2 → authenticated surface use cases extracted
+
+This establishes the correct base for wallet-specific extraction in 0.7.3.
+
+### Next
+
+0.7.3 — Wallet Management Use Cases Consolidation

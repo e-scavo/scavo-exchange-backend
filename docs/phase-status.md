@@ -1008,7 +1008,7 @@ Phase 0.7 — Application Layer Foundation
 | Subphase | Description | Status |
 |----------|------------|--------|
 | 0.7.1 | Application Layer Boundary Definition | ✔ Completed |
-| 0.7.2 | Authenticated Surface Use Cases Extraction | ⬜ Pending |
+| 0.7.2 | Authenticated Surface Use Cases Extraction | ✔ Completed |
 | 0.7.3 | Wallet Management Use Cases Consolidation | ⬜ Pending |
 | 0.7.4 | Handler Simplification & Contract Preservation | ⬜ Pending |
 
@@ -1030,3 +1030,25 @@ The backend now has a formal entry point for use-case orchestration, enabling co
 ### Next
 
 0.7.2 — Authenticated Surface Use Cases Extraction
+
+### 0.7.2 — Authenticated Surface Use Cases Extraction ✔ Completed
+
+This subphase completes the extraction of the authenticated surface core use cases into the application layer.
+
+#### Delivered
+
+- Login use-case moved to application layer
+- GetMe use-case moved to application layer
+- GetSession use-case moved to application layer
+- Handlers reduced to transport-only responsibilities
+
+#### Result
+
+Authenticated surface is now fully application-driven:
+
+- 0.7.1 → boundary defined
+- 0.7.2 → core use cases extracted
+
+#### Next
+
+0.7.3 — Wallet Management Use Cases Consolidation
