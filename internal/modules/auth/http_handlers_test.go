@@ -2579,6 +2579,131 @@ func TestHTTPHandlers_UpdateMe_UserNotFound(t *testing.T) {
 	}
 }
 
+func TestHTTPHandlers_Bootstrap_Success(t *testing.T) {
+	store := NewInMemoryWalletIdentityStore()
+	address := testWalletAddress()
+
+	identity, err := store.GetOrCreate(context.Background(), address)
+	if err != nil {
+		t.Fatalf("GetOrCreate error: %v", err)
+	}
+	attached, err := store.AttachUser(context.Background(), identity.ID, "u_test_example_com", true)
+	if err != nil {
+		t.Fatalf("AttachUser error: %v", err)
+	}
+
+	createdAt := time.Date(2026, time.April, 7, 10, 0, 0, 0, time.UTC)
+	updatedAt := createdAt.Add(10 * time.Minute)
+	repo := &stubUserSettingsRepo{
+		getByUserIDFn: func(ctx context.Context, userID string) (*usersettingsmod.UserSettings, error) {
+			return &usersettingsmod.UserSettings{
+				UserID: userID,
+				Preferences: map[string]any{
+					"theme": "dark",
+				},
+				CreatedAt: createdAt,
+				UpdatedAt: updatedAt,
+			}, nil
+		},
+	}
+
+	claims := sessionClaims()
+	claims.AuthMethod = "wallet_evm"
+	claims.WalletID = identity.ID
+	claims.WalletAddress = address
+	claims.Chain = "scavium"
+
+	h := HTTPHandlers{
+		Tokens:           mustTokenService(t),
+		TTL:              time.Hour,
+		Users:            usermod.NewService(nil),
+		UserSettings:     usersettingsmod.NewService(repo),
+		WalletIdentities: store,
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/auth/bootstrap", nil)
+	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, claims))
+	rec := httptest.NewRecorder()
+
+	h.Bootstrap(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+
+	var payload BootstrapResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("decode error: %v", err)
+	}
+
+	if payload.Session == nil || payload.Profile == nil || payload.User == nil {
+		t.Fatalf("unexpected bootstrap payload: %#v", payload)
+	}
+	if payload.Session.UserID != payload.Profile.UserID || payload.Session.UserID != payload.User.ID {
+		t.Fatalf("unexpected user alignment: session=%q profile=%q user=%q", payload.Session.UserID, payload.Profile.UserID, payload.User.ID)
+	}
+	if payload.Profile.PrimaryWallet == nil {
+		t.Fatal("expected primary wallet")
+	}
+	if payload.Profile.PrimaryWallet.ID != payload.Session.WalletID {
+		t.Fatalf("unexpected wallet alignment: profile=%q session=%q", payload.Profile.PrimaryWallet.ID, payload.Session.WalletID)
+	}
+	if payload.Settings.UserID != payload.Session.UserID {
+		t.Fatalf("unexpected settings alignment: %q", payload.Settings.UserID)
+	}
+	if payload.Settings.CreatedAt == nil || !payload.Settings.CreatedAt.Equal(createdAt) {
+		t.Fatalf("unexpected settings created_at: %#v", payload.Settings.CreatedAt)
+	}
+	if payload.Settings.UpdatedAt == nil || !payload.Settings.UpdatedAt.Equal(updatedAt) {
+		t.Fatalf("unexpected settings updated_at: %#v", payload.Settings.UpdatedAt)
+	}
+	if payload.Wallets.Total != 1 || len(payload.Wallets.Items) != 1 {
+		t.Fatalf("unexpected wallets payload: %#v", payload.Wallets)
+	}
+	if payload.Wallets.Items[0].ID != attached.ID || payload.Wallets.Items[0].Address != address {
+		t.Fatalf("unexpected bootstrap wallet: %#v", payload.Wallets.Items[0])
+	}
+}
+
+func TestHTTPHandlers_Bootstrap_MissingClaims(t *testing.T) {
+	h := HTTPHandlers{
+		Tokens:       mustTokenService(t),
+		TTL:          time.Hour,
+		Users:        usermod.NewService(nil),
+		UserSettings: usersettingsmod.NewService(&stubUserSettingsRepo{}),
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/auth/bootstrap", nil)
+	rec := httptest.NewRecorder()
+
+	h.Bootstrap(rec, req)
+
+	if rec.Code != http.StatusUnauthorized {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+}
+
+func TestHTTPHandlers_Bootstrap_ServiceUnavailable(t *testing.T) {
+	h := HTTPHandlers{
+		Tokens: mustTokenService(t),
+		TTL:    time.Hour,
+		Users:  usermod.NewService(nil),
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/auth/bootstrap", nil)
+	req = req.WithContext(context.WithValue(req.Context(), coreauth.ClaimsContextKey, sessionClaims()))
+	rec := httptest.NewRecorder()
+
+	h.Bootstrap(rec, req)
+
+	if rec.Code != http.StatusInternalServerError {
+		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
+	}
+	if !strings.Contains(rec.Body.String(), "auth_service_error") {
+		t.Fatalf("unexpected body: %s", rec.Body.String())
+	}
+}
+
 func TestHTTPHandlers_MeSettings_Success_Defaults(t *testing.T) {
 	h := HTTPHandlers{
 		Tokens:       mustTokenService(t),

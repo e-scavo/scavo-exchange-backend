@@ -1857,3 +1857,43 @@ Phase 0.6.2 therefore prepares the backend for the next step of Phase 0.6:
 - session-ready bootstrap read model consolidation
 - authenticated bootstrap consumption without ambiguity across surfaces
 - final authenticated application surface hardening
+
+## Phase 0.6.3 — Session-Ready Bootstrap Read Model
+
+### Objective
+
+Provide a single endpoint that aggregates the authenticated application surface into a frontend-ready bootstrap read model.
+
+### Implementation
+
+- Introduced `GET /auth/bootstrap`
+- Aggregates:
+  - session
+  - user
+  - profile
+  - settings
+  - wallet snapshot
+- Reuses existing logic:
+  - session builder
+  - profile builder
+  - settings service
+  - wallet store
+
+### Guarantees
+
+- No breaking changes
+- No endpoint replacement
+- No contract modification of existing endpoints
+- Pure aggregation layer
+
+### Result
+
+Authenticated surface is now:
+
+- boundary-defined (0.6.1)
+- contract-aligned (0.6.2)
+- bootstrap-ready (0.6.3)
+
+### Next
+
+0.6.4 — Application Surface Consistency Hardening

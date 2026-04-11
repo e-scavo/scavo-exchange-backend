@@ -216,6 +216,12 @@ func (s *Service) ResolveSessionClaims(ctx context.Context, claims *coreauth.Cla
 		return nil, err
 	}
 
+	return buildSessionViewWithUser(claims, user), nil
+}
+
+func buildSessionViewWithUser(claims *coreauth.Claims, user *usermod.User) *SessionView {
+	ctxView := buildAuthenticatedContextView(claims)
+
 	var expiresAt *time.Time
 	if claims != nil && claims.ExpiresAt != nil {
 		ts := claims.ExpiresAt.Time.UTC()
@@ -225,30 +231,24 @@ func (s *Service) ResolveSessionClaims(ctx context.Context, claims *coreauth.Cla
 	view := &SessionView{
 		Authenticated: true,
 		TokenType:     "Bearer",
-		UserID:        strings.TrimSpace(claims.UserID),
-		Email:         normalizeEmail(claims.Email),
-		WalletID:      strings.TrimSpace(claims.WalletID),
-		WalletAddress: normalizeWalletAddress(claims.WalletAddress),
-		AuthMethod:    strings.TrimSpace(claims.AuthMethod),
-		Chain:         normalizeChain(claims.Chain),
-		Subject:       strings.TrimSpace(claims.Subject),
-		Issuer:        strings.TrimSpace(claims.Issuer),
+		UserID:        ctxView.UserID,
+		Email:         ctxView.Email,
+		WalletID:      ctxView.WalletID,
+		WalletAddress: ctxView.WalletAddress,
+		AuthMethod:    ctxView.AuthMethod,
+		Chain:         ctxView.Chain,
 		ExpiresAt:     expiresAt,
 		User:          user,
 	}
-
+	if claims != nil {
+		view.Subject = strings.TrimSpace(claims.Subject)
+		view.Issuer = strings.TrimSpace(claims.Issuer)
+	}
 	if view.Subject == "" {
 		view.Subject = view.UserID
 	}
-	if view.AuthMethod == "" {
-		view.AuthMethod = "password_dev"
-	}
-	if view.WalletAddress == "" {
-		view.Chain = ""
-		view.WalletID = ""
-	}
 
-	return view, nil
+	return view
 }
 
 func normalizeEmail(email string) string {

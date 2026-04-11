@@ -41,6 +41,17 @@ This subphase aligns all authenticated endpoints under a shared normalized conte
 
 ---
 
+### 0.6.3 — Session-Ready Bootstrap Read Model ✔
+Completed
+
+This subphase introduces a unified bootstrap endpoint that aggregates all authenticated surfaces into a single response, enabling a one-call frontend initialization flow.
+
+### Next
+
+0.6.4 — Application Surface Consistency Hardening
+
+---
+
 ## 👤 Stage 1 — Identity & Wallets
 
 - User model

@@ -455,3 +455,38 @@ Current boundary after 0.6.2:
 * continue with 0.6.3 — Session-Ready Bootstrap Read Model
 * build a frontend-ready authenticated bootstrap read model on top of the now aligned authenticated surface
 * preserve the semantic boundary from 0.6.1 and the contract alignment from 0.6.2 while avoiding unnecessary expansion of Phase 0
+
+## Phase 0.6.3 — Session-Ready Bootstrap Read Model
+
+### Summary
+
+This subphase introduces a unified authenticated bootstrap read model, allowing frontend clients to retrieve all required authenticated surface data in a single request.
+
+### Key Additions
+
+- Introduced `GET /auth/bootstrap`
+- Aggregates:
+  - session
+  - user
+  - profile
+  - settings
+  - wallet snapshot
+- Eliminates multi-request bootstrap pattern
+
+### Resulting System State
+
+After 0.6.3, the authenticated surface is:
+
+- boundary-defined (0.6.1)
+- contract-aligned (0.6.2)
+- bootstrap-ready (0.6.3)
+
+### Impact
+
+- Simplifies frontend initialization
+- Reduces network roundtrips
+- Ensures cross-surface consistency at read time
+
+### Next Step
+
+0.6.4 — Application Surface Consistency Hardening

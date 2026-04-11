@@ -574,3 +574,41 @@ This enables safe evolution toward a unified bootstrap read model.
 ### Next
 
 0.6.3 — Session-Ready Bootstrap Read Model
+
+---
+
+## 0.6.3 — Session-Ready Bootstrap Read Model
+
+### Objective
+
+Provide a unified authenticated bootstrap read model to eliminate multi-request initialization and ensure consistent frontend state.
+
+### Implementation
+
+- Introduced `GET /auth/bootstrap`
+- Aggregates:
+  - session
+  - user
+  - profile
+  - settings
+  - wallet snapshot
+- Reuses existing builders and services
+
+### Guarantees
+
+- No breaking changes
+- No modification of existing endpoint contracts
+- Pure aggregation layer
+- Consistent data derived from a unified authenticated context
+
+### Result
+
+Authenticated surface is now:
+
+- boundary-defined (0.6.1)
+- contract-aligned (0.6.2)
+- bootstrap-ready (0.6.3)
+
+### Next
+
+0.6.4 — Application Surface Consistency Hardening

@@ -977,3 +977,45 @@ This ensures deterministic behavior for frontend bootstrap consumption.
 ### Next Evolution
 
 Phase 0.6.3 will introduce a consolidated bootstrap read model built on top of these aligned flows.
+
+## Phase 0.6.3 — Session-Ready Bootstrap Read Model
+
+### Bootstrap Flow
+
+The authenticated bootstrap process is now consolidated into a single request:
+
+1. `GET /auth/bootstrap`
+
+This replaces the previous multi-request flow:
+
+- `/auth/session`
+- `/auth/me`
+- `/auth/me/settings`
+- `/auth/wallets`
+
+### Flow Guarantees
+
+- All data is derived from a single authenticated context
+- No cross-request timing inconsistencies
+- Deterministic bootstrap state for frontend
+
+### Data Composition Flow
+
+`/auth/bootstrap` internally composes:
+
+- session → session builder
+- identity → profile builder
+- settings → user settings service
+- wallets → wallet identity store
+
+### Result
+
+Flows are now:
+
+- boundary-defined (0.6.1)
+- contract-aligned (0.6.2)
+- bootstrap-consolidated (0.6.3)
+
+### Next Evolution
+
+0.6.4 will harden consistency guarantees across all surfaces.

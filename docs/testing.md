@@ -1409,3 +1409,44 @@ The authenticated surface is now:
 - contract-aligned (0.6.2)
 
 All future evolution must preserve these guarantees.
+
+## Phase 0.6.3 — Session-Ready Bootstrap Read Model
+
+### Purpose
+
+Validate that the unified bootstrap endpoint correctly aggregates all authenticated surfaces into a consistent and reliable read model.
+
+### Coverage Added
+
+#### Bootstrap completeness
+
+- `/auth/bootstrap` must return:
+  - session
+  - user
+  - profile
+  - settings
+  - wallets snapshot
+
+#### Cross-surface consistency
+
+The data returned in `/auth/bootstrap` must match:
+
+- `/auth/session`
+- `/auth/me`
+- `/auth/me/settings`
+- `/auth/wallets`
+
+for equivalent authenticated context.
+
+#### Error handling
+
+- Missing claims → unauthorized
+- Missing services → internal error
+
+### Result
+
+Testing surface now guarantees:
+
+- boundary correctness (0.6.1)
+- contract alignment (0.6.2)
+- bootstrap integrity (0.6.3)

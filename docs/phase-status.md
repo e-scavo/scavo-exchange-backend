@@ -20,7 +20,7 @@ Status: ✅ Completed
 ### Phase 0.6 — Authenticated Application Bootstrap Consolidation & Session-Ready Surface
 Status: 🟡 In Progress
 
-Latest completed subphase: **0.6.2 — Authenticated Surface Contract Alignment**
+Latest completed subphase: **0.6.3 — Session-Ready Bootstrap Read Model**
 
 ---
 
@@ -936,3 +936,35 @@ This positions Phase 0.6 for the next step, where the bootstrap read model can b
 - consolidate a clearer session-ready bootstrap read model on top of the now-aligned authenticated context
 - preserve compatibility while reducing frontend ambiguity around which endpoint should be treated as the primary bootstrap source for each authenticated concern
 - continue hardening the authenticated application surface as a Stage 0 foundation concern before new business domains are introduced
+
+### Phase 0.6 — Subphase Status (Updated)
+
+| Subphase | Description | Status |
+|----------|------------|--------|
+| 0.6.1 | Bootstrap Surface Boundary Clarification | ✔ Completed |
+| 0.6.2 | Authenticated Surface Contract Alignment | ✔ Completed |
+| 0.6.3 | Session-Ready Bootstrap Read Model | ✔ Completed |
+| 0.6.4 | Application Surface Consistency Hardening | ⬜ Pending |
+
+---
+
+## ✅ Phase 0.6.3 Closure Summary
+
+### Delivered in 0.6.3
+
+- Introduced `GET /auth/bootstrap`
+- Aggregated authenticated surfaces into a single read model
+- Reused existing builders and services (session, profile, settings, wallets)
+- Eliminated multi-request bootstrap requirement for frontend
+
+### Result
+
+The authenticated surface is now:
+
+- boundary-defined (0.6.1)
+- contract-aligned (0.6.2)
+- bootstrap-ready (0.6.3)
+
+### Next Expected Evolution
+
+0.6.4 — Application Surface Consistency Hardening
