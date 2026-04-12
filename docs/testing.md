@@ -1622,3 +1622,38 @@ Testing surface now guarantees:
 - application boundary (0.7.1)
 - authenticated surface extraction (0.7.2)
 - wallet management consolidation (0.7.3)
+
+## Phase 0.7.4 — Handler Simplification & Contract Preservation
+
+### Purpose
+
+Ensure that handler simplification does not alter public contracts while validating the unified transport layer behavior.
+
+### Coverage Added
+
+#### Transport layer validation
+
+- All handlers must:
+  - use shared decoding logic
+  - use unified claims extraction
+  - use standardized error responses
+- No handler should contain business orchestration logic
+
+#### Contract preservation
+
+- Responses must remain byte-compatible with previous phases
+- Status codes must remain unchanged
+- Field naming and structure must not vary
+
+#### Error handling consistency
+
+- All errors must pass through the same formatting path
+- No divergent error structures across endpoints
+
+### Result
+
+Testing guarantees now include:
+
+- full application-driven architecture (0.7.1 → 0.7.3)
+- fully unified handler layer (0.7.4)
+- strict contract preservation across refactors

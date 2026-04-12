@@ -1179,3 +1179,43 @@ Flows are now fully consolidated:
 - 0.7.1 → application boundary  
 - 0.7.2 → authenticated surface extracted  
 - 0.7.3 → wallet management consolidated
+
+## Phase 0.7.4 — Handler Simplification & Contract Preservation
+
+### Final Unified Flow
+
+All endpoints now follow a strictly unified execution model:
+
+HTTP Request  
+→ HTTP Handler (minimal transport layer)  
+→ Application Layer (use-case execution)  
+→ Services / Stores (execution)  
+→ Response  
+
+### Transport Layer Guarantees
+
+- All handlers use shared transport helpers
+- No duplicated parsing or error handling logic
+- No business logic in handlers
+- Uniform structure across all endpoints
+
+### End-to-End Consistency
+
+The entire auth module now operates under a single consistent pattern:
+
+- `/auth/*` endpoints (login, session, profile, bootstrap)
+- `/auth/wallet*` endpoints (list, link, merge, primary, detach)
+
+All share identical flow semantics and error propagation.
+
+### Result
+
+Flow evolution is now complete:
+
+- 0.6.x → contract and boundary stabilization  
+- 0.7.1 → application boundary introduced  
+- 0.7.2 → authenticated surface extracted  
+- 0.7.3 → wallet management consolidated  
+- 0.7.4 → transport layer unified  
+
+The backend now exposes a clean, deterministic, and fully consistent execution flow.

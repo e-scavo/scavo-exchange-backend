@@ -2069,3 +2069,50 @@ The auth module now follows a consistent architecture across all endpoints.
 ### Next
 
 0.7.4 — Handler Simplification & Contract Preservation
+
+## Phase 0.7.4 — Handler Simplification & Contract Preservation
+
+### Objective
+
+Finalize the application-layer foundation by simplifying all authenticated handlers and preserving public contracts while removing residual transport duplication.
+
+### Implementation
+
+- Introduced shared HTTP transport helpers for:
+  - request decoding
+  - authenticated claims extraction
+  - error JSON writing
+- Refactored authenticated handlers to follow a unified flow:
+  - parse / extract context
+  - invoke application layer
+  - map error to HTTP
+  - write response
+- Simplified:
+  - login handlers
+  - me / session / profile update handlers
+  - bootstrap handler
+  - wallet handlers
+  - wallet list handler
+
+### Guarantees
+
+- No public contract changes
+- No route changes
+- No payload changes
+- No application-layer regression
+- No service/store refactor
+
+### Result
+
+Phase 0.7 is now functionally complete:
+
+- 0.7.1 → application boundary introduced
+- 0.7.2 → authenticated surface extracted
+- 0.7.3 → wallet management consolidated
+- 0.7.4 → handlers simplified and contracts preserved
+
+The auth module now exposes a fully application-driven execution model with transport-only handlers.
+
+### Next
+
+0.8 — Standardized Error Model

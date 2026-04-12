@@ -630,3 +630,40 @@ to:
 ### Next Step
 
 0.7.4 — Handler Simplification & Contract Preservation
+
+## Phase 0.7.4 — Handler Simplification & Contract Preservation
+
+### Summary
+
+This subphase finalizes the application-layer foundation by simplifying all authenticated handlers and eliminating residual transport duplication, without altering public contracts.
+
+### Key Changes
+
+- Introduced unified HTTP transport helpers:
+  - request decoding
+  - authenticated claims extraction
+  - error JSON writing
+- Refactored all auth and wallet handlers to:
+  - remove duplicated transport logic
+  - follow a consistent execution pattern
+- Ensured consistent error handling across endpoints
+
+### Architectural Impact
+
+- Auth module now exhibits fully clean separation:
+  - Handlers → transport only
+  - Application → orchestration
+  - Services/Stores → execution
+- No residual business logic remains in handlers
+
+### Resulting System State
+
+After 0.7.4, the backend reaches:
+
+- fully application-driven auth module
+- consistent and minimal HTTP transport layer
+- stable and preserved external contracts
+
+### Next Step
+
+0.8 — Standardized Error Model

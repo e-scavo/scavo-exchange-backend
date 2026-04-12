@@ -1010,7 +1010,7 @@ Phase 0.7 — Application Layer Foundation
 | 0.7.1 | Application Layer Boundary Definition | ✔ Completed |
 | 0.7.2 | Authenticated Surface Use Cases Extraction | ✔ Completed |
 | 0.7.3 | Wallet Management Use Cases Consolidation | ✔ Completed |
-| 0.7.4 | Handler Simplification & Contract Preservation | ⬜ Pending |
+| 0.7.4 | Handler Simplification & Contract Preservation | ✔ Completed |
 
 ---
 
@@ -1077,3 +1077,30 @@ Auth module is now fully application-driven:
 #### Next
 
 0.7.4 — Handler Simplification & Contract Preservation
+
+### 0.7.4 — Handler Simplification & Contract Preservation ✔ Completed
+
+This subphase finalizes the application-layer foundation by simplifying all authenticated handlers and removing residual transport duplication.
+
+#### Delivered
+
+- Unified request decoding across handlers
+- Centralized authenticated claims extraction
+- Standardized error JSON writing
+- Simplified all auth and wallet handlers to transport-only logic
+- Removed duplicated transport logic patterns
+
+#### Result
+
+Phase 0.7 is now fully completed:
+
+- 0.7.1 → boundary defined
+- 0.7.2 → authenticated surface extracted
+- 0.7.3 → wallet management consolidated
+- 0.7.4 → handlers simplified and contracts preserved
+
+Auth module is now fully application-driven with clean transport boundaries.
+
+#### Next
+
+0.8 — Standardized Error Model

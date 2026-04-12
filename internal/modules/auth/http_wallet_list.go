@@ -7,8 +7,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	coreauth "github.com/e-scavo/scavo-exchange-backend/internal/core/auth"
 )
 
 type WalletReadModel struct {
@@ -375,15 +373,14 @@ func buildWalletsResponse(window []*WalletReadModel, total int, q WalletsQuery) 
 }
 
 func (h HTTPHandlers) Wallets(w http.ResponseWriter, r *http.Request) {
-	claims, ok := coreauth.ClaimsFromContext(r.Context())
+	claims, ok := h.requireClaims(w, r)
 	if !ok {
-		writeJSON(w, http.StatusUnauthorized, map[string]any{"error": "unauthorized"})
 		return
 	}
 
 	query, queryErr := parseWalletsQuery(r)
 	if queryErr != "" {
-		writeJSON(w, http.StatusBadRequest, map[string]any{"error": queryErr})
+		writeErrorJSON(w, http.StatusBadRequest, queryErr)
 		return
 	}
 
@@ -391,13 +388,13 @@ func (h HTTPHandlers) Wallets(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, ErrUnauthorized):
-			writeJSON(w, http.StatusUnauthorized, map[string]any{"error": "unauthorized"})
+			writeErrorJSON(w, http.StatusUnauthorized, "unauthorized")
 		case errors.Is(err, ErrApplicationNotConfigured):
-			writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "wallet_identity_error"})
+			writeErrorJSON(w, http.StatusInternalServerError, "wallet_identity_error")
 		case errors.Is(err, ErrWalletIdentityStore):
-			writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "wallet_identity_error"})
+			writeErrorJSON(w, http.StatusInternalServerError, "wallet_identity_error")
 		default:
-			writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "wallet_identity_error"})
+			writeErrorJSON(w, http.StatusInternalServerError, "wallet_identity_error")
 		}
 		return
 	}

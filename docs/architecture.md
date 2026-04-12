@@ -362,3 +362,60 @@ For the authenticated wallet inventory route, the expected real-world case remai
 
 This keeps mutation-focused ownership logic separate from read-oriented inventory projection. It improves frontend and debugging visibility without changing ownership or lifecycle business rules.
 
+## Phase 0.7 — Application Layer Foundation
+
+### Architectural Objective
+
+Phase 0.7 introduces an explicit application layer between HTTP transport and module-level execution logic, establishing a repeatable orchestration boundary for authenticated use cases.
+
+### Boundary Introduced
+
+The backend now follows this architectural flow for the auth module:
+
+HTTP Handler  
+→ Application Layer  
+→ Services / Stores  
+→ Response  
+
+### Phase 0.7.1 — Application Layer Boundary Definition
+
+Introduced the first explicit `Application` entry point in `internal/modules/auth`, using bootstrap as the initial pilot use case.
+
+### Phase 0.7.2 — Authenticated Surface Use Cases Extraction
+
+Moved the main authenticated surface use cases into application orchestration:
+
+- login
+- me
+- session
+- bootstrap
+
+### Phase 0.7.3 — Wallet Management Use Cases Consolidation
+
+Extended the same application-layer pattern to all wallet-related use cases:
+
+- wallet list
+- wallet link challenge / verify
+- wallet account merge challenge / verify
+- set primary wallet
+- detach check / execute
+
+### Phase 0.7.4 — Handler Simplification & Contract Preservation
+
+Unified the transport layer by standardizing:
+
+- request decoding
+- claims extraction
+- error JSON writing
+
+This leaves handlers as minimal transport adapters while preserving all public contracts.
+
+### Result
+
+At the end of Phase 0.7, the auth module architecture is now consistently layered:
+
+- Handlers → transport only
+- Application → orchestration
+- Services / Stores → execution
+
+This prepares the backend for Phase 0.8 and beyond, where cross-cutting architectural concerns can be introduced on top of a stable application boundary.

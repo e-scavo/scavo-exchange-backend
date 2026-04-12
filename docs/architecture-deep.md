@@ -587,3 +587,114 @@ This stage does not require:
 - production-grade indexing yet
 
 This phase only locks the persistence and environment model that future implementation must follow.
+
+## Phase 0.7 — Application Layer Foundation (Deep Analysis)
+
+### Context
+
+Prior to Phase 0.7, the backend exhibited a mixed orchestration model where HTTP handlers partially controlled execution flow, directly invoking services and assembling responses.
+
+This led to:
+
+- duplicated orchestration logic
+- inconsistent handler responsibilities
+- weak separation between transport and domain execution
+
+---
+
+### Architectural Shift
+
+Phase 0.7 introduces a strict separation:
+
+Transport Layer (HTTP Handlers)  
+→ Application Layer (Use-case orchestration)  
+→ Services / Stores (Execution)
+
+---
+
+### Application Layer Responsibilities
+
+The application layer now:
+
+- defines explicit use cases
+- orchestrates multiple services
+- centralizes flow control
+- ensures deterministic execution paths
+
+It does NOT:
+
+- handle HTTP concerns
+- perform low-level DB logic
+- define transport formats
+
+---
+
+### Transport Layer Responsibilities
+
+Handlers are now strictly limited to:
+
+- request decoding
+- claims extraction
+- invoking application methods
+- mapping errors to HTTP responses
+- writing JSON responses
+
+---
+
+### Phase Breakdown
+
+#### 0.7.1 — Boundary Introduction
+
+- introduced `Application` struct
+- bootstrap flow used as initial entry point
+
+#### 0.7.2 — Authenticated Surface Extraction
+
+- login, session, profile flows moved into application
+- handlers reduced to delegators
+
+#### 0.7.3 — Wallet Consolidation
+
+- all wallet-related flows moved into application
+- removed remaining handler-driven orchestration
+
+#### 0.7.4 — Handler Simplification
+
+- unified transport helpers
+- removed duplication
+- enforced consistent handler pattern
+
+---
+
+### Resulting Execution Model
+
+All flows now follow:
+
+HTTP → Handler → Application → Services → Response
+
+With:
+
+- single orchestration layer
+- consistent transport behavior
+- no cross-layer leakage
+
+---
+
+### Architectural Guarantees
+
+- strict separation of concerns
+- deterministic execution paths
+- contract preservation across refactors
+- extensibility for future phases
+
+---
+
+### Impact on Future Phases
+
+This foundation enables:
+
+- Phase 0.8 → standardized error model
+- Phase 0.9 → versioning strategy
+- Phase 0.10 → authorization layer
+
+Without the risk of cross-layer inconsistencies.
