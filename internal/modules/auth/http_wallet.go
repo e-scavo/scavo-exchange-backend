@@ -211,15 +211,7 @@ func (h HTTPHandlers) WalletLinkChallenge(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	challengeTTL := h.ChallengeTTL
-	if challengeTTL <= 0 {
-		challengeTTL = 5 * time.Minute
-	}
-
-	challengeSvc := NewWalletChallengeService(h.Challenges, h.PublicBaseURL, challengeTTL)
-	linkSvc := NewWalletLinkingService(challengeSvc, h.WalletIdentities)
-
-	challenge, err := linkSvc.CreateChallenge(r.Context(), claims.UserID, req.Address, req.Chain)
+	response, err := h.Application().CreateWalletLinkChallenge(r.Context(), claims.UserID, req.Address, req.Chain)
 	if err != nil {
 		switch {
 		case errors.Is(err, ErrUnauthorized):
@@ -232,7 +224,7 @@ func (h HTTPHandlers) WalletLinkChallenge(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	writeJSON(w, http.StatusOK, WalletLinkChallengeResponse{Challenge: challenge})
+	writeJSON(w, http.StatusOK, response)
 }
 
 func (h HTTPHandlers) WalletLinkVerify(w http.ResponseWriter, r *http.Request) {
@@ -248,15 +240,7 @@ func (h HTTPHandlers) WalletLinkVerify(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	challengeTTL := h.ChallengeTTL
-	if challengeTTL <= 0 {
-		challengeTTL = 5 * time.Minute
-	}
-
-	challengeSvc := NewWalletChallengeService(h.Challenges, h.PublicBaseURL, challengeTTL)
-	linkSvc := NewWalletLinkingService(challengeSvc, h.WalletIdentities)
-
-	result, err := linkSvc.VerifyAndLink(r.Context(), claims.UserID, req.ChallengeID, req.Address, req.Signature)
+	response, err := h.Application().VerifyWalletLink(r.Context(), claims.UserID, req.ChallengeID, req.Address, req.Signature)
 	if err != nil {
 		switch {
 		case errors.Is(err, ErrUnauthorized):
@@ -285,11 +269,7 @@ func (h HTTPHandlers) WalletLinkVerify(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeJSON(w, http.StatusOK, WalletLinkVerifyResponse{
-		LinkedWallet: result.Linked,
-		Wallets:      result.Wallets,
-		Challenge:    result.Challenge,
-	})
+	writeJSON(w, http.StatusOK, response)
 }
 
 func (h HTTPHandlers) WalletAccountMergeChallenge(w http.ResponseWriter, r *http.Request) {
@@ -305,15 +285,7 @@ func (h HTTPHandlers) WalletAccountMergeChallenge(w http.ResponseWriter, r *http
 		return
 	}
 
-	challengeTTL := h.ChallengeTTL
-	if challengeTTL <= 0 {
-		challengeTTL = 5 * time.Minute
-	}
-
-	challengeSvc := NewWalletChallengeService(h.Challenges, h.PublicBaseURL, challengeTTL)
-	mergeSvc := NewWalletAccountMergeService(challengeSvc, h.WalletIdentities)
-
-	challenge, err := mergeSvc.CreateChallenge(r.Context(), claims.UserID, req.Address, req.Chain)
+	response, err := h.Application().CreateWalletAccountMergeChallenge(r.Context(), claims.UserID, req.Address, req.Chain)
 	if err != nil {
 		switch {
 		case errors.Is(err, ErrUnauthorized):
@@ -326,7 +298,7 @@ func (h HTTPHandlers) WalletAccountMergeChallenge(w http.ResponseWriter, r *http
 		return
 	}
 
-	writeJSON(w, http.StatusOK, WalletAccountMergeChallengeResponse{Challenge: challenge})
+	writeJSON(w, http.StatusOK, response)
 }
 
 func (h HTTPHandlers) WalletAccountMergeVerify(w http.ResponseWriter, r *http.Request) {
@@ -342,15 +314,7 @@ func (h HTTPHandlers) WalletAccountMergeVerify(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	challengeTTL := h.ChallengeTTL
-	if challengeTTL <= 0 {
-		challengeTTL = 5 * time.Minute
-	}
-
-	challengeSvc := NewWalletChallengeService(h.Challenges, h.PublicBaseURL, challengeTTL)
-	mergeSvc := NewWalletAccountMergeService(challengeSvc, h.WalletIdentities)
-
-	result, err := mergeSvc.VerifyAndMerge(r.Context(), claims.UserID, req.ChallengeID, req.Address, req.Signature)
+	response, err := h.Application().VerifyWalletAccountMerge(r.Context(), claims.UserID, req.ChallengeID, req.Address, req.Signature)
 	if err != nil {
 		switch {
 		case errors.Is(err, ErrUnauthorized):
@@ -379,13 +343,7 @@ func (h HTTPHandlers) WalletAccountMergeVerify(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	writeJSON(w, http.StatusOK, WalletAccountMergeVerifyResponse{
-		MergedWallet: result.MergedWallet,
-		Wallets:      result.Wallets,
-		Challenge:    result.Challenge,
-		SourceUserID: result.SourceUserID,
-		TargetUserID: result.TargetUserID,
-	})
+	writeJSON(w, http.StatusOK, response)
 }
 
 func (h HTTPHandlers) WalletDetachCheck(w http.ResponseWriter, r *http.Request) {
@@ -401,8 +359,7 @@ func (h HTTPHandlers) WalletDetachCheck(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	svc := NewWalletDetachService(h.WalletIdentities)
-	result, err := svc.CheckEligibility(r.Context(), claims.UserID, req.Address)
+	response, err := h.Application().CheckWalletDetach(r.Context(), claims.UserID, req.Address)
 	if err != nil {
 		switch {
 		case errors.Is(err, ErrUnauthorized):
@@ -419,13 +376,7 @@ func (h HTTPHandlers) WalletDetachCheck(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	writeJSON(w, http.StatusOK, WalletDetachCheckResponse{
-		WalletAddress:    result.WalletAddress,
-		Eligible:         result.Eligible,
-		IsPrimary:        result.IsPrimary,
-		OwnedWalletCount: result.OwnedWalletCount,
-		Reasons:          result.Reasons,
-	})
+	writeJSON(w, http.StatusOK, response)
 }
 
 func (h HTTPHandlers) WalletDetach(w http.ResponseWriter, r *http.Request) {
@@ -441,8 +392,7 @@ func (h HTTPHandlers) WalletDetach(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	svc := NewWalletDetachService(h.WalletIdentities)
-	result, err := svc.Execute(r.Context(), claims.UserID, req.Address)
+	response, err := h.Application().ExecuteWalletDetach(r.Context(), claims.UserID, req.Address)
 	if err != nil {
 		switch {
 		case errors.Is(err, ErrUnauthorized):
@@ -454,39 +404,14 @@ func (h HTTPHandlers) WalletDetach(w http.ResponseWriter, r *http.Request) {
 		case errors.Is(err, ErrWalletNotOwnedByUser):
 			writeJSON(w, http.StatusForbidden, map[string]any{"error": "wallet_identity_not_owned_by_user"})
 		case errors.Is(err, ErrWalletDetachNotEligible):
-			var check *WalletDetachCheckResponse
-			if result != nil && result.Check != nil {
-				check = &WalletDetachCheckResponse{
-					WalletAddress:    result.Check.WalletAddress,
-					Eligible:         result.Check.Eligible,
-					IsPrimary:        result.Check.IsPrimary,
-					OwnedWalletCount: result.Check.OwnedWalletCount,
-					Reasons:          result.Check.Reasons,
-				}
-			}
-			writeJSON(w, http.StatusConflict, map[string]any{"error": "wallet_detach_not_eligible", "check": check})
+			writeJSON(w, http.StatusConflict, map[string]any{"error": "wallet_detach_not_eligible", "check": response.Check})
 		default:
 			writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "wallet_detach_error"})
 		}
 		return
 	}
 
-	var check *WalletDetachCheckResponse
-	if result != nil && result.Check != nil {
-		check = &WalletDetachCheckResponse{
-			WalletAddress:    result.Check.WalletAddress,
-			Eligible:         result.Check.Eligible,
-			IsPrimary:        result.Check.IsPrimary,
-			OwnedWalletCount: result.Check.OwnedWalletCount,
-			Reasons:          result.Check.Reasons,
-		}
-	}
-
-	writeJSON(w, http.StatusOK, WalletDetachExecuteResponse{
-		DetachedWallet: result.Detached,
-		Wallets:        result.Wallets,
-		Check:          check,
-	})
+	writeJSON(w, http.StatusOK, response)
 }
 
 func (h HTTPHandlers) WalletSetPrimary(w http.ResponseWriter, r *http.Request) {
@@ -502,8 +427,7 @@ func (h HTTPHandlers) WalletSetPrimary(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	svc := NewWalletPrimaryService(h.WalletIdentities)
-	result, err := svc.SetPrimary(r.Context(), claims.UserID, req.Address)
+	response, err := h.Application().SetPrimaryWallet(r.Context(), claims.UserID, req.Address)
 	if err != nil {
 		switch {
 		case errors.Is(err, ErrUnauthorized):
@@ -520,8 +444,5 @@ func (h HTTPHandlers) WalletSetPrimary(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeJSON(w, http.StatusOK, WalletPrimarySetResponse{
-		PrimaryWallet: result.Primary,
-		Wallets:       result.Wallets,
-	})
+	writeJSON(w, http.StatusOK, response)
 }

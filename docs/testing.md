@@ -1570,3 +1570,55 @@ Testing surface now guarantees:
 - structural consistency (0.6.4)
 - application boundary (0.7.1)
 - full authenticated surface extraction (0.7.2)
+
+## Phase 0.7.3 — Wallet Management Use Cases Consolidation
+
+### Purpose
+
+Ensure that all wallet-related flows are validated at the application layer and no longer depend on handler-level orchestration.
+
+### Coverage Added
+
+#### Application layer coverage
+
+- `Application.ListWallets(...)`
+- `Application.CreateWalletLinkChallenge(...)`
+- `Application.VerifyWalletLink(...)`
+- `Application.CreateWalletAccountMergeChallenge(...)`
+- `Application.VerifyWalletAccountMerge(...)`
+- `Application.SetPrimaryWallet(...)`
+- `Application.CheckWalletDetach(...)`
+- `Application.ExecuteWalletDetach(...)`
+
+All must:
+
+- operate independently of HTTP layer
+- maintain contract integrity
+- provide deterministic results
+
+#### Handler validation
+
+- `/auth/wallets`
+- `/auth/wallet/*` endpoints
+
+Must:
+
+- delegate to application layer
+- not contain orchestration logic
+
+#### Error propagation
+
+- Application errors propagate consistently
+- Handlers translate errors without altering semantics
+
+### Result
+
+Testing surface now guarantees:
+
+- boundary correctness (0.6.1)
+- contract alignment (0.6.2)
+- bootstrap integrity (0.6.3)
+- structural consistency (0.6.4)
+- application boundary (0.7.1)
+- authenticated surface extraction (0.7.2)
+- wallet management consolidation (0.7.3)

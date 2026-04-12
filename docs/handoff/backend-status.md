@@ -589,3 +589,44 @@ to:
 ### Next Step
 
 0.7.3 — Wallet Management Use Cases Consolidation
+
+## Phase 0.7.3 — Wallet Management Use Cases Consolidation
+
+### Summary
+
+This subphase completes the migration of all wallet management flows into the application layer, removing handler-driven orchestration entirely from the auth module.
+
+### Key Changes
+
+- Introduced application-level wallet use cases:
+  - `Application.ListWallets(...)`
+  - `Application.CreateWalletLinkChallenge(...)`
+  - `Application.VerifyWalletLink(...)`
+  - `Application.CreateWalletAccountMergeChallenge(...)`
+  - `Application.VerifyWalletAccountMerge(...)`
+  - `Application.SetPrimaryWallet(...)`
+  - `Application.CheckWalletDetach(...)`
+  - `Application.ExecuteWalletDetach(...)`
+- Refactored all wallet-related HTTP handlers to delegate to application layer
+- Consolidated wallet listing and management under a unified execution model
+
+### Architectural Impact
+
+- Auth module is now fully application-driven
+- HTTP handlers act strictly as transport adapters
+- Application layer owns all use-case orchestration
+- Services and stores remain execution layer
+
+### Resulting System State
+
+After 0.7.3, the backend evolves from:
+
+- partially application-driven (0.7.2)
+
+to:
+
+- fully application-driven auth module (0.7.3)
+
+### Next Step
+
+0.7.4 — Handler Simplification & Contract Preservation

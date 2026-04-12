@@ -2741,8 +2741,12 @@ func TestApplication_GetBootstrap_Success(t *testing.T) {
 
 	app := NewApplication(
 		mustTokenService(t),
+		time.Hour,
 		usermod.NewService(nil),
 		usersettingsmod.NewService(repo),
+		"",
+		0,
+		nil,
 		store,
 	)
 
@@ -2769,7 +2773,7 @@ func TestApplication_GetBootstrap_Success(t *testing.T) {
 }
 
 func TestApplication_GetBootstrap_NotConfigured(t *testing.T) {
-	app := NewApplication(mustTokenService(t), usermod.NewService(nil), nil, nil)
+	app := NewApplication(mustTokenService(t), time.Hour, usermod.NewService(nil), nil, "", 0, nil, nil)
 
 	_, err := app.GetBootstrap(context.Background(), sessionClaims())
 	if !errors.Is(err, ErrApplicationNotConfigured) {
@@ -3516,7 +3520,7 @@ func TestHTTPHandlers_Bootstrap_CanonicalShape(t *testing.T) {
 }
 
 func TestApplication_Login_Success(t *testing.T) {
-	app := NewApplication(mustTokenService(t), usermod.NewService(nil), nil, nil)
+	app := NewApplication(mustTokenService(t), time.Hour, usermod.NewService(nil), nil, "", 0, nil, nil)
 
 	resp, err := app.Login(context.Background(), "test@example.com", "dev")
 	if err != nil {
@@ -3531,7 +3535,7 @@ func TestApplication_Login_Success(t *testing.T) {
 }
 
 func TestApplication_Login_InvalidCredentials(t *testing.T) {
-	app := NewApplication(mustTokenService(t), usermod.NewService(nil), nil, nil)
+	app := NewApplication(mustTokenService(t), time.Hour, usermod.NewService(nil), nil, "", 0, nil, nil)
 
 	_, err := app.Login(context.Background(), "test@example.com", "wrong")
 	if !errors.Is(err, ErrInvalidCredentials) {
@@ -3558,7 +3562,7 @@ func TestApplication_GetMe_Success(t *testing.T) {
 	claims.WalletAddress = address
 	claims.Chain = "scavium"
 
-	app := NewApplication(ts, usermod.NewService(nil), nil, store)
+	app := NewApplication(ts, time.Hour, usermod.NewService(nil), nil, "", 0, nil, store)
 
 	resp, err := app.GetMe(context.Background(), claims)
 	if err != nil {
@@ -3576,7 +3580,7 @@ func TestApplication_GetMe_Success(t *testing.T) {
 }
 
 func TestApplication_GetMe_Unauthorized(t *testing.T) {
-	app := NewApplication(mustTokenService(t), usermod.NewService(nil), nil, nil)
+	app := NewApplication(mustTokenService(t), time.Hour, usermod.NewService(nil), nil, "", 0, nil, nil)
 
 	_, err := app.GetMe(context.Background(), nil)
 	if !errors.Is(err, ErrUnauthorized) {
@@ -3585,7 +3589,7 @@ func TestApplication_GetMe_Unauthorized(t *testing.T) {
 }
 
 func TestApplication_GetSession_Success(t *testing.T) {
-	app := NewApplication(mustTokenService(t), usermod.NewService(nil), nil, nil)
+	app := NewApplication(mustTokenService(t), time.Hour, usermod.NewService(nil), nil, "", 0, nil, nil)
 
 	resp, err := app.GetSession(context.Background(), sessionClaims())
 	if err != nil {
@@ -3603,10 +3607,223 @@ func TestApplication_GetSession_Success(t *testing.T) {
 }
 
 func TestApplication_GetSession_Unauthorized(t *testing.T) {
-	app := NewApplication(mustTokenService(t), usermod.NewService(nil), nil, nil)
+	app := NewApplication(mustTokenService(t), time.Hour, usermod.NewService(nil), nil, "", 0, nil, nil)
 
 	_, err := app.GetSession(context.Background(), nil)
 	if !errors.Is(err, ErrUnauthorized) {
 		t.Fatalf("expected ErrUnauthorized, got %v", err)
+	}
+}
+
+func TestApplication_ListWallets_Success(t *testing.T) {
+	store := NewInMemoryWalletIdentityStore()
+	now := time.Now().UTC()
+	addresses := []string{
+		"0x9999999999999999999999999999999999999901",
+		"0x9999999999999999999999999999999999999902",
+	}
+
+	for i, address := range addresses {
+		mustSeedWalletIdentity(t, store, address, "u_test_example_com", i == 0, now.Add(time.Duration(i)*time.Minute))
+	}
+
+	app := NewApplication(mustTokenService(t), time.Hour, usermod.NewService(nil), nil, "", 0, nil, store)
+
+	response, err := app.ListWallets(context.Background(), "u_test_example_com", WalletsQuery{})
+	if err != nil {
+		t.Fatalf("ListWallets error: %v", err)
+	}
+	if response.Total != 2 {
+		t.Fatalf("expected total=2, got %d", response.Total)
+	}
+	if len(response.Items) != 2 || len(response.Wallets) != 2 {
+		t.Fatalf("expected 2 wallets in both items/wallets, got items=%d wallets=%d", len(response.Items), len(response.Wallets))
+	}
+}
+
+func TestApplication_CreateWalletLinkChallenge_Success(t *testing.T) {
+	challengeStore := NewInMemoryWalletChallengeStore()
+	app := NewApplication(mustTokenService(t), time.Hour, usermod.NewService(nil), nil, "https://api.scavo.exchange", 5*time.Minute, challengeStore, nil)
+
+	response, err := app.CreateWalletLinkChallenge(context.Background(), "u_test_example_com", "0x1111111111111111111111111111111111111111", "scavium")
+	if err != nil {
+		t.Fatalf("CreateWalletLinkChallenge error: %v", err)
+	}
+	if response.Challenge == nil {
+		t.Fatal("expected challenge")
+	}
+	if response.Challenge.Purpose != WalletChallengePurposeLinkWallet {
+		t.Fatalf("unexpected purpose: %q", response.Challenge.Purpose)
+	}
+}
+
+func TestApplication_VerifyWalletLink_Success(t *testing.T) {
+	challengeStore := NewInMemoryWalletChallengeStore()
+	identityStore := NewInMemoryWalletIdentityStore()
+
+	primaryAddress, _ := signWalletMessageForScalar(t, "app-bootstrap", "101")
+	primaryIdentity, err := identityStore.GetOrCreate(context.Background(), primaryAddress)
+	if err != nil {
+		t.Fatalf("GetOrCreate primary error: %v", err)
+	}
+	if _, err := identityStore.AttachUser(context.Background(), primaryIdentity.ID, "u_test_example_com", true); err != nil {
+		t.Fatalf("AttachUser primary error: %v", err)
+	}
+
+	secondaryAddress, _ := signWalletMessageForScalar(t, "app-secondary", "102")
+	challengeSvc := NewWalletChallengeService(challengeStore, "https://api.scavo.exchange", 5*time.Minute)
+	challenge, err := challengeSvc.CreateWithOptions(context.Background(), secondaryAddress, "scavium", WalletChallengeOptions{
+		Purpose:           WalletChallengePurposeLinkWallet,
+		RequestedByUserID: "u_test_example_com",
+	})
+	if err != nil {
+		t.Fatalf("CreateWithOptions error: %v", err)
+	}
+	_, signature := signWalletMessageForScalar(t, challenge.Message, "102")
+
+	app := NewApplication(mustTokenService(t), time.Hour, usermod.NewService(nil), nil, "https://api.scavo.exchange", 5*time.Minute, challengeStore, identityStore)
+
+	response, err := app.VerifyWalletLink(context.Background(), "u_test_example_com", challenge.ID, secondaryAddress, signature)
+	if err != nil {
+		t.Fatalf("VerifyWalletLink error: %v", err)
+	}
+	if response.LinkedWallet == nil || response.LinkedWallet.Address != secondaryAddress {
+		t.Fatalf("unexpected linked wallet: %#v", response.LinkedWallet)
+	}
+	if len(response.Wallets) != 2 {
+		t.Fatalf("expected 2 wallets, got %d", len(response.Wallets))
+	}
+}
+
+func TestApplication_SetPrimaryWallet_Success(t *testing.T) {
+	identityStore := NewInMemoryWalletIdentityStore()
+
+	primaryAddress, _ := signWalletMessageForScalar(t, "app-primary", "201")
+	primaryIdentity, err := identityStore.GetOrCreate(context.Background(), primaryAddress)
+	if err != nil {
+		t.Fatalf("GetOrCreate primary error: %v", err)
+	}
+	if _, err := identityStore.AttachUser(context.Background(), primaryIdentity.ID, "u_test_example_com", true); err != nil {
+		t.Fatalf("AttachUser primary error: %v", err)
+	}
+
+	secondaryAddress, _ := signWalletMessageForScalar(t, "app-secondary", "202")
+	secondaryIdentity, err := identityStore.GetOrCreate(context.Background(), secondaryAddress)
+	if err != nil {
+		t.Fatalf("GetOrCreate secondary error: %v", err)
+	}
+	if _, err := identityStore.AttachUser(context.Background(), secondaryIdentity.ID, "u_test_example_com", false); err != nil {
+		t.Fatalf("AttachUser secondary error: %v", err)
+	}
+
+	app := NewApplication(mustTokenService(t), time.Hour, usermod.NewService(nil), nil, "", 0, nil, identityStore)
+
+	response, err := app.SetPrimaryWallet(context.Background(), "u_test_example_com", secondaryAddress)
+	if err != nil {
+		t.Fatalf("SetPrimaryWallet error: %v", err)
+	}
+	if response.PrimaryWallet == nil || response.PrimaryWallet.Address != secondaryAddress {
+		t.Fatalf("unexpected primary wallet: %#v", response.PrimaryWallet)
+	}
+}
+
+func TestApplication_CheckWalletDetach_Success(t *testing.T) {
+	identityStore := NewInMemoryWalletIdentityStore()
+
+	primaryAddress, _ := signWalletMessageForScalar(t, "app-detach-primary", "301")
+	primaryIdentity, err := identityStore.GetOrCreate(context.Background(), primaryAddress)
+	if err != nil {
+		t.Fatalf("GetOrCreate primary error: %v", err)
+	}
+	if _, err := identityStore.AttachUser(context.Background(), primaryIdentity.ID, "u_test_example_com", true); err != nil {
+		t.Fatalf("AttachUser primary error: %v", err)
+	}
+
+	secondaryAddress, _ := signWalletMessageForScalar(t, "app-detach-secondary", "302")
+	secondaryIdentity, err := identityStore.GetOrCreate(context.Background(), secondaryAddress)
+	if err != nil {
+		t.Fatalf("GetOrCreate secondary error: %v", err)
+	}
+	if _, err := identityStore.AttachUser(context.Background(), secondaryIdentity.ID, "u_test_example_com", false); err != nil {
+		t.Fatalf("AttachUser secondary error: %v", err)
+	}
+
+	app := NewApplication(mustTokenService(t), time.Hour, usermod.NewService(nil), nil, "", 0, nil, identityStore)
+
+	response, err := app.CheckWalletDetach(context.Background(), "u_test_example_com", secondaryAddress)
+	if err != nil {
+		t.Fatalf("CheckWalletDetach error: %v", err)
+	}
+	if !response.Eligible {
+		t.Fatalf("expected eligible detach, got %#v", response)
+	}
+}
+
+func TestApplication_ExecuteWalletDetach_NotEligible(t *testing.T) {
+	identityStore := NewInMemoryWalletIdentityStore()
+
+	primaryAddress, _ := signWalletMessageForScalar(t, "app-detach-only", "401")
+	primaryIdentity, err := identityStore.GetOrCreate(context.Background(), primaryAddress)
+	if err != nil {
+		t.Fatalf("GetOrCreate primary error: %v", err)
+	}
+	if _, err := identityStore.AttachUser(context.Background(), primaryIdentity.ID, "u_test_example_com", true); err != nil {
+		t.Fatalf("AttachUser primary error: %v", err)
+	}
+
+	app := NewApplication(mustTokenService(t), time.Hour, usermod.NewService(nil), nil, "", 0, nil, identityStore)
+
+	response, err := app.ExecuteWalletDetach(context.Background(), "u_test_example_com", primaryAddress)
+	if !errors.Is(err, ErrWalletDetachNotEligible) {
+		t.Fatalf("expected ErrWalletDetachNotEligible, got %v", err)
+	}
+	if response.Check == nil {
+		t.Fatal("expected detach eligibility check in response")
+	}
+}
+
+func TestApplication_VerifyWalletAccountMerge_Success(t *testing.T) {
+	challengeStore := NewInMemoryWalletChallengeStore()
+	identityStore := NewInMemoryWalletIdentityStore()
+
+	targetAddress, _ := signWalletMessageForScalar(t, "merge-target", "501")
+	targetIdentity, err := identityStore.GetOrCreate(context.Background(), targetAddress)
+	if err != nil {
+		t.Fatalf("GetOrCreate target error: %v", err)
+	}
+	if _, err := identityStore.AttachUser(context.Background(), targetIdentity.ID, "u_test_example_com", true); err != nil {
+		t.Fatalf("AttachUser target error: %v", err)
+	}
+
+	sourceAddress, _ := signWalletMessageForScalar(t, "merge-source", "502")
+	sourceIdentity, err := identityStore.GetOrCreate(context.Background(), sourceAddress)
+	if err != nil {
+		t.Fatalf("GetOrCreate source error: %v", err)
+	}
+	if _, err := identityStore.AttachUser(context.Background(), sourceIdentity.ID, "u_source_user", false); err != nil {
+		t.Fatalf("AttachUser source error: %v", err)
+	}
+
+	challengeSvc := NewWalletChallengeService(challengeStore, "https://api.scavo.exchange", 5*time.Minute)
+	challenge, err := challengeSvc.CreateWithOptions(context.Background(), sourceAddress, "scavium", WalletChallengeOptions{
+		Purpose:           WalletChallengePurposeAccountMerge,
+		RequestedByUserID: "u_test_example_com",
+	})
+	if err != nil {
+		t.Fatalf("CreateWithOptions error: %v", err)
+	}
+	_, signature := signWalletMessageForScalar(t, challenge.Message, "502")
+
+	app := NewApplication(mustTokenService(t), time.Hour, usermod.NewService(nil), nil, "https://api.scavo.exchange", 5*time.Minute, challengeStore, identityStore)
+
+	response, err := app.VerifyWalletAccountMerge(context.Background(), "u_test_example_com", challenge.ID, sourceAddress, signature)
+	if err != nil {
+		t.Fatalf("VerifyWalletAccountMerge error: %v", err)
+	}
+	if response.MergedWallet == nil || response.MergedWallet.Address != sourceAddress {
+		t.Fatalf("unexpected merged wallet: %#v", response.MergedWallet)
+	}
+	if response.SourceUserID != "u_source_user" || response.TargetUserID != "u_test_example_com" {
+		t.Fatalf("unexpected source/target users: %#v", response)
 	}
 }

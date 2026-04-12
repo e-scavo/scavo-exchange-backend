@@ -1009,7 +1009,7 @@ Phase 0.7 — Application Layer Foundation
 |----------|------------|--------|
 | 0.7.1 | Application Layer Boundary Definition | ✔ Completed |
 | 0.7.2 | Authenticated Surface Use Cases Extraction | ✔ Completed |
-| 0.7.3 | Wallet Management Use Cases Consolidation | ⬜ Pending |
+| 0.7.3 | Wallet Management Use Cases Consolidation | ✔ Completed |
 | 0.7.4 | Handler Simplification & Contract Preservation | ⬜ Pending |
 
 ---
@@ -1052,3 +1052,28 @@ Authenticated surface is now fully application-driven:
 #### Next
 
 0.7.3 — Wallet Management Use Cases Consolidation
+
+### 0.7.3 — Wallet Management Use Cases Consolidation ✔ Completed
+
+This subphase completes the migration of wallet management flows into the application layer.
+
+#### Delivered
+
+- Wallet listing moved to application layer
+- Wallet link (challenge/verify) moved to application layer
+- Wallet account merge (challenge/verify) moved to application layer
+- Set primary wallet moved to application layer
+- Wallet detach (check/execute) moved to application layer
+- Wallet HTTP handlers reduced to transport-only responsibilities
+
+#### Result
+
+Auth module is now fully application-driven:
+
+- 0.7.1 → boundary defined
+- 0.7.2 → authenticated surface extracted
+- 0.7.3 → wallet management consolidated
+
+#### Next
+
+0.7.4 — Handler Simplification & Contract Preservation

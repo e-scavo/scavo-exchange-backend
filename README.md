@@ -2025,3 +2025,47 @@ This establishes the correct base for wallet-specific extraction in 0.7.3.
 ### Next
 
 0.7.3 — Wallet Management Use Cases Consolidation
+
+## Phase 0.7.3 — Wallet Management Use Cases Consolidation
+
+### Objective
+
+Complete the application-layer migration by consolidating all wallet management flows into explicit application use cases.
+
+### Implementation
+
+- Extended `internal/modules/auth/application.go` with wallet use cases:
+  - `ListWallets(...)`
+  - `CreateWalletLinkChallenge(...)`
+  - `VerifyWalletLink(...)`
+  - `CreateWalletAccountMergeChallenge(...)`
+  - `VerifyWalletAccountMerge(...)`
+  - `SetPrimaryWallet(...)`
+  - `CheckWalletDetach(...)`
+  - `ExecuteWalletDetach(...)`
+- Refactored wallet HTTP handlers to:
+  - delegate orchestration to application layer
+  - remain transport-only
+- Aligned wallet listing (`/auth/wallets`) with application layer
+
+### Guarantees
+
+- No public contract changes
+- No route changes
+- No payload changes
+- No restructuring of modules
+- Services remain execution layer
+
+### Result
+
+Wallet management is now fully application-driven:
+
+- 0.7.1 → application boundary introduced
+- 0.7.2 → authenticated surface extracted
+- 0.7.3 → wallet management consolidated
+
+The auth module now follows a consistent architecture across all endpoints.
+
+### Next
+
+0.7.4 — Handler Simplification & Contract Preservation

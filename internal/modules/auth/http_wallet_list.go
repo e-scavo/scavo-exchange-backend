@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"errors"
 	"net/http"
 	"sort"
 	"strconv"
@@ -386,21 +387,20 @@ func (h HTTPHandlers) Wallets(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if h.WalletIdentities == nil {
-		writeJSON(w, http.StatusOK, buildWalletsResponse([]*WalletReadModel{}, 0, query))
-		return
-	}
-
-	wallets, err := h.WalletIdentities.ListByUser(r.Context(), claims.UserID)
+	response, err := h.Application().ListWallets(r.Context(), claims.UserID, query)
 	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "wallet_identity_error"})
+		switch {
+		case errors.Is(err, ErrUnauthorized):
+			writeJSON(w, http.StatusUnauthorized, map[string]any{"error": "unauthorized"})
+		case errors.Is(err, ErrApplicationNotConfigured):
+			writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "wallet_identity_error"})
+		case errors.Is(err, ErrWalletIdentityStore):
+			writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "wallet_identity_error"})
+		default:
+			writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "wallet_identity_error"})
+		}
 		return
 	}
-	if wallets == nil {
-		wallets = []*WalletIdentity{}
-	}
 
-	mapped := mapWalletIdentitiesToReadModels(wallets)
-	window, total := applyWalletsQuery(mapped, query)
-	writeJSON(w, http.StatusOK, buildWalletsResponse(window, total, query))
+	writeJSON(w, http.StatusOK, response)
 }

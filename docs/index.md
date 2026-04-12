@@ -67,3 +67,5 @@ Phase 0.6 ✔ Completed
 - 0.7.1 ✔ Application Layer Boundary Definition
 
 - 0.7.2 ✔ Authenticated Surface Use Cases Extraction
+
+- 0.7.3 ✔ Wallet Management Use Cases Consolidation

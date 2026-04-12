@@ -74,7 +74,7 @@ Initial application layer boundary defined and bootstrap use-case migrated.
 
 #### 0.7.2 — Authenticated Surface Use Cases Extraction ✔ Completed
 
-#### 0.7.3 — Wallet Management Use Cases Consolidation ⬜ Pending
+#### 0.7.3 — Wallet Management Use Cases Consolidation ✔ Completed
 
 #### 0.7.4 — Handler Simplification & Contract Preservation ⬜ Pending
 

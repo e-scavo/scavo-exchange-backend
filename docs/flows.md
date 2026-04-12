@@ -1138,3 +1138,44 @@ Authenticated flows are now:
 - consistency-hardened (0.6.4)
 - application-boundary defined (0.7.1)
 - fully application-driven (0.7.2)
+
+## Phase 0.7.3 — Wallet Management Use Cases Consolidation
+
+### Fully Unified Auth Flow
+
+All authentication and wallet-related endpoints now follow a single unified flow:
+
+HTTP Request  
+→ HTTP Handler (transport only)  
+→ Application Layer (use-case execution)  
+→ Services / Stores (execution)  
+→ Response  
+
+### Auth + Wallet Endpoints (Unified)
+
+- `/auth/login`
+- `/auth/me`
+- `/auth/session`
+- `/auth/bootstrap`
+- `/auth/wallets`
+- `/auth/wallet/*`
+
+All orchestration is now fully delegated to application layer.
+
+### Flow Guarantees
+
+- Zero business logic in handlers
+- Single orchestration point (application layer)
+- Stable and consistent contracts across all endpoints
+
+### Result
+
+Flows are now fully consolidated:
+
+- 0.6.1 → boundary defined  
+- 0.6.2 → contract alignment  
+- 0.6.3 → bootstrap consolidation  
+- 0.6.4 → structural consistency  
+- 0.7.1 → application boundary  
+- 0.7.2 → authenticated surface extracted  
+- 0.7.3 → wallet management consolidated
