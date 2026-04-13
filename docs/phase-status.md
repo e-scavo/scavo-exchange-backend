@@ -1105,7 +1105,7 @@ Auth module is now fully application-driven with clean transport boundaries.
 
 0.8 — Standardized Error Model
 
-## 🟨 Phase 0.8 — Standardized Error Model
+## ✅ Phase 0.8 — Standardized Error Model
 
 ### Subphase Status
 
@@ -1114,11 +1114,11 @@ Auth module is now fully application-driven with clean transport boundaries.
 | 0.8.1 | Error Contract Definition | ✔ Completed |
 | 0.8.2 | Error Type System Introduction | ✔ Completed |
 | 0.8.3 | Auth Surface Error Standardization | ✔ Completed |
-| 0.8.4 | Error Mapping Hardening & Contract Tests | ⬜ Pending |
+| 0.8.4 | Error Mapping Hardening & Contract Tests | ✔ Completed |
 
 ---
 
-## ✅ Phase 0.8.1–0.8.3 Summary
+## ✅ Phase 0.8 Summary
 
 ### Delivered
 
@@ -1133,15 +1133,15 @@ Auth module is now fully application-driven with clean transport boundaries.
 
 ### Result
 
-Phase 0.8 is now started with 0.8.1 completed:
+Phase 0.8 is now fully completed:
 
 - 0.8.1 → error response contract introduced
 - 0.8.2 → internal app error type system introduced
 - 0.8.3 → auth surface standardized on centralized app errors
-- 0.8.4 → pending contract hardening and tests
+- 0.8.4 → mapping hardened and contract tests added
 
-The backend now exposes a single structured JSON error envelope across auth handlers and core auth HTTP middleware.
+The backend now exposes a single structured JSON error envelope across auth handlers and core auth HTTP middleware, backed by centralized app-error mapping and dedicated contract-level hardening tests.
 
 #### Next
 
-0.8.4 — Error Mapping Hardening & Contract Tests
+Next phase planning after 0.8 completion

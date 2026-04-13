@@ -78,7 +78,7 @@ Initial application layer boundary defined and bootstrap use-case migrated.
 
 #### 0.7.4 — Handler Simplification & Contract Preservation ✔ Completed
 
-### 0.8 — Standardized Error Model 🟨 In Progress
+### 0.8 — Standardized Error Model ✔ Completed
 Define a consistent error contract across all endpoints.
 
 #### 0.8.1 — Error Contract Definition ✔ Completed
@@ -90,7 +90,7 @@ Introduced centralized internal app error typing, shared auth error catalog norm
 #### 0.8.3 — Auth Surface Error Standardization ✔ Completed
 Auth handlers now consume centralized app-error factories and catalog resolution directly, while preserving the 0.8.1 envelope and avoiding cyclic import reintroduction.
 
-#### 0.8.4 — Error Mapping Hardening & Contract Tests ⬜ Pending
+#### 0.8.4 — Error Mapping Hardening & Contract Tests ✔ Completed
 
 ### 0.9 — API Versioning Strategy ⬜ Pending
 Introduce versioning to support backward-compatible evolution.

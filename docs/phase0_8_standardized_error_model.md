@@ -109,7 +109,7 @@ Planned:
 
 ---
 
-## Architecture Introduced in 0.8.1–0.8.3
+## Architecture Introduced in 0.8.1–0.8.4
 
 ### Response Contract Layer
 
@@ -169,13 +169,15 @@ This includes:
 
 ---
 
-## Guarantees After 0.8.3
+## Guarantees After 0.8.4
 
 - one structured JSON error envelope exists
 - auth HTTP handlers no longer emit legacy root-level string-only errors
 - error details are now nested under `error.details`
 - middleware-level auth failures align with the new envelope
 - auth surface handlers now consume centralized app-error factories directly
+- representative catalog mappings are now frozen with dedicated tests
+- canonical HTTP envelope writing is now frozen with dedicated tests
 - success payloads remain unchanged
 - routes remain unchanged
 - domain/application logic remains unchanged
@@ -184,16 +186,14 @@ This includes:
 
 ## Result
 
-Phase 0.8 has now started concretely in code.
+Phase 0.8 is now fully implemented in code and hardened with contract-focused tests.
 
-0.8.1, 0.8.2 and 0.8.3 now establish the contractual, internal typing and auth-surface adoption foundations required for the remaining subphase:
-
-- 0.8.4 will harden and freeze the contract with tests
+0.8.1, 0.8.2, 0.8.3 and 0.8.4 together establish the contractual envelope, the internal typing system, the auth-surface adoption layer and the regression-resistant test hardening required to treat the standardized error model as closed.
 
 ---
 
 ## Conclusion
 
-Phase 0.8.1, 0.8.2 and 0.8.3 do not redesign business behavior.
+Phase 0.8 does not redesign business behavior.
 
-Together they introduce the formal response contract, the centralized internal error type layer and the first auth-surface-wide adoption of centralized app-error factories, while preserving the current auth execution model established by Phase 0.7.
+Together its four subphases introduce the formal response contract, the centralized internal error type layer, the auth-surface-wide adoption of centralized app-error factories and the contract-hardening tests that freeze the expected mapping and transport behavior, while preserving the current auth execution model established by Phase 0.7.
