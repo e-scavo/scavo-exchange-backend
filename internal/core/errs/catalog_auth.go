@@ -52,12 +52,18 @@ var authErrorCatalog = map[string]AppErrorSpec{
 	"wallet_identity_already_linked_to_user": {LegacyKey: "wallet_identity_already_linked_to_user", Code: "WALLET_ALREADY_LINKED_TO_USER", Message: "wallet identity already linked to user", Status: http.StatusConflict, Category: CategoryWallet},
 	"wallet_identity_error":                  {LegacyKey: "wallet_identity_error", Code: "WALLET_IDENTITY_ERROR", Message: "wallet identity error", Status: http.StatusInternalServerError, Category: CategoryWallet},
 	"wallet_identity_not_found":              {LegacyKey: "wallet_identity_not_found", Code: "WALLET_NOT_FOUND", Message: "wallet identity not found", Status: http.StatusNotFound, Category: CategoryWallet},
-	"wallet_identity_not_owned_by_user":      {LegacyKey: "wallet_identity_not_owned_by_user", Code: "WALLET_NOT_OWNED_BY_USER", Message: "wallet identity not owned by user", Status: http.StatusConflict, Category: CategoryWallet},
-	"wallet_link_challenge_error":            {LegacyKey: "wallet_link_challenge_error", Code: "WALLET_LINK_CHALLENGE_ERROR", Message: "wallet link challenge error", Status: http.StatusInternalServerError, Category: CategoryWallet},
-	"wallet_link_challenge_user_mismatch":    {LegacyKey: "wallet_link_challenge_user_mismatch", Code: "WALLET_LINK_CHALLENGE_USER_MISMATCH", Message: "wallet link challenge user mismatch", Status: http.StatusConflict, Category: CategoryWallet},
-	"wallet_link_verify_error":               {LegacyKey: "wallet_link_verify_error", Code: "WALLET_LINK_VERIFY_ERROR", Message: "wallet link verification error", Status: http.StatusInternalServerError, Category: CategoryWallet},
-	"wallet_primary_set_error":               {LegacyKey: "wallet_primary_set_error", Code: "WALLET_PRIMARY_SET_ERROR", Message: "wallet primary set error", Status: http.StatusInternalServerError, Category: CategoryWallet},
-	"wallet_verify_error":                    {LegacyKey: "wallet_verify_error", Code: "WALLET_VERIFY_ERROR", Message: "wallet verification error", Status: http.StatusInternalServerError, Category: CategoryWallet},
+	"wallet_identity_not_owned_by_user": {
+		LegacyKey: "wallet_identity_not_owned_by_user",
+		Code:      "WALLET_NOT_OWNED_BY_USER",
+		Message:   "wallet identity not owned by user",
+		Status:    http.StatusForbidden,
+		Category:  CategoryWallet,
+	},
+	"wallet_link_challenge_error":         {LegacyKey: "wallet_link_challenge_error", Code: "WALLET_LINK_CHALLENGE_ERROR", Message: "wallet link challenge error", Status: http.StatusInternalServerError, Category: CategoryWallet},
+	"wallet_link_challenge_user_mismatch": {LegacyKey: "wallet_link_challenge_user_mismatch", Code: "WALLET_LINK_CHALLENGE_USER_MISMATCH", Message: "wallet link challenge user mismatch", Status: http.StatusConflict, Category: CategoryWallet},
+	"wallet_link_verify_error":            {LegacyKey: "wallet_link_verify_error", Code: "WALLET_LINK_VERIFY_ERROR", Message: "wallet link verification error", Status: http.StatusInternalServerError, Category: CategoryWallet},
+	"wallet_primary_set_error":            {LegacyKey: "wallet_primary_set_error", Code: "WALLET_PRIMARY_SET_ERROR", Message: "wallet primary set error", Status: http.StatusInternalServerError, Category: CategoryWallet},
+	"wallet_verify_error":                 {LegacyKey: "wallet_verify_error", Code: "WALLET_VERIFY_ERROR", Message: "wallet verification error", Status: http.StatusInternalServerError, Category: CategoryWallet},
 }
 
 func LookupAuthErrorSpec(legacyKey string) (AppErrorSpec, bool) {
