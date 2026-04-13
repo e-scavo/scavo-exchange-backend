@@ -2210,3 +2210,38 @@ Phase 0.8 is now fully completed across its four implementation layers:
 ### Next
 
 Phase 0.8 is closed. The next roadmap step should start from the post-0.8 foundation state rather than from a pending error-model subphase.
+
+
+## Phase 0.9.1 — Versioning Policy Definition
+
+### Objective
+
+Define the official API versioning policy for the post-0.8 backend so public contract evolution becomes explicit before authorization and later domain growth are introduced.
+
+### Why This Phase Follows 0.8
+
+Phase 0.8 closed the standardized error model and froze the authenticated transport error envelope, but the backend still exposes its public surface through unversioned routes. Once a stable transport contract exists, the next architectural need is to define how that contract evolves without breaking current consumers.
+
+### Policy Defined
+
+The backend now treats path-based versioning as the canonical public strategy:
+
+- canonical route namespace: `/api/v1/...`
+- current unversioned endpoints: legacy, backward-compatible, non-canonical
+- `v1` semantics: current success payloads plus the Phase 0.8 standardized error envelope
+
+### Guarantees
+
+- No business-flow redesign
+- No immediate route removal
+- No success payload mutation
+- No breaking error-envelope change inside `v1`
+- No forced frontend migration while the frontend remains aligned to backend Phase 0.6 until Stage 0 is complete
+
+### Immediate Architectural Consequence
+
+Versioning is now explicitly a transport-layer concern. The application layer introduced in Phase 0.7 remains the orchestration boundary, and future authorization work in 0.10 must build on top of this versioning policy rather than define transport evolution ad hoc.
+
+### Next
+
+Phase 0.9.2 should introduce the canonical router exposure under `/api/v1/...` while preserving the current legacy route surface.

@@ -405,3 +405,6 @@ This should introduce:
 - migration workflow bootstrap
 - health/readiness baseline implementation
 - testable infrastructure wiring direction
+
+### Phase 0.9 Impact — API Versioning
+The introduction of `/api/v1` as canonical API requires developers to consider versioned endpoints during development and testing.

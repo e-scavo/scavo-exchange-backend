@@ -1219,3 +1219,7 @@ Flow evolution is now complete:
 - 0.7.4 → transport layer unified  
 
 The backend now exposes a clean, deterministic, and fully consistent execution flow.
+
+
+### Phase 0.9 Impact — API Versioning
+The introduction of `/api/v1` as canonical API requires developers to consider versioned endpoints during development and testing.

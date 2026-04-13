@@ -1144,6 +1144,48 @@ Phase 0.8 is now fully completed:
 
 The backend now exposes a single structured JSON error envelope across auth handlers and core auth HTTP middleware, backed by centralized app-error mapping and dedicated contract-level hardening tests.
 
+## ⏳ Phase 0.9 — API Versioning Strategy
+
+### Subphase Status
+
+| Subphase | Description | Status |
+|----------|------------|--------|
+| 0.9.1 | Versioning Policy Definition | ✔ Completed |
+| 0.9.2 | Router Versioning Foundation | ⬜ Pending |
+| 0.9.3 | Authenticated Surface Version Freezing | ⬜ Pending |
+| 0.9.4 | Version-aware Contract Testing | ⬜ Pending |
+| 0.9.5 | Documentation Consolidation | ⬜ Pending |
+
+---
+
+## ⏳ Phase 0.9 Summary
+
+### Objective
+
+Define the canonical API versioning policy for the post-0.8 backend while preserving the currently consumed legacy transport surface and avoiding forced frontend movement before Stage 0 closes.
+
+### Delivered
+
+- Declared path-based versioning as the canonical public API strategy
+- Reserved `/api/v1/...` as the canonical route namespace for current authenticated and auth-adjacent surfaces
+- Classified the existing unversioned endpoints as legacy, backward-compatible and non-canonical rather than obsolete or immediately removable
+- Froze `v1` as the semantic home of the current success-payload and standardized error-envelope behavior
+- Recorded the rule that breaking transport or error-contract changes require a new API version rather than silent mutation of the existing surface
+- Linked the versioning step explicitly to the post-0.8 foundation state and to the upcoming authorization layer in 0.10
+- Preserved the project constraint that the frontend remains aligned to backend Phase 0.6 until Stage 0 completion, so versioning preparation must not force immediate frontend adoption
+
+### Current Result
+
+Phase 0.9 is now formally opened and architecturally defined:
+
+- 0.9.1 → versioning policy defined
+- 0.9.2 → canonical router exposure pending
+- 0.9.3 → authenticated-surface `v1` freeze pending
+- 0.9.4 → version-aware contract testing pending
+- 0.9.5 → trunk-documentation consolidation pending
+
+The backend remains functionally stable on its current routes while gaining an explicit contract-evolution model for the next implementation steps.
+
 #### Next
 
-Next phase planning after 0.8 completion
+0.9.2 — Router Versioning Foundation

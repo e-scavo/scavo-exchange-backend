@@ -274,3 +274,20 @@ Delaying test structure until late stages would create fragile integrations and 
 - test layers are defined early
 - infrastructure work should become testable as introduced
 - critical flows should gain regression protection as they stabilize
+
+---
+
+## ADR-0019 - Path-Based API Versioning Becomes Canonical After Phase 0.8
+
+### Decision
+The backend adopts path-based API versioning as the canonical public-contract strategy, with `/api/v1/...` defined as the authoritative route namespace for the currently stabilized authenticated surface.
+
+### Reason
+By the end of Phase 0.8, the backend already exposes a stable transport contract and a standardized error envelope, but it still does so through unversioned routes. Future work such as authorization and later domain growth needs an explicit contract-evolution model so compatibility and breaking changes are handled intentionally rather than informally.
+
+### Impact
+- the current unversioned routes remain available as legacy compatibility routes
+- `v1` freezes the present success-payload and error-envelope semantics
+- future breaking transport changes require a new API version
+- versioning stays in the transport layer and must not leak into application orchestration
+- frontend alignment can remain on the pre-versioned route set until Stage 0 completion without blocking backend evolution

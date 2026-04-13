@@ -256,3 +256,6 @@ That phase should define:
 - observability baseline
 - test structure direction
 - error visibility and operational diagnostics baseline
+
+### Phase 0.9 Impact — API Versioning
+The introduction of `/api/v1` as canonical API requires developers to consider versioned endpoints during development and testing.

@@ -418,4 +418,51 @@ At the end of Phase 0.7, the auth module architecture is now consistently layere
 - Application → orchestration
 - Services / Stores → execution
 
-This prepares the backend for Phase 0.8 and beyond, where cross-cutting architectural concerns can be introduced on top of a stable application boundary.
+
+## Phase 0.9 — API Versioning Strategy
+
+### Architectural Objective
+
+Phase 0.9 introduces an explicit API versioning layer for the already-stabilized authenticated surface so the backend can evolve its public transport contract without rewriting the underlying application or service orchestration.
+
+### Canonical Transport Model
+
+The architecture now distinguishes between:
+
+- legacy public routes, which remain backward-compatible and non-canonical
+- canonical versioned routes, which will live under `/api/v1/...`
+
+This distinction belongs to the HTTP contract layer only. It does not change the execution model introduced in Phase 0.7.
+
+### Layering Rule
+
+Versioning is defined as:
+
+- HTTP route exposure and contract selection → transport concern
+- use-case orchestration → application concern
+- domain execution and persistence → service/store concern
+
+This preserves the application-layer boundary while making room for controlled public API evolution.
+
+### Architectural Benefit
+
+With this model in place, the backend can:
+
+- preserve current consumers on legacy routes
+- freeze the current authenticated surface under `v1`
+- prepare authorization and later domain growth on top of explicit contract semantics
+- avoid mixing route-evolution decisions with business-flow implementation details
+
+### Frontend Alignment Constraint
+
+This architectural move is intentionally compatible with the current project rule that the frontend remains aligned to backend Phase 0.6 until Stage 0 completes. Versioning preparation therefore improves backend contract governance without forcing immediate frontend migration.
+
+### Result
+
+After 0.9.1, the architecture has a defined transport-evolution policy in addition to the application-layer foundation:
+
+- Handlers → transport plus versioned exposure rules
+- Application → orchestration
+- Services / Stores → execution
+
+This prepares the backend for Phase 0.10 and beyond, where authorization and later cross-cutting concerns can be introduced on top of a stable application boundary and an explicit public contract-evolution model.

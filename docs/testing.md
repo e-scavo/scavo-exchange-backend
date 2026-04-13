@@ -1657,3 +1657,47 @@ Testing guarantees now include:
 - full application-driven architecture (0.7.1 → 0.7.3)
 - fully unified handler layer (0.7.4)
 - strict contract preservation across refactors
+
+
+## Phase 0.9 — API Versioning Strategy
+
+### Purpose
+
+Define the testing direction required once canonical versioned routes are introduced on top of the already stabilized authenticated surface.
+
+### Coverage Direction
+
+#### Route equivalence
+
+Canonical `/api/v1/...` routes and their legacy counterparts must remain behaviorally aligned while both surfaces coexist.
+
+Tests for later subphases should validate:
+
+- same success payload shape
+- same status codes for equivalent scenarios
+- same standardized error envelope semantics
+- no handler-specific divergence between legacy and canonical paths
+
+#### Contract freezing
+
+The current authenticated/public surface now needs version-aware regression protection covering:
+
+- `/auth/login`
+- `/auth/bootstrap`
+- `/auth/me`
+- `/auth/me/settings`
+- `/auth/session`
+- `/auth/wallets`
+- wallet-management endpoints promoted into the canonical `v1` route space
+
+#### Breaking-change discipline
+
+Testing must make it explicit that:
+
+- additive optional fields may remain inside `v1`
+- structural response or error-envelope changes are not allowed silently
+- any breaking transport change requires a new API version rather than mutation of the current suite
+
+### Result
+
+Testing scope now extends beyond handler correctness and error-envelope normalization toward explicit transport-version compatibility control for the remaining Stage 0 work.

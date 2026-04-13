@@ -689,6 +689,56 @@ With:
 
 ---
 
+
+### Phase 0.9 — API Versioning Strategy (Deep Analysis)
+
+#### Context
+
+By the end of Phase 0.8, the backend already exposes a stable authenticated HTTP surface with a frozen structured error envelope, but it still does so through unversioned public routes. At that point the system has enough transport maturity that contract evolution becomes a first-class architectural concern rather than a future detail.
+
+A versioning phase becomes necessary because the backend now has to balance three realities simultaneously:
+
+- stable current consumers on the existing route set
+- future transport and authorization growth after 0.8
+- a frontend that intentionally remains aligned only up to backend Phase 0.6 until Stage 0 is fully closed
+
+#### Architectural Problem
+
+Without explicit versioning semantics, any later transport evolution would overload the meaning of the current route set:
+
+- new canonical behaviors would have no formal home
+- legacy compatibility would be ambiguous
+- breaking changes could be introduced informally
+- future authorization or domain-layer additions could create accidental contract drift
+
+The problem after 0.8 is therefore not route proliferation, but uncontrolled contract evolution.
+
+#### Architectural Direction
+
+Phase 0.9 defines a two-surface model:
+
+- canonical versioned API surface under `/api/v1/...`
+- legacy compatibility surface under the current unversioned routes
+
+This does not create two business implementations. It creates one business/application surface with two transport entry paths, where the legacy entry remains compatibility-oriented and the canonical entry becomes the authoritative contract target.
+
+#### Design Consequences
+
+This decision establishes the following architectural rules:
+
+- API versioning belongs to the transport contract, not to application/service orchestration
+- `v1` freezes the current success-payload semantics and the 0.8 standardized error envelope
+- legacy routes are preserved as non-canonical compatibility routes while Stage 0 remains in flight
+- future breaking transport changes must target a new API version rather than silently mutating `v1`
+- authorization in 0.10 must layer on top of a defined versioning policy instead of inventing one during permission work
+
+#### Why This Matters Before 0.10
+
+Authorization introduces contract-sensitive behavior: forbidden/unauthorized handling, future role-sensitive route behavior, and additional policy signals. Without a defined versioning model, those additions could blur the boundary between “current stable behavior” and “future evolved behavior”.
+
+Phase 0.9 avoids that by fixing the transport evolution model first.
+
+---
 ### Impact on Future Phases
 
 This foundation enables:

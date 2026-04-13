@@ -666,4 +666,63 @@ After 0.7.4, the backend reaches:
 
 ### Next Step
 
-0.8 — Standardized Error Model
+0.9 — API Versioning Strategy
+
+
+## Phase 0.8 — Standardized Error Model
+
+### Summary
+
+This phase completed the transport-level error standardization initiated after the application-layer foundation. The backend now exposes a single structured error envelope backed by centralized app-error typing, reusable factories and dedicated hardening tests.
+
+### Key Changes
+
+- Introduced a canonical HTTP error envelope under `internal/core/httpx`
+- Added centralized `AppError` typing and shared auth/internal factory helpers under `internal/core/errs`
+- Standardized auth handlers and auth middleware on the centralized error model
+- Added contract-hardening tests to freeze representative mapping and serialization behavior
+
+### Resulting System State
+
+After 0.8, the backend reaches:
+
+- stable authenticated transport contracts
+- centralized error normalization
+- explicit contract-level hardening around error mapping behavior
+- no cyclic-import regression while adopting the shared error system
+
+### Next Step
+
+0.9 — API Versioning Strategy
+
+## Phase 0.9 — API Versioning Strategy
+
+### Summary
+
+This phase opens the next Stage 0 step by defining how the post-0.8 backend will evolve its public API contract without breaking the currently available route surface.
+
+### Key Changes
+
+- Declares path-based versioning as the canonical API strategy
+- Reserves `/api/v1/...` as the canonical route namespace for the current authenticated surface
+- Classifies the existing unversioned endpoints as legacy compatibility routes
+- Freezes the current success-payload semantics and 0.8 error-envelope behavior as `v1` contract semantics
+- Preserves the project rule that the frontend remains aligned only up to backend Phase 0.6 until Stage 0 is fully completed
+
+### Architectural Impact
+
+- Transport contract evolution becomes explicit
+- Legacy compatibility is preserved without duplicating business logic
+- Authorization in 0.10 gains a stable versioning foundation instead of defining transport policy implicitly
+
+### Resulting System State
+
+After 0.9.1, the backend is:
+
+- functionally unchanged for current consumers
+- architecturally prepared for canonical versioned routes
+- documented with an explicit compatibility model for the remaining Stage 0 work
+
+### Next Step
+
+0.9.2 — Router Versioning Foundation
