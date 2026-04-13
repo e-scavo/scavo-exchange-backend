@@ -32,16 +32,18 @@
 * `phase0_5_4_user_settings_mutation.md`
 * `phase0_5_5_user_settings_hardening_and_contract_stabilization.md`
 * `phase0_6_authenticated_application_bootstrap_consolidation_and_session_ready_surface.md`
+* `phase0_7_application_layer_foundation.md`
+* `phase0_8_standardized_error_model.md`
 
 ---
 
 ## 🚧 Current Phase Focus
 
-* `phase0_6_authenticated_application_bootstrap_consolidation_and_session_ready_surface.md`
-  * `0.6.1 — Bootstrap Surface Boundary Clarification`
-  * `0.6.2 — Authenticated Surface Contract Alignment`
-  * `0.6.3 — Session-Ready Bootstrap Read Model`
-  * `0.6.4 — Application Surface Consistency Hardening`
+* `phase0_8_standardized_error_model.md`
+  * `0.8.1 — Error Contract Definition`
+  * `0.8.2 — Error Type System Introduction`
+  * `0.8.3 — Auth Surface Error Standardization`
+  * `0.8.4 — Error Mapping Hardening & Contract Tests`
 
 ---
 
@@ -71,3 +73,12 @@ Phase 0.6 ✔ Completed
 - 0.7.3 ✔ Wallet Management Use Cases Consolidation
 
 - 0.7.4 ✔ Handler Simplification & Contract Preservation
+
+--- 
+
+### Phase 0.8 — Standardized Error Model
+
+- 0.8.1 ✔ Error Contract Definition
+- 0.8.2 ⬜ Error Type System Introduction
+- 0.8.3 ⬜ Auth Surface Error Standardization
+- 0.8.4 ⬜ Error Mapping Hardening & Contract Tests

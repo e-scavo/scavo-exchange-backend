@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	coreauth "github.com/e-scavo/scavo-exchange-backend/internal/core/auth"
+	coreerrs "github.com/e-scavo/scavo-exchange-backend/internal/core/errs"
 )
 
 func AuthClaimsFromContext(ctx context.Context) (*coreauth.Claims, bool) {
@@ -16,19 +17,19 @@ func RequireAuth(tokens *coreauth.TokenService, allowQueryToken bool) func(http.
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if tokens == nil {
-				WriteJSON(w, http.StatusInternalServerError, map[string]any{"error": "auth_not_configured"})
+				WriteError(w, http.StatusInternalServerError, coreerrs.NewResponseError("AUTH_NOT_CONFIGURED", "authentication is not configured", nil))
 				return
 			}
 
 			token := coreauth.ExtractTokenFromRequest(r, allowQueryToken)
 			if strings.TrimSpace(token) == "" {
-				WriteJSON(w, http.StatusUnauthorized, map[string]any{"error": "missing_bearer_token"})
+				WriteError(w, http.StatusUnauthorized, coreerrs.NewResponseError("AUTH_MISSING_BEARER_TOKEN", "missing bearer token", nil))
 				return
 			}
 
 			claims, err := tokens.Parse(token)
 			if err != nil || claims == nil || strings.TrimSpace(claims.UserID) == "" {
-				WriteJSON(w, http.StatusUnauthorized, map[string]any{"error": "unauthorized"})
+				WriteError(w, http.StatusUnauthorized, coreerrs.NewResponseError("AUTH_UNAUTHORIZED", "authentication required", nil))
 				return
 			}
 

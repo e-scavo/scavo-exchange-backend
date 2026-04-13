@@ -17,6 +17,16 @@ import (
 	usersettingsmod "github.com/e-scavo/scavo-exchange-backend/internal/modules/usersettings"
 )
 
+type errorPayload struct {
+	Error errorBody `json:"error"`
+}
+
+type errorBody struct {
+	Code    string         `json:"code"`
+	Message string         `json:"message"`
+	Details map[string]any `json:"details,omitempty"`
+}
+
 type stubUserSettingsRepo struct {
 	getByUserIDFn       func(ctx context.Context, userID string) (*usersettingsmod.UserSettings, error)
 	upsertPreferencesFn func(ctx context.Context, userID string, preferences map[string]any) (*usersettingsmod.UserSettings, error)
@@ -34,6 +44,27 @@ func (s *stubUserSettingsRepo) UpsertPreferences(ctx context.Context, userID str
 		return s.upsertPreferencesFn(ctx, userID, preferences)
 	}
 	return &usersettingsmod.UserSettings{UserID: userID, Preferences: preferences}, nil
+}
+
+func assertErrorEnvelope(t *testing.T, rec *httptest.ResponseRecorder, wantStatus int, wantCode, wantMessage string) {
+	t.Helper()
+
+	if rec.Code != wantStatus {
+		t.Fatalf("unexpected status: got=%d want=%d body=%s", rec.Code, wantStatus, rec.Body.String())
+	}
+
+	var payload errorPayload
+	if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("decode error payload: %v body=%s", err, rec.Body.String())
+	}
+
+	if payload.Error.Code != wantCode {
+		t.Fatalf("unexpected error code: got=%q want=%q body=%s", payload.Error.Code, wantCode, rec.Body.String())
+	}
+
+	if payload.Error.Message != wantMessage {
+		t.Fatalf("unexpected error message: got=%q want=%q body=%s", payload.Error.Message, wantMessage, rec.Body.String())
+	}
 }
 
 func mustTokenService(t *testing.T) *coreauth.TokenService {
@@ -1252,12 +1283,12 @@ func TestHTTPHandlers_Wallets_InvalidQueryParams(t *testing.T) {
 				t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
 			}
 
-			var payload map[string]any
+			var payload errorPayload
 			if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
 				t.Fatalf("decode error: %v", err)
 			}
 
-			if payload["error"] != tc.expectedError {
+			if payload.Error.Code != normalizeAuthError(tc.expectedError).Code {
 				t.Fatalf("unexpected error payload: %#v", payload)
 			}
 		})
@@ -1441,12 +1472,12 @@ func TestHTTPHandlers_Wallets_InvalidPaginationParams(t *testing.T) {
 				t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
 			}
 
-			var payload map[string]any
+			var payload errorPayload
 			if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
 				t.Fatalf("decode error: %v", err)
 			}
 
-			if payload["error"] != tc.expectedError {
+			if payload.Error.Code != normalizeAuthError(tc.expectedError).Code {
 				t.Fatalf("unexpected error payload: %#v", payload)
 			}
 		})
@@ -1502,11 +1533,11 @@ func TestHTTPHandlers_WalletVerify_RejectsChallengePurposeMismatch(t *testing.T)
 		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
 	}
 
-	var payload map[string]any
+	var payload errorPayload
 	if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
 		t.Fatalf("decode error: %v", err)
 	}
-	if payload["error"] != "wallet_challenge_purpose_mismatch" {
+	if payload.Error.Code != normalizeAuthError("wallet_challenge_purpose_mismatch").Code {
 		t.Fatalf("unexpected error payload: %#v", payload)
 	}
 }
@@ -2088,8 +2119,13 @@ func TestHTTPHandlers_WalletDetachCheck_RejectsWalletNotOwnedByUser(t *testing.T
 }
 
 type walletDetachConflictPayload struct {
-	Error string                     `json:"error"`
-	Check *WalletDetachCheckResponse `json:"check,omitempty"`
+	Error struct {
+		Code    string `json:"code"`
+		Message string `json:"message"`
+		Details struct {
+			Check *WalletDetachCheckResponse `json:"check,omitempty"`
+		} `json:"details,omitempty"`
+	} `json:"error"`
 }
 
 func TestHTTPHandlers_WalletDetachExecute_ReadConsistency(t *testing.T) {
@@ -2313,14 +2349,14 @@ func TestHTTPHandlers_WalletDetach_RejectsPrimaryWallet(t *testing.T) {
 	if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
 		t.Fatalf("decode error: %v", err)
 	}
-	if payload.Error != "wallet_detach_not_eligible" {
-		t.Fatalf("unexpected error code: %q", payload.Error)
+	if payload.Error.Code != normalizeAuthError("wallet_detach_not_eligible").Code {
+		t.Fatalf("unexpected error code: %q", payload.Error.Code)
 	}
-	if payload.Check == nil || payload.Check.Eligible {
-		t.Fatalf("expected ineligible check payload, got %#v", payload.Check)
+	if payload.Error.Details.Check == nil || payload.Error.Details.Check.Eligible {
+		t.Fatalf("expected ineligible check payload, got %#v", payload.Error.Details.Check)
 	}
-	if len(payload.Check.Reasons) == 0 || payload.Check.Reasons[0] != WalletDetachReasonWalletIsPrimary {
-		t.Fatalf("unexpected detach reasons: %#v", payload.Check)
+	if len(payload.Error.Details.Check.Reasons) == 0 || payload.Error.Details.Check.Reasons[0] != WalletDetachReasonWalletIsPrimary {
+		t.Fatalf("unexpected detach reasons: %#v", payload.Error.Details.Check)
 	}
 }
 func TestHTTPHandlers_Wallets_ReattachedWalletPreservesDetachedAt(t *testing.T) {
@@ -2482,12 +2518,7 @@ func TestHTTPHandlers_UpdateMe_InvalidDisplayName(t *testing.T) {
 
 	h.UpdateMe(rec, req)
 
-	if rec.Code != http.StatusBadRequest {
-		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
-	}
-	if !strings.Contains(rec.Body.String(), "invalid_display_name") {
-		t.Fatalf("unexpected body: %s", rec.Body.String())
-	}
+	assertErrorEnvelope(t, rec, http.StatusBadRequest, "INVALID_DISPLAY_NAME", "invalid display name")
 }
 
 func TestHTTPHandlers_UpdateMe_DisplayNameTooLong(t *testing.T) {
@@ -2503,12 +2534,7 @@ func TestHTTPHandlers_UpdateMe_DisplayNameTooLong(t *testing.T) {
 
 	h.UpdateMe(rec, req)
 
-	if rec.Code != http.StatusBadRequest {
-		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
-	}
-	if !strings.Contains(rec.Body.String(), "display_name_too_long") {
-		t.Fatalf("unexpected body: %s", rec.Body.String())
-	}
+	assertErrorEnvelope(t, rec, http.StatusBadRequest, "DISPLAY_NAME_TOO_LONG", "display name is too long")
 }
 
 func TestHTTPHandlers_UpdateMe_UnknownFields(t *testing.T) {
@@ -2524,12 +2550,7 @@ func TestHTTPHandlers_UpdateMe_UnknownFields(t *testing.T) {
 
 	h.UpdateMe(rec, req)
 
-	if rec.Code != http.StatusBadRequest {
-		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
-	}
-	if !strings.Contains(rec.Body.String(), "bad_request") {
-		t.Fatalf("unexpected body: %s", rec.Body.String())
-	}
+	assertErrorEnvelope(t, rec, http.StatusBadRequest, "BAD_REQUEST", "invalid request payload")
 }
 
 func TestHTTPHandlers_UpdateMe_TrailingJSONRejected(t *testing.T) {
@@ -2545,12 +2566,7 @@ func TestHTTPHandlers_UpdateMe_TrailingJSONRejected(t *testing.T) {
 
 	h.UpdateMe(rec, req)
 
-	if rec.Code != http.StatusBadRequest {
-		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
-	}
-	if !strings.Contains(rec.Body.String(), "bad_request") {
-		t.Fatalf("unexpected body: %s", rec.Body.String())
-	}
+	assertErrorEnvelope(t, rec, http.StatusBadRequest, "BAD_REQUEST", "invalid request payload")
 }
 
 func TestHTTPHandlers_UpdateMe_UserNotFound(t *testing.T) {
@@ -2572,12 +2588,7 @@ func TestHTTPHandlers_UpdateMe_UserNotFound(t *testing.T) {
 
 	h.UpdateMe(rec, req)
 
-	if rec.Code != http.StatusNotFound {
-		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
-	}
-	if !strings.Contains(rec.Body.String(), "user_not_found") {
-		t.Fatalf("unexpected body: %s", rec.Body.String())
-	}
+	assertErrorEnvelope(t, rec, http.StatusNotFound, "AUTH_USER_NOT_FOUND", "user not found")
 }
 
 func TestHTTPHandlers_Bootstrap_Success(t *testing.T) {
@@ -2697,12 +2708,7 @@ func TestHTTPHandlers_Bootstrap_ServiceUnavailable(t *testing.T) {
 
 	h.Bootstrap(rec, req)
 
-	if rec.Code != http.StatusInternalServerError {
-		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
-	}
-	if !strings.Contains(rec.Body.String(), "auth_service_error") {
-		t.Fatalf("unexpected body: %s", rec.Body.String())
-	}
+	assertErrorEnvelope(t, rec, http.StatusInternalServerError, "AUTH_SERVICE_ERROR", "authentication service error")
 }
 
 func TestApplication_GetBootstrap_Success(t *testing.T) {
@@ -2939,7 +2945,11 @@ func TestHTTPHandlers_MeSettings_MissingClaims(t *testing.T) {
 	if rec.Code != http.StatusUnauthorized {
 		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
 	}
-	if !strings.Contains(rec.Body.String(), "unauthorized") {
+	var payload errorPayload
+	if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("decode error: %v", err)
+	}
+	if payload.Error.Code != normalizeAuthError("unauthorized").Code {
 		t.Fatalf("unexpected body: %s", rec.Body.String())
 	}
 }
@@ -2957,12 +2967,7 @@ func TestHTTPHandlers_MeSettings_ServiceUnavailable(t *testing.T) {
 
 	h.MeSettings(rec, req)
 
-	if rec.Code != http.StatusInternalServerError {
-		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
-	}
-	if !strings.Contains(rec.Body.String(), "auth_service_error") {
-		t.Fatalf("unexpected body: %s", rec.Body.String())
-	}
+	assertErrorEnvelope(t, rec, http.StatusInternalServerError, "AUTH_SERVICE_ERROR", "authentication service error")
 }
 
 func TestHTTPHandlers_UpdateMeSettings_Success_MergesPreferences(t *testing.T) {
@@ -3119,12 +3124,7 @@ func TestHTTPHandlers_UpdateMeSettings_RejectsMissingPreferences(t *testing.T) {
 
 	h.UpdateMeSettings(rec, req)
 
-	if rec.Code != http.StatusBadRequest {
-		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
-	}
-	if !strings.Contains(rec.Body.String(), "invalid_preferences") {
-		t.Fatalf("unexpected body: %s", rec.Body.String())
-	}
+	assertErrorEnvelope(t, rec, http.StatusBadRequest, "SETTINGS_INVALID_PAYLOAD", "invalid preferences payload")
 }
 
 func TestHTTPHandlers_UpdateMeSettings_RejectsNonObjectPreferences(t *testing.T) {
@@ -3141,12 +3141,7 @@ func TestHTTPHandlers_UpdateMeSettings_RejectsNonObjectPreferences(t *testing.T)
 
 	h.UpdateMeSettings(rec, req)
 
-	if rec.Code != http.StatusBadRequest {
-		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
-	}
-	if !strings.Contains(rec.Body.String(), "invalid_preferences") {
-		t.Fatalf("unexpected body: %s", rec.Body.String())
-	}
+	assertErrorEnvelope(t, rec, http.StatusBadRequest, "SETTINGS_INVALID_PAYLOAD", "invalid preferences payload")
 }
 
 func TestHTTPHandlers_UpdateMeSettings_RejectsUnknownFields(t *testing.T) {
@@ -3182,12 +3177,7 @@ func TestHTTPHandlers_UpdateMeSettings_RejectsNullPreferenceValue(t *testing.T) 
 
 	h.UpdateMeSettings(rec, req)
 
-	if rec.Code != http.StatusBadRequest {
-		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
-	}
-	if !strings.Contains(rec.Body.String(), "invalid_preferences") {
-		t.Fatalf("unexpected body: %s", rec.Body.String())
-	}
+	assertErrorEnvelope(t, rec, http.StatusBadRequest, "SETTINGS_INVALID_PAYLOAD", "invalid preferences payload")
 }
 
 func TestHTTPHandlers_UpdateMeSettings_ServiceUnavailable(t *testing.T) {
@@ -3203,12 +3193,7 @@ func TestHTTPHandlers_UpdateMeSettings_ServiceUnavailable(t *testing.T) {
 
 	h.UpdateMeSettings(rec, req)
 
-	if rec.Code != http.StatusInternalServerError {
-		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
-	}
-	if !strings.Contains(rec.Body.String(), "auth_service_error") {
-		t.Fatalf("unexpected body: %s", rec.Body.String())
-	}
+	assertErrorEnvelope(t, rec, http.StatusInternalServerError, "AUTH_SERVICE_ERROR", "authentication service error")
 }
 
 func TestHTTPHandlers_UpdateMeSettings_NormalizesPreferenceKeysAndNumbers(t *testing.T) {
@@ -3268,12 +3253,7 @@ func TestHTTPHandlers_UpdateMeSettings_RejectsNestedNullPreferenceValue(t *testi
 
 	h.UpdateMeSettings(rec, req)
 
-	if rec.Code != http.StatusBadRequest {
-		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
-	}
-	if !strings.Contains(rec.Body.String(), "invalid_preferences") {
-		t.Fatalf("unexpected body: %s", rec.Body.String())
-	}
+	assertErrorEnvelope(t, rec, http.StatusBadRequest, "SETTINGS_INVALID_PAYLOAD", "invalid preferences payload")
 }
 
 func TestHTTPHandlers_UpdateMeSettings_RejectsIncompatiblePreferenceShape(t *testing.T) {
@@ -3303,12 +3283,7 @@ func TestHTTPHandlers_UpdateMeSettings_RejectsIncompatiblePreferenceShape(t *tes
 
 	h.UpdateMeSettings(rec, req)
 
-	if rec.Code != http.StatusBadRequest {
-		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
-	}
-	if !strings.Contains(rec.Body.String(), "invalid_preferences") {
-		t.Fatalf("unexpected body: %s", rec.Body.String())
-	}
+	assertErrorEnvelope(t, rec, http.StatusBadRequest, "SETTINGS_INVALID_PAYLOAD", "invalid preferences payload")
 }
 
 func TestHTTPHandlers_UpdateMeSettings_Success_DeepMergesNestedPreferences(t *testing.T) {
@@ -3384,12 +3359,7 @@ func TestHTTPHandlers_UpdateMeSettings_RejectsKnownTopLevelScalarPreference(t *t
 
 	h.UpdateMeSettings(rec, req)
 
-	if rec.Code != http.StatusBadRequest {
-		t.Fatalf("unexpected status: %d body=%s", rec.Code, rec.Body.String())
-	}
-	if !strings.Contains(rec.Body.String(), "invalid_preferences") {
-		t.Fatalf("unexpected body: %s", rec.Body.String())
-	}
+	assertErrorEnvelope(t, rec, http.StatusBadRequest, "SETTINGS_INVALID_PAYLOAD", "invalid preferences payload")
 }
 
 func TestHTTPHandlers_Wallets_ResponseIncludesCanonicalItems(t *testing.T) {

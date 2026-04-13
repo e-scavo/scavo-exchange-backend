@@ -2116,3 +2116,38 @@ The auth module now exposes a fully application-driven execution model with tran
 ### Next
 
 0.8 — Standardized Error Model
+
+## Phase 0.8.1 — Error Contract Definition
+
+### Objective
+
+Introduce the first real implementation step of the standardized error model by defining a shared error envelope and centralizing HTTP error serialization.
+
+### Implementation
+
+- Added shared response error contract under `internal/core/errs`
+- Added centralized error envelope serialization under `internal/core/httpx`
+- Migrated auth HTTP handlers to the new envelope while preserving current control flow
+- Migrated auth middleware and recoverer/timeout transport responses away from legacy string-only error payloads
+- Updated auth HTTP tests to assert structured error payloads
+
+### Guarantees
+
+- No route changes
+- No success payload changes
+- No domain/application refactor yet
+- Error details now travel under `error.details`
+- Auth and middleware error responses now share one structured envelope
+
+### Result
+
+Phase 0.8 is now started in code:
+
+- 0.8.1 → error contract introduced
+- 0.8.2 → pending internal error type system
+- 0.8.3 → pending auth surface standardization
+- 0.8.4 → pending contract hardening and tests
+
+### Next
+
+0.8.2 — Error Type System Introduction

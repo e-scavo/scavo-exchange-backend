@@ -1104,3 +1104,41 @@ Auth module is now fully application-driven with clean transport boundaries.
 #### Next
 
 0.8 — Standardized Error Model
+
+## 🟨 Phase 0.8 — Standardized Error Model
+
+### Subphase Status
+
+| Subphase | Description | Status |
+|----------|------------|--------|
+| 0.8.1 | Error Contract Definition | ✔ Completed |
+| 0.8.2 | Error Type System Introduction | ⬜ Pending |
+| 0.8.3 | Auth Surface Error Standardization | ⬜ Pending |
+| 0.8.4 | Error Mapping Hardening & Contract Tests | ⬜ Pending |
+
+---
+
+## ✅ Phase 0.8.1 Summary
+
+### Delivered
+
+- Introduced a centralized response error contract under `internal/core/errs`
+- Added reusable HTTP error envelope writing in `internal/core/httpx`
+- Migrated auth handlers and auth middleware to the new error envelope
+- Preserved existing handler/domain error decision points while changing only the response contract structure
+- Updated auth HTTP tests to assert the new envelope shape and normalized codes
+
+### Result
+
+Phase 0.8 is now started with 0.8.1 completed:
+
+- 0.8.1 → error response contract introduced
+- 0.8.2 → pending internal error type system
+- 0.8.3 → pending auth surface standardization
+- 0.8.4 → pending contract hardening and tests
+
+The backend now exposes a single structured JSON error envelope across auth handlers and core auth HTTP middleware.
+
+#### Next
+
+0.8.2 — Error Type System Introduction

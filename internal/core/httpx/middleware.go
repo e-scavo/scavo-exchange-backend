@@ -12,6 +12,8 @@ import (
 
 	"github.com/google/uuid"
 
+	coreerrs "github.com/e-scavo/scavo-exchange-backend/internal/core/errs"
+
 	"github.com/e-scavo/scavo-exchange-backend/internal/core/logger"
 )
 
@@ -83,7 +85,7 @@ func Recoverer(log *logger.Logger) func(http.Handler) http.Handler {
 						"recover", rec,
 						"stack", string(debug.Stack()),
 					)
-					WriteJSON(w, http.StatusInternalServerError, map[string]any{"error": "internal_server_error"})
+					WriteError(w, http.StatusInternalServerError, coreerrs.NewResponseError("INTERNAL_ERROR", "internal server error", nil))
 				}
 			}()
 			next.ServeHTTP(w, r)
@@ -93,7 +95,7 @@ func Recoverer(log *logger.Logger) func(http.Handler) http.Handler {
 
 func Timeout(d time.Duration) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
-		return http.TimeoutHandler(next, d, `{"error":"timeout"}`)
+		return http.TimeoutHandler(next, d, `{"error":{"code":"TIMEOUT","message":"request timed out"}}`)
 	}
 }
 

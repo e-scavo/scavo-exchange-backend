@@ -78,8 +78,17 @@ Initial application layer boundary defined and bootstrap use-case migrated.
 
 #### 0.7.4 — Handler Simplification & Contract Preservation ✔ Completed
 
-### 0.8 — Standardized Error Model ⬜ Pending
+### 0.8 — Standardized Error Model 🟨 In Progress
 Define a consistent error contract across all endpoints.
+
+#### 0.8.1 — Error Contract Definition ✔ Completed
+Introduced the standardized error envelope foundation and centralized HTTP error writing.
+
+#### 0.8.2 — Error Type System Introduction ⬜ Pending
+
+#### 0.8.3 — Auth Surface Error Standardization ⬜ Pending
+
+#### 0.8.4 — Error Mapping Hardening & Contract Tests ⬜ Pending
 
 ### 0.9 — API Versioning Strategy ⬜ Pending
 Introduce versioning to support backward-compatible evolution.

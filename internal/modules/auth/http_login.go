@@ -5,9 +5,11 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
 	coreauth "github.com/e-scavo/scavo-exchange-backend/internal/core/auth"
+	coreerrs "github.com/e-scavo/scavo-exchange-backend/internal/core/errs"
 	usermod "github.com/e-scavo/scavo-exchange-backend/internal/modules/user"
 	usersettingsmod "github.com/e-scavo/scavo-exchange-backend/internal/modules/usersettings"
 )
@@ -56,14 +58,94 @@ type HTTPHandlers struct {
 	WalletIdentities WalletIdentityStore
 }
 
-func writeErrorJSON(w http.ResponseWriter, code int, errCode string, extras ...map[string]any) {
-	payload := map[string]any{"error": errCode}
+type errorEnvelope struct {
+	Error coreerrs.ResponseError `json:"error"`
+}
+
+func writeErrorJSON(w http.ResponseWriter, status int, errCode string, extras ...map[string]any) {
+	details := map[string]any{}
 	for _, extra := range extras {
 		for key, value := range extra {
-			payload[key] = value
+			details[key] = value
 		}
 	}
-	writeJSON(w, code, payload)
+
+	spec := normalizeAuthError(errCode)
+
+	payload := errorEnvelope{
+		Error: coreerrs.NewResponseError(spec.Code, spec.Message, details),
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	_ = json.NewEncoder(w).Encode(payload)
+}
+
+type authErrorSpec struct {
+	Code    string
+	Message string
+}
+
+var authErrorCatalog = map[string]authErrorSpec{
+	"auth_service_error":                     {Code: "AUTH_SERVICE_ERROR", Message: "authentication service error"},
+	"bad_request":                            {Code: "BAD_REQUEST", Message: "invalid request payload"},
+	"display_name_too_long":                  {Code: "DISPLAY_NAME_TOO_LONG", Message: "display name is too long"},
+	"invalid_credentials":                    {Code: "AUTH_INVALID_CREDENTIALS", Message: "invalid credentials"},
+	"invalid_display_name":                   {Code: "INVALID_DISPLAY_NAME", Message: "invalid display name"},
+	"invalid_limit":                          {Code: "INVALID_LIMIT", Message: "invalid limit"},
+	"invalid_offset":                         {Code: "INVALID_OFFSET", Message: "invalid offset"},
+	"invalid_order":                          {Code: "INVALID_ORDER", Message: "invalid order"},
+	"invalid_order_requires_sort":            {Code: "INVALID_ORDER_REQUIRES_SORT", Message: "order requires sort"},
+	"invalid_preferences":                    {Code: "SETTINGS_INVALID_PAYLOAD", Message: "invalid preferences payload"},
+	"invalid_primary":                        {Code: "INVALID_PRIMARY", Message: "invalid primary filter"},
+	"invalid_sort":                           {Code: "INVALID_SORT", Message: "invalid sort"},
+	"invalid_status":                         {Code: "INVALID_STATUS", Message: "invalid status"},
+	"invalid_wallet_address":                 {Code: "WALLET_INVALID_ADDRESS", Message: "invalid wallet address"},
+	"invalid_wallet_signature":               {Code: "WALLET_INVALID_SIGNATURE", Message: "invalid wallet signature"},
+	"unauthorized":                           {Code: "AUTH_UNAUTHORIZED", Message: "authentication required"},
+	"user_not_found":                         {Code: "AUTH_USER_NOT_FOUND", Message: "user not found"},
+	"wallet_account_merge_challenge_error":   {Code: "WALLET_ACCOUNT_MERGE_CHALLENGE_ERROR", Message: "wallet account merge challenge error"},
+	"wallet_account_merge_not_required":      {Code: "WALLET_ACCOUNT_MERGE_NOT_REQUIRED", Message: "wallet account merge is not required"},
+	"wallet_account_merge_source_not_linked": {Code: "WALLET_ACCOUNT_MERGE_SOURCE_NOT_LINKED", Message: "wallet account merge source is not linked"},
+	"wallet_account_merge_user_mismatch":     {Code: "WALLET_ACCOUNT_MERGE_USER_MISMATCH", Message: "wallet account merge user mismatch"},
+	"wallet_account_merge_verify_error":      {Code: "WALLET_ACCOUNT_MERGE_VERIFY_ERROR", Message: "wallet account merge verification error"},
+	"wallet_challenge_error":                 {Code: "WALLET_CHALLENGE_ERROR", Message: "wallet challenge error"},
+	"wallet_challenge_expired":               {Code: "WALLET_CHALLENGE_EXPIRED", Message: "wallet challenge expired"},
+	"wallet_challenge_not_found":             {Code: "WALLET_CHALLENGE_NOT_FOUND", Message: "wallet challenge not found"},
+	"wallet_challenge_purpose_mismatch":      {Code: "WALLET_CHALLENGE_PURPOSE_MISMATCH", Message: "wallet challenge purpose mismatch"},
+	"wallet_challenge_used":                  {Code: "WALLET_CHALLENGE_USED", Message: "wallet challenge already used"},
+	"wallet_detach_check_error":              {Code: "WALLET_DETACH_CHECK_ERROR", Message: "wallet detach check error"},
+	"wallet_detach_error":                    {Code: "WALLET_DETACH_ERROR", Message: "wallet detach error"},
+	"wallet_detach_not_eligible":             {Code: "WALLET_CANNOT_DETACH", Message: "wallet cannot be detached under current ownership rules"},
+	"wallet_identity_already_linked":         {Code: "WALLET_ALREADY_LINKED", Message: "wallet identity already linked"},
+	"wallet_identity_already_linked_to_user": {Code: "WALLET_ALREADY_LINKED_TO_USER", Message: "wallet identity already linked to user"},
+	"wallet_identity_error":                  {Code: "WALLET_IDENTITY_ERROR", Message: "wallet identity error"},
+	"wallet_identity_not_found":              {Code: "WALLET_NOT_FOUND", Message: "wallet identity not found"},
+	"wallet_identity_not_owned_by_user":      {Code: "WALLET_NOT_OWNED_BY_USER", Message: "wallet identity not owned by user"},
+	"wallet_link_challenge_error":            {Code: "WALLET_LINK_CHALLENGE_ERROR", Message: "wallet link challenge error"},
+	"wallet_link_challenge_user_mismatch":    {Code: "WALLET_LINK_CHALLENGE_USER_MISMATCH", Message: "wallet link challenge user mismatch"},
+	"wallet_link_verify_error":               {Code: "WALLET_LINK_VERIFY_ERROR", Message: "wallet link verification error"},
+	"wallet_primary_set_error":               {Code: "WALLET_PRIMARY_SET_ERROR", Message: "wallet primary set error"},
+	"wallet_verify_error":                    {Code: "WALLET_VERIFY_ERROR", Message: "wallet verification error"},
+}
+
+func normalizeAuthError(errCode string) authErrorSpec {
+	if spec, ok := authErrorCatalog[errCode]; ok {
+		return spec
+	}
+
+	message := strings.ReplaceAll(strings.TrimSpace(errCode), "_", " ")
+	if message == "" {
+		message = "unexpected error"
+	}
+
+	code := strings.ToUpper(strings.ReplaceAll(strings.TrimSpace(errCode), "-", "_"))
+	code = strings.ReplaceAll(code, " ", "_")
+	if code == "" {
+		code = "INTERNAL_ERROR"
+	}
+
+	return authErrorSpec{Code: code, Message: message}
 }
 
 func (h HTTPHandlers) requireClaims(w http.ResponseWriter, r *http.Request) (*coreauth.Claims, bool) {
