@@ -87,7 +87,8 @@ Introduced the standardized error envelope foundation and centralized HTTP error
 #### 0.8.2 — Error Type System Introduction ✔ Completed
 Introduced centralized internal app error typing, shared auth error catalog normalization and reusable error factories without changing the 0.8.1 transport envelope.
 
-#### 0.8.3 — Auth Surface Error Standardization ⬜ Pending
+#### 0.8.3 — Auth Surface Error Standardization ✔ Completed
+Auth handlers now consume centralized app-error factories and catalog resolution directly, while preserving the 0.8.1 envelope and avoiding cyclic import reintroduction.
 
 #### 0.8.4 — Error Mapping Hardening & Contract Tests ⬜ Pending
 

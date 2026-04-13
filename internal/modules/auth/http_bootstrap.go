@@ -5,6 +5,8 @@ import (
 	"errors"
 	"net/http"
 
+	coreerrs "github.com/e-scavo/scavo-exchange-backend/internal/core/errs"
+
 	usermod "github.com/e-scavo/scavo-exchange-backend/internal/modules/user"
 	usersettingsmod "github.com/e-scavo/scavo-exchange-backend/internal/modules/usersettings"
 )
@@ -59,11 +61,11 @@ func (h HTTPHandlers) Bootstrap(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, ErrUnauthorized), errors.Is(err, usersettingsmod.ErrUserIDRequired):
-			writeErrorJSON(w, http.StatusUnauthorized, "unauthorized")
+			writeAppErrorJSON(w, coreerrs.AuthUnauthorized())
 		case errors.Is(err, ErrWalletIdentityStore):
-			writeErrorJSON(w, http.StatusInternalServerError, "wallet_identity_error")
+			writeAppErrorJSON(w, coreerrs.WalletIdentityError(nil))
 		default:
-			writeErrorJSON(w, http.StatusInternalServerError, "auth_service_error")
+			writeAppErrorJSON(w, coreerrs.AuthServiceError(nil))
 		}
 		return
 	}

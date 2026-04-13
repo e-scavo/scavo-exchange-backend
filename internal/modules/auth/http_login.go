@@ -89,7 +89,7 @@ func writeErrorJSON(w http.ResponseWriter, status int, errCode string, extras ..
 func (h HTTPHandlers) requireClaims(w http.ResponseWriter, r *http.Request) (*coreauth.Claims, bool) {
 	claims, ok := coreauth.ClaimsFromContext(r.Context())
 	if !ok || claims == nil || claims.UserID == "" {
-		writeErrorJSON(w, http.StatusUnauthorized, "unauthorized")
+		writeAppErrorJSON(w, coreerrs.AuthUnauthorized())
 		return nil, false
 	}
 	return claims, true
@@ -97,7 +97,7 @@ func (h HTTPHandlers) requireClaims(w http.ResponseWriter, r *http.Request) (*co
 
 func decodeRequest(w http.ResponseWriter, r *http.Request, dst any, maxBodyBytes int64) bool {
 	if err := decodeJSONBody(r, dst, maxBodyBytes); err != nil {
-		writeErrorJSON(w, http.StatusBadRequest, "bad_request")
+		writeAppErrorJSON(w, coreerrs.BadRequestInvalidPayload())
 		return false
 	}
 	return true
@@ -113,9 +113,9 @@ func (h HTTPHandlers) Login(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, ErrInvalidCredentials):
-			writeErrorJSON(w, http.StatusUnauthorized, "invalid_credentials")
+			writeAppErrorJSON(w, coreerrs.AuthInvalidCredentials())
 		default:
-			writeErrorJSON(w, http.StatusInternalServerError, "auth_service_error")
+			writeAppErrorJSON(w, coreerrs.AuthServiceError(nil))
 		}
 		return
 	}
@@ -133,9 +133,9 @@ func (h HTTPHandlers) Me(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, ErrUnauthorized):
-			writeErrorJSON(w, http.StatusUnauthorized, "unauthorized")
+			writeAppErrorJSON(w, coreerrs.AuthUnauthorized())
 		default:
-			writeErrorJSON(w, http.StatusInternalServerError, "auth_service_error")
+			writeAppErrorJSON(w, coreerrs.AuthServiceError(nil))
 		}
 		return
 	}
@@ -149,7 +149,7 @@ func (h HTTPHandlers) UpdateMe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if h.Users == nil {
-		writeErrorJSON(w, http.StatusInternalServerError, "auth_service_error")
+		writeAppErrorJSON(w, coreerrs.AuthServiceError(nil))
 		return
 	}
 
@@ -162,22 +162,22 @@ func (h HTTPHandlers) UpdateMe(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, usermod.ErrEmptyUserID):
-			writeErrorJSON(w, http.StatusUnauthorized, "unauthorized")
+			writeAppErrorJSON(w, coreerrs.AuthUnauthorized())
 		case errors.Is(err, usermod.ErrEmptyDisplayName):
-			writeErrorJSON(w, http.StatusBadRequest, "invalid_display_name")
+			writeAppErrorJSON(w, coreerrs.InvalidDisplayName())
 		case errors.Is(err, usermod.ErrDisplayNameTooLong):
-			writeErrorJSON(w, http.StatusBadRequest, "display_name_too_long")
+			writeAppErrorJSON(w, coreerrs.DisplayNameTooLong())
 		case errors.Is(err, usermod.ErrUserNotFound):
-			writeErrorJSON(w, http.StatusNotFound, "user_not_found")
+			writeAppErrorJSON(w, coreerrs.AuthUserNotFound())
 		default:
-			writeErrorJSON(w, http.StatusInternalServerError, "auth_service_error")
+			writeAppErrorJSON(w, coreerrs.AuthServiceError(nil))
 		}
 		return
 	}
 
 	profile, err := buildProfileViewWithUser(r.Context(), claims, updatedUser, h.WalletIdentities)
 	if err != nil {
-		writeErrorJSON(w, http.StatusInternalServerError, "auth_service_error")
+		writeAppErrorJSON(w, coreerrs.AuthServiceError(nil))
 		return
 	}
 
@@ -194,7 +194,7 @@ func (h HTTPHandlers) UpdateMeSettings(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if h.UserSettings == nil {
-		writeErrorJSON(w, http.StatusInternalServerError, "auth_service_error")
+		writeAppErrorJSON(w, coreerrs.AuthServiceError(nil))
 		return
 	}
 
@@ -204,13 +204,13 @@ func (h HTTPHandlers) UpdateMeSettings(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(req.Preferences) == 0 {
-		writeErrorJSON(w, http.StatusBadRequest, "invalid_preferences")
+		writeAppErrorJSON(w, coreerrs.SettingsInvalidPayload())
 		return
 	}
 
 	var patch map[string]any
 	if err := json.Unmarshal(req.Preferences, &patch); err != nil {
-		writeErrorJSON(w, http.StatusBadRequest, "invalid_preferences")
+		writeAppErrorJSON(w, coreerrs.SettingsInvalidPayload())
 		return
 	}
 
@@ -218,14 +218,14 @@ func (h HTTPHandlers) UpdateMeSettings(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, usersettingsmod.ErrUserIDRequired):
-			writeErrorJSON(w, http.StatusUnauthorized, "unauthorized")
+			writeAppErrorJSON(w, coreerrs.AuthUnauthorized())
 		case errors.Is(err, usersettingsmod.ErrInvalidPreferences),
 			errors.Is(err, usersettingsmod.ErrNullPreferenceValue),
 			errors.Is(err, usersettingsmod.ErrInvalidPreferenceValue),
 			errors.Is(err, usersettingsmod.ErrIncompatiblePreference):
-			writeErrorJSON(w, http.StatusBadRequest, "invalid_preferences")
+			writeAppErrorJSON(w, coreerrs.SettingsInvalidPayload())
 		default:
-			writeErrorJSON(w, http.StatusInternalServerError, "auth_service_error")
+			writeAppErrorJSON(w, coreerrs.AuthServiceError(nil))
 		}
 		return
 	}
@@ -244,7 +244,7 @@ func (h HTTPHandlers) MeSettings(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if h.UserSettings == nil {
-		writeErrorJSON(w, http.StatusInternalServerError, "auth_service_error")
+		writeAppErrorJSON(w, coreerrs.AuthServiceError(nil))
 		return
 	}
 
@@ -252,9 +252,9 @@ func (h HTTPHandlers) MeSettings(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, usersettingsmod.ErrUserIDRequired):
-			writeErrorJSON(w, http.StatusUnauthorized, "unauthorized")
+			writeAppErrorJSON(w, coreerrs.AuthUnauthorized())
 		default:
-			writeErrorJSON(w, http.StatusInternalServerError, "auth_service_error")
+			writeAppErrorJSON(w, coreerrs.AuthServiceError(nil))
 		}
 		return
 	}
@@ -276,9 +276,9 @@ func (h HTTPHandlers) Session(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, ErrUnauthorized):
-			writeErrorJSON(w, http.StatusUnauthorized, "unauthorized")
+			writeAppErrorJSON(w, coreerrs.AuthUnauthorized())
 		default:
-			writeErrorJSON(w, http.StatusInternalServerError, "auth_service_error")
+			writeAppErrorJSON(w, coreerrs.AuthServiceError(nil))
 		}
 		return
 	}

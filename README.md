@@ -2139,19 +2139,6 @@ Introduce the first real implementation step of the standardized error model by 
 - Error details now travel under `error.details`
 - Auth and middleware error responses now share one structured envelope
 
-### Result
-
-Phase 0.8 is now advanced through the first two implementation layers:
-
-- 0.8.1 → error contract introduced
-- 0.8.2 → internal app error type system introduced
-- 0.8.3 → pending auth surface standardization
-- 0.8.4 → pending contract hardening and tests
-
-### Next
-
-0.8.3 — Auth Surface Error Standardization
-
 ## Phase 0.8.2 — Error Type System Introduction
 
 ### Objective
@@ -2174,7 +2161,36 @@ Introduce a reusable internal application error type system so the backend no lo
 - Existing 0.8.1 envelope remains stable
 - Internal error normalization is now centralized and reusable across subsequent subphases
 
+## Phase 0.8.3 — Auth Surface Error Standardization
+
+### Objective
+
+Apply the 0.8.2 internal app error type system across the auth transport surface so handlers consume centralized typed errors instead of auth-local legacy string mappings.
+
+### Implementation
+
+- Migrated `internal/modules/auth/http_login.go`, `http_bootstrap.go`, `http_wallet.go` and `http_wallet_list.go` to write structured transport errors from centralized `core/errs` app errors
+- Preserved auth-local JSON writing to avoid reintroducing cyclic imports with `internal/core/httpx/router.go`
+- Reduced the auth-local legacy adapter to compatibility/testing support instead of runtime ownership
+- Standardized wallet/auth/settings handler error emission on shared factories and centralized catalog resolution
+
+### Guarantees
+
+- No route changes
+- No success payload changes
+- No business-flow redesign
+- No reintroduction of `httpx -> auth -> httpx` cycles
+- Auth surface now depends on centralized app-error factories instead of local string contracts
+
 ### Result
 
-Phase 0.8 now has both its transport error contract and its first centralized internal error type layer in place.
+Phase 0.8 is now advanced through the first three implementation layers:
 
+- 0.8.1 → error contract introduced
+- 0.8.2 → internal app error type system introduced
+- 0.8.3 → auth surface standardized on app errors
+- 0.8.4 → pending contract hardening and tests
+
+### Next
+
+0.8.4 — Error Mapping Hardening & Contract Tests

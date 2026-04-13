@@ -84,13 +84,18 @@ The backend now has a centralized internal error type system that sits underneat
 
 ---
 
-### 0.8.3 — Auth Surface Error Standardization ⬜
+### 0.8.3 — Auth Surface Error Standardization ✔
 
-Planned:
+Delivered in this subphase:
 
-- endpoint-by-endpoint standardization of auth surface error mapping
-- consistent HTTP status semantics
-- consistent cross-endpoint error behavior
+- migrated auth transport handlers to consume centralized `core/errs` factories directly
+- reduced handler-local ownership of auth/wallet/settings error codes and messages
+- preserved auth-local JSON writing to avoid cyclic imports through `internal/core/httpx/router.go`
+- kept routes, success payloads and business flows unchanged while standardizing auth surface error emission
+
+Result:
+
+The auth surface now writes the Phase 0.8 standardized error contract from centralized app-error factories instead of relying on handler-local string ownership.
 
 ---
 
@@ -104,7 +109,7 @@ Planned:
 
 ---
 
-## Architecture Introduced in 0.8.1–0.8.2
+## Architecture Introduced in 0.8.1–0.8.3
 
 ### Response Contract Layer
 
@@ -131,7 +136,7 @@ Responsibilities:
 
 - define normalized internal application errors with code/message/status/category
 - centralize auth/wallet/settings legacy-key normalization in one place
-- provide reusable factories and wrapping helpers for later auth surface migration
+- provide reusable factories and wrapping helpers for auth surface adoption and later hardening
 
 ---
 
@@ -150,7 +155,7 @@ Responsibilities:
 
 ### Auth Transport Adoption
 
-The auth module now routes handler error responses through the centralized error envelope writer.
+The auth module now routes handler error responses through centralized app-error factories while preserving local JSON writing safety.
 
 This includes:
 
@@ -160,15 +165,17 @@ This includes:
 - wallet handler error responses
 - auth middleware unauthorized/configuration failures
 - panic and timeout transport responses in `httpx`
+- auth-local JSON writing remaining inside `internal/modules/auth` to avoid cyclic imports while still consuming centralized app-error factories
 
 ---
 
-## Guarantees After 0.8.1
+## Guarantees After 0.8.3
 
 - one structured JSON error envelope exists
 - auth HTTP handlers no longer emit legacy root-level string-only errors
 - error details are now nested under `error.details`
 - middleware-level auth failures align with the new envelope
+- auth surface handlers now consume centralized app-error factories directly
 - success payloads remain unchanged
 - routes remain unchanged
 - domain/application logic remains unchanged
@@ -179,15 +186,14 @@ This includes:
 
 Phase 0.8 has now started concretely in code.
 
-0.8.1 and 0.8.2 now establish the contractual and internal type foundations required for the remaining subphases:
+0.8.1, 0.8.2 and 0.8.3 now establish the contractual, internal typing and auth-surface adoption foundations required for the remaining subphase:
 
-- 0.8.3 will standardize error mapping semantics across auth surface
 - 0.8.4 will harden and freeze the contract with tests
 
 ---
 
 ## Conclusion
 
-Phase 0.8.1 and 0.8.2 do not redesign business behavior.
+Phase 0.8.1, 0.8.2 and 0.8.3 do not redesign business behavior.
 
-Together they introduce the formal response contract and the first centralized internal error type layer required for all later auth-surface-wide standardization work, while preserving the current auth execution model established by Phase 0.7.
+Together they introduce the formal response contract, the centralized internal error type layer and the first auth-surface-wide adoption of centralized app-error factories, while preserving the current auth execution model established by Phase 0.7.

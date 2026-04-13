@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	coreerrs "github.com/e-scavo/scavo-exchange-backend/internal/core/errs"
 )
 
 type WalletReadModel struct {
@@ -380,7 +382,7 @@ func (h HTTPHandlers) Wallets(w http.ResponseWriter, r *http.Request) {
 
 	query, queryErr := parseWalletsQuery(r)
 	if queryErr != "" {
-		writeErrorJSON(w, http.StatusBadRequest, queryErr)
+		writeAppErrorJSON(w, coreerrs.AppErrorFromLegacyAuthKey(queryErr, nil))
 		return
 	}
 
@@ -388,13 +390,13 @@ func (h HTTPHandlers) Wallets(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, ErrUnauthorized):
-			writeErrorJSON(w, http.StatusUnauthorized, "unauthorized")
+			writeAppErrorJSON(w, coreerrs.AuthUnauthorized())
 		case errors.Is(err, ErrApplicationNotConfigured):
-			writeErrorJSON(w, http.StatusInternalServerError, "wallet_identity_error")
+			writeAppErrorJSON(w, coreerrs.WalletIdentityError(nil))
 		case errors.Is(err, ErrWalletIdentityStore):
-			writeErrorJSON(w, http.StatusInternalServerError, "wallet_identity_error")
+			writeAppErrorJSON(w, coreerrs.WalletIdentityError(nil))
 		default:
-			writeErrorJSON(w, http.StatusInternalServerError, "wallet_identity_error")
+			writeAppErrorJSON(w, coreerrs.WalletIdentityError(nil))
 		}
 		return
 	}
