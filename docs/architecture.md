@@ -459,10 +459,12 @@ This architectural move is intentionally compatible with the current project rul
 
 ### Result
 
-After 0.9.1, the architecture has a defined transport-evolution policy in addition to the application-layer foundation:
+After 0.9.2, the architecture has both a defined transport-evolution policy and a concrete router-level implementation of that policy:
 
-- Handlers → transport plus versioned exposure rules
+- Handlers → transport plus real legacy/canonical route exposure rules
 - Application → orchestration
 - Services / Stores → execution
 
-This prepares the backend for Phase 0.10 and beyond, where authorization and later cross-cutting concerns can be introduced on top of a stable application boundary and an explicit public contract-evolution model.
+Versioning is now implemented as router-level projection of the same stabilized handler/application behavior into two public route spaces rather than as duplicated route-specific logic.
+
+This prepares the backend for Phase 0.10 and beyond, where authorization and later cross-cutting concerns can be introduced on top of a stable application boundary, an explicit public contract-evolution model and a real canonical route surface already present in the transport layer.

@@ -738,6 +738,19 @@ Authorization introduces contract-sensitive behavior: forbidden/unauthorized han
 
 Phase 0.9 avoids that by fixing the transport evolution model first.
 
+
+
+#### 0.9.2 Implementation Consequence
+
+With 0.9.2, the two-surface model is no longer only architectural policy. The HTTP router now materializes both entry paths:
+
+- legacy compatibility exposure under `/auth/...`
+- canonical exposure under `/api/v1/auth/...`
+
+Crucially, this is implemented as shared transport registration over the same handlers rather than duplicated route-specific code paths. That preserves the 0.7 application boundary and keeps versioning as a projection concern in the transport layer.
+
+This matters because later phases can now reason about canonical route behavior against a real router surface instead of a merely documented target.
+
 ---
 ### Impact on Future Phases
 

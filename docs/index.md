@@ -40,12 +40,14 @@
 
 ## 🚧 Current Phase Focus
 
+* `phase0_9_api_versioning_strategy.md`
+  * `0.9.1 — Versioning Policy Definition`
+  * `0.9.2 — Router Versioning Foundation`
 * `phase0_8_standardized_error_model.md`
   * `0.8.1 — Error Contract Definition`
   * `0.8.2 — Error Type System Introduction`
   * `0.8.3 — Auth Surface Error Standardization`
   * `0.8.4 — Error Mapping Hardening & Contract Tests`
-* `phase0_9_api_versioning_strategy.md`
 
 ---
 
@@ -92,7 +94,7 @@ Phase 0.8 ✔ Completed
 ### Phase 0.9 — API Versioning Strategy
 
 - 0.9.1 ✔ Versioning Policy Definition
-- 0.9.2 ⏳ Router Versioning Foundation
+- 0.9.2 ✔ Router Versioning Foundation
 - 0.9.3 ⬜ Authenticated Surface Version Freezing
 - 0.9.4 ⬜ Version-aware Contract Testing
 - 0.9.5 ⬜ Documentation Consolidation

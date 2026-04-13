@@ -22,9 +22,9 @@ The backend follows a **wallet-first identity model** that progressively evolves
 ## 🚧 Current Stage
 
 **Stage:** 0 — Foundation  
-**Phase:** 0.8 — Standardized Error Model  
-**Current Subphase:** **0.8.4 — Error Mapping Hardening & Contract Tests**  
-**Phase Status:** **Completed**
+**Phase:** 0.9 — API Versioning Strategy  
+**Current Subphase:** **0.9.2 — Router Versioning Foundation**  
+**Phase Status:** **In Progress**
 
 ---
 
@@ -2245,3 +2245,63 @@ Versioning is now explicitly a transport-layer concern. The application layer in
 ### Next
 
 Phase 0.9.2 should introduce the canonical router exposure under `/api/v1/...` while preserving the current legacy route surface.
+
+
+## Phase 0.9.2 — Router Versioning Foundation
+
+### Objective
+
+Materialize the canonical `v1` transport surface in the real HTTP router without changing the current business flows, payload semantics or legacy route availability.
+
+### Why This Subphase Follows 0.9.1
+
+Phase 0.9.1 defined the policy, but the router still exposed only the legacy unversioned route space. The next natural step is to project the already-stabilized auth and authenticated surfaces into the canonical `/api/v1/...` namespace while preserving compatibility for existing consumers.
+
+### Implementation
+
+- Reworked `internal/core/httpx/router.go` so auth and authenticated route registration now happens through one shared route-registration helper
+- Kept the current legacy transport surface unchanged
+- Added the canonical `/api/v1/...` transport surface on top of the same handlers
+- Preserved current middleware behavior, including auth protection, access logging, timeout wrapping and structured error handling
+- Avoided route-level business duplication by making versioning a pure transport registration concern
+
+### Routes Now Exposed Canonically
+
+The backend now exposes canonical `v1` routes for the currently stabilized auth and auth-adjacent surface, including:
+
+- `/api/v1/auth/login`
+- `/api/v1/auth/wallet/challenge`
+- `/api/v1/auth/wallet/verify`
+- `/api/v1/auth/wallets/link/challenge`
+- `/api/v1/auth/wallets/link/verify`
+- `/api/v1/auth/account/merge/wallet/challenge`
+- `/api/v1/auth/account/merge/wallet/verify`
+- `/api/v1/auth/bootstrap`
+- `/api/v1/auth/me`
+- `/api/v1/auth/me/settings`
+- `/api/v1/auth/session`
+- `/api/v1/auth/wallets`
+- `/api/v1/auth/wallets/detach/check`
+- `/api/v1/auth/wallets/detach`
+- `/api/v1/auth/wallets/primary`
+
+### Guarantees
+
+- No legacy route was removed
+- No success payload changed
+- No error-envelope contract changed
+- No application/service orchestration changed
+- No frontend migration is required while the frontend remains aligned to backend Phase 0.6 during Stage 0
+
+### Result
+
+The backend now has two public transport entry surfaces for the same stabilized behavior:
+
+- legacy compatibility routes under `/auth/...`
+- canonical `v1` routes under `/api/v1/auth/...`
+
+This completes the router-level materialization of the versioning model defined in 0.9.1 and prepares the contract-freezing work of 0.9.3.
+
+### Next
+
+Phase 0.9.3 should freeze the currently exposed authenticated surface explicitly as the canonical `v1` contract and clarify the semantic equivalence rule between legacy and canonical entry paths.

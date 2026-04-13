@@ -119,9 +119,18 @@ This means:
 
 The canonical versioning model, compatibility rules and Stage 0 alignment constraints are now documented.
 
-### 0.9.2 — Router Versioning Foundation ⬜ Pending
+### 0.9.2 — Router Versioning Foundation ✔ Completed
 
-Introduce canonical `/api/v1/...` routing while preserving legacy route access.
+The canonical route policy is now materialized in the real HTTP router.
+
+Delivered in this subphase:
+
+- canonical `/api/v1/...` auth and authenticated route exposure added in `internal/core/httpx/router.go`
+- current legacy `/auth/...` routes preserved without semantic change
+- shared route-registration logic introduced so versioning does not duplicate handler/business behavior
+- current auth middleware protection preserved across both route spaces
+
+This subphase intentionally changes route exposure only. It does not yet redefine or freeze the semantic equivalence set endpoint by endpoint; that remains the responsibility of 0.9.3 and 0.9.4.
 
 ### 0.9.3 — Authenticated Surface Version Freezing ⬜ Pending
 

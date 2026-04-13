@@ -99,8 +99,8 @@ Formalize canonical API versioning, preserve legacy route compatibility and free
 #### 0.9.1 — Versioning Policy Definition ✔ Completed
 Path-based versioning is now the canonical strategy, `v1` semantics are explicitly frozen and the legacy/non-canonical compatibility rule is documented.
 
-#### 0.9.2 — Router Versioning Foundation ⬜ Pending
-Introduce the canonical `/api/v1/...` route surface while preserving the current legacy endpoints.
+#### 0.9.2 — Router Versioning Foundation ✔ Completed
+Materialized the canonical `/api/v1/...` route surface in the real router while preserving the current legacy endpoints and reusing the same handler/application behavior.
 
 #### 0.9.3 — Authenticated Surface Version Freezing ⬜ Pending
 Bind the current auth/bootstrap/profile/settings/session/wallet surfaces to the canonical `v1` contract without changing their business behavior.

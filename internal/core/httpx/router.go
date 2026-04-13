@@ -100,24 +100,40 @@ func NewRouter(p RouterParams) http.Handler {
 			WalletIdentities: p.WalletIdentityStore,
 		}
 
-		r.Post("/auth/login", handlers.Login)
-		r.Post("/auth/wallet/challenge", handlers.WalletChallenge)
-		r.Post("/auth/wallet/verify", handlers.WalletVerify)
-		r.With(RequireAuth(p.TokenService, false)).Post("/auth/wallets/link/challenge", handlers.WalletLinkChallenge)
-		r.With(RequireAuth(p.TokenService, false)).Post("/auth/wallets/link/verify", handlers.WalletLinkVerify)
-		r.With(RequireAuth(p.TokenService, false)).Post("/auth/account/merge/wallet/challenge", handlers.WalletAccountMergeChallenge)
-		r.With(RequireAuth(p.TokenService, false)).Post("/auth/account/merge/wallet/verify", handlers.WalletAccountMergeVerify)
-		r.With(RequireAuth(p.TokenService, false)).Get("/auth/bootstrap", handlers.Bootstrap)
-		r.With(RequireAuth(p.TokenService, false)).Get("/auth/me", handlers.Me)
-		r.With(RequireAuth(p.TokenService, false)).Patch("/auth/me", handlers.UpdateMe)
-		r.With(RequireAuth(p.TokenService, false)).Get("/auth/me/settings", handlers.MeSettings)
-		r.With(RequireAuth(p.TokenService, false)).Patch("/auth/me/settings", handlers.UpdateMeSettings)
-		r.With(RequireAuth(p.TokenService, false)).Get("/auth/session", handlers.Session)
-		r.With(RequireAuth(p.TokenService, false)).Get("/auth/wallets", handlers.Wallets)
-		r.With(RequireAuth(p.TokenService, false)).Post("/auth/wallets/detach/check", handlers.WalletDetachCheck)
-		r.With(RequireAuth(p.TokenService, false)).Post("/auth/wallets/detach", handlers.WalletDetach)
-		r.With(RequireAuth(p.TokenService, false)).Post("/auth/wallets/primary", handlers.WalletSetPrimary)
+		registerAuthRoutes(r, "", p.TokenService, handlers)
+		registerAuthRoutes(r, "/api/v1", p.TokenService, handlers)
 	})
 
 	return r
+}
+
+func registerAuthRoutes(r chi.Router, prefix string, tokens *coreauth.TokenService, handlers authmod.HTTPHandlers) {
+	r.Post(routePath(prefix, "/auth/login"), handlers.Login)
+	r.Post(routePath(prefix, "/auth/wallet/challenge"), handlers.WalletChallenge)
+	r.Post(routePath(prefix, "/auth/wallet/verify"), handlers.WalletVerify)
+
+	requireAuth := RequireAuth(tokens, false)
+
+	r.With(requireAuth).Post(routePath(prefix, "/auth/wallets/link/challenge"), handlers.WalletLinkChallenge)
+	r.With(requireAuth).Post(routePath(prefix, "/auth/wallets/link/verify"), handlers.WalletLinkVerify)
+	r.With(requireAuth).Post(routePath(prefix, "/auth/account/merge/wallet/challenge"), handlers.WalletAccountMergeChallenge)
+	r.With(requireAuth).Post(routePath(prefix, "/auth/account/merge/wallet/verify"), handlers.WalletAccountMergeVerify)
+
+	r.With(requireAuth).Get(routePath(prefix, "/auth/bootstrap"), handlers.Bootstrap)
+	r.With(requireAuth).Get(routePath(prefix, "/auth/me"), handlers.Me)
+	r.With(requireAuth).Patch(routePath(prefix, "/auth/me"), handlers.UpdateMe)
+	r.With(requireAuth).Get(routePath(prefix, "/auth/me/settings"), handlers.MeSettings)
+	r.With(requireAuth).Patch(routePath(prefix, "/auth/me/settings"), handlers.UpdateMeSettings)
+	r.With(requireAuth).Get(routePath(prefix, "/auth/session"), handlers.Session)
+	r.With(requireAuth).Get(routePath(prefix, "/auth/wallets"), handlers.Wallets)
+	r.With(requireAuth).Post(routePath(prefix, "/auth/wallets/detach/check"), handlers.WalletDetachCheck)
+	r.With(requireAuth).Post(routePath(prefix, "/auth/wallets/detach"), handlers.WalletDetach)
+	r.With(requireAuth).Post(routePath(prefix, "/auth/wallets/primary"), handlers.WalletSetPrimary)
+}
+
+func routePath(prefix, suffix string) string {
+	if prefix == "" {
+		return suffix
+	}
+	return prefix + suffix
 }
