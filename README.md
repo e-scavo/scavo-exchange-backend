@@ -22,8 +22,9 @@ The backend follows a **wallet-first identity model** that progressively evolves
 ## 🚧 Current Stage
 
 **Stage:** 0 — Foundation  
-**Phase:** 0.6 — Authenticated Application Bootstrap Consolidation & Session-Ready Surface  
-**Current Subphase:** **0.6.2 — Authenticated Surface Contract Alignment**
+**Phase:** 0.8 — Standardized Error Model  
+**Current Subphase:** **0.8.4 — Error Mapping Hardening & Contract Tests**  
+**Phase Status:** **Completed**
 
 ---
 
@@ -2184,13 +2185,28 @@ Apply the 0.8.2 internal app error type system across the auth transport surface
 
 ### Result
 
-Phase 0.8 is now advanced through the first three implementation layers:
+Phase 0.8 is now fully completed across its four implementation layers:
 
 - 0.8.1 → error contract introduced
 - 0.8.2 → internal app error type system introduced
 - 0.8.3 → auth surface standardized on app errors
-- 0.8.4 → pending contract hardening and tests
+- 0.8.4 → error mapping hardened and contract tests added
+
+### Validation
+
+- Added contract-oriented test coverage in `internal/core/errs/app_error_test.go`
+- Added HTTP-envelope hardening coverage in `internal/core/httpx/error_test.go`
+- Preserved green `go test ./...` validation after hardening
+
+### Guarantees After Phase 0.8
+
+- Canonical `error` envelope is now frozen and reused across middleware and auth handlers
+- Centralized `AppError`/catalog/factory flow is now hardened by tests
+- Representative code/status/category mappings are now explicitly validated
+- No success payload contract changed during the phase
+- No route contract changed during the phase
+- No `httpx -> auth -> httpx` cyclic import was reintroduced
 
 ### Next
 
-0.8.4 — Error Mapping Hardening & Contract Tests
+Phase 0.8 is closed. The next roadmap step should start from the post-0.8 foundation state rather than from a pending error-model subphase.

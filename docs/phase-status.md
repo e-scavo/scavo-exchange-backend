@@ -1130,6 +1130,8 @@ Auth module is now fully application-driven with clean transport boundaries.
 - Added a centralized internal `AppError` type with categories, wrapping helpers and conversion to response errors
 - Moved the auth-local normalized error catalog into `internal/core/errs` to prepare reusable mapping across later phases
 - Added shared typed factories and HTTP writing support for application errors
+- Standardized auth-surface handlers on centralized app-error factories without reintroducing cyclic imports
+- Added contract-focused tests under `internal/core/errs` and `internal/core/httpx` to freeze representative mapping behavior and canonical HTTP error envelope serialization
 
 ### Result
 

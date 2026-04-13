@@ -91,6 +91,7 @@ Introduced centralized internal app error typing, shared auth error catalog norm
 Auth handlers now consume centralized app-error factories and catalog resolution directly, while preserving the 0.8.1 envelope and avoiding cyclic import reintroduction.
 
 #### 0.8.4 — Error Mapping Hardening & Contract Tests ✔ Completed
+Added contract-focused tests for centralized app-error mapping and HTTP envelope serialization so representative `code/status/category` behavior and transport fallback paths are now frozen by automated coverage.
 
 ### 0.9 — API Versioning Strategy ⬜ Pending
 Introduce versioning to support backward-compatible evolution.

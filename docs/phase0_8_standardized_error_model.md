@@ -99,13 +99,19 @@ The auth surface now writes the Phase 0.8 standardized error contract from centr
 
 ---
 
-### 0.8.4 — Error Mapping Hardening & Contract Tests ⬜
+### 0.8.4 — Error Mapping Hardening & Contract Tests ✔
 
-Planned:
+Delivered in this subphase:
 
-- error contract tests
-- mapping hardening
-- shape/code/status regression protection
+- added dedicated catalog and `AppError` hardening coverage in `internal/core/errs/app_error_test.go`
+- added HTTP envelope and transport hardening coverage in `internal/core/httpx/error_test.go`
+- froze representative `legacyKey -> code/status/category` mappings under automated tests
+- froze canonical `AppError -> ResponseError -> HTTP envelope` behavior under automated tests
+- added regression protection for nil/unknown error fallbacks so transport safety remains explicit
+
+Result:
+
+The standardized error model is now not only implemented but also contract-hardened through focused tests that protect shape, code and status behavior against regression.
 
 ---
 
