@@ -2141,13 +2141,40 @@ Introduce the first real implementation step of the standardized error model by 
 
 ### Result
 
-Phase 0.8 is now started in code:
+Phase 0.8 is now advanced through the first two implementation layers:
 
 - 0.8.1 → error contract introduced
-- 0.8.2 → pending internal error type system
+- 0.8.2 → internal app error type system introduced
 - 0.8.3 → pending auth surface standardization
 - 0.8.4 → pending contract hardening and tests
 
 ### Next
 
-0.8.2 — Error Type System Introduction
+0.8.3 — Auth Surface Error Standardization
+
+## Phase 0.8.2 — Error Type System Introduction
+
+### Objective
+
+Introduce a reusable internal application error type system so the backend no longer depends on auth-local string catalogs to express normalized error codes, messages, status and categories.
+
+### Implementation
+
+- Added `AppError`, `Category`, wrapping helpers and conversion helpers under `internal/core/errs`
+- Moved the auth/wallet/settings legacy-to-normalized error catalog out of `internal/modules/auth/http_login.go` into `internal/core/errs`
+- Added reusable typed factories for common auth/internal/settings error cases
+- Added HTTP writing support for `AppError` in `internal/core/httpx`
+- Rebased auth transport helpers and core auth middleware on the new internal error type system while preserving the 0.8.1 envelope
+
+### Guarantees
+
+- No route changes
+- No success payload changes
+- No auth surface-wide semantic remapping yet
+- Existing 0.8.1 envelope remains stable
+- Internal error normalization is now centralized and reusable across subsequent subphases
+
+### Result
+
+Phase 0.8 now has both its transport error contract and its first centralized internal error type layer in place.
+

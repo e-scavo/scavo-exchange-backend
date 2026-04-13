@@ -67,13 +67,20 @@ When contextual data is needed, the envelope now supports:
 
 ---
 
-### 0.8.2 — Error Type System Introduction ⬜
+### 0.8.2 — Error Type System Introduction ✔
 
-Planned:
+Delivered in this subphase:
 
-- internal typed error system
-- initial error code catalog
-- separation between generic and domain errors
+- introduced a reusable internal `AppError` type under `internal/core/errs`
+- introduced centralized error categories for generic/auth/wallet/settings/internal cases
+- moved the auth normalized error catalog out of `internal/modules/auth/http_login.go` into `internal/core/errs`
+- added typed helper factories and conversion helpers from internal errors to response errors
+- added `WriteAppError(...)` support in `internal/core/httpx`
+- preserved the 0.8.1 transport envelope while removing auth-local normalized error definitions
+
+Result:
+
+The backend now has a centralized internal error type system that sits underneath the 0.8.1 HTTP envelope and prepares later auth-surface-wide mapping work without changing current routes or success payloads.
 
 ---
 
@@ -97,7 +104,7 @@ Planned:
 
 ---
 
-## Architecture Introduced in 0.8.1
+## Architecture Introduced in 0.8.1–0.8.2
 
 ### Response Contract Layer
 
@@ -109,6 +116,22 @@ Responsibilities:
 
 - define structured response error shape
 - carry code/message/details in a transport-neutral form
+
+---
+
+### Internal Error Type Layer
+
+The backend now has a reusable application-level error type system:
+
+- `internal/core/errs/app_error.go`
+- `internal/core/errs/catalog_auth.go`
+- `internal/core/errs/factories.go`
+
+Responsibilities:
+
+- define normalized internal application errors with code/message/status/category
+- centralize auth/wallet/settings legacy-key normalization in one place
+- provide reusable factories and wrapping helpers for later auth surface migration
 
 ---
 
@@ -156,9 +179,8 @@ This includes:
 
 Phase 0.8 has now started concretely in code.
 
-0.8.1 establishes the contractual base required for the remaining subphases:
+0.8.1 and 0.8.2 now establish the contractual and internal type foundations required for the remaining subphases:
 
-- 0.8.2 will define the internal type system
 - 0.8.3 will standardize error mapping semantics across auth surface
 - 0.8.4 will harden and freeze the contract with tests
 
@@ -166,6 +188,6 @@ Phase 0.8 has now started concretely in code.
 
 ## Conclusion
 
-Phase 0.8.1 does not redesign business behavior.
+Phase 0.8.1 and 0.8.2 do not redesign business behavior.
 
-It introduces the formal response contract required for all later error standardization work, while preserving the current auth execution model established by Phase 0.7.
+Together they introduce the formal response contract and the first centralized internal error type layer required for all later auth-surface-wide standardization work, while preserving the current auth execution model established by Phase 0.7.

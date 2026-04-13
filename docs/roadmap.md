@@ -84,7 +84,8 @@ Define a consistent error contract across all endpoints.
 #### 0.8.1 — Error Contract Definition ✔ Completed
 Introduced the standardized error envelope foundation and centralized HTTP error writing.
 
-#### 0.8.2 — Error Type System Introduction ⬜ Pending
+#### 0.8.2 — Error Type System Introduction ✔ Completed
+Introduced centralized internal app error typing, shared auth error catalog normalization and reusable error factories without changing the 0.8.1 transport envelope.
 
 #### 0.8.3 — Auth Surface Error Standardization ⬜ Pending
 
