@@ -6,6 +6,10 @@ type ResponseError struct {
 	Details map[string]any `json:"details,omitempty"`
 }
 
+type ErrorEnvelope struct {
+	Error ResponseError `json:"error"`
+}
+
 func NewResponseError(code, message string, details map[string]any) ResponseError {
 	err := ResponseError{
 		Code:    code,
@@ -15,4 +19,8 @@ func NewResponseError(code, message string, details map[string]any) ResponseErro
 		err.Details = details
 	}
 	return err
+}
+
+func NewErrorEnvelope(err ResponseError) ErrorEnvelope {
+	return ErrorEnvelope{Error: err}
 }

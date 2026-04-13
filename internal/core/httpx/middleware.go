@@ -85,7 +85,7 @@ func Recoverer(log *logger.Logger) func(http.Handler) http.Handler {
 						"recover", rec,
 						"stack", string(debug.Stack()),
 					)
-					WriteError(w, http.StatusInternalServerError, coreerrs.NewResponseError("INTERNAL_ERROR", "internal server error", nil))
+					WriteAppError(w, coreerrs.InternalError(nil))
 				}
 			}()
 			next.ServeHTTP(w, r)
@@ -95,8 +95,16 @@ func Recoverer(log *logger.Logger) func(http.Handler) http.Handler {
 
 func Timeout(d time.Duration) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
-		return http.TimeoutHandler(next, d, `{"error":{"code":"TIMEOUT","message":"request timed out"}}`)
+		return http.TimeoutHandler(next, d, string(mustJSON(coreerrs.NewErrorEnvelope(coreerrs.Timeout().ToResponseError()))))
 	}
+}
+
+func mustJSON(v any) []byte {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return []byte(`{"error":{"code":"INTERNAL_ERROR","message":"internal server error"}}`)
+	}
+	return b
 }
 
 func WriteJSON(w http.ResponseWriter, code int, v any) {

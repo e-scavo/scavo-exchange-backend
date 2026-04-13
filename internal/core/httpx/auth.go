@@ -17,19 +17,19 @@ func RequireAuth(tokens *coreauth.TokenService, allowQueryToken bool) func(http.
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if tokens == nil {
-				WriteError(w, http.StatusInternalServerError, coreerrs.NewResponseError("AUTH_NOT_CONFIGURED", "authentication is not configured", nil))
+				WriteAppError(w, coreerrs.AuthNotConfigured())
 				return
 			}
 
 			token := coreauth.ExtractTokenFromRequest(r, allowQueryToken)
 			if strings.TrimSpace(token) == "" {
-				WriteError(w, http.StatusUnauthorized, coreerrs.NewResponseError("AUTH_MISSING_BEARER_TOKEN", "missing bearer token", nil))
+				WriteAppError(w, coreerrs.AuthMissingBearerToken())
 				return
 			}
 
 			claims, err := tokens.Parse(token)
 			if err != nil || claims == nil || strings.TrimSpace(claims.UserID) == "" {
-				WriteError(w, http.StatusUnauthorized, coreerrs.NewResponseError("AUTH_UNAUTHORIZED", "authentication required", nil))
+				WriteAppError(w, coreerrs.AuthUnauthorized())
 				return
 			}
 
