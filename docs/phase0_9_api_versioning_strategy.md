@@ -132,9 +132,16 @@ Delivered in this subphase:
 
 This subphase intentionally changes route exposure only. It does not yet redefine or freeze the semantic equivalence set endpoint by endpoint; that remains the responsibility of 0.9.3 and 0.9.4.
 
-### 0.9.3 — Authenticated Surface Version Freezing ⬜ Pending
+### 0.9.3 — Authenticated Surface Version Freezing ✔ Completed
 
-Map the current authenticated surfaces onto canonical `v1` semantics without changing business behavior.
+The current authenticated surface is now explicitly frozen as the canonical `v1` authenticated contract.
+
+Delivered in this subphase:
+
+- bound bootstrap, profile, settings, session and wallet inventory/read behavior to canonical `v1` semantics
+- clarified that legacy `/auth/...` and canonical `/api/v1/auth/...` entry paths are transport projections of the same authenticated contract
+- preserved current business behavior, payload semantics, middleware wrapping and Phase 0.8 error-envelope behavior
+- left strict route-by-route transport equivalence assertions to 0.9.4 rather than mixing freeze definition with contract-test expansion
 
 ### 0.9.4 — Version-aware Contract Testing ⬜ Pending
 

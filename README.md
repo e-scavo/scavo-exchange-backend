@@ -23,7 +23,7 @@ The backend follows a **wallet-first identity model** that progressively evolves
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.9 — API Versioning Strategy  
-**Current Subphase:** **0.9.2 — Router Versioning Foundation**  
+**Current Subphase:** **0.9.3 — Authenticated Surface Version Freezing**  
 **Phase Status:** **In Progress**
 
 ---
@@ -2304,4 +2304,50 @@ This completes the router-level materialization of the versioning model defined 
 
 ### Next
 
-Phase 0.9.3 should freeze the currently exposed authenticated surface explicitly as the canonical `v1` contract and clarify the semantic equivalence rule between legacy and canonical entry paths.
+Phase 0.9.4 should formalize version-aware contract tests so legacy and canonical `v1` entry paths remain protected from silent divergence.
+
+
+## Phase 0.9.3 — Authenticated Surface Version Freezing
+
+### Objective
+
+Bind the currently exposed authenticated surface explicitly to canonical `v1` semantics without changing business behavior, payload structure or middleware rules.
+
+### Why This Subphase Follows 0.9.2
+
+Phase 0.9.2 made the canonical route space real in the runtime router, but route exposure alone does not define which transport surface is actually frozen as `v1`. The next step is to declare that the existing authenticated behavior reached through those routes is now the canonical `v1` authenticated contract rather than a provisional projection.
+
+### Canonical `v1` Authenticated Surface
+
+The backend now treats the following authenticated routes as the frozen `v1` authenticated surface, exposed both through legacy compatibility paths and canonical versioned paths:
+
+- `GET /auth/bootstrap` ↔ `GET /api/v1/auth/bootstrap`
+- `GET /auth/me` ↔ `GET /api/v1/auth/me`
+- `PATCH /auth/me` ↔ `PATCH /api/v1/auth/me`
+- `GET /auth/me/settings` ↔ `GET /api/v1/auth/me/settings`
+- `PATCH /auth/me/settings` ↔ `PATCH /api/v1/auth/me/settings`
+- `GET /auth/session` ↔ `GET /api/v1/auth/session`
+- `GET /auth/wallets` ↔ `GET /api/v1/auth/wallets`
+- authenticated wallet-management flows already routed through `/auth/...` and `/api/v1/auth/...` using the same handlers and middleware
+
+### Freeze Semantics
+
+For the authenticated `v1` surface, the backend now makes these guarantees explicit:
+
+- legacy and canonical entry paths are two transport projections of the same authenticated contract
+- business behavior remains identical across both route spaces
+- success payload semantics remain unchanged
+- the standardized Phase 0.8 error envelope remains part of the same `v1` contract
+- future breaking changes to this authenticated surface require a new API version instead of silent mutation of the current one
+
+### Non-Goals
+
+This subphase does not yet add route-by-route equivalence assertions in automated coverage. That stricter transport regression protection remains the responsibility of 0.9.4.
+
+### Result
+
+After 0.9.3, the backend no longer only exposes a canonical route space; it also explicitly freezes which authenticated surface that route space represents for `v1`.
+
+### Next
+
+Phase 0.9.4 should formalize version-aware contract tests so legacy and canonical `v1` entry paths remain protected from silent divergence.

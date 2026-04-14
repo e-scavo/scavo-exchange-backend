@@ -1152,7 +1152,7 @@ The backend now exposes a single structured JSON error envelope across auth hand
 |----------|------------|--------|
 | 0.9.1 | Versioning Policy Definition | ✔ Completed |
 | 0.9.2 | Router Versioning Foundation | ✔ Completed |
-| 0.9.3 | Authenticated Surface Version Freezing | ⬜ Pending |
+| 0.9.3 | Authenticated Surface Version Freezing | ✔ Completed |
 | 0.9.4 | Version-aware Contract Testing | ⬜ Pending |
 | 0.9.5 | Documentation Consolidation | ⬜ Pending |
 
@@ -1176,6 +1176,8 @@ Define the canonical API versioning policy for the post-0.8 backend while preser
 - Materialized canonical `/api/v1/...` route exposure in the real router while preserving legacy `/auth/...` access
 - Reused the same handler/application behavior across legacy and canonical route spaces instead of creating route-specific business duplication
 - Kept current auth middleware and transport concerns intact across both route surfaces
+- Explicitly froze the current authenticated surface as canonical `v1` semantics across bootstrap, profile, settings, session and wallet inventory/read flows
+- Declared legacy and canonical authenticated entry paths to be two projections of the same `v1` contract rather than independent route contracts
 
 ### Current Result
 
@@ -1183,7 +1185,7 @@ Phase 0.9 is now no longer only documented; it is partially implemented in runti
 
 - 0.9.1 → versioning policy defined
 - 0.9.2 → canonical router exposure completed
-- 0.9.3 → authenticated-surface `v1` freeze pending
+- 0.9.3 → authenticated-surface `v1` freeze completed
 - 0.9.4 → version-aware contract testing pending
 - 0.9.5 → trunk-documentation consolidation pending
 
@@ -1191,4 +1193,4 @@ The backend remains functionally stable on its current routes while now exposing
 
 #### Next
 
-0.9.3 — Authenticated Surface Version Freezing
+0.9.4 — Version-aware Contract Testing

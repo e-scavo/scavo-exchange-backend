@@ -102,8 +102,8 @@ Path-based versioning is now the canonical strategy, `v1` semantics are explicit
 #### 0.9.2 — Router Versioning Foundation ✔ Completed
 Materialized the canonical `/api/v1/...` route surface in the real router while preserving the current legacy endpoints and reusing the same handler/application behavior.
 
-#### 0.9.3 — Authenticated Surface Version Freezing ⬜ Pending
-Bind the current auth/bootstrap/profile/settings/session/wallet surfaces to the canonical `v1` contract without changing their business behavior.
+#### 0.9.3 — Authenticated Surface Version Freezing ✔ Completed
+Bound the current auth/bootstrap/profile/settings/session/wallet surfaces explicitly to the canonical `v1` contract semantics while preserving the same business behavior across legacy and canonical entry paths.
 
 #### 0.9.4 — Version-aware Contract Testing ⬜ Pending
 Extend contract-level tests so legacy and canonical routes are protected from divergence.

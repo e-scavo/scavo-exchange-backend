@@ -43,6 +43,7 @@
 * `phase0_9_api_versioning_strategy.md`
   * `0.9.1 — Versioning Policy Definition`
   * `0.9.2 — Router Versioning Foundation`
+  * `0.9.3 — Authenticated Surface Version Freezing`
 * `phase0_8_standardized_error_model.md`
   * `0.8.1 — Error Contract Definition`
   * `0.8.2 — Error Type System Introduction`
@@ -95,7 +96,7 @@ Phase 0.8 ✔ Completed
 
 - 0.9.1 ✔ Versioning Policy Definition
 - 0.9.2 ✔ Router Versioning Foundation
-- 0.9.3 ⬜ Authenticated Surface Version Freezing
+- 0.9.3 ✔ Authenticated Surface Version Freezing
 - 0.9.4 ⬜ Version-aware Contract Testing
 - 0.9.5 ⬜ Documentation Consolidation
 

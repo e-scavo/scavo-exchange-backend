@@ -1698,16 +1698,16 @@ Testing must make it explicit that:
 - structural response or error-envelope changes are not allowed silently
 - any breaking transport change requires a new API version rather than mutation of the current suite
 
-### Current Status After 0.9.2
+### Current Status After 0.9.3
 
-The router now exposes both legacy and canonical transport entry paths, but full equivalence hardening remains a dedicated responsibility of 0.9.4.
+The authenticated `v1` surface is now explicitly frozen, while exhaustive legacy-versus-canonical transport equivalence coverage remains a dedicated responsibility of 0.9.4.
 
 This means:
 
-- canonical route exposure now exists in runtime code
-- compatibility expectations are now testable against a real router
-- endpoint-by-endpoint equivalence assertions still need to be formalized in the later contract-testing subphase
+- canonical route exposure already exists in runtime code
+- the authenticated surface that those routes represent is now explicitly defined and frozen
+- the next testing step is to convert that freeze into route-by-route compatibility assertions so legacy and canonical entry paths cannot drift silently
 
 ### Result
 
-Testing scope now extends beyond handler correctness and error-envelope normalization toward explicit transport-version compatibility control for the remaining Stage 0 work.
+Testing scope now extends beyond handler correctness, error-envelope normalization and route exposure toward explicit protection of the frozen authenticated `v1` contract across both supported transport entry spaces.

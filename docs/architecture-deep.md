@@ -751,6 +751,17 @@ Crucially, this is implemented as shared transport registration over the same ha
 
 This matters because later phases can now reason about canonical route behavior against a real router surface instead of a merely documented target.
 
+#### 0.9.3 Architectural Consequence
+
+With 0.9.3, the authenticated surface exposed through that router is no longer treated as a provisional or merely mirrored route set. The backend now explicitly freezes the currently stabilized authenticated behavior as canonical `v1` semantics.
+
+That freeze covers the authenticated bootstrap, profile, settings, session and wallet inventory/read surface already stabilized in earlier phases. Architecturally, this means:
+
+- canonical `/api/v1/auth/...` routes are the official `v1` transport face of that authenticated surface
+- legacy `/auth/...` routes remain supported as compatibility aliases over the same contract
+- route versioning does not create independent handler/application semantics
+- later authorization work in 0.10 can build on a contract boundary that is both exposed and explicitly frozen
+
 ---
 ### Impact on Future Phases
 
