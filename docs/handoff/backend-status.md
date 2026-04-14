@@ -16,9 +16,9 @@ It is intended to:
 
 **Stage:** 0 — Foundation
 **Phase:** 0.10 — Authorization Layer
-**Latest Completed Subphase:** 0.10.2 — Authorization Context & Middleware
-**Next Planned Phase:** 0.10 — Authorization Layer
-**Next Planned Subphase:** 0.10.3 — Policy Evaluation Layer
+**Latest Completed Subphase:** 0.10.3 — Policy Evaluation Layer
+**Next Planned Phase:** 0.11 — Domain Module Pattern
+**Next Planned Subphase:** 0.10.4 — Endpoint-Level Enforcement
 
 ---
 
@@ -887,3 +887,28 @@ This subphase does not yet evaluate permissions or deny requests. Endpoint behav
 ### Next
 
 0.10.3 — Policy Evaluation Layer
+
+
+## Phase 0.10.3 — Policy Evaluation Layer
+
+### Current State
+
+The backend now has a centralized authorization decision boundary on top of the model and context work delivered in 0.10.1 and 0.10.2.
+
+Phase 0.10.3 introduces explicit action/resource vocabulary and a dedicated evaluator so authorization questions no longer need to be answered by reading raw claims or manually reproducing role-permission logic in transport code.
+
+### Delivered in 0.10.3
+
+- `Action` and `Resource` vocabularies in `internal/core/authorization`
+- centralized action/resource → permission projection helpers
+- `PolicyEvaluator` with `Evaluate(...)` and `Can(...)` APIs
+- permission evaluation against normalized `AuthorizationSubject` data
+- focused tests covering allowed, denied and unknown policy decisions
+
+### Important Boundary
+
+This subphase still does not enforce permissions at the HTTP endpoint level. Handlers, payloads and error contracts remain unchanged. What changed is that the backend now has a stable internal policy API that can be used by the next subphase without introducing handler-local authorization logic.
+
+### Next
+
+0.10.4 — Endpoint-Level Enforcement

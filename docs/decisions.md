@@ -317,3 +317,20 @@ Keeping policy code dependent on raw transport claims would blur the boundary be
 - authenticated routes now hydrate authorization context after successful authentication
 - future policy evaluation can remain transport-agnostic
 - endpoint enforcement can be introduced later without redesigning the authenticated request pipeline
+
+
+## Decision — Policy Evaluation Must Be Centralized Before Endpoint Enforcement
+
+Authorization decisions must be introduced through a dedicated core evaluator before protected endpoints start denying requests based on permissions.
+
+Phase 0.10.3 therefore introduces explicit authorization action/resource vocabularies and a centralized `PolicyEvaluator` rather than allowing handlers or router-level code to translate roles into permissions independently.
+
+### Reason
+
+If endpoint enforcement were introduced first, authorization semantics would likely fragment across handlers and middleware, making later changes riskier and harder to test.
+
+### Impact
+
+- authorization questions now have a stable core API
+- handler and middleware code can stay thin when enforcement starts
+- future permission expansion can evolve in one place rather than across multiple endpoint implementations

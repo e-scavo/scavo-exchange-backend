@@ -510,3 +510,20 @@ The protected-route pipeline is therefore now effectively structured as:
 `Request → RequireAuth → HydrateAuthorization → Handler/Application`
 
 At this stage, the authorization middleware is intentionally non-blocking. Its role is to hydrate context, not to decide access. That preserves current runtime stability while preparing a clean handoff to centralized policy evaluation in 0.10.3.
+
+
+## Phase 0.10.3 — Policy Evaluation Layer
+
+Phase 0.10.3 introduces the first centralized decision point of the authorization architecture without yet turning authorization into transport enforcement. Up to 0.10.2, the backend had a model and a hydrated authorization subject in request context, but still lacked a stable policy boundary.
+
+The new policy layer closes that gap by defining:
+
+- explicit `Action` and `Resource` vocabularies as authorization-facing intent
+- centralized action/resource → permission projection derived from the static role-permission model
+- a `PolicyEvaluator` that answers authorization questions against a normalized `AuthorizationSubject`
+
+Architecturally, this matters because endpoint enforcement should not be the first place where policy semantics appear. The evaluator now becomes the boundary between authorization context and transport/application enforcement:
+
+`Request → RequireAuth → HydrateAuthorization → PolicyEvaluator → Handler/Application`
+
+At this stage, the evaluator is present but still not invoked to deny requests in router/handler flows. This keeps Phase 0.10.3 non-breaking while ensuring 0.10.4 can enforce permissions progressively through a centralized policy API instead of duplicating role/permission logic near endpoints.

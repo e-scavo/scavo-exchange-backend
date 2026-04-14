@@ -23,9 +23,9 @@ The backend follows a **wallet-first identity model** that progressively evolves
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.10 — Authorization Layer  
-**Latest Completed Subphase:** **0.10.2 — Authorization Context & Middleware**  
+**Latest Completed Subphase:** **0.10.3 — Policy Evaluation Layer**  
 **Phase Status:** **In Progress**  
-**Next Planned Subphase:** **0.10.3 — Policy Evaluation Layer**  
+**Next Planned Subphase:** **0.10.4 — Endpoint-Level Enforcement**  
 **Next Planned Phase:** **0.11 — Domain Module Pattern**
 
 ---
@@ -2517,3 +2517,47 @@ while still deferring policy checks and endpoint denial to later subphases.
 ### Next
 
 0.10.3 — Policy Evaluation Layer
+
+## Phase 0.10.3 — Policy Evaluation Layer
+
+### Objective
+
+Introduce a centralized authorization decision boundary so the backend can answer permission questions through a stable core API before any endpoint begins denying requests.
+
+### Why this subphase exists
+
+By the end of 0.10.2, authenticated requests already carry a normalized `AuthorizationSubject`. What still remained missing was the policy boundary itself: a reusable place where the backend can decide whether a subject may perform an action on a resource without embedding that logic directly in handlers or tying it to JWT claims.
+
+### What 0.10.3 introduces
+
+Phase 0.10.3 adds that missing central layer under `internal/core/authorization`:
+
+- explicit authorization `Action` vocabulary
+- explicit authorization `Resource` vocabulary
+- static action/resource → permission projection
+- centralized permission resolution helpers
+- `PolicyEvaluator` with `Evaluate(...)` and `Can(...)` APIs
+- focused tests covering permission projection and role-based authorization decisions
+
+### Runtime effect
+
+Phase 0.10.3 remains non-breaking and non-enforcing:
+
+- no endpoint behavior changes yet
+- no new transport contract is introduced
+- no handler starts denying requests yet
+- the evaluator exists so 0.10.4 can enforce permissions progressively without inventing policy rules locally
+
+### Result
+
+After 0.10.3, the authorization layer now consists of three explicit steps:
+
+- 0.10.1 → model vocabulary (`Role`, `Permission`, `AuthorizationSubject`)
+- 0.10.2 → request-context hydration (`HydrateAuthorization`)
+- 0.10.3 → centralized policy evaluation (`PolicyEvaluator`)
+
+The backend still behaves exactly as before from the client perspective, but it no longer lacks a central place to answer authorization questions. Endpoint-level enforcement can now begin in 0.10.4 on top of a real policy layer instead of ad-hoc handler checks.
+
+### Next
+
+0.10.4 — Endpoint-Level Enforcement

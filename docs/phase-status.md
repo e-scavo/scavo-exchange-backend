@@ -1207,7 +1207,7 @@ The backend remains functionally stable on its current routes while now exposing
 |----------|------------|--------|
 | 0.10.1 | Authorization Model Definition | ✔ Completed |
 | 0.10.2 | Authorization Context & Middleware | ✔ Completed |
-| 0.10.3 | Policy Evaluation Layer | ⬜ Pending |
+| 0.10.3 | Policy Evaluation Layer | ✔ Completed |
 | 0.10.4 | Endpoint-Level Enforcement | ⬜ Pending |
 | 0.10.5 | Documentation & Contract Consolidation | ⬜ Pending |
 
@@ -1233,11 +1233,11 @@ Introduce a structured authorization layer on top of the already-stabilized auth
 
 Phase 0.10 has started, but runtime enforcement has not yet begun. The backend still behaves exactly as before from an HTTP-contract perspective; what changed is the architectural baseline. The system now has an explicit authorization model instead of relying on future handler-level ad-hoc checks.
 
-The next step is to propagate that model into the authenticated request lifecycle through middleware and context wiring before policy evaluation and endpoint enforcement are introduced.
+The next step is to introduce a centralized policy-evaluation boundary on top of the hydrated authorization subject before any endpoint begins enforcing permissions.
 
 #### Next
 
-0.10.2 — Authorization Context & Middleware
+0.10.4 — Endpoint-Level Enforcement
 
 
 ## ✅ Phase 0.10.2 — Authorization Context & Middleware
@@ -1258,3 +1258,24 @@ Phase 0.10.2 is completed:
 - 0.10.2 → authorization subject now propagates through the authenticated request lifecycle
 
 The backend still does not enforce permissions yet, but authenticated requests now carry a first-class authorization subject in addition to authentication claims. This creates the infrastructure boundary needed for centralized policy evaluation in 0.10.3 without forcing handler-local authorization logic.
+
+
+## ✅ Phase 0.10.3 — Policy Evaluation Layer
+
+### Delivered
+
+- introduced explicit authorization `Action` and `Resource` vocabularies under `internal/core/authorization`
+- added centralized action/resource → permission resolution helpers so policy questions are derived from the same static authorization model introduced in 0.10.1
+- introduced `PolicyEvaluator` with `Evaluate(...)` and `Can(...)` APIs for centralized authorization decisions
+- added permission-check helpers so policy code evaluates normalized authorization subjects rather than raw transport claims
+- added focused unit tests covering permission projection, positive and negative role-based decisions, and unknown action/resource denial behavior
+
+### Result
+
+Phase 0.10.3 is completed:
+
+- 0.10.1 → authorization model vocabulary introduced
+- 0.10.2 → authorization subject now propagates through the authenticated request lifecycle
+- 0.10.3 → centralized policy evaluation is now available through a stable core API
+
+The backend still does not enforce permissions yet, but it now has a dedicated policy boundary that can answer authorization questions without pushing role or permission logic into handlers. This sets up 0.10.4 to introduce endpoint-level enforcement progressively on top of an already-centralized evaluator.

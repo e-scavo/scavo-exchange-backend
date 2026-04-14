@@ -120,7 +120,7 @@ Introduced the foundational authorization primitives under `internal/core/author
 #### 0.10.2 — Authorization Context & Middleware ✔ Completed
 Attach authorization subject data to the authenticated request lifecycle and extend middleware/context propagation without changing endpoint contracts yet.
 
-#### 0.10.3 — Policy Evaluation Layer ⬜ Pending
+#### 0.10.3 — Policy Evaluation Layer ✔ Completed
 Introduce a centralized policy-evaluation boundary so handlers can ask authorization questions without embedding permission logic ad hoc.
 
 #### 0.10.4 — Endpoint-Level Enforcement ⬜ Pending

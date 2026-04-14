@@ -83,9 +83,9 @@ Its purpose is to establish a stable internal vocabulary so later authorization 
 
 Phase 0.10.2 propagates authorization subject information through the authenticated request lifecycle without changing payload or enforcement behavior. The current auth context and HTTP middleware stack now hydrate an explicit authorization subject for authenticated requests while still deferring policy decisions and endpoint denial to later subphases.
 
-### 0.10.3 — Policy Evaluation Layer ⬜ Pending
+### 0.10.3 — Policy Evaluation Layer ✔ Completed
 
-This subphase should introduce a centralized policy boundary so handlers and application code can ask authorization questions through a stable interface rather than embedding role/permission decisions locally.
+This subphase introduces the centralized policy boundary that handlers and application code can later use to ask authorization questions through a stable interface rather than embedding role/permission decisions locally.
 
 ### 0.10.4 — Endpoint-Level Enforcement ⬜ Pending
 
@@ -121,4 +121,23 @@ The runtime contract remains stable: clients still see the same success and erro
 
 ### Next
 
-0.10.3 — Policy Evaluation Layer
+0.10.4 — Endpoint-Level Enforcement
+
+
+## Current Result After 0.10.3
+
+The backend now has a centralized policy evaluation layer on top of the authorization model and authorization-context propagation already delivered in the previous subphases.
+
+Phase 0.10.3 specifically delivers:
+
+- explicit `Action` and `Resource` vocabularies for authorization questions
+- static action/resource → permission projection helpers
+- permission evaluation against normalized `AuthorizationSubject` data
+- a `PolicyEvaluator` with `Evaluate(...)` and `Can(...)` entry points
+- focused tests covering allowed, denied and unknown-policy decisions
+
+The runtime contract still remains stable: endpoint behavior, success payloads and standardized errors are unchanged, and no request is denied yet because of authorization policy. What changed is that the backend now has a real internal policy boundary instead of having to invent one at the moment enforcement begins.
+
+### Next
+
+0.10.4 — Endpoint-Level Enforcement
