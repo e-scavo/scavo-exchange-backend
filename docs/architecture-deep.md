@@ -763,6 +763,25 @@ That freeze covers the authenticated bootstrap, profile, settings, session and w
 - later authorization work in 0.10 can build on a contract boundary that is both exposed and explicitly frozen
 
 ---
+#### 0.9.4 Architectural Consequence
+
+With 0.9.4, the versioning model is no longer protected only by documentation and route registration. The transport layer now has representative automated checks proving that selected legacy and canonical entry points continue to expose the same observable contract shape for both standardized error and success scenarios.
+
+Architecturally, this matters because it reduces the risk that future transport work silently separates the two supported route spaces while both still coexist during Stage 0.
+
+#### 0.9.5 Consolidation Consequence
+
+With 0.9.5, Phase 0.9 becomes a closed architectural foundation rather than a partially scattered implementation. The important consequence is documentary but still architectural: the repository now records one coherent answer to all of the following questions at once:
+
+- what the canonical route space is
+- why legacy routes still exist
+- which authenticated surface is frozen as `v1`
+- how representative parity is protected in automated coverage
+- why the frontend still remains aligned only up to backend Phase 0.6 until Stage 0 closes
+
+That consolidation matters because Phase 0.10 should build authorization on top of a stable and unambiguous transport boundary rather than on partially divergent status narratives.
+
+
 ### Impact on Future Phases
 
 This foundation enables:

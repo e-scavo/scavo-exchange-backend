@@ -1698,7 +1698,7 @@ Testing must make it explicit that:
 - structural response or error-envelope changes are not allowed silently
 - any breaking transport change requires a new API version rather than mutation of the current suite
 
-### Current Status After 0.9.4
+### Current Status After 0.9.5
 
 The authenticated `v1` surface is now explicitly frozen and protected by version-aware contract tests.
 
@@ -1721,3 +1721,5 @@ The current contract-testing layer now includes representative checks for:
 ### Result
 
 Testing scope now extends beyond handler correctness, error-envelope normalization and route exposure toward explicit protection of the frozen authenticated `v1` contract across both supported transport entry spaces.
+
+Phase 0.9.5 closes the loop by consolidating that testing intent in the trunk documentation set, so the project now records the same contract-governance rule in architecture, phase-status, README and handoff rather than only in isolated test-facing notes.

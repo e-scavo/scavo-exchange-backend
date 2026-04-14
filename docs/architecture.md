@@ -459,7 +459,7 @@ This architectural move is intentionally compatible with the current project rul
 
 ### Result
 
-After 0.9.3, the architecture has a defined transport-evolution policy, a concrete router-level implementation of that policy, and an explicitly frozen authenticated `v1` surface:
+By the end of Phase 0.9, the architecture has a defined transport-evolution policy, a concrete router-level implementation of that policy, an explicitly frozen authenticated `v1` surface and representative transport regression coverage protecting key legacy-versus-canonical scenarios:
 
 - Handlers → transport plus real legacy/canonical route exposure rules
 - Application → orchestration
@@ -468,5 +468,7 @@ After 0.9.3, the architecture has a defined transport-evolution policy, a concre
 Versioning is now implemented as router-level projection of the same stabilized handler/application behavior into two public route spaces rather than as duplicated route-specific logic.
 
 The architectural consequence of 0.9.3 is that the authenticated surface itself is no longer merely reachable through canonical paths; it is now explicitly treated as the frozen `v1` contract surface for bootstrap, profile, settings, session and wallet inventory/read behavior. Legacy and canonical routes are therefore architectural aliases over the same stabilized authenticated boundary rather than separate transport contracts.
+
+The final architectural consequence of 0.9.5 is not a new runtime mechanism but a closed architectural record: roadmap, status, testing and handoff now all describe the same versioning boundary and the same frontend Phase 0.6 alignment rule.
 
 This prepares the backend for Phase 0.10 and beyond, where authorization and later cross-cutting concerns can be introduced on top of a stable application boundary, an explicit public contract-evolution model and a real canonical route surface already present in the transport layer.

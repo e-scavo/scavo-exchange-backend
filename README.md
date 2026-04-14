@@ -23,8 +23,9 @@ The backend follows a **wallet-first identity model** that progressively evolves
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.9 — API Versioning Strategy  
-**Current Subphase:** **0.9.4 — Version-aware Contract Testing**  
-**Phase Status:** **In Progress**
+**Current Subphase:** **0.9.5 — Documentation Consolidation**  
+**Phase Status:** **Completed**  
+**Next Planned Phase:** **0.10 — Authorization Layer**
 
 ---
 
@@ -2305,6 +2306,51 @@ This completes the router-level materialization of the versioning model defined 
 ### Next
 
 Phase 0.9.4 formalizes version-aware contract tests so legacy and canonical `v1` entry paths remain protected from silent divergence. The next step is 0.9.5 — Documentation Consolidation.
+
+
+## Phase 0.9.5 — Documentation Consolidation
+
+### Objective
+
+Close Phase 0.9 by aligning the full trunk documentation set with the now-real versioning model, the authenticated-surface `v1` freeze and the representative legacy-versus-canonical contract testing introduced through 0.9.4.
+
+### Why This Subphase Follows 0.9.4
+
+By the end of 0.9.4, the backend already had all three technical pieces of the versioning foundation in place:
+
+- a documented versioning policy (0.9.1)
+- a real canonical `/api/v1/...` router surface (0.9.2)
+- an explicitly frozen authenticated `v1` contract plus representative transport regression tests (0.9.3 and 0.9.4)
+
+What still remained was the trunk-documentation responsibility: removing the state drift that had accumulated while the subphases were landing and leaving the repository with a single coherent narrative before Phase 0.10 begins.
+
+### Delivered
+
+Phase 0.9.5 consolidates the documentation set around the finalized versioning model:
+
+- marks Phase 0.9 as completed across roadmap, phase-status, index and top-level project status surfaces
+- records 0.9.4 as completed and 0.9.5 as the documentation-consolidation closure step rather than leaving either one pending
+- aligns the phase-specific, architectural, testing and handoff documents around the same canonical explanation of legacy `/auth/...` versus canonical `/api/v1/auth/...`
+- preserves the project rule that the frontend remains aligned to backend Phase 0.6 until Stage 0 is fully closed, so the documentation does not imply forced frontend adoption of the new route space
+- leaves Phase 0.10 clearly framed as the next planned step rather than mixing authorization concerns into the versioning closure
+
+### Scope Boundary
+
+This subphase does not change runtime code, router behavior, payload semantics, middleware logic or test intent. It closes Phase 0.9 by eliminating documentation drift and by making the already-delivered versioning foundation readable as one coherent trunk narrative.
+
+### Result
+
+After 0.9.5, Phase 0.9 is fully closed:
+
+- `v1` versioning policy is defined
+- canonical routing is implemented
+- the authenticated `v1` surface is frozen
+- representative version-aware transport regression tests are in place
+- the trunk documentation set now describes the same state consistently
+
+### Next
+
+Phase 0.10 should build the authorization layer on top of this now-completed versioning and contract-governance foundation.
 
 
 ## Phase 0.9.4 — Version-aware Contract Testing

@@ -1144,7 +1144,7 @@ Phase 0.8 is now fully completed:
 
 The backend now exposes a single structured JSON error envelope across auth handlers and core auth HTTP middleware, backed by centralized app-error mapping and dedicated contract-level hardening tests.
 
-## ⏳ Phase 0.9 — API Versioning Strategy
+## ✅ Phase 0.9 — API Versioning Strategy
 
 ### Subphase Status
 
@@ -1154,11 +1154,11 @@ The backend now exposes a single structured JSON error envelope across auth hand
 | 0.9.2 | Router Versioning Foundation | ✔ Completed |
 | 0.9.3 | Authenticated Surface Version Freezing | ✔ Completed |
 | 0.9.4 | Version-aware Contract Testing | ✔ Completed |
-| 0.9.5 | Documentation Consolidation | ⬜ Pending |
+| 0.9.5 | Documentation Consolidation | ✔ Completed |
 
 ---
 
-## ⏳ Phase 0.9 Summary
+## ✅ Phase 0.9 Summary
 
 ### Objective
 
@@ -1180,19 +1180,20 @@ Define the canonical API versioning policy for the post-0.8 backend while preser
 - Declared legacy and canonical authenticated entry paths to be two projections of the same `v1` contract rather than independent route contracts
 
 - Added representative router-level contract tests covering legacy/canonical path composition and success/error parity for key authenticated/auth-adjacent routes
+- Consolidated roadmap, phase-status, README, architecture, testing and handoff documents so Phase 0.9 now closes with a single coherent description of canonical `v1`, legacy compatibility and the frontend Phase 0.6 alignment rule
 
 ### Current Result
 
-Phase 0.9 is now no longer only documented; it is partially implemented in runtime code:
+Phase 0.9 is now fully completed. The versioning foundation is both implemented in runtime code and consolidated across the trunk documentation set:
 
 - 0.9.1 → versioning policy defined
 - 0.9.2 → canonical router exposure completed
 - 0.9.3 → authenticated-surface `v1` freeze completed
 - 0.9.4 → version-aware contract testing completed
-- 0.9.5 → trunk-documentation consolidation pending
+- 0.9.5 → trunk-documentation consolidation completed
 
-The backend remains functionally stable on its current routes while now exposing a real canonical `v1` route surface backed by representative version-aware regression tests.
+The backend remains functionally stable on its current routes while now exposing a real canonical `v1` route surface backed by representative version-aware regression tests and by a documentation set aligned to the same transport-evolution narrative.
 
 #### Next
 
-0.9.5 — Documentation Consolidation
+0.10 — Authorization Layer

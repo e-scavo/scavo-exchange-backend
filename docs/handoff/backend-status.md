@@ -16,7 +16,8 @@ It is intended to:
 
 **Stage:** 0 — Foundation
 **Phase:** 0.9 — API Versioning Strategy
-**Latest Completed Subphase:** 0.9.3 — Authenticated Surface Version Freezing
+**Latest Completed Subphase:** 0.9.5 — Documentation Consolidation
+**Next Planned Phase:** 0.10 — Authorization Layer
 
 ---
 
@@ -728,6 +729,74 @@ After 0.9.3, the backend is:
 ### Next Step
 
 0.9.4 — Version-aware Contract Testing
+
+
+## Phase 0.9.4 — Version-aware Contract Testing
+
+### Summary
+
+This subphase turns the declared authenticated-surface `v1` freeze into representative automated transport regression protection so legacy and canonical route spaces do not silently drift while both remain supported.
+
+### Key Changes
+
+- Added router-level versioning tests under `internal/core/httpx` rather than introducing route-specific business logic
+- Verified legacy/canonical helper path composition and representative parity for protected error scenarios
+- Verified representative public success-shape compatibility for wallet challenge creation across `/auth/...` and `/api/v1/auth/...`
+- Kept the scope focused on representative contract parity rather than attempting a new API version or a full endpoint-by-endpoint matrix in the same step
+
+### Architectural Impact
+
+- The canonical route surface is now not only exposed and frozen; it is also protected by automated transport-level checks
+- The risk of accidental divergence between legacy and canonical Stage 0 entry paths is reduced before authorization work begins
+- Frontend alignment remains unchanged because the current legacy route surface is still supported and the frontend continues to target backend Phase 0.6 semantics during Stage 0
+
+### Resulting System State
+
+After 0.9.4, the system has:
+
+- a documented versioning policy
+- a real canonical `v1` route namespace
+- a frozen authenticated `v1` contract surface
+- representative version-aware regression protection for key legacy/canonical paths
+- preserved legacy compatibility routes
+
+### Next Step
+
+0.9.5 — Documentation Consolidation
+
+
+## Phase 0.9.5 — Documentation Consolidation
+
+### Summary
+
+This subphase closes Phase 0.9 by consolidating the trunk documentation set around the already-delivered versioning policy, router foundation, authenticated-surface freeze and representative version-aware contract testing.
+
+### Key Changes
+
+- Updated trunk documents so Phase 0.9 is consistently represented as completed
+- Recorded 0.9.4 as completed and 0.9.5 as the formal closure step for the phase
+- Aligned README, roadmap, phase-status, architecture, testing and handoff around the same explanation of canonical `/api/v1/auth/...`, legacy `/auth/...` and the frontend Phase 0.6 alignment rule
+- Corrected operational handoff state so the next planned phase is now accurately represented as 0.10 — Authorization Layer
+
+### Architectural Impact
+
+- The backend now has a closed and coherent architectural record for its transport-evolution model
+- Authorization in 0.10 can start from an unambiguous versioning and contract-governance baseline rather than from fragmented status narratives
+- Documentation no longer implies that versioning work is still partially pending when the router, freeze and representative tests are already in place
+
+### Resulting System State
+
+After 0.9.5, the system has:
+
+- a completed Phase 0.9 versioning foundation
+- a documented and implemented canonical `v1` route surface
+- a frozen authenticated `v1` contract boundary
+- representative version-aware regression protection
+- a trunk documentation set aligned to the same backend/frontend evolution rule
+
+### Next Step
+
+0.10 — Authorization Layer
 
 
 ## Phase 0.9.2 — Router Versioning Foundation

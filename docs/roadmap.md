@@ -93,7 +93,7 @@ Auth handlers now consume centralized app-error factories and catalog resolution
 #### 0.8.4 — Error Mapping Hardening & Contract Tests ✔ Completed
 Added contract-focused tests for centralized app-error mapping and HTTP envelope serialization so representative `code/status/category` behavior and transport fallback paths are now frozen by automated coverage.
 
-### 0.9 — API Versioning Strategy ⏳ In Progress
+### 0.9 — API Versioning Strategy ✔ Completed
 Formalize canonical API versioning, preserve legacy route compatibility and freeze the public contract-evolution rules needed before authorization and later domain growth.
 
 #### 0.9.1 — Versioning Policy Definition ✔ Completed
@@ -105,11 +105,11 @@ Materialized the canonical `/api/v1/...` route surface in the real router while 
 #### 0.9.3 — Authenticated Surface Version Freezing ✔ Completed
 Bound the current auth/bootstrap/profile/settings/session/wallet surfaces explicitly to the canonical `v1` contract semantics while preserving the same business behavior across legacy and canonical entry paths.
 
-#### 0.9.4 — Version-aware Contract Testing ⬜ Pending
-Extend contract-level tests so legacy and canonical routes are protected from divergence.
+#### 0.9.4 — Version-aware Contract Testing ✔ Completed
+Extended representative contract-level tests so legacy and canonical routes are protected from silent divergence across key authenticated and auth-adjacent scenarios.
 
-#### 0.9.5 — Documentation Consolidation ⬜ Pending
-Propagate the versioning model through the trunk documentation set and leave explicit frontend/backend alignment notes for the Stage 0 completion path.
+#### 0.9.5 — Documentation Consolidation ✔ Completed
+Consolidated the trunk documentation set so roadmap, status, architecture, testing and handoff now describe the same completed Phase 0.9 state and the same frontend/backend alignment rule.
 
 ### 0.10 — Authorization Layer ⬜ Pending
 Add roles, permissions, and enforcement mechanisms.

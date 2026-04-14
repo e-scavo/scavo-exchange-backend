@@ -156,9 +156,18 @@ Delivered in this subphase:
 
 This subphase intentionally protects representative route behavior and contract shape without expanding into a new API version or redefining the already frozen `v1` payload semantics.
 
-### 0.9.5 — Documentation Consolidation ⬜ Pending
+### 0.9.5 — Documentation Consolidation ✔ Completed
 
-Align the trunk document set with the finalized versioning model and the backend/frontend evolution rule.
+The trunk documentation set is now aligned with the finalized versioning model, the authenticated-surface `v1` freeze and the representative transport-level parity checks introduced in 0.9.4.
+
+Delivered in this subphase:
+
+- updated the trunk documentation set so Phase 0.9 is consistently represented as completed rather than partially pending
+- aligned roadmap, phase-status, README, architecture, testing and handoff around the same explanation of canonical `/api/v1/auth/...` and legacy `/auth/...`
+- corrected state drift in the operational handoff document so the latest completed subphase and next planned phase are now accurate
+- preserved the project rule that the frontend remains aligned to backend Phase 0.6 until Stage 0 closure, avoiding any suggestion that Phase 0.9 forces immediate frontend route migration
+
+This subphase intentionally changes documentation only. It closes the phase by removing narrative drift, not by altering router behavior, payload semantics, middleware or test scope.
 
 ## Expected Outcome
 
@@ -169,3 +178,7 @@ At the end of Phase 0.9, the backend should have:
 - preserved legacy route compatibility
 - version-aware regression protection
 - documentation that makes transport evolution rules explicit before Phase 0.10 begins
+
+## Phase Closure
+
+Phase 0.9 is now fully completed. The backend has an explicit versioning policy, a real canonical `v1` route surface, a frozen authenticated `v1` contract, representative legacy-versus-canonical transport regression protection and a consolidated trunk documentation set that records the same state consistently before Phase 0.10 begins.
