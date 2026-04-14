@@ -920,3 +920,101 @@ Because those foundations already exist, 0.11 can stay strictly structural. It d
 ### Current Repository State
 
 At this repository point, Phase 0.11 is defined and documented as the next structural step, but the runtime refactor itself has not yet been applied. The repository therefore records the target pattern and its scope without claiming delivered internal code alignment beyond the completed 0.10 state.
+
+---
+## Phase 0.11 - Domain Module Pattern
+
+### Objective
+
+Phase 0.11 introduces a standardized internal module pattern to improve maintainability, structural clarity, and controlled scalability without changing external API behavior.
+
+### Standard Internal Module Structure
+
+The target module shape is:
+
+```text
+internal/modules/<module>/
+    http/
+        handlers.go
+        dto.go
+
+    app/
+        service.go
+        usecases.go
+
+    domain/
+        model.go
+        contracts.go
+
+    repository/
+        repository.go   (if applicable)
+```
+
+This structure is intentionally pragmatic. It standardizes internal organization without forcing artificial layers where they do not add value.
+
+### Layer Responsibilities
+
+#### HTTP
+Responsible for:
+- request parsing
+- transport validation
+- response serialization
+- error mapping toward the standardized error model
+
+HTTP must not own business flow, persistence logic, or domain rules.
+
+#### Application
+Responsible for:
+- use-case orchestration
+- coordination between domain operations
+- flow composition across internal contracts
+
+Application is the operational layer that turns domain capabilities into executable backend behavior.
+
+#### Domain
+Responsible for:
+- domain models
+- domain rules
+- invariants
+- internal contracts
+
+Domain must stay free from HTTP and persistence concerns.
+
+#### Repository
+Responsible for:
+- persistence implementation when needed
+- adaptation of storage concerns behind internal contracts
+
+Repository remains optional and should only exist where it improves clarity.
+
+### Cross-Module Contract Boundaries
+
+Phase 0.11 also formalizes how modules interact without collapsing boundaries.
+
+#### auth -> user
+Allowed when authentication flows need authenticated user resolution or minimal user-owned information.
+
+#### auth -> usersettings
+Allowed when authenticated bootstrap composition requires effective settings resolution.
+
+#### user <-> usersettings
+Allowed only in contextual terms around the same platform user. This does not merge the two domains.
+
+### Semantic Ownership
+
+The pattern is reinforced by explicit ownership boundaries:
+
+- `auth` owns authentication flows, challenge/verify semantics, and authenticated identity entry
+- `user` owns the platform user model and user-facing metadata/profile surface
+- `usersettings` owns authenticated user configuration, preferences, and settings consistency
+
+Modules may coordinate with each other, but they must not silently take ownership of another module's domain.
+
+### Architectural Rule
+
+The key architectural rule introduced by Phase 0.11 is:
+
+- modules coordinate
+- contracts stabilize dependencies
+- ownership remains local
+- external contracts stay unchanged

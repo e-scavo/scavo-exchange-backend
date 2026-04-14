@@ -363,3 +363,20 @@ This means the repository now explicitly documents two truths at the same time:
 - authorization is already operational on that first slice, with a standardized forbidden path for denied requests
 
 Documenting both points together is important because it prevents later work from incorrectly assuming either that authorization is still pending everywhere or that every authenticated endpoint is already under full policy control.
+
+---
+## ADR-0011 - Domain Module Pattern
+
+### Decision
+The backend adopts a Domain Module Pattern to standardize the internal structure of domain modules.
+
+### Reason
+The backend has reached a stage where authentication, authorization, API versioning, standardized error handling, and authenticated bootstrap flows are already stabilized. The next structural need is to remove internal inconsistencies between modules, formalize separation of concerns, and reduce accidental coupling before broader feature growth.
+
+### Impact
+- domain modules are organized around explicit internal layers
+- HTTP, application orchestration, and domain semantics are separated
+- repository concerns remain optional and only appear where they add real clarity
+- module-to-module dependencies must be expressed through minimal explicit contracts when needed
+- the pattern applies conservatively and does not imply a full clean-architecture rewrite
+- external contracts remain unchanged while internal maintainability improves

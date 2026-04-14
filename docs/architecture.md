@@ -595,3 +595,21 @@ Phase 0.11 remains intentionally non-breaking. It is defined as an internal stru
 - the canonical `/api/v1/...` contract state
 - the existing payloads and error model
 - the already stabilized challenge / verify / bootstrap semantics
+
+---
+## Domain Module Pattern
+
+Phase 0.11 introduces a standardized internal module pattern for backend domain modules.
+
+The backend continues to operate as a modular monolith, but modules are now expected to evolve toward an explicit internal structure under:
+
+- `internal/modules/<module>/`
+
+The intended organization separates responsibilities into:
+
+- HTTP
+- Application
+- Domain
+- Repository (when applicable)
+
+This pattern does not change the external API surface. Its purpose is to improve internal consistency, reduce accidental coupling, and make future evolution of modules such as `auth`, `user`, and `usersettings` more predictable and maintainable.
