@@ -730,6 +730,70 @@ After 0.9.3, the backend is:
 
 0.9.4 — Version-aware Contract Testing
 
+## Phase 0.9.2 — Router Versioning Foundation
+
+### Summary
+
+This subphase turns the 0.9.1 versioning policy into real transport exposure by projecting the stabilized auth/authenticated surface into the canonical `/api/v1/...` namespace.
+
+### Key Changes
+
+- Added canonical `/api/v1/auth/...` route registration in `internal/core/httpx/router.go`
+- Preserved the existing `/auth/...` compatibility surface
+- Centralized auth route registration so legacy and canonical paths reuse the same handlers
+- Preserved auth middleware wrapping and existing transport concerns across both route spaces
+
+### Architectural Impact
+
+- Versioning is now implemented in router composition rather than only described in docs
+- The backend can move into contract freezing and equivalence hardening against a real canonical runtime surface
+- Frontend alignment remains unchanged because the legacy route space still exists and remains supported
+
+### Resulting System State
+
+After 0.9.2, the system has:
+
+- a documented versioning policy
+- a real canonical `v1` route namespace
+- preserved legacy compatibility routes
+- no business-flow duplication introduced by versioning
+
+### Next Step
+
+0.9.3 — Authenticated Surface Version Freezing
+
+## Phase 0.9.3 — Authenticated Surface Version Freezing
+
+### Summary
+
+This subphase freezes the currently stabilized authenticated behavior as the canonical `v1` authenticated contract without changing business flows, payload structure or middleware behavior.
+
+### Key Changes
+
+- Declared bootstrap, profile, settings, session and wallet inventory/read behavior to be part of the frozen authenticated `v1` surface
+- Clarified that legacy `/auth/...` and canonical `/api/v1/auth/...` entry paths are transport aliases over the same authenticated contract
+- Preserved the current Phase 0.8 standardized error envelope as part of the same `v1` semantics
+- Kept exhaustive route-by-route equivalence hardening deferred to 0.9.4
+
+### Architectural Impact
+
+- Canonical routing is now backed by an explicit surface freeze rather than only by route exposure
+- Later authorization work can target a stable authenticated contract boundary instead of a merely projected router surface
+- Frontend alignment remains unchanged because the legacy route surface is still supported during Stage 0
+
+### Resulting System State
+
+After 0.9.3, the system has:
+
+- a documented versioning policy
+- a real canonical `v1` route namespace
+- a frozen authenticated `v1` contract surface
+- preserved legacy compatibility routes
+- no business-flow duplication introduced by versioning
+
+### Next Step
+
+0.9.4 — Version-aware Contract Testing
 
 ## Phase 0.9.4 — Version-aware Contract Testing
 
@@ -764,7 +828,6 @@ After 0.9.4, the system has:
 
 0.9.5 — Documentation Consolidation
 
-
 ## Phase 0.9.5 — Documentation Consolidation
 
 ### Summary
@@ -798,69 +861,3 @@ After 0.9.5, the system has:
 
 0.10 — Authorization Layer
 
-
-## Phase 0.9.2 — Router Versioning Foundation
-
-### Summary
-
-This subphase turns the 0.9.1 versioning policy into real transport exposure by projecting the stabilized auth/authenticated surface into the canonical `/api/v1/...` namespace.
-
-### Key Changes
-
-- Added canonical `/api/v1/auth/...` route registration in `internal/core/httpx/router.go`
-- Preserved the existing `/auth/...` compatibility surface
-- Centralized auth route registration so legacy and canonical paths reuse the same handlers
-- Preserved auth middleware wrapping and existing transport concerns across both route spaces
-
-### Architectural Impact
-
-- Versioning is now implemented in router composition rather than only described in docs
-- The backend can move into contract freezing and equivalence hardening against a real canonical runtime surface
-- Frontend alignment remains unchanged because the legacy route space still exists and remains supported
-
-### Resulting System State
-
-After 0.9.2, the system has:
-
-- a documented versioning policy
-- a real canonical `v1` route namespace
-- preserved legacy compatibility routes
-- no business-flow duplication introduced by versioning
-
-### Next Step
-
-0.9.3 — Authenticated Surface Version Freezing
-
-
-## Phase 0.9.3 — Authenticated Surface Version Freezing
-
-### Summary
-
-This subphase freezes the currently stabilized authenticated behavior as the canonical `v1` authenticated contract without changing business flows, payload structure or middleware behavior.
-
-### Key Changes
-
-- Declared bootstrap, profile, settings, session and wallet inventory/read behavior to be part of the frozen authenticated `v1` surface
-- Clarified that legacy `/auth/...` and canonical `/api/v1/auth/...` entry paths are transport aliases over the same authenticated contract
-- Preserved the current Phase 0.8 standardized error envelope as part of the same `v1` semantics
-- Kept exhaustive route-by-route equivalence hardening deferred to 0.9.4
-
-### Architectural Impact
-
-- Canonical routing is now backed by an explicit surface freeze rather than only by route exposure
-- Later authorization work can target a stable authenticated contract boundary instead of a merely projected router surface
-- Frontend alignment remains unchanged because the legacy route surface is still supported during Stage 0
-
-### Resulting System State
-
-After 0.9.3, the system has:
-
-- a documented versioning policy
-- a real canonical `v1` route namespace
-- a frozen authenticated `v1` contract surface
-- preserved legacy compatibility routes
-- no business-flow duplication introduced by versioning
-
-### Next Step
-
-0.9.4 — Version-aware Contract Testing
