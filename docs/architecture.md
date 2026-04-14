@@ -552,3 +552,46 @@ Phase 0.10.5 closes the architectural introduction of authorization by consolida
 - progressive endpoint-level enforcement
 
 The architectural value of 0.10.5 is that the code and the trunk documentation now match. The backend can move forward with later module work without carrying conflicting descriptions of whether authorization exists only as preparatory infrastructure or already participates in selected authenticated request decisions.
+
+
+## Phase 0.11 — Domain Module Pattern
+
+Phase 0.11 is the next architectural consolidation step after the completed authorization layer. It does not add a new public runtime capability on its own; instead, it standardizes how the current Stage 0 domain-facing modules should be structured internally so later work can grow on top of a clearer module model.
+
+The architectural target is a consistent internal module organization of the form:
+
+```text
+internal/modules/<module>/
+    http/
+    app/
+    domain/
+    repository/   (when it adds real clarity)
+```
+
+This pattern makes the current layer intent explicit:
+
+- `http` owns request/response transport and DTO mapping
+- `app` owns use-case orchestration
+- `domain` owns models, invariants and module-local contracts
+- `repository` owns persistence-facing implementation boundaries when the module really needs them
+
+Architecturally, the important consequence is that the backend stops treating module organization as mostly historical or handler-driven. Instead, the current domain-facing modules are expected to follow an explicit direction of dependency:
+
+`HTTP → APP → DOMAIN`
+
+with repository implementations supporting the application/domain boundary rather than collapsing it.
+
+The first modules in scope are `auth`, `user` and `usersettings`. They do not all have identical semantics, but they should all align to the same structural pattern:
+
+- `auth` keeps ownership of authentication flows and authenticated-identity entry behavior
+- `user` keeps ownership of the user entity/profile boundary
+- `usersettings` keeps ownership of configuration and preference semantics
+
+This matters because later Stage 0 and post-Stage 0 work should not continue to grow through implicit ownership transfer or direct concrete cross-module knowledge. Phase 0.11 therefore establishes the architectural expectation that coordination between these modules should happen through minimal explicit contracts rather than through accidental import-level coupling.
+
+Phase 0.11 remains intentionally non-breaking. It is defined as an internal structural consolidation layer that preserves:
+
+- the completed authenticated and authorization-enabled transport surface
+- the canonical `/api/v1/...` contract state
+- the existing payloads and error model
+- the already stabilized challenge / verify / bootstrap semantics

@@ -111,7 +111,7 @@ Extended representative contract-level tests so legacy and canonical routes are 
 #### 0.9.5 — Documentation Consolidation ✔ Completed
 Consolidated the trunk documentation set so roadmap, status, architecture, testing and handoff now describe the same completed Phase 0.9 state and the same frontend/backend alignment rule.
 
-### 0.10 — Authorization Layer ◑ In Progress
+### 0.10 — Authorization Layer ✔ Completed
 Introduce a structured authorization layer on top of the authenticated Stage 0 foundation without breaking the stabilized transport and application contracts.
 
 #### 0.10.1 — Authorization Model Definition ✔ Completed
@@ -129,8 +129,29 @@ Apply progressive authorization checks to selected authenticated endpoints throu
 #### 0.10.5 — Documentation & Contract Consolidation ✔ Completed
 Align the trunk documentation set to the delivered authorization behavior and close the phase with a coherent architectural and operational narrative.
 
-### 0.11 — Domain Module Pattern ⬜ Pending
-Standardize module structure for future domain expansion.
+### 0.11 — Domain Module Pattern ◑ Defined / Ready for Controlled Implementation
+Standardize the internal structure of the current Stage 0 domain-facing modules so future growth builds on explicit HTTP / APP / DOMAIN boundaries, minimal internal contracts and reduced accidental coupling without changing the public API surface.
+
+#### 0.11.1 — Domain Module Pattern Definition ◑ Defined
+Define the standard internal module shape, layer responsibilities, dependency direction and naming conventions that the currently relevant modules will follow.
+
+#### 0.11.2 — User Module Refactor ◑ Defined
+Apply the pattern to `internal/modules/user` so user-facing transport handlers stop carrying orchestration responsibilities and the module becomes the first concrete reference implementation of the pattern.
+
+#### 0.11.3 — UserSettings Module Refactor ◑ Defined
+Align `internal/modules/usersettings` to the same pattern while preserving its own configuration-oriented semantics and keeping it distinct from the user-entity boundary.
+
+#### 0.11.4 — Auth Module Alignment ◑ Defined
+Align `internal/modules/auth` to the pattern conservatively, expressing authentication flows as use cases while preserving the already stabilized challenge, verify and authorization-adjacent behavior.
+
+#### 0.11.5 — Cross-Module Contract Consolidation ◑ Defined
+Consolidate the explicit internal contracts between `auth`, `user` and `usersettings` so coordination remains possible without reintroducing ownership confusion or concrete cross-module coupling.
+
+#### 0.11.6 — Documentation & Phase Closure ◑ Defined
+Update the trunk documentation set so the adopted module pattern, its scope and its completion criteria are recorded consistently across roadmap, status, architecture, handoff and the dedicated phase document.
+
+#### Expected outcome
+By the end of Phase 0.11, the backend should keep the same external HTTP behavior while exposing a more uniform internal module structure, clearer ownership boundaries and safer foundations for later Stage 0 and post-Stage 0 work.
 
 ### 0.12 — Read/Write Model Separation ⬜ Pending
 Formalize CQRS-lite approach across the system.

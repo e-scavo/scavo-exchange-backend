@@ -25,7 +25,8 @@ The backend follows a **wallet-first identity model** that progressively evolves
 **Phase:** 0.10 — Authorization Layer  
 **Latest Completed Subphase:** **0.10.5 — Documentation & Contract Consolidation**  
 **Phase Status:** **Completed**  
-**Next Planned Phase:** **0.11 — Domain Module Pattern**
+**Next Planned Phase:** **0.11 — Domain Module Pattern**  
+**0.11 Readiness:** **Defined / Ready for Controlled Implementation**
 
 ---
 
@@ -2628,3 +2629,95 @@ Phase 0.10 is complete. The next phase can build on a closed and consistently de
 ### Next
 
 0.11 — Domain Module Pattern
+
+
+## Phase 0.11 — Domain Module Pattern
+
+Define the next structural Stage 0 step: standardize how domain-oriented modules are organized internally without changing the public transport contract, the authenticated bootstrap semantics or the already delivered authorization behavior.
+
+### Why this phase exists
+
+After Phases 0.6 through 0.10, the backend already has a stabilized authenticated surface, an explicit application-layer foundation, a standardized error model, a canonical `v1` route space and a progressively enforced authorization boundary. What it still lacks is a uniform internal module pattern across the current Stage 0 domain-facing modules.
+
+Without that pattern, the codebase risks keeping:
+
+- handlers that accumulate orchestration responsibilities
+- implicit domain boundaries
+- module-local structures that are inconsistent from one module to another
+- cross-module dependencies expressed through concrete knowledge rather than explicit contracts
+
+Phase 0.11 addresses that structural gap without reworking business behavior.
+
+### What 0.11 defines
+
+Phase 0.11 introduces the repository-level definition of a **Domain Module Pattern** for the current Stage 0 modules, centered on the following internal shape:
+
+```text
+internal/modules/<module>/
+    http/
+        handlers.go
+        dto.go
+
+    app/
+        service.go
+        usecases.go
+
+    domain/
+        model.go
+        contracts.go
+
+    repository/
+        repository.go   (when it adds real clarity)
+```
+
+The architectural intention is explicit separation of responsibilities:
+
+- **HTTP** → transport parsing, request validation, response mapping
+- **APP** → use-case orchestration and flow coordination
+- **DOMAIN** → models, invariants and internal contracts
+- **REPOSITORY** → persistence-facing implementation boundaries when needed
+
+### Phase 0.11 subphases
+
+- **0.11.1 — Domain Module Pattern Definition**
+- **0.11.2 — User Module Refactor**
+- **0.11.3 — UserSettings Module Refactor**
+- **0.11.4 — Auth Module Alignment**
+- **0.11.5 — Cross-Module Contract Consolidation**
+- **0.11.6 — Documentation & Phase Closure**
+
+### Intended scope
+
+Phase 0.11 is intentionally structural and non-functional:
+
+- reorganize internal module boundaries
+- make use-case orchestration explicit
+- formalize domain-facing contracts
+- reduce accidental coupling across `auth`, `user` and `usersettings`
+- preserve complete compatibility at the HTTP/API level
+
+This phase does **not** introduce:
+
+- new endpoints
+- new business features
+- public payload changes
+- auth/authorization redesign
+- CQRS/event sourcing or multi-tenant architecture
+
+### Expected outcome
+
+When Phase 0.11 is implemented and closed, the backend should have:
+
+- a uniform internal module pattern for the currently relevant Stage 0 modules
+- thinner handlers and clearer use-case boundaries
+- explicit ownership between `auth`, `user` and `usersettings`
+- cross-module dependencies expressed through minimal contracts instead of incidental imports
+- the same externally observable behavior as the completed 0.10 surface
+
+### Status
+
+Phase 0.11 is defined and documented as the next planned structural step. Runtime implementation has not yet been introduced in this repository state.
+
+### Next
+
+0.11.1 — Domain Module Pattern Definition

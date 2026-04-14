@@ -36,11 +36,13 @@
 * `phase0_8_standardized_error_model.md`
 * `phase0_9_api_versioning_strategy.md`
 * `phase0_10_authorization_layer.md`
+* `phase0_11_domain_module_pattern.md`
 
 ---
 
 ## 🚧 Current Phase Focus
 
+* `phase0_11_domain_module_pattern.md`
 * `phase0_10_authorization_layer.md`
   * `0.10.1 — Authorization Model Definition`
   * `0.10.2 — Authorization Context & Middleware`
@@ -119,3 +121,17 @@ Phase 0.9 ✔ Completed
 Phase 0.10 ✔ Completed
 
 Next planned phase: `0.11 — Domain Module Pattern`
+
+
+---
+
+### Phase 0.11 — Domain Module Pattern
+
+- 0.11.1 ◑ Domain Module Pattern Definition
+- 0.11.2 ◑ User Module Refactor
+- 0.11.3 ◑ UserSettings Module Refactor
+- 0.11.4 ◑ Auth Module Alignment
+- 0.11.5 ◑ Cross-Module Contract Consolidation
+- 0.11.6 ◑ Documentation & Phase Closure
+
+Phase 0.11 ◑ Defined / Ready for Controlled Implementation

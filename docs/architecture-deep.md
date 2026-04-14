@@ -791,3 +791,132 @@ This foundation enables:
 - Phase 0.10 → authorization layer
 
 Without the risk of cross-layer inconsistencies.
+
+
+## Phase 0.11 — Domain Module Pattern (Deep Architectural Definition)
+
+Phase 0.11 formalizes a repository-level expectation that the current Stage 0 domain-facing modules must stop evolving as mostly handler-centric or historically shaped folders and instead expose a consistent internal boundary model.
+
+### Target Internal Shape
+
+```text
+internal/modules/<module>/
+    http/
+        handlers.go
+        dto.go
+
+    app/
+        service.go
+        usecases.go
+
+    domain/
+        model.go
+        contracts.go
+
+    repository/
+        repository.go   (when it adds real clarity)
+```
+
+This is not a claim that every module must contain the same amount of code in each folder or that every module must introduce a repository abstraction regardless of need. The architectural requirement is consistency of responsibility, not cosmetic symmetry.
+
+### Responsibility Split
+
+#### HTTP
+
+The `http` boundary should own:
+
+- request parsing
+- transport-level validation
+- response mapping
+- transport-facing error projection
+
+It should not own authentication flow orchestration, user/business semantics or persistence decisions.
+
+#### APP
+
+The `app` boundary should own:
+
+- use-case orchestration
+- ordering of module-internal steps
+- coordination with other modules through explicit dependencies
+
+This is where the backend should express things such as authenticated bootstrap composition, settings fetch/update orchestration or authentication entry flows as use cases rather than as heavy handlers.
+
+#### DOMAIN
+
+The `domain` boundary should own:
+
+- models
+- invariants
+- module-local vocabulary
+- explicit contracts that define what the module needs from supporting implementations or collaborating modules
+
+The domain layer must not become a mirror of HTTP DTOs or a storage-schema dump. Its value is to preserve semantic ownership.
+
+#### REPOSITORY
+
+The `repository` boundary should appear only when it improves clarity by isolating persistence-facing implementation details. It is intentionally optional because Phase 0.11 is not a dogmatic rewrite into interface-per-file architecture.
+
+### Dependency Direction
+
+The intended dependency direction is:
+
+`HTTP → APP → DOMAIN`
+
+Repository implementations support those layers but should not pull transport concerns back inward. This matters because the codebase already contains completed transport, error and authorization foundations; Phase 0.11 should build on them rather than collapse them by moving orchestration back into handlers.
+
+### Module-Specific Consequences
+
+#### `internal/modules/user`
+
+The user module becomes the first concrete reference implementation of the pattern. Its handlers should become thinner, while user-related orchestration moves into `app` and user-specific semantic ownership becomes explicit in `domain`.
+
+#### `internal/modules/usersettings`
+
+The user settings module should align to the same pattern without being treated as a mere extension of the user entity. Its domain boundary should preserve settings/configuration semantics such as effective values, consistency and update behavior.
+
+#### `internal/modules/auth`
+
+The auth module requires the most conservative alignment. It already sits on top of stabilized challenge/verify semantics, authenticated identity resolution and authorization-adjacent boundaries. In 0.11 it should be reorganized structurally, not functionally: authentication flows become clearer use cases, but the already delivered public behavior remains unchanged.
+
+### Cross-Module Contract Consolidation
+
+One of the deep architectural goals of 0.11 is to reduce concrete cross-module knowledge between `auth`, `user` and `usersettings`.
+
+The important distinction is:
+
+- coordination is allowed
+- ownership transfer is not
+
+That means:
+
+- `auth` may coordinate bootstrap-facing reads without owning the `user` or `usersettings` domains
+- `user` must not absorb authentication semantics
+- `usersettings` must not become informal profile storage
+
+Where module interaction is real, it should be expressed through minimal explicit contracts rather than through direct knowledge of another module's internal models or implementation details.
+
+### Architectural Non-Goals
+
+Phase 0.11 does not claim that the backend is adopting a full clean architecture, CQRS/event-sourcing model or generic cross-cutting module framework. The deep architectural purpose is narrower and more pragmatic:
+
+- normalize the current module set
+- preserve Stage 0 external stability
+- reduce accidental coupling
+- create clearer foundations for later work
+
+### Relationship to Earlier Stage 0 Work
+
+Phase 0.11 depends on the earlier Stage 0 foundations already being in place:
+
+- the authenticated application surface consolidated in 0.6
+- the application-layer intent introduced in 0.7
+- the standardized error boundary introduced in 0.8
+- the canonical route/versioning discipline introduced in 0.9
+- the explicit authorization boundary completed in 0.10
+
+Because those foundations already exist, 0.11 can stay strictly structural. It does not need to reopen public-contract decisions in order to improve module clarity.
+
+### Current Repository State
+
+At this repository point, Phase 0.11 is defined and documented as the next structural step, but the runtime refactor itself has not yet been applied. The repository therefore records the target pattern and its scope without claiming delivered internal code alignment beyond the completed 0.10 state.

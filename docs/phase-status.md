@@ -1329,3 +1329,66 @@ Authorization is now both implemented and consistently documented. The backend k
 #### Next
 
 0.11 — Domain Module Pattern
+
+
+## ◑ Phase 0.11 — Domain Module Pattern
+
+Status: ◑ Defined / Ready for Controlled Implementation
+
+### Objective
+
+Define and later apply a consistent internal module pattern for the current Stage 0 domain-facing modules so the backend can continue growing on top of explicit transport, application and domain boundaries without changing the already stabilized public contract.
+
+### Scope
+
+Phase 0.11 is structural rather than functional. It is intended to:
+
+- standardize the internal module layout around `http`, `app`, `domain` and optional `repository` boundaries
+- reduce handler-local orchestration in the current Stage 0 modules
+- make internal ownership clearer across `auth`, `user` and `usersettings`
+- replace accidental concrete cross-module knowledge with minimal explicit contracts where those dependencies are real
+
+This phase does not introduce new endpoints, payload shapes, authentication semantics or authorization behavior.
+
+### Planned / Defined Subphases
+
+| Subphase | Description | Status |
+|----------|-------------|--------|
+| 0.11.1 | Domain Module Pattern Definition | ◑ Defined |
+| 0.11.2 | User Module Refactor | ◑ Defined |
+| 0.11.3 | UserSettings Module Refactor | ◑ Defined |
+| 0.11.4 | Auth Module Alignment | ◑ Defined |
+| 0.11.5 | Cross-Module Contract Consolidation | ◑ Defined |
+| 0.11.6 | Documentation & Phase Closure | ◑ Defined |
+
+### Architectural Intent
+
+The target pattern for the current module set is:
+
+```text
+internal/modules/<module>/
+    http/
+    app/
+    domain/
+    repository/   (when it adds real clarity)
+```
+
+with the following responsibility split:
+
+- `http` → request/response transport boundary
+- `app` → use-case orchestration
+- `domain` → models, invariants and internal contracts
+- `repository` → persistence implementation boundary when needed
+
+### Expected Outcome
+
+When Phase 0.11 is eventually implemented and closed, the repository should expose:
+
+- a consistent internal module pattern across `auth`, `user` and `usersettings`
+- clearer ownership boundaries between authentication, user entity concerns and user settings concerns
+- explicit cross-module contracts where coordination is required
+- unchanged external API behavior compared with the completed 0.10 state
+
+### Next
+
+0.11.1 — Domain Module Pattern Definition
