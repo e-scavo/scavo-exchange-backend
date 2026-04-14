@@ -16,9 +16,9 @@ It is intended to:
 
 **Stage:** 0 — Foundation
 **Phase:** 0.10 — Authorization Layer
-**Latest Completed Subphase:** 0.10.4 — Endpoint-Level Enforcement
+**Latest Completed Subphase:** 0.10.5 — Documentation & Contract Consolidation
+**Phase Status:** Completed
 **Next Planned Phase:** 0.11 — Domain Module Pattern
-**Next Planned Subphase:** 0.10.5 — Documentation & Contract Consolidation
 
 ---
 
@@ -912,3 +912,22 @@ This subphase still does not enforce permissions at the HTTP endpoint level. Han
 ### Next
 
 0.10.4 — Endpoint-Level Enforcement
+
+
+## Phase 0.10.5 — Documentation & Contract Consolidation
+
+Phase 0.10.5 does not add new authorization runtime behavior. It closes the authorization layer by consolidating the repository narrative around what was already delivered in 0.10.1 through 0.10.4.
+
+This subphase aligns the trunk documentation so that README, roadmap, phase-status, handoff, architecture and the dedicated Phase 0.10 document all describe the same state:
+
+- the authorization model exists
+- authorization subject hydration exists in the authenticated request lifecycle
+- centralized policy evaluation exists
+- selected endpoints already enforce authorization decisions
+- the first enforcement slice is intentionally progressive rather than universal
+
+Phase 0.10 is therefore complete. The next architectural step should build on this now-documented authorization foundation rather than re-explaining or re-stabilizing it.
+
+### Next
+
+0.11 — Domain Module Pattern

@@ -113,10 +113,9 @@ Phase 0.9 ✔ Completed
 - 0.10.1 ✔ Authorization Model Definition
 - 0.10.2 ✔ Authorization Context & Middleware
 - 0.10.3 ✔ Policy Evaluation Layer
-- 0.10.4 ⬜ Endpoint-Level Enforcement
-- 0.10.5 ⬜ Documentation & Contract Consolidation
+- 0.10.4 ✔ Endpoint-Level Enforcement
+- 0.10.5 ✔ Documentation & Contract Consolidation
 
-Phase 0.10 ◑ In Progress
+Phase 0.10 ✔ Completed
 
-Next planned subphase: `0.10.4 — Endpoint-Level Enforcement`
 Next planned phase: `0.11 — Domain Module Pattern`

@@ -23,9 +23,8 @@ The backend follows a **wallet-first identity model** that progressively evolves
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.10 — Authorization Layer  
-**Latest Completed Subphase:** **0.10.4 — Endpoint-Level Enforcement**  
-**Phase Status:** **In Progress**  
-**Next Planned Subphase:** **0.10.5 — Documentation & Contract Consolidation**  
+**Latest Completed Subphase:** **0.10.5 — Documentation & Contract Consolidation**  
+**Phase Status:** **Completed**  
 **Next Planned Phase:** **0.11 — Domain Module Pattern**
 
 ---
@@ -2561,3 +2560,71 @@ The backend still behaves exactly as before from the client perspective, but it 
 ### Next
 
 0.10.4 — Endpoint-Level Enforcement
+
+
+## Phase 0.10.4 — Endpoint-Level Enforcement
+
+Introduce progressive endpoint-level authorization enforcement on the authenticated Stage 0 surfaces already represented by the static authorization model and centralized policy evaluator.
+
+### Why this subphase exists
+
+By the end of 0.10.3, the backend could already answer authorization questions through a stable internal policy API. What was still missing was operational enforcement: selected endpoints still authenticated users, but did not yet deny unauthorized access through the new authorization layer.
+
+### What 0.10.4 introduces
+
+Phase 0.10.4 makes authorization operational on a first controlled slice by introducing:
+
+- route-level `RequirePermission(...)` middleware in `internal/core/httpx`
+- standardized `AUTH_FORBIDDEN` responses for denied authorization checks
+- progressive enforcement on selected authenticated `me` and `settings` endpoints
+- focused tests confirming allowed and denied outcomes under the centralized policy layer
+
+### Runtime effect
+
+Phase 0.10.4 is intentionally progressive rather than universal:
+
+- `GET /auth/me` and `GET /api/v1/auth/me` now enforce `read user`
+- `GET /auth/me/settings` and `GET /api/v1/auth/me/settings` now enforce `read settings`
+- `PATCH /auth/me/settings` and `PATCH /api/v1/auth/me/settings` now enforce `update settings`
+- `PATCH /auth/me` remains outside the first enforcement slice because its self-update semantics are not yet fully represented by the current static role model
+
+### Result
+
+After 0.10.4, the authorization layer no longer exists only as internal preparation. The backend now actively denies unauthorized access on a selected subset of authenticated endpoints while preserving the stabilized transport contract for allowed requests.
+
+### Next
+
+0.10.5 — Documentation & Contract Consolidation
+
+## Phase 0.10.5 — Documentation & Contract Consolidation
+
+Close Phase 0.10 by consolidating the repository narrative and contract documentation around the authorization layer already delivered in 0.10.1 through 0.10.4.
+
+### Why this subphase exists
+
+Once 0.10.4 introduced real endpoint-level enforcement, the repository could no longer leave trunk documents in mixed intermediate states. The last step of the phase is therefore documentary and contractual: bring README, roadmap, handoff, architecture, status and the dedicated phase document into one coherent explanation of the delivered authorization layer.
+
+### What 0.10.5 introduces
+
+Phase 0.10.5 adds no new runtime behavior. Instead, it consolidates the project narrative by:
+
+- marking Phase 0.10 as completed across the trunk documentation set
+- removing stale text that still described authorization as entirely non-enforcing after 0.10.4
+- documenting the progressive scope of the first enforcement slice
+- aligning the public contract narrative around the standardized `AUTH_FORBIDDEN` path for covered endpoints
+
+### Result
+
+After 0.10.5, the authorization layer is both implemented and consistently documented:
+
+- 0.10.1 → authorization model definition
+- 0.10.2 → authorization context and middleware hydration
+- 0.10.3 → centralized policy evaluation
+- 0.10.4 → progressive endpoint-level enforcement
+- 0.10.5 → documentation and contract consolidation
+
+Phase 0.10 is complete. The next phase can build on a closed and consistently described authorization foundation instead of revisiting stale intermediate state.
+
+### Next
+
+0.11 — Domain Module Pattern

@@ -126,7 +126,7 @@ Introduce a centralized policy-evaluation boundary so handlers can ask authoriza
 #### 0.10.4 — Endpoint-Level Enforcement ✔ Completed
 Apply progressive authorization checks to selected authenticated endpoints through centralized policy middleware while preserving backward compatibility and the current Stage 0 contract discipline.
 
-#### 0.10.5 — Documentation & Contract Consolidation ⬜ Pending
+#### 0.10.5 — Documentation & Contract Consolidation ✔ Completed
 Align the trunk documentation set to the delivered authorization behavior and close the phase with a coherent architectural and operational narrative.
 
 ### 0.11 — Domain Module Pattern ⬜ Pending

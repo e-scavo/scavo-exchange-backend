@@ -351,3 +351,15 @@ Starting enforcement only on the already-aligned endpoints proves the full autho
 - authorization is now enforced in real router flows rather than remaining only preparatory
 - route-level denial still stays centralized through policy middleware
 - endpoints requiring richer ownership semantics remain stable until the policy model is expanded intentionally
+
+
+## Decision — Close Authorization Phase Through Documentation Consolidation
+
+Once Phase 0.10.4 introduced real endpoint-level enforcement, the repository could no longer treat authorization as only a future concern in trunk documents. Phase 0.10.5 therefore exists to make the contract and implementation narrative converge before the next phase begins.
+
+This means the repository now explicitly documents two truths at the same time:
+
+- authorization rollout remains progressive and intentionally limited to the endpoints already represented by the static model
+- authorization is already operational on that first slice, with a standardized forbidden path for denied requests
+
+Documenting both points together is important because it prevents later work from incorrectly assuming either that authorization is still pending everywhere or that every authenticated endpoint is already under full policy control.

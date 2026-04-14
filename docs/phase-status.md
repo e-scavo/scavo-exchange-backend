@@ -1209,7 +1209,7 @@ The backend remains functionally stable on its current routes while now exposing
 | 0.10.2 | Authorization Context & Middleware | ✔ Completed |
 | 0.10.3 | Policy Evaluation Layer | ✔ Completed |
 | 0.10.4 | Endpoint-Level Enforcement | ✔ Completed |
-| 0.10.5 | Documentation & Contract Consolidation | ⬜ Pending |
+| 0.10.5 | Documentation & Contract Consolidation | ✔ Completed |
 
 ---
 
@@ -1237,7 +1237,7 @@ The current enforcement scope intentionally covers only the authenticated endpoi
 
 #### Next
 
-0.10.5 — Documentation & Contract Consolidation
+0.11 — Domain Module Pattern
 
 
 ## ✅ Phase 0.10.2 — Authorization Context & Middleware
@@ -1305,6 +1305,27 @@ Phase 0.10.4 is completed:
 
 Authorization is no longer only preparatory infrastructure. The backend now actively denies unauthorized access on a selected subset of authenticated endpoints using the centralized policy layer, while preserving the stabilized transport contract and deliberately deferring endpoints whose semantics are not yet fully represented by the current static permission model.
 
+## ✅ Phase 0.10.5 — Documentation & Contract Consolidation
+
+### Delivered
+
+- aligned Phase 0.10 completion state across README, roadmap, index, phase-status, handoff and the dedicated authorization phase document
+- removed stale intermediate narrative that still described authorization as non-enforcing after endpoint-level enforcement had already been introduced in 0.10.4
+- consolidated the public contract narrative so the repository now documents both the non-breaking rollout strategy and the new standardized authorization denial path
+- recorded the intentionally progressive scope of the first authorization enforcement slice, including the deliberate exclusion of `PATCH /auth/me` from the current static permission map
+
+### Result
+
+Phase 0.10 is completed:
+
+- 0.10.1 → authorization model vocabulary introduced
+- 0.10.2 → authorization subject now propagates through the authenticated request lifecycle
+- 0.10.3 → centralized policy evaluation is available through a stable core API
+- 0.10.4 → selected authenticated endpoints enforce centralized authorization decisions
+- 0.10.5 → repository documentation and contract state are consolidated around the delivered authorization layer
+
+Authorization is now both implemented and consistently documented. The backend keeps its stabilized Stage 0 transport discipline while explicitly exposing the new authorization boundary, its current enforcement scope and the standardized forbidden path for covered endpoints.
+
 #### Next
 
-0.10.5 — Documentation & Contract Consolidation
+0.11 — Domain Module Pattern

@@ -540,3 +540,15 @@ This subphase introduces a dedicated route-level enforcement middleware in `inte
 Architecturally, this is important because the transport layer still does not embed role logic directly. Router configuration declares the required action/resource pair, and the middleware delegates the actual decision to the centralized policy layer. That keeps enforcement thin, testable and consistent with the static permission model already defined in 0.10.1 and evaluated in 0.10.3.
 
 The enforcement rollout is intentionally progressive. Only the authenticated endpoints already aligned with the current static permission map are enforced in 0.10.4, while endpoints that still require richer self/ownership semantics remain outside the first denial boundary. This preserves Stage 0 behavioral stability while proving the end-to-end authorization path in production code.
+
+
+## Phase 0.10.5 — Documentation & Contract Consolidation
+
+Phase 0.10.5 closes the architectural introduction of authorization by consolidating how the repository describes the new boundary. No new middleware, policy logic or enforcement path is added here. Instead, the subphase confirms that the architecture now contains all four delivered runtime layers of authorization:
+
+- model vocabulary
+- request-context hydration
+- centralized policy evaluation
+- progressive endpoint-level enforcement
+
+The architectural value of 0.10.5 is that the code and the trunk documentation now match. The backend can move forward with later module work without carrying conflicting descriptions of whether authorization exists only as preparatory infrastructure or already participates in selected authenticated request decisions.

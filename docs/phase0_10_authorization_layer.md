@@ -87,11 +87,11 @@ Phase 0.10.2 propagates authorization subject information through the authentica
 
 This subphase introduces the centralized policy boundary that handlers and application code can later use to ask authorization questions through a stable interface rather than embedding role/permission decisions locally.
 
-### 0.10.4 — Endpoint-Level Enforcement ⬜ Pending
+### 0.10.4 — Endpoint-Level Enforcement ✔ Completed
 
 Once policy evaluation exists, selected endpoints should begin enforcing permissions progressively while preserving current contract discipline and minimizing risk to stabilized Stage 0 flows.
 
-### 0.10.5 — Documentation & Contract Consolidation ⬜ Pending
+### 0.10.5 — Documentation & Contract Consolidation ✔ Completed
 
 The final subphase should align README, roadmap, architecture, testing, status and handoff documents so the delivered authorization layer is represented consistently across the trunk documentation set.
 
@@ -165,6 +165,27 @@ The enforced scope currently includes:
 
 The runtime contract remains disciplined: success payloads and legacy/canonical route compatibility stay intact for permitted users, while selected endpoints now deny unauthorized access through the standardized authorization error path.
 
+## Current Result After 0.10.5
+
+Phase 0.10 is now fully consolidated. No new runtime authorization behavior is added in 0.10.5; instead, the repository documents the delivered state consistently across the trunk set and the dedicated authorization narrative.
+
+Phase 0.10.5 specifically delivers:
+
+- completion-state alignment across README, roadmap, index, handoff and phase-status documents
+- removal of stale intermediate descriptions that still treated authorization as pre-enforcement after 0.10.4
+- explicit contract documentation for the progressive first enforcement slice and the standardized forbidden path
+- a single coherent explanation of how model, context, policy and selected endpoint enforcement now fit together
+
+Phase 0.10 is completed with the following delivered progression:
+
+- 0.10.1 → authorization model definition
+- 0.10.2 → authorization context and middleware hydration
+- 0.10.3 → centralized policy evaluation
+- 0.10.4 → progressive endpoint-level enforcement
+- 0.10.5 → documentation and contract consolidation
+
+The next phase can now build on a closed and consistently described authorization layer rather than on partially synchronized implementation notes.
+
 ### Next
 
-0.10.5 — Documentation & Contract Consolidation
+0.11 — Domain Module Pattern
