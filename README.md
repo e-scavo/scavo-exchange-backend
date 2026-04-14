@@ -2483,3 +2483,37 @@ without prematurely coupling handler logic, transport behavior or persistence to
 0.10.2 — Authorization Context & Middleware
 
 
+
+
+## Phase 0.10.2 — Authorization Context & Middleware
+
+### Objective
+
+Propagate the authorization subject through the authenticated HTTP request lifecycle without changing endpoint success payloads, error contracts or enforcement behavior.
+
+### Delivered
+
+Phase 0.10.2 builds on the static authorization model introduced in 0.10.1 and wires it into the transport layer in a non-breaking way:
+
+- adds authorization-context helpers in `internal/core/authorization` for storing and retrieving an `AuthorizationSubject` from `context.Context`
+- adds a deterministic subject resolver from authenticated JWT claims to the authorization model
+- introduces a dedicated HTTP middleware in `internal/core/httpx` that hydrates authorization data only after authentication has already succeeded
+- integrates that middleware into the authenticated route pipeline for both legacy `/auth/...` and canonical `/api/v1/auth/...` surfaces
+- adds focused tests covering authorization-context storage, claim-to-subject resolution and middleware hydration behavior
+
+### Runtime Result
+
+After 0.10.2, authenticated requests still behave exactly as before from a client perspective, but the backend request lifecycle now carries both:
+
+- authentication claims
+- a normalized authorization subject
+
+This keeps the architecture aligned with the intended layering:
+
+`HTTP → Auth → Authorization → Application → Domain`
+
+while still deferring policy checks and endpoint denial to later subphases.
+
+### Next
+
+0.10.3 — Policy Evaluation Layer

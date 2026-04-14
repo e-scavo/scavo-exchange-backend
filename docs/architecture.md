@@ -494,3 +494,19 @@ This keeps the architecture layered correctly:
 
 The key architectural consequence is that the backend no longer needs to jump directly from authenticated claims to endpoint decisions. There is now a dedicated model boundary between identity and future permission checks, introduced without mutating the transport contract or the current application/use-case composition.
 
+
+
+## Phase 0.10.2 — Authorization Context & Middleware
+
+Phase 0.10.2 moves authorization from a purely static model into the request pipeline without yet turning it into enforcement. Architecturally, this is the moment where the backend starts carrying two distinct actor representations during authenticated requests:
+
+- authentication claims as the transport/security identity artifact
+- `AuthorizationSubject` as the normalized authorization artifact
+
+This separation matters because later policy evaluation should not need to depend directly on raw JWT claims or transport-specific details. The new middleware layer projects claims into authorization context once, near the transport boundary, and the rest of the system can later consume authorization state through a dedicated core abstraction.
+
+The protected-route pipeline is therefore now effectively structured as:
+
+`Request → RequireAuth → HydrateAuthorization → Handler/Application`
+
+At this stage, the authorization middleware is intentionally non-blocking. Its role is to hydrate context, not to decide access. That preserves current runtime stability while preparing a clean handoff to centralized policy evaluation in 0.10.3.

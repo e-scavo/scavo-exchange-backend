@@ -79,9 +79,9 @@ This subphase intentionally does **not** yet:
 
 Its purpose is to establish a stable internal vocabulary so later authorization work is layered rather than ad hoc.
 
-### 0.10.2 — Authorization Context & Middleware ⬜ Pending
+### 0.10.2 — Authorization Context & Middleware ✔ Completed
 
-The next subphase should propagate authorization subject information through the authenticated request lifecycle. This is where the current auth context and HTTP middleware stack should gain explicit authorization-aware context wiring without yet introducing broad endpoint denial logic.
+Phase 0.10.2 propagates authorization subject information through the authenticated request lifecycle without changing payload or enforcement behavior. The current auth context and HTTP middleware stack now hydrate an explicit authorization subject for authenticated requests while still deferring policy decisions and endpoint denial to later subphases.
 
 ### 0.10.3 — Policy Evaluation Layer ⬜ Pending
 
@@ -100,3 +100,25 @@ The final subphase should align README, roadmap, architecture, testing, status a
 Phase 0.10 is now in progress. The backend still behaves exactly as it did after 0.9.5 from a client/runtime perspective, but it now includes an explicit authorization model at the core layer.
 
 That means the project no longer needs to invent authorization semantics later inside transport code or feature handlers. The next work can proceed through context propagation, policy evaluation and endpoint enforcement on top of a real model foundation.
+
+
+## Current Result After 0.10.2
+
+The backend now has both halves of the authorization foundation in place:
+
+- a static authorization model (`Role`, `Permission`, role mapping and `AuthorizationSubject`)
+- request-context propagation of a normalized authorization subject for authenticated HTTP flows
+
+Phase 0.10.2 specifically delivers:
+
+- context helpers for storing and retrieving authorization subject data
+- deterministic projection from JWT claims to authorization subject
+- a dedicated authorization-hydration middleware in `internal/core/httpx`
+- integration of that middleware into protected route registration for both legacy and canonical route spaces
+- focused tests protecting the new context and middleware behavior
+
+The runtime contract remains stable: clients still see the same success and error shapes, and the backend still does not enforce endpoint permissions. What changed is the internal request lifecycle, which now carries authorization data in a form suitable for centralized policy evaluation.
+
+### Next
+
+0.10.3 — Policy Evaluation Layer

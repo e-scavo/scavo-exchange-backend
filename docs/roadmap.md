@@ -117,7 +117,7 @@ Introduce a structured authorization layer on top of the authenticated Stage 0 f
 #### 0.10.1 — Authorization Model Definition ✔ Completed
 Introduced the foundational authorization primitives under `internal/core/authorization`, including roles, permissions, static role-to-permission mapping and the authorization-subject model that later subphases will propagate and evaluate.
 
-#### 0.10.2 — Authorization Context & Middleware ⬜ Pending
+#### 0.10.2 — Authorization Context & Middleware ✔ Completed
 Attach authorization subject data to the authenticated request lifecycle and extend middleware/context propagation without changing endpoint contracts yet.
 
 #### 0.10.3 — Policy Evaluation Layer ⬜ Pending

@@ -861,3 +861,28 @@ After 0.9.5, the system has:
 
 0.10 — Authorization Layer
 
+
+
+## Phase 0.10.2 — Authorization Context & Middleware
+
+### Current State
+
+The backend now carries authorization context through authenticated HTTP requests.
+
+Phase 0.10.1 introduced the static authorization model (`Role`, `Permission`, role → permission mapping and `AuthorizationSubject`). Phase 0.10.2 extends that work by attaching a normalized authorization subject to the authenticated request context after JWT authentication succeeds.
+
+### Delivered in 0.10.2
+
+- authorization context helpers in `internal/core/authorization`
+- deterministic projection from authenticated JWT claims to `AuthorizationSubject`
+- dedicated `HydrateAuthorization()` middleware in `internal/core/httpx`
+- middleware integration across protected legacy and canonical auth routes
+- focused transport/core tests for authorization-context propagation
+
+### Important Boundary
+
+This subphase does not yet evaluate permissions or deny requests. Endpoint behavior, response payloads and error contracts remain unchanged. The backend is now prepared for centralized policy evaluation, which is the next planned step.
+
+### Next
+
+0.10.3 — Policy Evaluation Layer

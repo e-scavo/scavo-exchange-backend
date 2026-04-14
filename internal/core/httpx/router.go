@@ -113,22 +113,23 @@ func registerAuthRoutes(r chi.Router, prefix string, tokens *coreauth.TokenServi
 	r.Post(routePath(prefix, "/auth/wallet/verify"), handlers.WalletVerify)
 
 	requireAuth := RequireAuth(tokens, false)
+	hydrateAuthorization := HydrateAuthorization()
 
-	r.With(requireAuth).Post(routePath(prefix, "/auth/wallets/link/challenge"), handlers.WalletLinkChallenge)
-	r.With(requireAuth).Post(routePath(prefix, "/auth/wallets/link/verify"), handlers.WalletLinkVerify)
-	r.With(requireAuth).Post(routePath(prefix, "/auth/account/merge/wallet/challenge"), handlers.WalletAccountMergeChallenge)
-	r.With(requireAuth).Post(routePath(prefix, "/auth/account/merge/wallet/verify"), handlers.WalletAccountMergeVerify)
+	r.With(requireAuth, hydrateAuthorization).Post(routePath(prefix, "/auth/wallets/link/challenge"), handlers.WalletLinkChallenge)
+	r.With(requireAuth, hydrateAuthorization).Post(routePath(prefix, "/auth/wallets/link/verify"), handlers.WalletLinkVerify)
+	r.With(requireAuth, hydrateAuthorization).Post(routePath(prefix, "/auth/account/merge/wallet/challenge"), handlers.WalletAccountMergeChallenge)
+	r.With(requireAuth, hydrateAuthorization).Post(routePath(prefix, "/auth/account/merge/wallet/verify"), handlers.WalletAccountMergeVerify)
 
-	r.With(requireAuth).Get(routePath(prefix, "/auth/bootstrap"), handlers.Bootstrap)
-	r.With(requireAuth).Get(routePath(prefix, "/auth/me"), handlers.Me)
-	r.With(requireAuth).Patch(routePath(prefix, "/auth/me"), handlers.UpdateMe)
-	r.With(requireAuth).Get(routePath(prefix, "/auth/me/settings"), handlers.MeSettings)
-	r.With(requireAuth).Patch(routePath(prefix, "/auth/me/settings"), handlers.UpdateMeSettings)
-	r.With(requireAuth).Get(routePath(prefix, "/auth/session"), handlers.Session)
-	r.With(requireAuth).Get(routePath(prefix, "/auth/wallets"), handlers.Wallets)
-	r.With(requireAuth).Post(routePath(prefix, "/auth/wallets/detach/check"), handlers.WalletDetachCheck)
-	r.With(requireAuth).Post(routePath(prefix, "/auth/wallets/detach"), handlers.WalletDetach)
-	r.With(requireAuth).Post(routePath(prefix, "/auth/wallets/primary"), handlers.WalletSetPrimary)
+	r.With(requireAuth, hydrateAuthorization).Get(routePath(prefix, "/auth/bootstrap"), handlers.Bootstrap)
+	r.With(requireAuth, hydrateAuthorization).Get(routePath(prefix, "/auth/me"), handlers.Me)
+	r.With(requireAuth, hydrateAuthorization).Patch(routePath(prefix, "/auth/me"), handlers.UpdateMe)
+	r.With(requireAuth, hydrateAuthorization).Get(routePath(prefix, "/auth/me/settings"), handlers.MeSettings)
+	r.With(requireAuth, hydrateAuthorization).Patch(routePath(prefix, "/auth/me/settings"), handlers.UpdateMeSettings)
+	r.With(requireAuth, hydrateAuthorization).Get(routePath(prefix, "/auth/session"), handlers.Session)
+	r.With(requireAuth, hydrateAuthorization).Get(routePath(prefix, "/auth/wallets"), handlers.Wallets)
+	r.With(requireAuth, hydrateAuthorization).Post(routePath(prefix, "/auth/wallets/detach/check"), handlers.WalletDetachCheck)
+	r.With(requireAuth, hydrateAuthorization).Post(routePath(prefix, "/auth/wallets/detach"), handlers.WalletDetach)
+	r.With(requireAuth, hydrateAuthorization).Post(routePath(prefix, "/auth/wallets/primary"), handlers.WalletSetPrimary)
 }
 
 func routePath(prefix, suffix string) string {

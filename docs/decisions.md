@@ -300,3 +300,20 @@ The backend introduces authorization in two explicit steps rather than mixing mo
 First, Phase 0.10.1 defines roles, permissions, a static role-to-permission mapping and an authorization-subject model in a dedicated core package. Later subphases will propagate that model through middleware, evaluate policies centrally and only then enforce permissions on selected endpoints.
 
 This decision preserves Stage 0 stability by preventing ad-hoc authorization checks from appearing first in handlers or transport code without an agreed vocabulary. It also keeps authorization conceptually separate from authentication claims and from API versioning concerns.
+
+
+## Decision — Authorization Context Must Be Hydrated Before Policy Evaluation
+
+The backend must project authenticated identities into a dedicated authorization context before introducing centralized policy checks.
+
+This means policy evaluation will consume a normalized `AuthorizationSubject` from request context rather than reading raw JWT claims directly inside handlers or policy code.
+
+### Reason
+
+Keeping policy code dependent on raw transport claims would blur the boundary between authentication and authorization, increase coupling to JWT structure and encourage handler-local access decisions.
+
+### Impact
+
+- authenticated routes now hydrate authorization context after successful authentication
+- future policy evaluation can remain transport-agnostic
+- endpoint enforcement can be introduced later without redesigning the authenticated request pipeline

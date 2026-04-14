@@ -1238,3 +1238,23 @@ The next step is to propagate that model into the authenticated request lifecycl
 #### Next
 
 0.10.2 — Authorization Context & Middleware
+
+
+## ✅ Phase 0.10.2 — Authorization Context & Middleware
+
+### Delivered
+
+- introduced authorization-context helpers under `internal/core/authorization` to store and retrieve a normalized `AuthorizationSubject`
+- added deterministic claim-to-subject resolution so authenticated identities can be projected into the authorization model without new persistence requirements
+- introduced `HydrateAuthorization()` in `internal/core/httpx` as a dedicated middleware that runs after successful authentication
+- integrated authorization hydration into the protected route stack for both legacy `/auth/...` routes and canonical `/api/v1/auth/...` routes
+- added focused tests covering context storage, claim projection and middleware hydration semantics
+
+### Result
+
+Phase 0.10.2 is completed:
+
+- 0.10.1 → authorization model vocabulary introduced
+- 0.10.2 → authorization subject now propagates through the authenticated request lifecycle
+
+The backend still does not enforce permissions yet, but authenticated requests now carry a first-class authorization subject in addition to authentication claims. This creates the infrastructure boundary needed for centralized policy evaluation in 0.10.3 without forcing handler-local authorization logic.
