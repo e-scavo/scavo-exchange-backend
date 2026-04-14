@@ -123,8 +123,8 @@ Attach authorization subject data to the authenticated request lifecycle and ext
 #### 0.10.3 — Policy Evaluation Layer ✔ Completed
 Introduce a centralized policy-evaluation boundary so handlers can ask authorization questions without embedding permission logic ad hoc.
 
-#### 0.10.4 — Endpoint-Level Enforcement ⬜ Pending
-Apply progressive authorization checks to selected authenticated endpoints while preserving backward compatibility and the current Stage 0 contract discipline.
+#### 0.10.4 — Endpoint-Level Enforcement ✔ Completed
+Apply progressive authorization checks to selected authenticated endpoints through centralized policy middleware while preserving backward compatibility and the current Stage 0 contract discipline.
 
 #### 0.10.5 — Documentation & Contract Consolidation ⬜ Pending
 Align the trunk documentation set to the delivered authorization behavior and close the phase with a coherent architectural and operational narrative.

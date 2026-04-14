@@ -16,6 +16,10 @@ func AuthInvalidCredentials() *AppError {
 	return AppErrorFromLegacyAuthKey("invalid_credentials", nil)
 }
 
+func AuthForbidden(details map[string]any) *AppError {
+	return AppErrorFromLegacyAuthKey("auth_forbidden", details)
+}
+
 func AuthServiceError(cause error) *AppError {
 	err := AppErrorFromLegacyAuthKey("auth_service_error", nil)
 	err.Cause = cause

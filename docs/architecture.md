@@ -527,3 +527,16 @@ Architecturally, this matters because endpoint enforcement should not be the fir
 `Request → RequireAuth → HydrateAuthorization → PolicyEvaluator → Handler/Application`
 
 At this stage, the evaluator is present but still not invoked to deny requests in router/handler flows. This keeps Phase 0.10.3 non-breaking while ensuring 0.10.4 can enforce permissions progressively through a centralized policy API instead of duplicating role/permission logic near endpoints.
+
+
+## Phase 0.10.4 — Endpoint-Level Enforcement
+
+Phase 0.10.4 is the first point where authorization becomes operational rather than purely preparatory. Up to 0.10.3, the backend could model subjects, hydrate authorization context and answer policy questions, but no protected endpoint actually denied requests because of those answers.
+
+This subphase introduces a dedicated route-level enforcement middleware in `internal/core/httpx` that sits after authentication and authorization-context hydration, and before the selected handler execution boundary:
+
+`Request → RequireAuth → HydrateAuthorization → RequirePermission → Handler/Application`
+
+Architecturally, this is important because the transport layer still does not embed role logic directly. Router configuration declares the required action/resource pair, and the middleware delegates the actual decision to the centralized policy layer. That keeps enforcement thin, testable and consistent with the static permission model already defined in 0.10.1 and evaluated in 0.10.3.
+
+The enforcement rollout is intentionally progressive. Only the authenticated endpoints already aligned with the current static permission map are enforced in 0.10.4, while endpoints that still require richer self/ownership semantics remain outside the first denial boundary. This preserves Stage 0 behavioral stability while proving the end-to-end authorization path in production code.

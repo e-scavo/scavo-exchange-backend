@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/cors"
 
 	coreauth "github.com/e-scavo/scavo-exchange-backend/internal/core/auth"
+	coreauthorization "github.com/e-scavo/scavo-exchange-backend/internal/core/authorization"
 	"github.com/e-scavo/scavo-exchange-backend/internal/core/config"
 	"github.com/e-scavo/scavo-exchange-backend/internal/core/logger"
 	"github.com/e-scavo/scavo-exchange-backend/internal/core/status"
@@ -114,6 +115,9 @@ func registerAuthRoutes(r chi.Router, prefix string, tokens *coreauth.TokenServi
 
 	requireAuth := RequireAuth(tokens, false)
 	hydrateAuthorization := HydrateAuthorization()
+	requireUserRead := RequirePermission(coreauthorization.ActionRead, coreauthorization.ResourceUser)
+	requireSettingsRead := RequirePermission(coreauthorization.ActionRead, coreauthorization.ResourceSettings)
+	requireSettingsUpdate := RequirePermission(coreauthorization.ActionUpdate, coreauthorization.ResourceSettings)
 
 	r.With(requireAuth, hydrateAuthorization).Post(routePath(prefix, "/auth/wallets/link/challenge"), handlers.WalletLinkChallenge)
 	r.With(requireAuth, hydrateAuthorization).Post(routePath(prefix, "/auth/wallets/link/verify"), handlers.WalletLinkVerify)
@@ -121,10 +125,10 @@ func registerAuthRoutes(r chi.Router, prefix string, tokens *coreauth.TokenServi
 	r.With(requireAuth, hydrateAuthorization).Post(routePath(prefix, "/auth/account/merge/wallet/verify"), handlers.WalletAccountMergeVerify)
 
 	r.With(requireAuth, hydrateAuthorization).Get(routePath(prefix, "/auth/bootstrap"), handlers.Bootstrap)
-	r.With(requireAuth, hydrateAuthorization).Get(routePath(prefix, "/auth/me"), handlers.Me)
+	r.With(requireAuth, hydrateAuthorization, requireUserRead).Get(routePath(prefix, "/auth/me"), handlers.Me)
 	r.With(requireAuth, hydrateAuthorization).Patch(routePath(prefix, "/auth/me"), handlers.UpdateMe)
-	r.With(requireAuth, hydrateAuthorization).Get(routePath(prefix, "/auth/me/settings"), handlers.MeSettings)
-	r.With(requireAuth, hydrateAuthorization).Patch(routePath(prefix, "/auth/me/settings"), handlers.UpdateMeSettings)
+	r.With(requireAuth, hydrateAuthorization, requireSettingsRead).Get(routePath(prefix, "/auth/me/settings"), handlers.MeSettings)
+	r.With(requireAuth, hydrateAuthorization, requireSettingsUpdate).Patch(routePath(prefix, "/auth/me/settings"), handlers.UpdateMeSettings)
 	r.With(requireAuth, hydrateAuthorization).Get(routePath(prefix, "/auth/session"), handlers.Session)
 	r.With(requireAuth, hydrateAuthorization).Get(routePath(prefix, "/auth/wallets"), handlers.Wallets)
 	r.With(requireAuth, hydrateAuthorization).Post(routePath(prefix, "/auth/wallets/detach/check"), handlers.WalletDetachCheck)

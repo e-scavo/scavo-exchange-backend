@@ -141,3 +141,30 @@ The runtime contract still remains stable: endpoint behavior, success payloads a
 ### Next
 
 0.10.4 — Endpoint-Level Enforcement
+
+
+## Current Result After 0.10.4
+
+The backend now has the first real endpoint-level authorization enforcement slice on top of the model, context-propagation and policy-evaluation work already delivered in 0.10.1 through 0.10.3.
+
+Phase 0.10.4 specifically delivers:
+
+- route-level permission enforcement middleware under `internal/core/httpx`
+- centralized denial decisions powered by `PolicyEvaluator`
+- standardized `AUTH_FORBIDDEN` responses for authorization failures
+- progressive enforcement on the authenticated endpoints already aligned with the current static permission map
+- legacy and canonical route coverage for the first enforced `me` and `settings` surfaces
+
+The enforced scope currently includes:
+
+- `GET /auth/me` and `GET /api/v1/auth/me`
+- `GET /auth/me/settings` and `GET /api/v1/auth/me/settings`
+- `PATCH /auth/me/settings` and `PATCH /api/v1/auth/me/settings`
+
+`PATCH /auth/me` remains intentionally outside the first enforcement slice because its self-update semantics are not yet fully represented by the current static role model.
+
+The runtime contract remains disciplined: success payloads and legacy/canonical route compatibility stay intact for permitted users, while selected endpoints now deny unauthorized access through the standardized authorization error path.
+
+### Next
+
+0.10.5 — Documentation & Contract Consolidation

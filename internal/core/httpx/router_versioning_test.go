@@ -2,6 +2,7 @@ package httpx
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -12,6 +13,7 @@ import (
 	"github.com/e-scavo/scavo-exchange-backend/internal/core/config"
 	"github.com/e-scavo/scavo-exchange-backend/internal/core/logger"
 	authmod "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth"
+	usersettingsmod "github.com/e-scavo/scavo-exchange-backend/internal/modules/usersettings"
 )
 
 type versionedErrorEnvelope struct {
@@ -20,6 +22,16 @@ type versionedErrorEnvelope struct {
 		Message string         `json:"message"`
 		Details map[string]any `json:"details,omitempty"`
 	} `json:"error"`
+}
+
+type versioningUserSettingsRepo struct{}
+
+func (versioningUserSettingsRepo) GetByUserID(_ context.Context, _ string) (*usersettingsmod.UserSettings, error) {
+	return nil, nil
+}
+
+func (versioningUserSettingsRepo) UpsertPreferences(_ context.Context, userID string, preferences map[string]any) (*usersettingsmod.UserSettings, error) {
+	return &usersettingsmod.UserSettings{UserID: userID, Preferences: preferences}, nil
 }
 
 func newVersioningTestRouter(t *testing.T) http.Handler {
@@ -31,12 +43,13 @@ func newVersioningTestRouter(t *testing.T) http.Handler {
 	}
 
 	return NewRouter(RouterParams{
-		Log:            logger.New("test"),
-		Config:         config.Config{Env: "test", Version: "test", Commit: "test", CORSAllowOrigins: []string{"*"}, JWTTTLHrs: 24},
-		TokenService:   tokens,
-		ChallengeStore: authmod.NewInMemoryWalletChallengeStore(),
-		ChallengeTTL:   5 * time.Minute,
-		PublicBaseURL:  "https://api.scavo.exchange",
+		Log:                 logger.New("test"),
+		Config:              config.Config{Env: "test", Version: "test", Commit: "test", CORSAllowOrigins: []string{"*"}, JWTTTLHrs: 24},
+		TokenService:        tokens,
+		UserSettingsService: usersettingsmod.NewService(versioningUserSettingsRepo{}),
+		ChallengeStore:      authmod.NewInMemoryWalletChallengeStore(),
+		ChallengeTTL:        5 * time.Minute,
+		PublicBaseURL:       "https://api.scavo.exchange",
 	})
 }
 
@@ -98,6 +111,73 @@ func TestNewRouter_ProtectedLegacyAndCanonicalRoutesShareUnauthorizedContract(t 
 			t.Fatalf("unexpected error code for %s: got=%q want=%q", path, payload.Error.Code, "AUTH_UNAUTHORIZED")
 		}
 	}
+}
+
+func TestNewRouter_ProtectedMeRoutesAcceptAuthorizedUserRead(t *testing.T) {
+	router := newVersioningTestRouter(t)
+	tokens := mustTokenServiceForRouter(t)
+	token, err := tokens.Mint("u_test_example_com", "test@example.com")
+	if err != nil {
+		t.Fatalf("mint token error: %v", err)
+	}
+
+	for _, path := range []string{"/auth/me", "/api/v1/auth/me"} {
+		req := httptest.NewRequest(http.MethodGet, path, nil)
+		req.Header.Set("Authorization", "Bearer "+token)
+		rec := httptest.NewRecorder()
+
+		router.ServeHTTP(rec, req)
+
+		if rec.Code != http.StatusOK {
+			t.Fatalf("unexpected status for %s: got=%d want=%d body=%s", path, rec.Code, http.StatusOK, rec.Body.String())
+		}
+	}
+}
+
+func TestNewRouter_ProtectedSettingsRoutesAcceptAuthorizedUserPermissions(t *testing.T) {
+	router := newVersioningTestRouter(t)
+	tokens := mustTokenServiceForRouter(t)
+	token, err := tokens.Mint("u_test_example_com", "test@example.com")
+	if err != nil {
+		t.Fatalf("mint token error: %v", err)
+	}
+
+	cases := []struct {
+		method string
+		path   string
+		body   string
+	}{
+		{method: http.MethodGet, path: "/auth/me/settings"},
+		{method: http.MethodGet, path: "/api/v1/auth/me/settings"},
+		{method: http.MethodPatch, path: "/auth/me/settings", body: `{"preferences":{"ui":{"theme":"dark"}}}`},
+		{method: http.MethodPatch, path: "/api/v1/auth/me/settings", body: `{"preferences":{"ui":{"theme":"dark"}}}`},
+	}
+
+	for _, tc := range cases {
+		req := httptest.NewRequest(tc.method, tc.path, bytes.NewBufferString(tc.body))
+		req.Header.Set("Authorization", "Bearer "+token)
+		if tc.body != "" {
+			req.Header.Set("Content-Type", "application/json")
+		}
+		rec := httptest.NewRecorder()
+
+		router.ServeHTTP(rec, req)
+
+		if rec.Code != http.StatusOK {
+			t.Fatalf("unexpected status for %s %s: got=%d want=%d body=%s", tc.method, tc.path, rec.Code, http.StatusOK, rec.Body.String())
+		}
+	}
+}
+
+func mustTokenServiceForRouter(t *testing.T) *coreauth.TokenService {
+	t.Helper()
+
+	tokens, err := coreauth.NewTokenService("test_secret_value_1234567890", "scavo-exchange-backend", 24*time.Hour)
+	if err != nil {
+		t.Fatalf("token service init error: %v", err)
+	}
+
+	return tokens
 }
 
 func TestNewRouter_WalletChallengeLegacyAndCanonicalRoutesExposeCompatibleSuccessShape(t *testing.T) {

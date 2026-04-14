@@ -334,3 +334,20 @@ If endpoint enforcement were introduced first, authorization semantics would lik
 - authorization questions now have a stable core API
 - handler and middleware code can stay thin when enforcement starts
 - future permission expansion can evolve in one place rather than across multiple endpoint implementations
+
+
+## Decision — Endpoint Enforcement Must Start Only Where the Static Permission Model Already Fits
+
+Phase 0.10.4 should begin operational authorization enforcement only on authenticated endpoints whose semantics are already represented by the current static action/resource and role-permission model.
+
+### Reason
+
+The current static authorization model can cleanly represent `read user`, `read settings` and `update settings`, but it does not yet fully explain self-profile mutation semantics for `PATCH /auth/me` without either broadening `RoleUser`, adding owner-aware rules or introducing richer resource scoping.
+
+Starting enforcement only on the already-aligned endpoints proves the full authorization path without forcing an early policy decision that could break the stabilized Stage 0 application surface.
+
+### Impact
+
+- authorization is now enforced in real router flows rather than remaining only preparatory
+- route-level denial still stays centralized through policy middleware
+- endpoints requiring richer ownership semantics remain stable until the policy model is expanded intentionally

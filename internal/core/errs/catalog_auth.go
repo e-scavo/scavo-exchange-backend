@@ -17,6 +17,7 @@ var authErrorCatalog = map[string]AppErrorSpec{
 	"auth_not_configured":                    {LegacyKey: "auth_not_configured", Code: "AUTH_NOT_CONFIGURED", Message: "authentication is not configured", Status: http.StatusInternalServerError, Category: CategoryAuth},
 	"auth_missing_bearer_token":              {LegacyKey: "auth_missing_bearer_token", Code: "AUTH_MISSING_BEARER_TOKEN", Message: "missing bearer token", Status: http.StatusUnauthorized, Category: CategoryAuth},
 	"auth_service_error":                     {LegacyKey: "auth_service_error", Code: "AUTH_SERVICE_ERROR", Message: "authentication service error", Status: http.StatusInternalServerError, Category: CategoryAuth},
+	"auth_forbidden":                         {LegacyKey: "auth_forbidden", Code: "AUTH_FORBIDDEN", Message: "insufficient permissions", Status: http.StatusForbidden, Category: CategoryAuth},
 	"bad_request":                            {LegacyKey: "bad_request", Code: "BAD_REQUEST", Message: "invalid request payload", Status: http.StatusBadRequest, Category: CategoryGeneric},
 	"display_name_too_long":                  {LegacyKey: "display_name_too_long", Code: "DISPLAY_NAME_TOO_LONG", Message: "display name is too long", Status: http.StatusBadRequest, Category: CategoryAuth},
 	"internal_error":                         {LegacyKey: "internal_error", Code: "INTERNAL_ERROR", Message: "internal server error", Status: http.StatusInternalServerError, Category: CategoryInternal},

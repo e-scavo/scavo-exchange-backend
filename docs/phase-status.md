@@ -1208,7 +1208,7 @@ The backend remains functionally stable on its current routes while now exposing
 | 0.10.1 | Authorization Model Definition | ✔ Completed |
 | 0.10.2 | Authorization Context & Middleware | ✔ Completed |
 | 0.10.3 | Policy Evaluation Layer | ✔ Completed |
-| 0.10.4 | Endpoint-Level Enforcement | ⬜ Pending |
+| 0.10.4 | Endpoint-Level Enforcement | ✔ Completed |
 | 0.10.5 | Documentation & Contract Consolidation | ⬜ Pending |
 
 ---
@@ -1231,13 +1231,13 @@ Introduce a structured authorization layer on top of the already-stabilized auth
 
 ### Current Result
 
-Phase 0.10 has started, but runtime enforcement has not yet begun. The backend still behaves exactly as before from an HTTP-contract perspective; what changed is the architectural baseline. The system now has an explicit authorization model instead of relying on future handler-level ad-hoc checks.
+Phase 0.10 is now operating with progressive endpoint-level authorization enforcement. The backend no longer treats authorization as only preparatory infrastructure: selected authenticated endpoints already deny unauthorized access through the centralized policy layer while preserving the stabilized transport contract.
 
-The next step is to introduce a centralized policy-evaluation boundary on top of the hydrated authorization subject before any endpoint begins enforcing permissions.
+The current enforcement scope intentionally covers only the authenticated endpoints already aligned with the static role-permission model, leaving richer self-update semantics for later intentional expansion rather than premature policy broadening.
 
 #### Next
 
-0.10.4 — Endpoint-Level Enforcement
+0.10.5 — Documentation & Contract Consolidation
 
 
 ## ✅ Phase 0.10.2 — Authorization Context & Middleware
@@ -1279,3 +1279,32 @@ Phase 0.10.3 is completed:
 - 0.10.3 → centralized policy evaluation is now available through a stable core API
 
 The backend still does not enforce permissions yet, but it now has a dedicated policy boundary that can answer authorization questions without pushing role or permission logic into handlers. This sets up 0.10.4 to introduce endpoint-level enforcement progressively on top of an already-centralized evaluator.
+
+
+## ✅ Phase 0.10.4 — Endpoint-Level Enforcement
+
+### Delivered
+
+- introduced route-level authorization enforcement middleware in `internal/core/httpx` backed by the centralized `PolicyEvaluator`
+- added a standardized `AUTH_FORBIDDEN` error for denied authorization checks
+- applied progressive enforcement to the authenticated endpoints already aligned with the current static permission map
+- enforced `read user` on `GET /auth/me` and `GET /api/v1/auth/me`
+- enforced `read settings` on `GET /auth/me/settings` and `GET /api/v1/auth/me/settings`
+- enforced `update settings` on `PATCH /auth/me/settings` and `PATCH /api/v1/auth/me/settings`
+- added focused middleware tests for allowed, denied and missing-subject authorization outcomes
+- added router-level tests confirming legacy and canonical authenticated routes still succeed when the user holds the required permissions
+
+### Result
+
+Phase 0.10.4 is completed:
+
+- 0.10.1 → authorization model vocabulary introduced
+- 0.10.2 → authorization subject now propagates through the authenticated request lifecycle
+- 0.10.3 → centralized policy evaluation is now available through a stable core API
+- 0.10.4 → selected authenticated endpoints now enforce centralized authorization decisions
+
+Authorization is no longer only preparatory infrastructure. The backend now actively denies unauthorized access on a selected subset of authenticated endpoints using the centralized policy layer, while preserving the stabilized transport contract and deliberately deferring endpoints whose semantics are not yet fully represented by the current static permission model.
+
+#### Next
+
+0.10.5 — Documentation & Contract Consolidation
