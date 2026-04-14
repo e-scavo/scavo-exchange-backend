@@ -23,7 +23,7 @@ The backend follows a **wallet-first identity model** that progressively evolves
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.9 — API Versioning Strategy  
-**Current Subphase:** **0.9.3 — Authenticated Surface Version Freezing**  
+**Current Subphase:** **0.9.4 — Version-aware Contract Testing**  
 **Phase Status:** **In Progress**
 
 ---
@@ -2304,7 +2304,39 @@ This completes the router-level materialization of the versioning model defined 
 
 ### Next
 
-Phase 0.9.4 should formalize version-aware contract tests so legacy and canonical `v1` entry paths remain protected from silent divergence.
+Phase 0.9.4 formalizes version-aware contract tests so legacy and canonical `v1` entry paths remain protected from silent divergence. The next step is 0.9.5 — Documentation Consolidation.
+
+
+## Phase 0.9.4 — Version-aware Contract Testing
+
+### Objective
+
+Turn the `v1` freeze defined in 0.9.3 into executable regression protection by asserting that legacy `/auth/...` and canonical `/api/v1/auth/...` entry paths remain behaviorally aligned where the current Stage 0 surface is expected to match.
+
+### Why This Subphase Follows 0.9.3
+
+Phase 0.9.3 defined which authenticated surface is frozen as canonical `v1`, but a declared freeze is still vulnerable to silent drift unless the transport layer is covered by route-aware regression tests. The next step is therefore to express that equivalence in automated coverage rather than only in architectural and phase documentation.
+
+### Delivered
+
+Phase 0.9.4 adds explicit version-aware transport tests around the router foundation introduced in 0.9.2:
+
+- verifies helper path composition for legacy and canonical route registration
+- verifies that protected legacy and canonical authenticated endpoints return the same standardized missing-bearer error contract
+- verifies that protected legacy and canonical authenticated endpoints return the same standardized unauthorized error contract for invalid tokens
+- verifies that representative public wallet-challenge endpoints exposed through `/auth/...` and `/api/v1/auth/...` preserve a compatible success payload shape
+
+### Scope Boundary
+
+This subphase focuses on transport-level contract equivalence for the currently frozen `v1` authenticated surface. It does not introduce `v2`, redefine payload semantics, or duplicate business behavior into route-specific handlers.
+
+### Result
+
+After 0.9.4, the versioning model is not only declared and routed; it is also protected by concrete regression tests that guard the coexistence of legacy and canonical `v1` paths.
+
+### Next
+
+Phase 0.9.5 should consolidate the complete trunk documentation set around the finalized 0.9 versioning model and testing guarantees.
 
 
 ## Phase 0.9.3 — Authenticated Surface Version Freezing

@@ -1698,15 +1698,25 @@ Testing must make it explicit that:
 - structural response or error-envelope changes are not allowed silently
 - any breaking transport change requires a new API version rather than mutation of the current suite
 
-### Current Status After 0.9.3
+### Current Status After 0.9.4
 
-The authenticated `v1` surface is now explicitly frozen, while exhaustive legacy-versus-canonical transport equivalence coverage remains a dedicated responsibility of 0.9.4.
+The authenticated `v1` surface is now explicitly frozen and protected by version-aware contract tests.
 
 This means:
 
 - canonical route exposure already exists in runtime code
-- the authenticated surface that those routes represent is now explicitly defined and frozen
-- the next testing step is to convert that freeze into route-by-route compatibility assertions so legacy and canonical entry paths cannot drift silently
+- the authenticated surface that those routes represent is explicitly defined and frozen
+- representative legacy-versus-canonical transport equivalence is now asserted in automated coverage
+- silent divergence across both supported route spaces is less likely to escape into later Stage 0 work
+
+### Implemented Coverage in 0.9.4
+
+The current contract-testing layer now includes representative checks for:
+
+- helper path composition for legacy and canonical route registration
+- protected endpoint parity for missing bearer-token scenarios
+- protected endpoint parity for invalid-token unauthorized scenarios
+- representative public success-shape parity for wallet challenge creation across `/auth/...` and `/api/v1/auth/...`
 
 ### Result
 

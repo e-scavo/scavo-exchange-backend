@@ -1153,7 +1153,7 @@ The backend now exposes a single structured JSON error envelope across auth hand
 | 0.9.1 | Versioning Policy Definition | ✔ Completed |
 | 0.9.2 | Router Versioning Foundation | ✔ Completed |
 | 0.9.3 | Authenticated Surface Version Freezing | ✔ Completed |
-| 0.9.4 | Version-aware Contract Testing | ⬜ Pending |
+| 0.9.4 | Version-aware Contract Testing | ✔ Completed |
 | 0.9.5 | Documentation Consolidation | ⬜ Pending |
 
 ---
@@ -1179,6 +1179,8 @@ Define the canonical API versioning policy for the post-0.8 backend while preser
 - Explicitly froze the current authenticated surface as canonical `v1` semantics across bootstrap, profile, settings, session and wallet inventory/read flows
 - Declared legacy and canonical authenticated entry paths to be two projections of the same `v1` contract rather than independent route contracts
 
+- Added representative router-level contract tests covering legacy/canonical path composition and success/error parity for key authenticated/auth-adjacent routes
+
 ### Current Result
 
 Phase 0.9 is now no longer only documented; it is partially implemented in runtime code:
@@ -1186,11 +1188,11 @@ Phase 0.9 is now no longer only documented; it is partially implemented in runti
 - 0.9.1 → versioning policy defined
 - 0.9.2 → canonical router exposure completed
 - 0.9.3 → authenticated-surface `v1` freeze completed
-- 0.9.4 → version-aware contract testing pending
+- 0.9.4 → version-aware contract testing completed
 - 0.9.5 → trunk-documentation consolidation pending
 
-The backend remains functionally stable on its current routes while now exposing a real canonical `v1` route surface for the next implementation steps.
+The backend remains functionally stable on its current routes while now exposing a real canonical `v1` route surface backed by representative version-aware regression tests.
 
 #### Next
 
-0.9.4 — Version-aware Contract Testing
+0.9.5 — Documentation Consolidation

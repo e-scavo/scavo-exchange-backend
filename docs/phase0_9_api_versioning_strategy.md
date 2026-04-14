@@ -143,9 +143,18 @@ Delivered in this subphase:
 - preserved current business behavior, payload semantics, middleware wrapping and Phase 0.8 error-envelope behavior
 - left strict route-by-route transport equivalence assertions to 0.9.4 rather than mixing freeze definition with contract-test expansion
 
-### 0.9.4 — Version-aware Contract Testing ⬜ Pending
+### 0.9.4 — Version-aware Contract Testing ✔ Completed
 
-Extend contract tests to protect canonical/legacy equivalence and forbid silent drift.
+The versioning model is now backed by explicit transport-aware regression coverage so the frozen `v1` authenticated surface cannot drift silently across legacy and canonical entry paths.
+
+Delivered in this subphase:
+
+- added router-level tests that verify helper path composition for legacy and canonical route registration
+- added protected-endpoint equivalence checks confirming both `/auth/...` and `/api/v1/auth/...` return the same standardized missing-bearer contract
+- added protected-endpoint equivalence checks confirming both route spaces return the same standardized unauthorized contract for invalid tokens
+- added representative public success-shape checks around wallet challenge creation to ensure canonical and legacy paths continue exposing compatible payload structure
+
+This subphase intentionally protects representative route behavior and contract shape without expanding into a new API version or redefining the already frozen `v1` payload semantics.
 
 ### 0.9.5 — Documentation Consolidation ⬜ Pending
 
