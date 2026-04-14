@@ -22,10 +22,11 @@ The backend follows a **wallet-first identity model** that progressively evolves
 ## 🚧 Current Stage
 
 **Stage:** 0 — Foundation  
-**Phase:** 0.9 — API Versioning Strategy  
-**Latest Completed Subphase:** **0.9.5 — Documentation Consolidation**  
-**Phase Status:** **Completed**  
-**Next Planned Phase:** **0.10 — Authorization Layer**
+**Phase:** 0.10 — Authorization Layer  
+**Latest Completed Subphase:** **0.10.1 — Authorization Model Definition**  
+**Phase Status:** **In Progress**  
+**Next Planned Subphase:** **0.10.2 — Authorization Context & Middleware**  
+**Next Planned Phase:** **0.11 — Domain Module Pattern**
 
 ---
 
@@ -2424,4 +2425,61 @@ After 0.9.5, Phase 0.9 is fully closed:
 ### Next
 
 Phase 0.10 should build the authorization layer on top of this now-completed versioning and contract-governance foundation.
+
+## Phase 0.10.1 — Authorization Model Definition
+
+### Objective
+
+Introduce the first real authorization artifact set without changing request behavior yet, so the backend moves from an authentication-only foundation to an explicit authorization model foundation.
+
+### Why This Subphase Follows 0.9.5
+
+Phase 0.9 deliberately closed the transport/versioning boundary before any permission semantics were introduced. With canonical `v1` routing, standardized errors and the authenticated application surface already stabilized, the next safe move is not immediate endpoint blocking but a static authorization model that defines the language of later enforcement.
+
+The backend already knows who the authenticated subject is through JWT claims and auth middleware, but it still lacks a first-class representation of:
+
+- roles
+- permissions
+- role-to-permission mapping
+- an authorization subject model distinct from transport claims
+
+Adding those primitives first keeps the next subphases honest: middleware/context propagation in 0.10.2 and policy evaluation in 0.10.3 can build on explicit structures instead of inventing ad-hoc handler-level checks.
+
+### Delivered
+
+Phase 0.10.1 introduces a new core authorization package under `internal/core/authorization` and keeps the scope intentionally static:
+
+- defines the initial role model with `user` and `admin`
+- defines the initial permission vocabulary for current Stage 0 authenticated surfaces
+- defines the foundational role → permission mapping
+- introduces an `AuthorizationSubject` structure that is separate from raw JWT claims
+- adds normalization and immutability-oriented helpers so later subphases can consume a stable model
+- adds focused unit tests for normalization, mapping immutability and permission aggregation semantics
+
+This subphase intentionally does **not** yet:
+
+- attach authorization data to HTTP requests
+- evaluate policies at runtime
+- deny endpoint access
+- persist roles or permissions in the database
+- mutate existing authenticated response contracts
+
+### Current Result
+
+After 0.10.1, the backend still behaves exactly as before at runtime, but it no longer lacks an explicit authorization vocabulary. The system now has a dedicated core model describing the authorization subject and the static permission space that later subphases will propagate and enforce.
+
+Architecturally, the backend has now crossed from:
+
+`authentication only`
+
+into:
+
+`authentication + explicit authorization model foundation`
+
+without prematurely coupling handler logic, transport behavior or persistence to enforcement concerns.
+
+#### Next
+
+0.10.2 — Authorization Context & Middleware
+
 

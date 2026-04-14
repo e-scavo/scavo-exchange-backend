@@ -111,8 +111,23 @@ Extended representative contract-level tests so legacy and canonical routes are 
 #### 0.9.5 — Documentation Consolidation ✔ Completed
 Consolidated the trunk documentation set so roadmap, status, architecture, testing and handoff now describe the same completed Phase 0.9 state and the same frontend/backend alignment rule.
 
-### 0.10 — Authorization Layer ⬜ Pending
-Add roles, permissions, and enforcement mechanisms.
+### 0.10 — Authorization Layer ◑ In Progress
+Introduce a structured authorization layer on top of the authenticated Stage 0 foundation without breaking the stabilized transport and application contracts.
+
+#### 0.10.1 — Authorization Model Definition ✔ Completed
+Introduced the foundational authorization primitives under `internal/core/authorization`, including roles, permissions, static role-to-permission mapping and the authorization-subject model that later subphases will propagate and evaluate.
+
+#### 0.10.2 — Authorization Context & Middleware ⬜ Pending
+Attach authorization subject data to the authenticated request lifecycle and extend middleware/context propagation without changing endpoint contracts yet.
+
+#### 0.10.3 — Policy Evaluation Layer ⬜ Pending
+Introduce a centralized policy-evaluation boundary so handlers can ask authorization questions without embedding permission logic ad hoc.
+
+#### 0.10.4 — Endpoint-Level Enforcement ⬜ Pending
+Apply progressive authorization checks to selected authenticated endpoints while preserving backward compatibility and the current Stage 0 contract discipline.
+
+#### 0.10.5 — Documentation & Contract Consolidation ⬜ Pending
+Align the trunk documentation set to the delivered authorization behavior and close the phase with a coherent architectural and operational narrative.
 
 ### 0.11 — Domain Module Pattern ⬜ Pending
 Standardize module structure for future domain expansion.

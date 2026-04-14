@@ -291,3 +291,12 @@ By the end of Phase 0.8, the backend already exposes a stable transport contract
 - future breaking transport changes require a new API version
 - versioning stays in the transport layer and must not leak into application orchestration
 - frontend alignment can remain on the pre-versioned route set until Stage 0 completion without blocking backend evolution
+
+
+## Decision — Authorization Model Before Enforcement
+
+The backend introduces authorization in two explicit steps rather than mixing model definition with immediate endpoint blocking.
+
+First, Phase 0.10.1 defines roles, permissions, a static role-to-permission mapping and an authorization-subject model in a dedicated core package. Later subphases will propagate that model through middleware, evaluate policies centrally and only then enforce permissions on selected endpoints.
+
+This decision preserves Stage 0 stability by preventing ad-hoc authorization checks from appearing first in handlers or transport code without an agreed vocabulary. It also keeps authorization conceptually separate from authentication claims and from API versioning concerns.

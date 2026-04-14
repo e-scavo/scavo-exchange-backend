@@ -1197,3 +1197,44 @@ The backend remains functionally stable on its current routes while now exposing
 #### Next
 
 0.10 — Authorization Layer
+
+
+## ◑ Phase 0.10 — Authorization Layer
+
+### Subphase Status
+
+| Subphase | Description | Status |
+|----------|------------|--------|
+| 0.10.1 | Authorization Model Definition | ✔ Completed |
+| 0.10.2 | Authorization Context & Middleware | ⬜ Pending |
+| 0.10.3 | Policy Evaluation Layer | ⬜ Pending |
+| 0.10.4 | Endpoint-Level Enforcement | ⬜ Pending |
+| 0.10.5 | Documentation & Contract Consolidation | ⬜ Pending |
+
+---
+
+## ◑ Phase 0.10 Summary
+
+### Objective
+
+Introduce a structured authorization layer on top of the already-stabilized authentication, application and transport foundations without breaking current runtime behavior or frozen `v1` contracts.
+
+### Delivered So Far
+
+- Introduced a dedicated `internal/core/authorization` package
+- Defined the initial role vocabulary with `user` and `admin`
+- Defined the initial permission vocabulary for current Stage 0 authenticated surfaces
+- Declared the foundational static role → permission mapping
+- Introduced an `AuthorizationSubject` model separate from raw JWT claims
+- Added normalization helpers so later context propagation and policy evaluation can consume stable data
+- Added focused unit tests for mapping immutability, normalization and multi-role permission aggregation semantics
+
+### Current Result
+
+Phase 0.10 has started, but runtime enforcement has not yet begun. The backend still behaves exactly as before from an HTTP-contract perspective; what changed is the architectural baseline. The system now has an explicit authorization model instead of relying on future handler-level ad-hoc checks.
+
+The next step is to propagate that model into the authenticated request lifecycle through middleware and context wiring before policy evaluation and endpoint enforcement are introduced.
+
+#### Next
+
+0.10.2 — Authorization Context & Middleware

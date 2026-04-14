@@ -472,3 +472,25 @@ The architectural consequence of 0.9.3 is that the authenticated surface itself 
 The final architectural consequence of 0.9.5 is not a new runtime mechanism but a closed architectural record: roadmap, status, testing and handoff now all describe the same versioning boundary and the same frontend Phase 0.6 alignment rule.
 
 This prepares the backend for Phase 0.10 and beyond, where authorization and later cross-cutting concerns can be introduced on top of a stable application boundary, an explicit public contract-evolution model and a real canonical route surface already present in the transport layer.
+
+## Phase 0.10.1 — Authorization Model Definition
+
+Phase 0.10.1 introduces the first explicit authorization architecture element without yet changing the request pipeline. The architectural goal is to ensure the backend stops treating authorization as a future handler concern and instead defines a dedicated core model before request-context propagation and enforcement are added.
+
+The new `internal/core/authorization` package establishes the foundational vocabulary of the authorization layer:
+
+- `Role` as the coarse-grained actor classification
+- `Permission` as the explicit capability vocabulary
+- a static role → permission mapping as the initial policy foundation
+- `AuthorizationSubject` as the normalized authorization-facing representation of the authenticated actor
+
+This keeps the architecture layered correctly:
+
+- authentication still resolves identity
+- authorization now has an explicit model
+- middleware/context integration remains deferred to 0.10.2
+- policy evaluation remains deferred to 0.10.3
+- endpoint enforcement remains deferred to 0.10.4
+
+The key architectural consequence is that the backend no longer needs to jump directly from authenticated claims to endpoint decisions. There is now a dedicated model boundary between identity and future permission checks, introduced without mutating the transport contract or the current application/use-case composition.
+
