@@ -23,9 +23,9 @@ The backend follows a **wallet-first identity model** that progressively evolves
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.10 — Authorization Layer  
-**Latest Completed Subphase:** **0.10.1 — Authorization Model Definition**  
+**Latest Completed Subphase:** **0.10.2 — Authorization Context & Middleware**  
 **Phase Status:** **In Progress**  
-**Next Planned Subphase:** **0.10.2 — Authorization Context & Middleware**  
+**Next Planned Subphase:** **0.10.3 — Policy Evaluation Layer**  
 **Next Planned Phase:** **0.11 — Domain Module Pattern**
 
 ---

@@ -15,9 +15,10 @@ It is intended to:
 ## 📌 Current State
 
 **Stage:** 0 — Foundation
-**Phase:** 0.9 — API Versioning Strategy
-**Latest Completed Subphase:** 0.9.5 — Documentation Consolidation
+**Phase:** 0.10 — Authorization Layer
+**Latest Completed Subphase:** 0.10.2 — Authorization Context & Middleware
 **Next Planned Phase:** 0.10 — Authorization Layer
+**Next Planned Subphase:** 0.10.3 — Policy Evaluation Layer
 
 ---
 
