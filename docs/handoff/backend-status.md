@@ -15,11 +15,10 @@ It is intended to:
 ## 📌 Current State
 
 **Stage:** 0 — Foundation
-**Phase:** 0.10 — Authorization Layer
-**Latest Completed Subphase:** 0.10.5 — Documentation & Contract Consolidation
-**Phase Status:** Completed
-**Next Planned Phase:** 0.11 — Domain Module Pattern
-**0.11 Readiness:** Defined / Ready for Controlled Implementation
+**Phase:** 0.11 — Domain Module Pattern
+**Latest Completed Subphase:** 0.11.2 — User Module Refactor
+**Phase Status:** In Progress
+**Next Planned Subphase:** 0.11.3 — UserSettings Module Refactor
 
 ---
 
@@ -936,13 +935,11 @@ Phase 0.10 is therefore complete. The next architectural step should build on th
 
 ## Phase 0.11 — Domain Module Pattern
 
-Phase 0.11 is the next structural Stage 0 step after the completed authorization layer. It is defined in this repository state but not yet implemented.
+Phase 0.11 is now the current structural Stage 0 phase. It follows the completed authorization layer and focuses on standardizing the internal organization of the current domain-facing modules without changing the public API contract.
 
-### Current Intended Direction
+### Current Structural Direction
 
-The backend now has enough completed foundation work to standardize how the currently relevant domain-facing modules are structured internally. The main goal of 0.11 is to stop relying on inconsistent module-local organization while preserving the same externally observable transport behavior delivered up to 0.10.5.
-
-The target module pattern is centered on:
+The adopted module pattern is centered on:
 
 - `http/` for transport handlers and DTOs
 - `app/` for use-case orchestration
@@ -955,28 +952,28 @@ The target module pattern is centered on:
 - `internal/modules/usersettings`
 - `internal/modules/auth`
 
-### Architectural Boundary
+### Phase State
 
-This phase is not intended to redesign authentication, authorization or the public API contract. Its purpose is to normalize internal structure, make ownership clearer and reduce accidental coupling between the current Stage 0 modules.
+Phase 0.11 is **in progress**.
 
-### Defined Subphases
+Completed subphases:
 
-- 0.11.1 — Domain Module Pattern Definition
-- 0.11.2 — User Module Refactor
-- 0.11.3 — UserSettings Module Refactor
-- 0.11.4 — Auth Module Alignment
-- 0.11.5 — Cross-Module Contract Consolidation
-- 0.11.6 — Documentation & Phase Closure
+- ✔ 0.11.1 — Domain Module Pattern Definition
+- ✔ 0.11.2 — User Module Refactor
 
-### Expected Operational Value
+Defined next subphases:
 
-Once implemented, Phase 0.11 should leave the backend with:
+- ◑ 0.11.3 — UserSettings Module Refactor
+- ◑ 0.11.4 — Auth Module Alignment
+- ◑ 0.11.5 — Cross-Module Contract Consolidation
+- ◑ 0.11.6 — Documentation & Phase Closure
 
-- thinner handlers and clearer use-case boundaries
-- explicit ownership between `auth`, `user` and `usersettings`
-- safer cross-module coordination through minimal contracts
-- the same external request/response semantics already stabilized in the repository
+### Current Operational Meaning
+
+0.11.1 established the repository-level architectural definition of the Domain Module Pattern, including responsibility split, dependency direction and ownership boundaries.
+
+0.11.2 applied that pattern to `internal/modules/user`. The user module is now the first concrete runtime reference implementation of the pattern, exposing explicit `app`, `domain` and `repository` boundaries while preserving current runtime behavior and test compatibility.
 
 ### Next
 
-0.11.1 — Domain Module Pattern Definition
+0.11.3 — UserSettings Module Refactor

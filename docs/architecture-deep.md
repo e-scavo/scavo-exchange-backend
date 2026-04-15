@@ -879,7 +879,7 @@ The user settings module should align to the same pattern without being treated 
 
 The auth module requires the most conservative alignment. It already sits on top of stabilized challenge/verify semantics, authenticated identity resolution and authorization-adjacent boundaries. In 0.11 it should be reorganized structurally, not functionally: authentication flows become clearer use cases, but the already delivered public behavior remains unchanged.
 
-### Cross-Module Contract Consolidation
+### Cross-Module Contract Boundaries
 
 One of the deep architectural goals of 0.11 is to reduce concrete cross-module knowledge between `auth`, `user` and `usersettings`.
 
@@ -895,6 +895,16 @@ That means:
 - `usersettings` must not become informal profile storage
 
 Where module interaction is real, it should be expressed through minimal explicit contracts rather than through direct knowledge of another module's internal models or implementation details.
+
+### Semantic Ownership
+
+The pattern is reinforced by explicit ownership boundaries:
+
+- `auth` owns authentication flows, challenge/verify semantics, and authenticated identity entry
+- `user` owns the platform user model and user-facing metadata/profile surface
+- `usersettings` owns authenticated user configuration, preferences, and settings consistency
+
+Modules may coordinate with each other, but they must not silently take ownership of another module's domain.
 
 ### Architectural Non-Goals
 
@@ -919,102 +929,8 @@ Because those foundations already exist, 0.11 can stay strictly structural. It d
 
 ### Current Repository State
 
-At this repository point, Phase 0.11 is defined and documented as the next structural step, but the runtime refactor itself has not yet been applied. The repository therefore records the target pattern and its scope without claiming delivered internal code alignment beyond the completed 0.10 state.
+0.11.1 is completed and has already established the deep architectural definition of the Domain Module Pattern.
 
----
-## Phase 0.11 - Domain Module Pattern
+0.11.2 is also completed in runtime repository state. `internal/modules/user` is the first concrete module aligned to this pattern, which means the repository has already moved from pure definition into controlled execution.
 
-### Objective
-
-Phase 0.11 introduces a standardized internal module pattern to improve maintainability, structural clarity, and controlled scalability without changing external API behavior.
-
-### Standard Internal Module Structure
-
-The target module shape is:
-
-```text
-internal/modules/<module>/
-    http/
-        handlers.go
-        dto.go
-
-    app/
-        service.go
-        usecases.go
-
-    domain/
-        model.go
-        contracts.go
-
-    repository/
-        repository.go   (if applicable)
-```
-
-This structure is intentionally pragmatic. It standardizes internal organization without forcing artificial layers where they do not add value.
-
-### Layer Responsibilities
-
-#### HTTP
-Responsible for:
-- request parsing
-- transport validation
-- response serialization
-- error mapping toward the standardized error model
-
-HTTP must not own business flow, persistence logic, or domain rules.
-
-#### Application
-Responsible for:
-- use-case orchestration
-- coordination between domain operations
-- flow composition across internal contracts
-
-Application is the operational layer that turns domain capabilities into executable backend behavior.
-
-#### Domain
-Responsible for:
-- domain models
-- domain rules
-- invariants
-- internal contracts
-
-Domain must stay free from HTTP and persistence concerns.
-
-#### Repository
-Responsible for:
-- persistence implementation when needed
-- adaptation of storage concerns behind internal contracts
-
-Repository remains optional and should only exist where it improves clarity.
-
-### Cross-Module Contract Boundaries
-
-Phase 0.11 also formalizes how modules interact without collapsing boundaries.
-
-#### auth -> user
-Allowed when authentication flows need authenticated user resolution or minimal user-owned information.
-
-#### auth -> usersettings
-Allowed when authenticated bootstrap composition requires effective settings resolution.
-
-#### user <-> usersettings
-Allowed only in contextual terms around the same platform user. This does not merge the two domains.
-
-### Semantic Ownership
-
-The pattern is reinforced by explicit ownership boundaries:
-
-- `auth` owns authentication flows, challenge/verify semantics, and authenticated identity entry
-- `user` owns the platform user model and user-facing metadata/profile surface
-- `usersettings` owns authenticated user configuration, preferences, and settings consistency
-
-Modules may coordinate with each other, but they must not silently take ownership of another module's domain.
-
-### Architectural Rule
-
-The key architectural rule introduced by Phase 0.11 is:
-
-- modules coordinate
-- contracts stabilize dependencies
-- ownership remains local
-- external contracts stay unchanged
+Phase 0.11 is therefore **in progress**. The remaining work is to apply the same discipline to `usersettings` and `auth`, consolidate cross-module contracts and then close the phase coherently in the trunk documentation.

@@ -22,11 +22,10 @@ The backend follows a **wallet-first identity model** that progressively evolves
 ## 🚧 Current Stage
 
 **Stage:** 0 — Foundation  
-**Phase:** 0.10 — Authorization Layer  
-**Latest Completed Subphase:** **0.10.5 — Documentation & Contract Consolidation**  
-**Phase Status:** **Completed**  
-**Next Planned Phase:** **0.11 — Domain Module Pattern**  
-**0.11 Readiness:** **Defined / Ready for Controlled Implementation**
+**Phase:** 0.11 — Domain Module Pattern  
+**Latest Completed Subphase:** **0.11.2 — User Module Refactor**  
+**Phase Status:** **In Progress**  
+**Next Planned Subphase:** **0.11.3 — UserSettings Module Refactor**
 
 ---
 
@@ -2633,11 +2632,11 @@ Phase 0.10 is complete. The next phase can build on a closed and consistently de
 
 ## Phase 0.11 — Domain Module Pattern
 
-Define the next structural Stage 0 step: standardize how domain-oriented modules are organized internally without changing the public transport contract, the authenticated bootstrap semantics or the already delivered authorization behavior.
+Phase 0.11 is the current structural Stage 0 step. It standardizes how domain-oriented modules are organized internally without changing the public transport contract, the authenticated bootstrap semantics or the already delivered authorization behavior.
 
 ### Why this phase exists
 
-After Phases 0.6 through 0.10, the backend already has a stabilized authenticated surface, an explicit application-layer foundation, a standardized error model, a canonical `v1` route space and a progressively enforced authorization boundary. What it still lacks is a uniform internal module pattern across the current Stage 0 domain-facing modules.
+After Phases 0.6 through 0.10, the backend already has a stabilized authenticated surface, an explicit application-layer foundation, a standardized error model, a canonical `v1` route space and a progressively enforced authorization boundary. What it still lacked before 0.11 was a uniform internal module pattern across the current Stage 0 domain-facing modules.
 
 Without that pattern, the codebase risks keeping:
 
@@ -2679,12 +2678,12 @@ The architectural intention is explicit separation of responsibilities:
 
 ### Phase 0.11 subphases
 
-- **0.11.1 — Domain Module Pattern Definition**
-- **0.11.2 — User Module Refactor**
-- **0.11.3 — UserSettings Module Refactor**
-- **0.11.4 — Auth Module Alignment**
-- **0.11.5 — Cross-Module Contract Consolidation**
-- **0.11.6 — Documentation & Phase Closure**
+- **0.11.1 — Domain Module Pattern Definition** ✔ Completed
+- **0.11.2 — User Module Refactor** ✔ Completed
+- **0.11.3 — UserSettings Module Refactor** ◑ Defined
+- **0.11.4 — Auth Module Alignment** ◑ Defined
+- **0.11.5 — Cross-Module Contract Consolidation** ◑ Defined
+- **0.11.6 — Documentation & Phase Closure** ◑ Defined
 
 ### Intended scope
 
@@ -2704,6 +2703,12 @@ This phase does **not** introduce:
 - auth/authorization redesign
 - CQRS/event sourcing or multi-tenant architecture
 
+### Current result
+
+0.11.1 established the architectural definition, scope, dependency direction and ownership model of the Domain Module Pattern across the repository documentation.
+
+0.11.2 applied that pattern to `internal/modules/user`, making `user` the first concrete reference implementation of the new structure while preserving the current runtime contract. The refactor is validated in repository state by passing module and repository tests.
+
 ### Expected outcome
 
 When Phase 0.11 is implemented and closed, the backend should have:
@@ -2716,8 +2721,8 @@ When Phase 0.11 is implemented and closed, the backend should have:
 
 ### Status
 
-Phase 0.11 is defined and documented as the next planned structural step. Runtime implementation has not yet been introduced in this repository state.
+Phase 0.11 is **in progress**. The pattern definition is completed and the first concrete runtime migration has already been delivered through `0.11.2 — User Module Refactor`.
 
 ### Next
 
-0.11.1 — Domain Module Pattern Definition
+0.11.3 — UserSettings Module Refactor

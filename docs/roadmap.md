@@ -129,14 +129,16 @@ Apply progressive authorization checks to selected authenticated endpoints throu
 #### 0.10.5 — Documentation & Contract Consolidation ✔ Completed
 Align the trunk documentation set to the delivered authorization behavior and close the phase with a coherent architectural and operational narrative.
 
-### 0.11 — Domain Module Pattern ◑ Defined / Ready for Controlled Implementation
+### 0.11 — Domain Module Pattern ◑ In Progress
 Standardize the internal structure of the current Stage 0 domain-facing modules so future growth builds on explicit HTTP / APP / DOMAIN boundaries, minimal internal contracts and reduced accidental coupling without changing the public API surface.
 
-#### 0.11.1 — Domain Module Pattern Definition ◑ Defined
+#### 0.11.1 — Domain Module Pattern Definition ✔ Completed
 Define the standard internal module shape, layer responsibilities, dependency direction and naming conventions that the currently relevant modules will follow.
 
-#### 0.11.2 — User Module Refactor ◑ Defined
+#### 0.11.2 — User Module Refactor ✔ Completed
 Apply the pattern to `internal/modules/user` so user-facing transport handlers stop carrying orchestration responsibilities and the module becomes the first concrete reference implementation of the pattern.
+
+This subphase is already delivered in repository state: the user module now exposes explicit `app`, `domain` and `repository` boundaries while preserving backward-compatible package access for existing consumers.
 
 #### 0.11.3 — UserSettings Module Refactor ◑ Defined
 Align `internal/modules/usersettings` to the same pattern while preserving its own configuration-oriented semantics and keeping it distinct from the user-entity boundary.

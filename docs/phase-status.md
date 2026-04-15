@@ -1333,11 +1333,11 @@ Authorization is now both implemented and consistently documented. The backend k
 
 ## ◑ Phase 0.11 — Domain Module Pattern
 
-Status: ◑ Defined / Ready for Controlled Implementation
+Status: ◑ In Progress
 
 ### Objective
 
-Define and later apply a consistent internal module pattern for the current Stage 0 domain-facing modules so the backend can continue growing on top of explicit transport, application and domain boundaries without changing the already stabilized public contract.
+Define and apply a consistent internal module pattern for the current Stage 0 domain-facing modules so the backend can continue growing on top of explicit transport, application and domain boundaries without changing the already stabilized public contract.
 
 ### Scope
 
@@ -1350,12 +1350,12 @@ Phase 0.11 is structural rather than functional. It is intended to:
 
 This phase does not introduce new endpoints, payload shapes, authentication semantics or authorization behavior.
 
-### Planned / Defined Subphases
+### Subphase Status
 
 | Subphase | Description | Status |
 |----------|-------------|--------|
-| 0.11.1 | Domain Module Pattern Definition | ◑ Defined |
-| 0.11.2 | User Module Refactor | ◑ Defined |
+| 0.11.1 | Domain Module Pattern Definition | ✅ Completed |
+| 0.11.2 | User Module Refactor | ✅ Completed |
 | 0.11.3 | UserSettings Module Refactor | ◑ Defined |
 | 0.11.4 | Auth Module Alignment | ◑ Defined |
 | 0.11.5 | Cross-Module Contract Consolidation | ◑ Defined |
@@ -1380,9 +1380,21 @@ with the following responsibility split:
 - `domain` → models, invariants and internal contracts
 - `repository` → persistence implementation boundary when needed
 
+### Current Result After 0.11.1
+
+0.11.1 is completed at the documentation and architectural-definition level. The repository now has an explicit Domain Module Pattern, explicit layer responsibility rules, explicit ownership boundaries between `auth`, `user` and `usersettings`, and explicit completion criteria for the rest of the phase.
+
+### Current Result After 0.11.2
+
+0.11.2 is completed in repository state.
+
+The backend now includes the first concrete runtime application of the pattern under `internal/modules/user`, where the `user` module exposes explicit `app`, `domain` and `repository` boundaries while preserving the current external behavior and backward-compatible package access for existing consumers.
+
+This subphase is validated by the passing repository test state, including the `internal/modules/user` package set.
+
 ### Expected Outcome
 
-When Phase 0.11 is eventually implemented and closed, the repository should expose:
+When Phase 0.11 is eventually completed, the repository should expose:
 
 - a consistent internal module pattern across `auth`, `user` and `usersettings`
 - clearer ownership boundaries between authentication, user entity concerns and user settings concerns
@@ -1391,4 +1403,4 @@ When Phase 0.11 is eventually implemented and closed, the repository should expo
 
 ### Next
 
-0.11.1 — Domain Module Pattern Definition
+0.11.3 — UserSettings Module Refactor

@@ -556,7 +556,7 @@ The architectural value of 0.10.5 is that the code and the trunk documentation n
 
 ## Phase 0.11 — Domain Module Pattern
 
-Phase 0.11 is the next architectural consolidation step after the completed authorization layer. It does not add a new public runtime capability on its own; instead, it standardizes how the current Stage 0 domain-facing modules should be structured internally so later work can grow on top of a clearer module model.
+Phase 0.11 is the current architectural consolidation step after the completed authorization layer. It does not add a new public runtime capability on its own; instead, it standardizes how the current Stage 0 domain-facing modules are structured internally so later work can grow on top of a clearer module model.
 
 The architectural target is a consistent internal module organization of the form:
 
@@ -581,7 +581,7 @@ Architecturally, the important consequence is that the backend stops treating mo
 
 with repository implementations supporting the application/domain boundary rather than collapsing it.
 
-The first modules in scope are `auth`, `user` and `usersettings`. They do not all have identical semantics, but they should all align to the same structural pattern:
+The modules in scope remain `auth`, `user` and `usersettings`. They do not all have identical semantics, but they align to the same structural pattern:
 
 - `auth` keeps ownership of authentication flows and authenticated-identity entry behavior
 - `user` keeps ownership of the user entity/profile boundary
@@ -589,27 +589,17 @@ The first modules in scope are `auth`, `user` and `usersettings`. They do not al
 
 This matters because later Stage 0 and post-Stage 0 work should not continue to grow through implicit ownership transfer or direct concrete cross-module knowledge. Phase 0.11 therefore establishes the architectural expectation that coordination between these modules should happen through minimal explicit contracts rather than through accidental import-level coupling.
 
-Phase 0.11 remains intentionally non-breaking. It is defined as an internal structural consolidation layer that preserves:
+Phase 0.11 remains intentionally non-breaking. It preserves:
 
 - the completed authenticated and authorization-enabled transport surface
 - the canonical `/api/v1/...` contract state
 - the existing payloads and error model
 - the already stabilized challenge / verify / bootstrap semantics
 
----
-## Domain Module Pattern
+### Current Repository State
 
-Phase 0.11 introduces a standardized internal module pattern for backend domain modules.
+0.11.1 is completed and has already established the architectural definition of the pattern.
 
-The backend continues to operate as a modular monolith, but modules are now expected to evolve toward an explicit internal structure under:
+0.11.2 is also completed and has already applied the pattern to `internal/modules/user`, making the `user` module the first concrete runtime reference implementation of the new structure.
 
-- `internal/modules/<module>/`
-
-The intended organization separates responsibilities into:
-
-- HTTP
-- Application
-- Domain
-- Repository (when applicable)
-
-This pattern does not change the external API surface. Its purpose is to improve internal consistency, reduce accidental coupling, and make future evolution of modules such as `auth`, `user`, and `usersettings` more predictable and maintainable.
+Phase 0.11 is therefore **in progress**, not merely planned.

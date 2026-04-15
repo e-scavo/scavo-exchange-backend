@@ -163,6 +163,8 @@ Repository implementations support the application/domain boundary when needed. 
 
 ### 0.11.1 — Domain Module Pattern Definition
 
+Status: ✔ Completed
+
 Define:
 
 - the standard internal module shape
@@ -178,6 +180,8 @@ Result expected from 0.11.1:
 ---
 
 ### 0.11.2 — User Module Refactor
+
+Status: ✔ Completed
 
 Apply the pattern to `internal/modules/user`.
 
@@ -198,6 +202,8 @@ Expected result:
 
 ### 0.11.3 — UserSettings Module Refactor
 
+Status: ◑ Defined
+
 Apply the pattern to `internal/modules/usersettings`.
 
 Goals:
@@ -216,6 +222,8 @@ Expected result:
 ---
 
 ### 0.11.4 — Auth Module Alignment
+
+Status: ◑ Defined
 
 Apply the pattern conservatively to `internal/modules/auth`.
 
@@ -255,6 +263,8 @@ Expected result:
 ---
 
 ### 0.11.6 — Documentation & Phase Closure
+
+Status: ◑ Defined
 
 Close the phase by aligning the trunk documentation set with the adopted module pattern.
 
@@ -348,12 +358,39 @@ Phase 0.11 should only be considered complete when:
 
 ## Current Repository State
 
-At this repository point, Phase 0.11 is defined and documented as the next planned Stage 0 structural phase.
+At this repository point, Phase 0.11 is no longer only a defined target. The phase is **in progress**.
 
-The repository does **not** yet claim that the runtime refactor itself has been executed. This document records the architectural target, the intended scope and the controlled implementation plan so later execution can proceed without roadmap drift.
+0.11.1 is completed at the architectural-definition level. The repository now has an explicit description of the Domain Module Pattern, explicit layer responsibilities, explicit dependency direction and explicit ownership boundaries between `auth`, `user` and `usersettings`.
 
----
+0.11.2 is also completed in runtime repository state. The `internal/modules/user` package is now the first concrete implementation of the pattern, with explicit `app`, `domain` and `repository` boundaries and backward-compatible package access preserved for existing consumers.
 
-## Next
+## Current Result After 0.11.1
 
-0.11.1 — Domain Module Pattern Definition
+Phase 0.11.1 specifically delivered:
+
+- the standard internal module shape for the current Stage 0 modules
+- the explicit `HTTP → APP → DOMAIN` dependency direction
+- the responsibility split between transport, orchestration, domain semantics and optional persistence boundaries
+- the ownership model between `auth`, `user` and `usersettings`
+- the explicit non-goals and completion criteria for the rest of the phase
+
+No runtime behavior was changed by 0.11.1. Its purpose was to close the structural-definition gap before any controlled runtime migration began.
+
+### Next
+
+0.11.2 — User Module Refactor
+
+## Current Result After 0.11.2
+
+Phase 0.11.2 specifically delivers:
+
+- the first concrete runtime application of the Domain Module Pattern under `internal/modules/user`
+- explicit `app`, `domain` and `repository` package boundaries for the user module
+- preservation of current external user-related behavior and existing consumers through backward-compatible root-package access
+- repository state validated by passing tests, including the `internal/modules/user` package set
+
+The repository is therefore no longer only describing 0.11 as a future intention. It has already delivered the first completed structural migration while keeping the Stage 0 public contract intact.
+
+### Next
+
+0.11.3 — UserSettings Module Refactor
