@@ -1,0 +1,153 @@
+package app
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"strings"
+	"time"
+	"unicode/utf8"
+
+	"github.com/e-scavo/scavo-exchange-backend/internal/modules/user/domain"
+)
+
+var (
+	ErrEmptyUserID        = errors.New("empty user id")
+	ErrEmptyDisplayName   = errors.New("empty display name")
+	ErrDisplayNameTooLong = errors.New("display name too long")
+)
+
+type Service struct {
+	repo domain.Repository
+}
+
+func NewService(repo domain.Repository) *Service {
+	return &Service{repo: repo}
+}
+
+func (s *Service) ResolveOrCreateDevUser(ctx context.Context, email string) (*domain.User, error) {
+	email = normalizeEmail(email)
+	if email == "" {
+		return nil, fmt.Errorf("empty email")
+	}
+
+	if s == nil || s.repo == nil {
+		now := time.Now().UTC()
+		return &domain.User{
+			ID:          devUserID(email),
+			Email:       email,
+			DisplayName: "",
+			CreatedAt:   now,
+			UpdatedAt:   now,
+			LastLoginAt: &now,
+		}, nil
+	}
+
+	return s.repo.UpsertDevUser(ctx, email)
+}
+
+func (s *Service) ResolveOrCreateWalletUser(ctx context.Context, address string) (*domain.User, error) {
+	address = normalizeWalletAddress(address)
+	if address == "" {
+		return nil, fmt.Errorf("empty wallet address")
+	}
+
+	id := walletUserID(address)
+	email := walletUserEmail(address)
+	displayName := address
+
+	if s == nil || s.repo == nil {
+		now := time.Now().UTC()
+		return &domain.User{
+			ID:          id,
+			Email:       email,
+			DisplayName: displayName,
+			CreatedAt:   now,
+			UpdatedAt:   now,
+			LastLoginAt: &now,
+		}, nil
+	}
+
+	return s.repo.UpsertWalletUser(ctx, id, email, displayName)
+}
+
+func (s *Service) GetByID(ctx context.Context, id string, emailHint string) (*domain.User, error) {
+	id = strings.TrimSpace(id)
+	emailHint = normalizeEmail(emailHint)
+
+	if id == "" {
+		return nil, ErrEmptyUserID
+	}
+
+	if s == nil || s.repo == nil {
+		now := time.Now().UTC()
+		return &domain.User{
+			ID:          id,
+			Email:       emailHint,
+			DisplayName: "",
+			CreatedAt:   now,
+			UpdatedAt:   now,
+		}, nil
+	}
+
+	return s.repo.GetByID(ctx, id)
+}
+
+func (s *Service) UpdateDisplayName(ctx context.Context, id, displayName string) (*domain.User, error) {
+	id = strings.TrimSpace(id)
+	displayName = normalizeDisplayName(displayName)
+
+	if id == "" {
+		return nil, ErrEmptyUserID
+	}
+	if displayName == "" {
+		return nil, ErrEmptyDisplayName
+	}
+	if utf8.RuneCountInString(displayName) > 120 {
+		return nil, ErrDisplayNameTooLong
+	}
+
+	if s == nil || s.repo == nil {
+		now := time.Now().UTC()
+		return &domain.User{
+			ID:          id,
+			DisplayName: displayName,
+			CreatedAt:   now,
+			UpdatedAt:   now,
+		}, nil
+	}
+
+	return s.repo.UpdateDisplayName(ctx, id, displayName)
+}
+
+func normalizeEmail(email string) string {
+	return strings.TrimSpace(strings.ToLower(email))
+}
+
+func normalizeWalletAddress(address string) string {
+	return strings.TrimSpace(strings.ToLower(address))
+}
+
+func normalizeDisplayName(displayName string) string {
+	return strings.TrimSpace(displayName)
+}
+
+func devUserID(email string) string {
+	id := strings.ReplaceAll(email, "@", "_")
+	id = strings.ReplaceAll(id, ".", "_")
+	id = strings.ReplaceAll(id, "+", "_")
+	id = strings.ReplaceAll(id, "-", "_")
+	return "u_" + id
+}
+
+func walletUserID(address string) string {
+	address = normalizeWalletAddress(address)
+	address = strings.TrimPrefix(address, "0x")
+	return "u_wallet_" + address
+}
+
+func walletUserEmail(address string) string {
+	address = normalizeWalletAddress(address)
+	address = strings.TrimPrefix(address, "0x")
+	return "wallet." + address + "@wallet.scavo.local"
+}
