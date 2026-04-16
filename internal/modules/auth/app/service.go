@@ -15,7 +15,8 @@ var (
 
 type Service = rootauth.Service
 type LoginResult = rootauth.LoginResult
-type SessionView = rootauth.SessionView
+
+// type SessionView = rootauth.SessionView
 
 func NewService(tokens *coreauth.TokenService, users *usermod.Service, ttl time.Duration) *Service {
 	return rootauth.NewService(tokens, users, ttl)

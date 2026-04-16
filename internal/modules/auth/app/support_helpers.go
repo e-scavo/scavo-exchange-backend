@@ -7,8 +7,8 @@ import (
 	"time"
 
 	coreauth "github.com/e-scavo/scavo-exchange-backend/internal/core/auth"
+	authdomain "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/domain"
 	usermod "github.com/e-scavo/scavo-exchange-backend/internal/modules/user"
-	rootauth "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth"
 )
 
 type authenticatedContextView struct {
@@ -95,7 +95,7 @@ func buildSessionViewWithUser(claims *coreauth.Claims, user *usermod.User) *Sess
 	return view
 }
 
-func buildProfileView(ctx context.Context, claims *coreauth.Claims, users *usermod.Service, walletStore rootauth.WalletIdentityStore) (*ProfileView, error) {
+func buildProfileView(ctx context.Context, claims *coreauth.Claims, users *usermod.Service, walletStore authdomain.WalletIdentityStore) (*ProfileView, error) {
 	svc := NewService(nil, users, 24*time.Hour)
 	user, err := svc.ResolveCurrentUserClaims(ctx, claims)
 	if err != nil {
@@ -104,7 +104,7 @@ func buildProfileView(ctx context.Context, claims *coreauth.Claims, users *userm
 	return buildProfileViewWithUser(ctx, claims, user, walletStore)
 }
 
-func buildProfileViewWithUser(ctx context.Context, claims *coreauth.Claims, user *usermod.User, walletStore rootauth.WalletIdentityStore) (*ProfileView, error) {
+func buildProfileViewWithUser(ctx context.Context, claims *coreauth.Claims, user *usermod.User, walletStore authdomain.WalletIdentityStore) (*ProfileView, error) {
 	ctxView := buildAuthenticatedContextView(claims)
 
 	view := &ProfileView{
@@ -148,7 +148,7 @@ func buildProfileViewWithUser(ctx context.Context, claims *coreauth.Claims, user
 	return view, nil
 }
 
-func mapWalletIdentityToProfileWallet(wallet *rootauth.WalletIdentity) *ProfileWalletView {
+func mapWalletIdentityToProfileWallet(wallet *authdomain.WalletIdentity) *ProfileWalletView {
 	mapped := mapWalletIdentityToReadModel(wallet)
 	if mapped == nil {
 		return nil
@@ -164,7 +164,7 @@ func mapWalletIdentityToProfileWallet(wallet *rootauth.WalletIdentity) *ProfileW
 	}
 }
 
-func listWalletReadModelsForUser(ctx context.Context, userID string, store rootauth.WalletIdentityStore) ([]*WalletReadModel, error) {
+func listWalletReadModelsForUser(ctx context.Context, userID string, store authdomain.WalletIdentityStore) ([]*WalletReadModel, error) {
 	if store == nil || userID == "" {
 		return []*WalletReadModel{}, nil
 	}
@@ -174,7 +174,7 @@ func listWalletReadModelsForUser(ctx context.Context, userID string, store roota
 		return nil, err
 	}
 	if wallets == nil {
-		wallets = []*rootauth.WalletIdentity{}
+		wallets = []*authdomain.WalletIdentity{}
 	}
 
 	return mapWalletIdentitiesToReadModels(wallets), nil
@@ -191,7 +191,7 @@ func buildBootstrapWalletsView(wallets []*WalletReadModel) BootstrapWalletsView 
 	}
 }
 
-func mapWalletIdentityToReadModel(wallet *rootauth.WalletIdentity) *WalletReadModel {
+func mapWalletIdentityToReadModel(wallet *authdomain.WalletIdentity) *WalletReadModel {
 	if wallet == nil {
 		return nil
 	}
@@ -215,7 +215,7 @@ func mapWalletIdentityToReadModel(wallet *rootauth.WalletIdentity) *WalletReadMo
 	}
 }
 
-func mapWalletIdentitiesToReadModels(wallets []*rootauth.WalletIdentity) []*WalletReadModel {
+func mapWalletIdentitiesToReadModels(wallets []*authdomain.WalletIdentity) []*WalletReadModel {
 	if len(wallets) == 0 {
 		return []*WalletReadModel{}
 	}
@@ -261,10 +261,10 @@ func enrichWalletReadModelsActionability(wallets []*WalletReadModel) []*WalletRe
 		}
 
 		if wallet.IsPrimary {
-			wallet.DetachBlockReasons = append(wallet.DetachBlockReasons, rootauth.WalletDetachReasonWalletIsPrimary)
+			wallet.DetachBlockReasons = append(wallet.DetachBlockReasons, authdomain.WalletDetachReasonWalletIsPrimary)
 		}
 		if activeOwnedCount <= 1 {
-			wallet.DetachBlockReasons = append(wallet.DetachBlockReasons, rootauth.WalletDetachReasonUserWouldBeEmpty)
+			wallet.DetachBlockReasons = append(wallet.DetachBlockReasons, authdomain.WalletDetachReasonUserWouldBeEmpty)
 		}
 		if len(wallet.DetachBlockReasons) == 0 {
 			wallet.CanDetach = true
