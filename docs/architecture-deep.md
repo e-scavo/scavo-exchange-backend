@@ -933,4 +933,6 @@ Because those foundations already exist, 0.11 can stay strictly structural. It d
 
 0.11.2 is also completed in runtime repository state. `internal/modules/user` is the first concrete module aligned to this pattern, which means the repository has already moved from pure definition into controlled execution.
 
-Phase 0.11 is therefore **in progress**. The remaining work is to apply the same discipline to `usersettings` and `auth`, consolidate cross-module contracts and then close the phase coherently in the trunk documentation.
+0.11.3 is also completed in runtime repository state. `internal/modules/usersettings` now follows the same structural pattern with explicit `app`, `domain` and `repository` boundaries while preserving settings-specific orchestration and external contract behavior.
+
+Phase 0.11 is therefore **in progress**. The remaining work is to apply the same discipline to `auth`, consolidate cross-module contracts and then close the phase coherently in the trunk documentation.

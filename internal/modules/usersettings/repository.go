@@ -1,13 +1,7 @@
 package usersettings
 
-import (
-	"context"
-	"errors"
-)
+import usersettingsdomain "github.com/e-scavo/scavo-exchange-backend/internal/modules/usersettings/domain"
 
-var ErrUserIDRequired = errors.New("user settings user id is required")
+var ErrUserIDRequired = usersettingsdomain.ErrUserIDRequired
 
-type Repository interface {
-	GetByUserID(ctx context.Context, userID string) (*UserSettings, error)
-	UpsertPreferences(ctx context.Context, userID string, preferences map[string]any) (*UserSettings, error)
-}
+type Repository = usersettingsdomain.Repository

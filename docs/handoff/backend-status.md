@@ -16,9 +16,9 @@ It is intended to:
 
 **Stage:** 0 — Foundation
 **Phase:** 0.11 — Domain Module Pattern
-**Latest Completed Subphase:** 0.11.2 — User Module Refactor
+**Latest Completed Subphase:** 0.11.3 — UserSettings Module Refactor
 **Phase Status:** In Progress
-**Next Planned Subphase:** 0.11.3 — UserSettings Module Refactor
+**Next Planned Subphase:** 0.11.4 — Auth Module Alignment
 
 ---
 

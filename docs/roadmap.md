@@ -140,8 +140,10 @@ Apply the pattern to `internal/modules/user` so user-facing transport handlers s
 
 This subphase is already delivered in repository state: the user module now exposes explicit `app`, `domain` and `repository` boundaries while preserving backward-compatible package access for existing consumers.
 
-#### 0.11.3 — UserSettings Module Refactor ◑ Defined
+#### 0.11.3 — UserSettings Module Refactor ✔ Completed
 Align `internal/modules/usersettings` to the same pattern while preserving its own configuration-oriented semantics and keeping it distinct from the user-entity boundary.
+
+This subphase is now delivered in repository state: the user settings module exposes explicit `app`, `domain` and `repository` boundaries while preserving backward-compatible package access for existing consumers and keeping settings-specific validation/orchestration in the application layer.
 
 #### 0.11.4 — Auth Module Alignment ◑ Defined
 Align `internal/modules/auth` to the pattern conservatively, expressing authentication flows as use cases while preserving the already stabilized challenge, verify and authorization-adjacent behavior.

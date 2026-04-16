@@ -602,4 +602,6 @@ Phase 0.11 remains intentionally non-breaking. It preserves:
 
 0.11.2 is also completed and has already applied the pattern to `internal/modules/user`, making the `user` module the first concrete runtime reference implementation of the new structure.
 
+0.11.3 is now completed as well and applies the same structural discipline to `internal/modules/usersettings`, preserving its settings-specific semantics while exposing explicit `app`, `domain` and `repository` boundaries.
+
 Phase 0.11 is therefore **in progress**, not merely planned.

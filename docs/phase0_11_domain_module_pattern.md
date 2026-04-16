@@ -202,7 +202,7 @@ Expected result:
 
 ### 0.11.3 — UserSettings Module Refactor
 
-Status: ◑ Defined
+Status: ✔ Completed
 
 Apply the pattern to `internal/modules/usersettings`.
 
@@ -242,6 +242,8 @@ Expected result:
 ---
 
 ### 0.11.5 — Cross-Module Contract Consolidation
+
+Status: ◑ Defined
 
 Clarify and minimize the way the modules interact.
 
@@ -364,6 +366,8 @@ At this repository point, Phase 0.11 is no longer only a defined target. The pha
 
 0.11.2 is also completed in runtime repository state. The `internal/modules/user` package is now the first concrete implementation of the pattern, with explicit `app`, `domain` and `repository` boundaries and backward-compatible package access preserved for existing consumers.
 
+0.11.3 is now also completed in runtime repository state. The `internal/modules/usersettings` package follows the same pattern with explicit `app`, `domain` and `repository` boundaries while preserving settings-specific semantics and backward-compatible package access for existing consumers.
+
 ## Current Result After 0.11.1
 
 Phase 0.11.1 specifically delivered:
@@ -378,7 +382,7 @@ No runtime behavior was changed by 0.11.1. Its purpose was to close the structur
 
 ### Next
 
-0.11.2 — User Module Refactor
+0.11.4 — Auth Module Alignment
 
 ## Current Result After 0.11.2
 
@@ -391,6 +395,17 @@ Phase 0.11.2 specifically delivers:
 
 The repository is therefore no longer only describing 0.11 as a future intention. It has already delivered the first completed structural migration while keeping the Stage 0 public contract intact.
 
+## Current Result After 0.11.3
+
+Phase 0.11.3 specifically delivers:
+
+- the application of the same Domain Module Pattern to `internal/modules/usersettings`
+- explicit `app`, `domain` and `repository` package boundaries for the user settings module
+- preservation of configuration/settings semantics without collapsing them into the user-entity boundary
+- backward-compatible root-package access for existing consumers and passing repository validation for the `internal/modules/usersettings` package set
+
+The repository now contains two completed runtime applications of the pattern (`user` and `usersettings`) while preserving the Stage 0 public contract.
+
 ### Next
 
-0.11.3 — UserSettings Module Refactor
+0.11.4 — Auth Module Alignment

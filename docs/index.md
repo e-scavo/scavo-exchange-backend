@@ -129,7 +129,7 @@ Next planned phase: `0.11 — Domain Module Pattern`
 
 - 0.11.1 ✔ Domain Module Pattern Definition
 - 0.11.2 ✔ User Module Refactor
-- 0.11.3 ◑ UserSettings Module Refactor
+- 0.11.3 ✔ UserSettings Module Refactor
 - 0.11.4 ◑ Auth Module Alignment
 - 0.11.5 ◑ Cross-Module Contract Consolidation
 - 0.11.6 ◑ Documentation & Phase Closure
