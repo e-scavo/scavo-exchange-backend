@@ -6,6 +6,12 @@ import (
 )
 
 const (
+	WalletChallengePurposeAuthBootstrap = "auth_bootstrap"
+	WalletChallengePurposeLinkWallet    = "wallet_link"
+	WalletChallengePurposeAccountMerge  = "account_merge"
+)
+
+const (
 	WalletDetachReasonNotOwnedByUser   = "wallet_not_owned_by_user"
 	WalletDetachReasonWalletIsPrimary  = "wallet_is_primary"
 	WalletDetachReasonUserWouldBeEmpty = "user_would_have_no_wallets"

@@ -5,12 +5,6 @@ import (
 	"strings"
 )
 
-const (
-	WalletDetachReasonNotOwnedByUser   = "wallet_not_owned_by_user"
-	WalletDetachReasonWalletIsPrimary  = "wallet_is_primary"
-	WalletDetachReasonUserWouldBeEmpty = "user_would_have_no_wallets"
-)
-
 type WalletDetachCheckResult struct {
 	WalletAddress    string   `json:"wallet_address"`
 	Eligible         bool     `json:"eligible"`

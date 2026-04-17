@@ -12,6 +12,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
+	authdomain "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/domain"
 )
 
 var (
@@ -32,35 +34,26 @@ var (
 )
 
 const (
-	WalletChallengePurposeAuthBootstrap = "auth_bootstrap"
-	WalletChallengePurposeLinkWallet    = "wallet_link"
-	WalletChallengePurposeAccountMerge  = "account_merge"
+	WalletChallengePurposeAuthBootstrap = authdomain.WalletChallengePurposeAuthBootstrap
+	WalletChallengePurposeLinkWallet    = authdomain.WalletChallengePurposeLinkWallet
+	WalletChallengePurposeAccountMerge  = authdomain.WalletChallengePurposeAccountMerge
+)
+
+const (
+	WalletDetachReasonNotOwnedByUser   = authdomain.WalletDetachReasonNotOwnedByUser
+	WalletDetachReasonWalletIsPrimary  = authdomain.WalletDetachReasonWalletIsPrimary
+	WalletDetachReasonUserWouldBeEmpty = authdomain.WalletDetachReasonUserWouldBeEmpty
 )
 
 var evmAddressRE = regexp.MustCompile(`^0x[0-9a-fA-F]{40}$`)
 
-type WalletChallenge struct {
-	ID                string     `json:"id"`
-	Address           string     `json:"address"`
-	Chain             string     `json:"chain"`
-	Nonce             string     `json:"nonce"`
-	Message           string     `json:"message"`
-	Purpose           string     `json:"purpose"`
-	RequestedByUserID string     `json:"requested_by_user_id,omitempty"`
-	IssuedAt          time.Time  `json:"issued_at"`
-	ExpiresAt         time.Time  `json:"expires_at"`
-	UsedAt            *time.Time `json:"used_at,omitempty"`
-}
+type WalletChallenge = authdomain.WalletChallenge
+type WalletChallengeOptions = authdomain.WalletChallengeOptions
 
 type WalletChallengeStore interface {
 	Save(ctx context.Context, challenge *WalletChallenge) error
 	GetByID(ctx context.Context, id string) (*WalletChallenge, error)
 	Use(ctx context.Context, id string, usedAt time.Time) (*WalletChallenge, error)
-}
-
-type WalletChallengeOptions struct {
-	Purpose           string
-	RequestedByUserID string
 }
 
 type WalletChallengeService struct {
