@@ -3,10 +3,9 @@ package app
 import (
 	"time"
 
+	authdomain "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/domain"
 	usermod "github.com/e-scavo/scavo-exchange-backend/internal/modules/user"
 	usersettingsmod "github.com/e-scavo/scavo-exchange-backend/internal/modules/usersettings"
-
-	authdomain "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/domain"
 )
 
 type LoginResponse struct {
