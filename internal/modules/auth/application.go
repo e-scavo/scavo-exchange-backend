@@ -3,297 +3,482 @@ package auth
 import (
 	"context"
 	"errors"
-	"fmt"
-	"strings"
 	"time"
 
 	coreauth "github.com/e-scavo/scavo-exchange-backend/internal/core/auth"
+	authapp "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/app"
+	authdomain "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/domain"
 	usermod "github.com/e-scavo/scavo-exchange-backend/internal/modules/user"
 	usersettingsmod "github.com/e-scavo/scavo-exchange-backend/internal/modules/usersettings"
 )
 
 var (
-	ErrApplicationNotConfigured = errors.New("application not configured")
-	ErrWalletIdentityStore      = errors.New("wallet identity store error")
+	ErrApplicationNotConfigured = authapp.ErrApplicationNotConfigured
+	ErrWalletIdentityStore      = authapp.ErrWalletIdentityStore
 )
 
 type Application struct {
-	Tokens           *coreauth.TokenService
-	TTL              time.Duration
-	Users            *usermod.Service
-	UserSettings     *usersettingsmod.Service
-	PublicBaseURL    string
-	ChallengeTTL     time.Duration
-	Challenges       WalletChallengeStore
-	WalletIdentities WalletIdentityStore
+	inner *authapp.Application
 }
 
-func NewApplication(tokens *coreauth.TokenService, ttl time.Duration, users *usermod.Service, userSettings *usersettingsmod.Service, publicBaseURL string, challengeTTL time.Duration, challenges WalletChallengeStore, walletIdentities WalletIdentityStore) *Application {
+func NewApplication(
+	tokens *coreauth.TokenService,
+	ttl time.Duration,
+	users *usermod.Service,
+	userSettings *usersettingsmod.Service,
+	publicBaseURL string,
+	challengeTTL time.Duration,
+	challenges WalletChallengeStore,
+	walletIdentities WalletIdentityStore,
+) *Application {
 	return &Application{
-		Tokens:           tokens,
-		TTL:              ttl,
-		Users:            users,
-		UserSettings:     userSettings,
-		PublicBaseURL:    publicBaseURL,
-		ChallengeTTL:     challengeTTL,
-		Challenges:       challenges,
-		WalletIdentities: walletIdentities,
+		inner: authapp.NewApplication(
+			tokens,
+			ttl,
+			users,
+			userSettings,
+			publicBaseURL,
+			challengeTTL,
+			newWalletChallengeStoreAdapter(challenges, publicBaseURL, challengeTTL),
+			walletIdentities,
+		),
 	}
 }
 
 func (h HTTPHandlers) Application() *Application {
-	return NewApplication(h.Tokens, h.TTL, h.Users, h.UserSettings, h.PublicBaseURL, h.ChallengeTTL, h.Challenges, h.WalletIdentities)
-}
-
-func (a *Application) challengeTTL() time.Duration {
-	if a == nil || a.ChallengeTTL <= 0 {
-		return 5 * time.Minute
-	}
-	return a.ChallengeTTL
-}
-
-func (a *Application) challengeService() WalletChallengeService {
-	return *NewWalletChallengeService(a.Challenges, a.PublicBaseURL, a.challengeTTL())
+	return NewApplication(
+		h.Tokens,
+		h.TTL,
+		h.Users,
+		h.UserSettings,
+		h.PublicBaseURL,
+		h.ChallengeTTL,
+		h.Challenges,
+		h.WalletIdentities,
+	)
 }
 
 func (a *Application) Login(ctx context.Context, email, password string) (LoginResponse, error) {
-	if a == nil || a.Tokens == nil {
-		return LoginResponse{}, ErrApplicationNotConfigured
-	}
-
-	svc := NewService(a.Tokens, a.Users, a.TTL)
-	result, err := svc.LoginDev(ctx, email, password)
+	response, err := a.inner.Login(ctx, email, password)
 	if err != nil {
-		return LoginResponse{}, err
-	}
-
-	userID := ""
-	if result.User != nil {
-		userID = result.User.ID
+		return LoginResponse{}, normalizeApplicationError(err)
 	}
 
 	return LoginResponse{
-		AccessToken: result.AccessToken,
-		TokenType:   result.TokenType,
-		ExpiresIn:   result.ExpiresIn,
-		UserID:      userID,
+		AccessToken: response.AccessToken,
+		TokenType:   response.TokenType,
+		ExpiresIn:   response.ExpiresIn,
+		UserID:      response.UserID,
 	}, nil
 }
 
 func (a *Application) GetMe(ctx context.Context, claims *coreauth.Claims) (MeResponse, error) {
-	if claims == nil {
-		return MeResponse{}, ErrUnauthorized
-	}
-	if a == nil {
-		return MeResponse{}, ErrApplicationNotConfigured
-	}
-
-	profile, err := buildProfileView(ctx, claims, a.Users, a.WalletIdentities)
+	response, err := a.inner.GetMe(ctx, claims)
 	if err != nil {
-		return MeResponse{}, err
+		return MeResponse{}, normalizeApplicationError(err)
 	}
 
 	return MeResponse{
-		User:    profile.User,
-		Profile: profile,
+		User:    response.User,
+		Profile: mapProfileViewFromApp(response.Profile),
 	}, nil
 }
 
 func (a *Application) GetSession(ctx context.Context, claims *coreauth.Claims) (SessionResponse, error) {
-	if claims == nil {
-		return SessionResponse{}, ErrUnauthorized
-	}
-	if a == nil {
-		return SessionResponse{}, ErrApplicationNotConfigured
-	}
-
-	svc := NewService(a.Tokens, a.Users, a.TTL)
-	session, err := svc.ResolveSessionClaims(ctx, claims)
+	response, err := a.inner.GetSession(ctx, claims)
 	if err != nil {
-		return SessionResponse{}, err
+		return SessionResponse{}, normalizeApplicationError(err)
 	}
 
-	return SessionResponse{Session: session}, nil
+	return SessionResponse{
+		Session: mapSessionViewFromApp(response.Session),
+	}, nil
 }
 
 func (a *Application) GetBootstrap(ctx context.Context, claims *coreauth.Claims) (BootstrapResponse, error) {
-	if claims == nil {
-		return BootstrapResponse{}, ErrUnauthorized
-	}
-	if a == nil || a.UserSettings == nil {
-		return BootstrapResponse{}, ErrApplicationNotConfigured
-	}
-
-	svc := NewService(a.Tokens, a.Users, a.TTL)
-	user, err := svc.ResolveCurrentUserClaims(ctx, claims)
+	response, err := a.inner.GetBootstrap(ctx, claims)
 	if err != nil {
-		return BootstrapResponse{}, err
-	}
-
-	session := buildSessionViewWithUser(claims, user)
-	profile, err := buildProfileViewWithUser(ctx, claims, user, a.WalletIdentities)
-	if err != nil {
-		return BootstrapResponse{}, err
-	}
-
-	settings, err := a.UserSettings.GetOrDefault(ctx, session.UserID)
-	if err != nil {
-		return BootstrapResponse{}, err
-	}
-
-	wallets, err := listWalletReadModelsForUser(ctx, session.UserID, a.WalletIdentities)
-	if err != nil {
-		return BootstrapResponse{}, fmt.Errorf("%w: %v", ErrWalletIdentityStore, err)
+		return BootstrapResponse{}, normalizeApplicationError(err)
 	}
 
 	return BootstrapResponse{
-		Session:  session,
-		User:     user,
-		Profile:  profile,
-		Settings: usersettingsmod.ToView(settings),
-		Wallets:  buildBootstrapWalletsView(wallets),
+		Session:  mapSessionViewFromApp(response.Session),
+		User:     response.User,
+		Profile:  mapProfileViewFromApp(response.Profile),
+		Settings: response.Settings,
+		Wallets: BootstrapWalletsView{
+			Items: mapWalletReadModelsFromApp(response.Wallets.Items),
+			Total: response.Wallets.Total,
+		},
 	}, nil
 }
 
 func (a *Application) ListWallets(ctx context.Context, userID string, query WalletsQuery) (WalletsResponse, error) {
-	userID = strings.TrimSpace(userID)
-	if userID == "" {
-		return WalletsResponse{}, ErrUnauthorized
-	}
-	if a == nil {
-		return WalletsResponse{}, ErrApplicationNotConfigured
-	}
-	if a.WalletIdentities == nil {
-		return buildWalletsResponse([]*WalletReadModel{}, 0, query), nil
-	}
-
-	wallets, err := a.WalletIdentities.ListByUser(ctx, userID)
+	response, err := a.inner.ListWallets(ctx, userID, authapp.WalletsQuery(query))
 	if err != nil {
-		return WalletsResponse{}, fmt.Errorf("%w: %v", ErrWalletIdentityStore, err)
-	}
-	if wallets == nil {
-		wallets = []*WalletIdentity{}
+		return WalletsResponse{}, normalizeApplicationError(err)
 	}
 
-	mapped := mapWalletIdentitiesToReadModels(wallets)
-	window, total := applyWalletsQuery(mapped, query)
-	return buildWalletsResponse(window, total, query), nil
+	return WalletsResponse{
+		Items:          mapWalletReadModelsFromApp(response.Items),
+		Wallets:        mapWalletReadModelsFromApp(response.Wallets),
+		Total:          response.Total,
+		Limit:          response.Limit,
+		Offset:         response.Offset,
+		Returned:       response.Returned,
+		HasMore:        response.HasMore,
+		NextOffset:     response.NextOffset,
+		PreviousOffset: response.PreviousOffset,
+	}, nil
 }
 
 func (a *Application) CreateWalletLinkChallenge(ctx context.Context, userID, address, chain string) (WalletLinkChallengeResponse, error) {
-	if a == nil {
-		return WalletLinkChallengeResponse{}, ErrApplicationNotConfigured
-	}
-	linkSvc := NewWalletLinkingService(ptrWalletChallengeService(a.challengeService()), a.WalletIdentities)
-	challenge, err := linkSvc.CreateChallenge(ctx, userID, address, chain)
+	response, err := a.inner.CreateWalletLinkChallenge(ctx, userID, address, chain)
 	if err != nil {
-		return WalletLinkChallengeResponse{}, err
+		return WalletLinkChallengeResponse{}, normalizeApplicationError(err)
 	}
-	return WalletLinkChallengeResponse{Challenge: challenge}, nil
+
+	return WalletLinkChallengeResponse{
+		Challenge: mapWalletChallengeFromDomain(response.Challenge),
+	}, nil
 }
 
 func (a *Application) VerifyWalletLink(ctx context.Context, userID, challengeID, address, signature string) (WalletLinkVerifyResponse, error) {
-	if a == nil {
-		return WalletLinkVerifyResponse{}, ErrApplicationNotConfigured
-	}
-	linkSvc := NewWalletLinkingService(ptrWalletChallengeService(a.challengeService()), a.WalletIdentities)
-	result, err := linkSvc.VerifyAndLink(ctx, userID, challengeID, address, signature)
+	response, err := a.inner.VerifyWalletLink(ctx, userID, challengeID, address, signature)
 	if err != nil {
-		return WalletLinkVerifyResponse{}, err
+		return WalletLinkVerifyResponse{}, normalizeApplicationError(err)
 	}
+
 	return WalletLinkVerifyResponse{
-		LinkedWallet: result.Linked,
-		Wallets:      result.Wallets,
-		Challenge:    result.Challenge,
+		LinkedWallet: mapWalletIdentityFromDomain(response.LinkedWallet),
+		Wallets:      mapWalletIdentitiesFromDomain(response.Wallets),
+		Challenge:    mapWalletChallengeFromDomain(response.Challenge),
 	}, nil
 }
 
 func (a *Application) CreateWalletAccountMergeChallenge(ctx context.Context, userID, address, chain string) (WalletAccountMergeChallengeResponse, error) {
-	if a == nil {
-		return WalletAccountMergeChallengeResponse{}, ErrApplicationNotConfigured
-	}
-	mergeSvc := NewWalletAccountMergeService(ptrWalletChallengeService(a.challengeService()), a.WalletIdentities)
-	challenge, err := mergeSvc.CreateChallenge(ctx, userID, address, chain)
+	response, err := a.inner.CreateWalletAccountMergeChallenge(ctx, userID, address, chain)
 	if err != nil {
-		return WalletAccountMergeChallengeResponse{}, err
+		return WalletAccountMergeChallengeResponse{}, normalizeApplicationError(err)
 	}
-	return WalletAccountMergeChallengeResponse{Challenge: challenge}, nil
+
+	return WalletAccountMergeChallengeResponse{
+		Challenge: mapWalletChallengeFromDomain(response.Challenge),
+	}, nil
 }
 
 func (a *Application) VerifyWalletAccountMerge(ctx context.Context, userID, challengeID, address, signature string) (WalletAccountMergeVerifyResponse, error) {
-	if a == nil {
-		return WalletAccountMergeVerifyResponse{}, ErrApplicationNotConfigured
-	}
-	mergeSvc := NewWalletAccountMergeService(ptrWalletChallengeService(a.challengeService()), a.WalletIdentities)
-	result, err := mergeSvc.VerifyAndMerge(ctx, userID, challengeID, address, signature)
+	response, err := a.inner.VerifyWalletAccountMerge(ctx, userID, challengeID, address, signature)
 	if err != nil {
-		return WalletAccountMergeVerifyResponse{}, err
+		return WalletAccountMergeVerifyResponse{}, normalizeApplicationError(err)
 	}
+
 	return WalletAccountMergeVerifyResponse{
-		MergedWallet: result.MergedWallet,
-		Wallets:      result.Wallets,
-		Challenge:    result.Challenge,
-		SourceUserID: result.SourceUserID,
-		TargetUserID: result.TargetUserID,
+		MergedWallet: mapWalletIdentityFromDomain(response.MergedWallet),
+		Wallets:      mapWalletIdentitiesFromDomain(response.Wallets),
+		Challenge:    mapWalletChallengeFromDomain(response.Challenge),
+		SourceUserID: response.SourceUserID,
+		TargetUserID: response.TargetUserID,
 	}, nil
 }
 
 func (a *Application) SetPrimaryWallet(ctx context.Context, userID, address string) (WalletPrimarySetResponse, error) {
-	if a == nil {
-		return WalletPrimarySetResponse{}, ErrApplicationNotConfigured
-	}
-	svc := NewWalletPrimaryService(a.WalletIdentities)
-	result, err := svc.SetPrimary(ctx, userID, address)
+	response, err := a.inner.SetPrimaryWallet(ctx, userID, address)
 	if err != nil {
-		return WalletPrimarySetResponse{}, err
+		return WalletPrimarySetResponse{}, normalizeApplicationError(err)
 	}
+
 	return WalletPrimarySetResponse{
-		PrimaryWallet: result.Primary,
-		Wallets:       result.Wallets,
+		PrimaryWallet: mapWalletIdentityFromDomain(response.PrimaryWallet),
+		Wallets:       mapWalletIdentitiesFromDomain(response.Wallets),
 	}, nil
 }
 
 func (a *Application) CheckWalletDetach(ctx context.Context, userID, address string) (WalletDetachCheckResponse, error) {
-	if a == nil {
-		return WalletDetachCheckResponse{}, ErrApplicationNotConfigured
-	}
-	svc := NewWalletDetachService(a.WalletIdentities)
-	result, err := svc.CheckEligibility(ctx, userID, address)
+	response, err := a.inner.CheckWalletDetach(ctx, userID, address)
 	if err != nil {
-		return WalletDetachCheckResponse{}, err
+		return WalletDetachCheckResponse{}, normalizeApplicationError(err)
 	}
+
 	return WalletDetachCheckResponse{
-		WalletAddress:    result.WalletAddress,
-		Eligible:         result.Eligible,
-		IsPrimary:        result.IsPrimary,
-		OwnedWalletCount: result.OwnedWalletCount,
-		Reasons:          result.Reasons,
+		WalletAddress:    response.WalletAddress,
+		Eligible:         response.Eligible,
+		IsPrimary:        response.IsPrimary,
+		OwnedWalletCount: response.OwnedWalletCount,
+		Reasons:          response.Reasons,
 	}, nil
 }
 
 func (a *Application) ExecuteWalletDetach(ctx context.Context, userID, address string) (WalletDetachExecuteResponse, error) {
-	if a == nil {
-		return WalletDetachExecuteResponse{}, ErrApplicationNotConfigured
+	response, err := a.inner.ExecuteWalletDetach(ctx, userID, address)
+
+	out := WalletDetachExecuteResponse{
+		DetachedWallet: mapWalletIdentityFromDomain(response.DetachedWallet),
+		Wallets:        mapWalletIdentitiesFromDomain(response.Wallets),
+		Check:          mapWalletDetachCheckFromApp(response.Check),
 	}
-	svc := NewWalletDetachService(a.WalletIdentities)
-	result, err := svc.Execute(ctx, userID, address)
-	response := WalletDetachExecuteResponse{}
-	if result != nil {
-		response.DetachedWallet = result.Detached
-		response.Wallets = result.Wallets
-		if result.Check != nil {
-			response.Check = &WalletDetachCheckResponse{
-				WalletAddress:    result.Check.WalletAddress,
-				Eligible:         result.Check.Eligible,
-				IsPrimary:        result.Check.IsPrimary,
-				OwnedWalletCount: result.Check.OwnedWalletCount,
-				Reasons:          result.Check.Reasons,
-			}
-		}
+
+	if err != nil {
+		return out, normalizeApplicationError(err)
 	}
-	return response, err
+
+	return out, nil
 }
 
-func ptrWalletChallengeService(s WalletChallengeService) *WalletChallengeService {
-	return &s
+type walletChallengeStoreAdapter struct {
+	store         WalletChallengeStore
+	publicBaseURL string
+	ttl           time.Duration
+}
+
+func newWalletChallengeStoreAdapter(
+	store WalletChallengeStore,
+	publicBaseURL string,
+	ttl time.Duration,
+) authdomain.WalletChallengeStore {
+	if store == nil {
+		return nil
+	}
+	return &walletChallengeStoreAdapter{
+		store:         store,
+		publicBaseURL: publicBaseURL,
+		ttl:           ttl,
+	}
+}
+
+func (a *walletChallengeStoreAdapter) Create(ctx context.Context, address, chain string, ttl time.Duration) (*authdomain.WalletChallenge, error) {
+	svc := NewWalletChallengeService(a.store, a.publicBaseURL, ttl)
+	challenge, err := svc.Create(ctx, address, chain)
+	if err != nil {
+		return nil, err
+	}
+	return mapWalletChallengeToDomain(challenge), nil
+}
+
+func (a *walletChallengeStoreAdapter) CreateWithOptions(ctx context.Context, address, chain string, opts authdomain.WalletChallengeOptions) (*authdomain.WalletChallenge, error) {
+	svc := NewWalletChallengeService(a.store, a.publicBaseURL, a.ttl)
+	challenge, err := svc.CreateWithOptions(ctx, address, chain, WalletChallengeOptions{
+		Purpose:           opts.Purpose,
+		RequestedByUserID: opts.RequestedByUserID,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return mapWalletChallengeToDomain(challenge), nil
+}
+
+func (a *walletChallengeStoreAdapter) Get(ctx context.Context, challengeID string) (*authdomain.WalletChallenge, error) {
+	svc := NewWalletChallengeService(a.store, a.publicBaseURL, a.ttl)
+	challenge, err := svc.Get(ctx, challengeID)
+	if err != nil {
+		return nil, err
+	}
+	return mapWalletChallengeToDomain(challenge), nil
+}
+
+func (a *walletChallengeStoreAdapter) MarkUsed(ctx context.Context, challengeID string, usedAt time.Time) error {
+	svc := NewWalletChallengeService(a.store, a.publicBaseURL, a.ttl)
+	_, err := svc.MarkUsed(ctx, challengeID, usedAt)
+	return err
+}
+
+func normalizeApplicationError(err error) error {
+	switch {
+	case err == nil:
+		return nil
+	case errors.Is(err, authapp.ErrInvalidCredentials):
+		return ErrInvalidCredentials
+	case errors.Is(err, authapp.ErrUnauthorized):
+		return ErrUnauthorized
+	case errors.Is(err, authapp.ErrInvalidWalletAddress):
+		return ErrInvalidWalletAddress
+	case errors.Is(err, authapp.ErrChallengeStore):
+		return ErrChallengeStore
+	case errors.Is(err, authapp.ErrChallengeExpired):
+		return ErrChallengeExpired
+	case errors.Is(err, authapp.ErrChallengeUsed):
+		return ErrChallengeUsed
+	case errors.Is(err, authapp.ErrWalletChallengeNotFound):
+		return ErrWalletChallengeNotFound
+	case errors.Is(err, authapp.ErrWalletIdentityNotFound):
+		return ErrWalletIdentityNotFound
+	case errors.Is(err, authapp.ErrWalletIdentityAlreadyLinked):
+		return ErrWalletIdentityAlreadyLinked
+	case errors.Is(err, authapp.ErrWalletAlreadyLinkedToUser):
+		return ErrWalletAlreadyLinkedToUser
+	case errors.Is(err, authapp.ErrWalletLinkChallengeMismatch):
+		return ErrWalletLinkChallengeMismatch
+	case errors.Is(err, authapp.ErrWalletChallengePurpose):
+		return ErrWalletChallengePurpose
+	case errors.Is(err, authapp.ErrWalletMergeSourceNotLinked):
+		return ErrWalletMergeSourceNotLinked
+	case errors.Is(err, authapp.ErrWalletMergeSameUser):
+		return ErrWalletMergeSameUser
+	case errors.Is(err, authapp.ErrWalletNotOwnedByUser):
+		return ErrWalletNotOwnedByUser
+	case errors.Is(err, authapp.ErrWalletDetachNotEligible):
+		return ErrWalletDetachNotEligible
+	case errors.Is(err, authapp.ErrInvalidWalletSignature):
+		return ErrInvalidWalletSignature
+	case errors.Is(err, authapp.ErrApplicationNotConfigured):
+		return ErrApplicationNotConfigured
+	case errors.Is(err, authapp.ErrWalletIdentityStore):
+		return ErrWalletIdentityStore
+	default:
+		return err
+	}
+}
+
+func mapSessionViewFromApp(v *authapp.SessionView) *SessionView {
+	if v == nil {
+		return nil
+	}
+	return &SessionView{
+		Authenticated: v.Authenticated,
+		TokenType:     v.TokenType,
+		UserID:        v.UserID,
+		Email:         v.Email,
+		WalletID:      v.WalletID,
+		WalletAddress: v.WalletAddress,
+		AuthMethod:    v.AuthMethod,
+		Chain:         v.Chain,
+		Subject:       v.Subject,
+		Issuer:        v.Issuer,
+		ExpiresAt:     v.ExpiresAt,
+		User:          v.User,
+	}
+}
+
+func mapProfileViewFromApp(v *authapp.ProfileView) *ProfileView {
+	if v == nil {
+		return nil
+	}
+
+	wallets := make([]*ProfileWalletView, 0, len(v.Wallets))
+	for _, wallet := range v.Wallets {
+		wallets = append(wallets, mapProfileWalletViewFromApp(wallet))
+	}
+
+	return &ProfileView{
+		User:                v.User,
+		UserID:              v.UserID,
+		AuthMethod:          v.AuthMethod,
+		WalletID:            v.WalletID,
+		WalletAddress:       v.WalletAddress,
+		Chain:               v.Chain,
+		PrimaryWallet:       mapProfileWalletViewFromApp(v.PrimaryWallet),
+		Wallets:             wallets,
+		WalletCount:         v.WalletCount,
+		ActiveWalletCount:   v.ActiveWalletCount,
+		DetachedWalletCount: v.DetachedWalletCount,
+		HasWalletSession:    v.HasWalletSession,
+	}
+}
+
+func mapProfileWalletViewFromApp(v *authapp.ProfileWalletView) *ProfileWalletView {
+	if v == nil {
+		return nil
+	}
+	return &ProfileWalletView{
+		ID:         v.ID,
+		Address:    v.Address,
+		IsPrimary:  v.IsPrimary,
+		Status:     v.Status,
+		LinkedAt:   v.LinkedAt,
+		DetachedAt: v.DetachedAt,
+	}
+}
+
+func mapWalletReadModelsFromApp(items []*authapp.WalletReadModel) []*WalletReadModel {
+	out := make([]*WalletReadModel, 0, len(items))
+	for _, item := range items {
+		if item == nil {
+			out = append(out, nil)
+			continue
+		}
+		out = append(out, &WalletReadModel{
+			ID:                 item.ID,
+			Address:            item.Address,
+			UserID:             item.UserID,
+			LinkedAt:           item.LinkedAt,
+			DetachedAt:         item.DetachedAt,
+			IsPrimary:          item.IsPrimary,
+			Status:             item.Status,
+			CanSetPrimary:      item.CanSetPrimary,
+			CanDetach:          item.CanDetach,
+			DetachBlockReasons: item.DetachBlockReasons,
+		})
+	}
+	return out
+}
+
+func mapWalletDetachCheckFromApp(v *authapp.WalletDetachCheckResponse) *WalletDetachCheckResponse {
+	if v == nil {
+		return nil
+	}
+	return &WalletDetachCheckResponse{
+		WalletAddress:    v.WalletAddress,
+		Eligible:         v.Eligible,
+		IsPrimary:        v.IsPrimary,
+		OwnedWalletCount: v.OwnedWalletCount,
+		Reasons:          v.Reasons,
+	}
+}
+
+func mapWalletChallengeToDomain(ch *WalletChallenge) *authdomain.WalletChallenge {
+	if ch == nil {
+		return nil
+	}
+	return &authdomain.WalletChallenge{
+		ID:                ch.ID,
+		Address:           ch.Address,
+		Chain:             ch.Chain,
+		Nonce:             ch.Nonce,
+		Message:           ch.Message,
+		Purpose:           ch.Purpose,
+		RequestedByUserID: ch.RequestedByUserID,
+		IssuedAt:          ch.IssuedAt,
+		ExpiresAt:         ch.ExpiresAt,
+		UsedAt:            ch.UsedAt,
+	}
+}
+
+func mapWalletChallengeFromDomain(ch *authdomain.WalletChallenge) *WalletChallenge {
+	if ch == nil {
+		return nil
+	}
+	return &WalletChallenge{
+		ID:                ch.ID,
+		Address:           ch.Address,
+		Chain:             ch.Chain,
+		Nonce:             ch.Nonce,
+		Message:           ch.Message,
+		Purpose:           ch.Purpose,
+		RequestedByUserID: ch.RequestedByUserID,
+		IssuedAt:          ch.IssuedAt,
+		ExpiresAt:         ch.ExpiresAt,
+		UsedAt:            ch.UsedAt,
+	}
+}
+
+func mapWalletIdentityFromDomain(w *authdomain.WalletIdentity) *WalletIdentity {
+	if w == nil {
+		return nil
+	}
+	return &WalletIdentity{
+		ID:         w.ID,
+		Address:    w.Address,
+		UserID:     w.UserID,
+		LinkedAt:   w.LinkedAt,
+		DetachedAt: w.DetachedAt,
+		IsPrimary:  w.IsPrimary,
+	}
+}
+
+func mapWalletIdentitiesFromDomain(items []*authdomain.WalletIdentity) []*WalletIdentity {
+	out := make([]*WalletIdentity, 0, len(items))
+	for _, item := range items {
+		out = append(out, mapWalletIdentityFromDomain(item))
+	}
+	return out
 }
