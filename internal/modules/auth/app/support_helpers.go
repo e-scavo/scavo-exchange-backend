@@ -408,3 +408,29 @@ func buildWalletsResponse(window []*WalletReadModel, total int, q WalletsQuery) 
 		PreviousOffset: previousOffset,
 	}
 }
+
+// Exported compatibility wrappers for root auth package cleanup.
+
+func BuildSessionViewWithUser(claims *coreauth.Claims, user *usermod.User) *SessionView {
+	return buildSessionViewWithUser(claims, user)
+}
+
+func BuildProfileView(ctx context.Context, claims *coreauth.Claims, users *usermod.Service, walletStore authdomain.WalletIdentityStore) (*ProfileView, error) {
+	return buildProfileView(ctx, claims, users, walletStore)
+}
+
+func BuildProfileViewWithUser(ctx context.Context, claims *coreauth.Claims, user *usermod.User, walletStore authdomain.WalletIdentityStore) (*ProfileView, error) {
+	return buildProfileViewWithUser(ctx, claims, user, walletStore)
+}
+
+func MapWalletIdentityToProfileWallet(wallet *authdomain.WalletIdentity) *ProfileWalletView {
+	return mapWalletIdentityToProfileWallet(wallet)
+}
+
+func ListWalletReadModelsForUser(ctx context.Context, userID string, store authdomain.WalletIdentityStore) ([]*WalletReadModel, error) {
+	return listWalletReadModelsForUser(ctx, userID, store)
+}
+
+func BuildBootstrapWalletsView(wallets []*WalletReadModel) BootstrapWalletsView {
+	return buildBootstrapWalletsView(wallets)
+}
