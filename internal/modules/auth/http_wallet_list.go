@@ -6,48 +6,14 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"time"
 
 	coreerrs "github.com/e-scavo/scavo-exchange-backend/internal/core/errs"
+	authapp "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/app"
 )
 
-type WalletReadModel struct {
-	ID                 string     `json:"id"`
-	Address            string     `json:"address"`
-	UserID             string     `json:"user_id,omitempty"`
-	LinkedAt           *time.Time `json:"linked_at,omitempty"`
-	DetachedAt         *time.Time `json:"detached_at,omitempty"`
-	IsPrimary          bool       `json:"is_primary"`
-	Status             string     `json:"status"`
-	CanSetPrimary      bool       `json:"can_set_primary"`
-	CanDetach          bool       `json:"can_detach"`
-	DetachBlockReasons []string   `json:"detach_block_reasons"`
-}
-
-type WalletsResponse struct {
-	Items          []*WalletReadModel `json:"items"`
-	Wallets        []*WalletReadModel `json:"wallets"`
-	Total          int                `json:"total"`
-	Limit          int                `json:"limit"`
-	Offset         int                `json:"offset"`
-	Returned       int                `json:"returned"`
-	HasMore        bool               `json:"has_more"`
-	NextOffset     *int               `json:"next_offset,omitempty"`
-	PreviousOffset *int               `json:"previous_offset,omitempty"`
-}
-
-type WalletsQuery struct {
-	Status         string
-	Primary        *bool
-	Sort           string
-	Order          string
-	Limit          int
-	Offset         int
-	SortProvided   bool
-	OrderProvided  bool
-	LimitProvided  bool
-	OffsetProvided bool
-}
+type WalletReadModel = authapp.WalletReadModel
+type WalletsResponse = authapp.WalletsResponse
+type WalletsQuery = authapp.WalletsQuery
 
 func mapWalletIdentityToReadModel(wallet *WalletIdentity) *WalletReadModel {
 	if wallet == nil {
