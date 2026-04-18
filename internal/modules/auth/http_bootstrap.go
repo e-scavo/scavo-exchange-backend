@@ -1,55 +1,16 @@
 package auth
 
 import (
-	"context"
 	"errors"
 	"net/http"
 
 	coreerrs "github.com/e-scavo/scavo-exchange-backend/internal/core/errs"
-
-	usermod "github.com/e-scavo/scavo-exchange-backend/internal/modules/user"
+	authapp "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/app"
 	usersettingsmod "github.com/e-scavo/scavo-exchange-backend/internal/modules/usersettings"
 )
 
-type BootstrapWalletsView struct {
-	Items []*WalletReadModel `json:"items"`
-	Total int                `json:"total"`
-}
-
-func buildBootstrapWalletsView(wallets []*WalletReadModel) BootstrapWalletsView {
-	if wallets == nil {
-		wallets = []*WalletReadModel{}
-	}
-
-	return BootstrapWalletsView{
-		Items: wallets,
-		Total: len(wallets),
-	}
-}
-
-type BootstrapResponse struct {
-	Session  *SessionView         `json:"session"`
-	User     *usermod.User        `json:"user,omitempty"`
-	Profile  *ProfileView         `json:"profile,omitempty"`
-	Settings usersettingsmod.View `json:"settings"`
-	Wallets  BootstrapWalletsView `json:"wallets"`
-}
-
-func listWalletReadModelsForUser(ctx context.Context, userID string, store WalletIdentityStore) ([]*WalletReadModel, error) {
-	if store == nil || userID == "" {
-		return []*WalletReadModel{}, nil
-	}
-
-	wallets, err := store.ListByUser(ctx, userID)
-	if err != nil {
-		return nil, err
-	}
-	if wallets == nil {
-		wallets = []*WalletIdentity{}
-	}
-
-	return mapWalletIdentitiesToReadModels(wallets), nil
-}
+type BootstrapWalletsView = authapp.BootstrapWalletsView
+type BootstrapResponse = authapp.BootstrapResponse
 
 func (h HTTPHandlers) Bootstrap(w http.ResponseWriter, r *http.Request) {
 	claims, ok := h.requireClaims(w, r)

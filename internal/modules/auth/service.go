@@ -8,6 +8,7 @@ import (
 	"time"
 
 	coreauth "github.com/e-scavo/scavo-exchange-backend/internal/core/auth"
+	authapp "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/app"
 	usermod "github.com/e-scavo/scavo-exchange-backend/internal/modules/user"
 )
 
@@ -33,7 +34,8 @@ type LoginResult struct {
 	AuthMethod    string
 }
 
-type SessionView struct {
+type SessionView = authapp.SessionView
+type SessionViewOld struct {
 	Authenticated bool          `json:"authenticated"`
 	TokenType     string        `json:"token_type"`
 	UserID        string        `json:"user_id"`
