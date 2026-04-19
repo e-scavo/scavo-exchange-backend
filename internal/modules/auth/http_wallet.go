@@ -6,7 +6,7 @@ import (
 	"time"
 
 	coreerrs "github.com/e-scavo/scavo-exchange-backend/internal/core/errs"
-
+	authapp "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/app"
 	usermod "github.com/e-scavo/scavo-exchange-backend/internal/modules/user"
 )
 
@@ -43,9 +43,7 @@ type WalletLinkChallengeRequest struct {
 	Chain   string `json:"chain,omitempty"`
 }
 
-type WalletLinkChallengeResponse struct {
-	Challenge *WalletChallenge `json:"challenge"`
-}
+type WalletLinkChallengeResponse = authapp.WalletLinkChallengeResponse
 
 type WalletLinkVerifyRequest struct {
 	ChallengeID string `json:"challenge_id"`
@@ -53,20 +51,14 @@ type WalletLinkVerifyRequest struct {
 	Signature   string `json:"signature"`
 }
 
-type WalletLinkVerifyResponse struct {
-	LinkedWallet *WalletIdentity   `json:"linked_wallet,omitempty"`
-	Wallets      []*WalletIdentity `json:"wallets"`
-	Challenge    *WalletChallenge  `json:"challenge,omitempty"`
-}
+type WalletLinkVerifyResponse = authapp.WalletLinkVerifyResponse
 
 type WalletAccountMergeChallengeRequest struct {
 	Address string `json:"address"`
 	Chain   string `json:"chain,omitempty"`
 }
 
-type WalletAccountMergeChallengeResponse struct {
-	Challenge *WalletChallenge `json:"challenge"`
-}
+type WalletAccountMergeChallengeResponse = authapp.WalletAccountMergeChallengeResponse
 
 type WalletAccountMergeVerifyRequest struct {
 	ChallengeID string `json:"challenge_id"`
@@ -74,44 +66,25 @@ type WalletAccountMergeVerifyRequest struct {
 	Signature   string `json:"signature"`
 }
 
-type WalletAccountMergeVerifyResponse struct {
-	MergedWallet *WalletIdentity   `json:"merged_wallet,omitempty"`
-	Wallets      []*WalletIdentity `json:"wallets"`
-	Challenge    *WalletChallenge  `json:"challenge,omitempty"`
-	SourceUserID string            `json:"source_user_id"`
-	TargetUserID string            `json:"target_user_id"`
-}
+type WalletAccountMergeVerifyResponse = authapp.WalletAccountMergeVerifyResponse
 
 type WalletDetachCheckRequest struct {
 	Address string `json:"wallet_address"`
 }
 
-type WalletDetachCheckResponse struct {
-	WalletAddress    string   `json:"wallet_address"`
-	Eligible         bool     `json:"eligible"`
-	IsPrimary        bool     `json:"is_primary"`
-	OwnedWalletCount int      `json:"owned_wallet_count"`
-	Reasons          []string `json:"reasons"`
-}
+type WalletDetachCheckResponse = authapp.WalletDetachCheckResponse
 
 type WalletDetachExecuteRequest struct {
 	Address string `json:"wallet_address"`
 }
 
-type WalletDetachExecuteResponse struct {
-	DetachedWallet *WalletIdentity            `json:"detached_wallet,omitempty"`
-	Wallets        []*WalletIdentity          `json:"wallets"`
-	Check          *WalletDetachCheckResponse `json:"check,omitempty"`
-}
+type WalletDetachExecuteResponse = authapp.WalletDetachExecuteResponse
 
 type WalletPrimarySetRequest struct {
 	Address string `json:"wallet_address"`
 }
 
-type WalletPrimarySetResponse struct {
-	PrimaryWallet *WalletIdentity   `json:"primary_wallet,omitempty"`
-	Wallets       []*WalletIdentity `json:"wallets"`
-}
+type WalletPrimarySetResponse = authapp.WalletPrimarySetResponse
 
 func (h HTTPHandlers) WalletChallenge(w http.ResponseWriter, r *http.Request) {
 	var req WalletChallengeRequest
