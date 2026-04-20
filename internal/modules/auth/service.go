@@ -34,21 +34,9 @@ type LoginResult struct {
 	AuthMethod    string
 }
 
+// SessionView already has a stable canonical shape in auth/app.
+// For root compatibility, keep it as an alias here.
 type SessionView = authapp.SessionView
-type SessionViewOld struct {
-	Authenticated bool          `json:"authenticated"`
-	TokenType     string        `json:"token_type"`
-	UserID        string        `json:"user_id"`
-	Email         string        `json:"email,omitempty"`
-	WalletID      string        `json:"wallet_id,omitempty"`
-	WalletAddress string        `json:"wallet_address,omitempty"`
-	AuthMethod    string        `json:"auth_method,omitempty"`
-	Chain         string        `json:"chain,omitempty"`
-	Subject       string        `json:"subject,omitempty"`
-	Issuer        string        `json:"issuer,omitempty"`
-	ExpiresAt     *time.Time    `json:"expires_at,omitempty"`
-	User          *usermod.User `json:"user,omitempty"`
-}
 
 func NewService(tokens *coreauth.TokenService, users *usermod.Service, ttl time.Duration) *Service {
 	if ttl <= 0 {
@@ -221,42 +209,20 @@ func (s *Service) ResolveSessionClaims(ctx context.Context, claims *coreauth.Cla
 	return buildSessionViewWithUser(claims, user), nil
 }
 
+// Keep this helper in root for now because service.go still owns real runtime
+// behavior in 0.11.4C3.1a. Delegate the canonical shape building to auth/app.
 func buildSessionViewWithUser(claims *coreauth.Claims, user *usermod.User) *SessionView {
-	ctxView := buildAuthenticatedContextView(claims)
-
-	var expiresAt *time.Time
-	if claims != nil && claims.ExpiresAt != nil {
-		ts := claims.ExpiresAt.Time.UTC()
-		expiresAt = &ts
-	}
-
-	view := &SessionView{
-		Authenticated: true,
-		TokenType:     "Bearer",
-		UserID:        ctxView.UserID,
-		Email:         ctxView.Email,
-		WalletID:      ctxView.WalletID,
-		WalletAddress: ctxView.WalletAddress,
-		AuthMethod:    ctxView.AuthMethod,
-		Chain:         ctxView.Chain,
-		ExpiresAt:     expiresAt,
-		User:          user,
-	}
-	if claims != nil {
-		view.Subject = strings.TrimSpace(claims.Subject)
-		view.Issuer = strings.TrimSpace(claims.Issuer)
-	}
-	if view.Subject == "" {
-		view.Subject = view.UserID
-	}
-
-	return view
+	return authapp.BuildSessionViewWithUser(claims, user)
 }
 
+// Root compatibility helper still needed by auth_context.go and current service
+// flows. This remains intentionally local in 0.11.4C3.1a.
 func normalizeEmail(email string) string {
 	return strings.TrimSpace(strings.ToLower(email))
 }
 
+// Root compatibility wallet user helpers remain local for now because
+// ResolveCurrentUserClaims and wallet login flows still depend on them directly.
 func walletUser(address string) *usermod.User {
 	now := time.Now().UTC()
 	address = normalizeWalletAddress(address)
