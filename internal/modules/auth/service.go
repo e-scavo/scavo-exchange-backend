@@ -50,6 +50,13 @@ func NewService(tokens *coreauth.TokenService, users *usermod.Service, ttl time.
 	}
 }
 
+func (s *Service) appService() *authapp.Service {
+	if s == nil {
+		return authapp.NewService(nil, nil, 0)
+	}
+	return authapp.NewService(s.tokens, s.users, s.ttl)
+}
+
 func (s *Service) LoginDev(ctx context.Context, email, password string) (*LoginResult, error) {
 	if s == nil || s.tokens == nil {
 		return nil, fmt.Errorf("token service not configured")
@@ -183,40 +190,29 @@ func (s *Service) ResolveCurrentUserClaims(ctx context.Context, claims *coreauth
 }
 
 func (s *Service) ResolveSession(ctx context.Context, token string) (*SessionView, error) {
-	if s == nil || s.tokens == nil {
-		return nil, ErrUnauthorized
+	session, err := s.appService().ResolveSession(ctx, token)
+	if err != nil {
+		return nil, normalizeServiceError(err)
 	}
-
-	token = strings.TrimSpace(token)
-	if token == "" {
-		return nil, ErrUnauthorized
-	}
-
-	claims, err := s.tokens.Parse(token)
-	if err != nil || claims == nil || strings.TrimSpace(claims.UserID) == "" {
-		return nil, ErrUnauthorized
-	}
-
-	return s.ResolveSessionClaims(ctx, claims)
+	return session, nil
 }
 
 func (s *Service) ResolveSessionClaims(ctx context.Context, claims *coreauth.Claims) (*SessionView, error) {
-	user, err := s.ResolveCurrentUserClaims(ctx, claims)
+	session, err := s.appService().ResolveSessionClaims(ctx, claims)
 	if err != nil {
-		return nil, err
+		return nil, normalizeServiceError(err)
 	}
-
-	return buildSessionViewWithUser(claims, user), nil
+	return session, nil
 }
 
 // Keep this helper in root for now because service.go still owns real runtime
-// behavior in 0.11.4C3.1a. Delegate the canonical shape building to auth/app.
+// behavior for login/current-user paths in 0.11.4C3.1b1.
 func buildSessionViewWithUser(claims *coreauth.Claims, user *usermod.User) *SessionView {
 	return authapp.BuildSessionViewWithUser(claims, user)
 }
 
 // Root compatibility helper still needed by auth_context.go and current service
-// flows. This remains intentionally local in 0.11.4C3.1a.
+// flows. This remains intentionally local in 0.11.4C3.1b1.
 func normalizeEmail(email string) string {
 	return strings.TrimSpace(strings.ToLower(email))
 }
@@ -233,5 +229,20 @@ func walletUser(address string) *usermod.User {
 		CreatedAt:   now,
 		UpdatedAt:   now,
 		LastLoginAt: &now,
+	}
+}
+
+func normalizeServiceError(err error) error {
+	switch {
+	case err == nil:
+		return nil
+	case errors.Is(err, authapp.ErrInvalidCredentials):
+		return ErrInvalidCredentials
+	case errors.Is(err, authapp.ErrUnauthorized):
+		return ErrUnauthorized
+	case errors.Is(err, authapp.ErrInvalidWalletAddress):
+		return ErrInvalidWalletAddress
+	default:
+		return err
 	}
 }
