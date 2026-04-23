@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	coreauth "github.com/e-scavo/scavo-exchange-backend/internal/core/auth"
 	coreerrs "github.com/e-scavo/scavo-exchange-backend/internal/core/errs"
 	authapp "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/app"
 	usermod "github.com/e-scavo/scavo-exchange-backend/internal/modules/user"
@@ -100,12 +101,7 @@ func (h HTTPHandlers) WalletChallenge(w http.ResponseWriter, r *http.Request) {
 	svc := NewWalletChallengeService(h.Challenges, h.PublicBaseURL, challengeTTL)
 	challenge, err := svc.Create(r.Context(), req.Address, req.Chain)
 	if err != nil {
-		switch {
-		case errors.Is(err, ErrInvalidWalletAddress):
-			writeAppErrorJSON(w, coreerrs.WalletInvalidAddress())
-		default:
-			writeAppErrorJSON(w, coreerrs.WalletChallengeError(nil))
-		}
+		writeWalletChallengeError(w, err)
 		return
 	}
 
@@ -129,22 +125,7 @@ func (h HTTPHandlers) WalletVerify(w http.ResponseWriter, r *http.Request) {
 
 	result, challenge, err := verifySvc.VerifyAndLogin(r.Context(), req.ChallengeID, req.Address, req.Signature)
 	if err != nil {
-		switch {
-		case errors.Is(err, ErrInvalidWalletAddress):
-			writeAppErrorJSON(w, coreerrs.WalletInvalidAddress())
-		case errors.Is(err, ErrInvalidWalletSignature):
-			writeAppErrorJSON(w, coreerrs.WalletInvalidSignature())
-		case errors.Is(err, ErrWalletChallengeNotFound):
-			writeAppErrorJSON(w, coreerrs.WalletChallengeNotFound())
-		case errors.Is(err, ErrChallengeExpired):
-			writeAppErrorJSON(w, coreerrs.WalletChallengeExpired())
-		case errors.Is(err, ErrChallengeUsed):
-			writeAppErrorJSON(w, coreerrs.WalletChallengeUsed())
-		case errors.Is(err, ErrWalletChallengePurpose):
-			writeAppErrorJSON(w, coreerrs.WalletChallengePurposeMismatch())
-		default:
-			writeAppErrorJSON(w, coreerrs.WalletVerifyError(nil))
-		}
+		writeWalletVerifyError(w, err)
 		return
 	}
 
@@ -170,26 +151,14 @@ func (h HTTPHandlers) WalletVerify(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h HTTPHandlers) WalletLinkChallenge(w http.ResponseWriter, r *http.Request) {
-	claims, ok := h.requireClaims(w, r)
+	claims, req, ok := decodeAuthenticatedWalletRequest[WalletLinkChallengeRequest](h, w, r, 4<<10)
 	if !ok {
-		return
-	}
-
-	var req WalletLinkChallengeRequest
-	if !decodeRequest(w, r, &req, 4<<10) {
 		return
 	}
 
 	response, err := h.Application().CreateWalletLinkChallenge(r.Context(), claims.UserID, req.Address, req.Chain)
 	if err != nil {
-		switch {
-		case errors.Is(err, ErrUnauthorized):
-			writeAppErrorJSON(w, coreerrs.AuthUnauthorized())
-		case errors.Is(err, ErrInvalidWalletAddress):
-			writeAppErrorJSON(w, coreerrs.WalletInvalidAddress())
-		default:
-			writeAppErrorJSON(w, coreerrs.WalletLinkChallengeError(nil))
-		}
+		writeWalletLinkChallengeError(w, err)
 		return
 	}
 
@@ -197,42 +166,14 @@ func (h HTTPHandlers) WalletLinkChallenge(w http.ResponseWriter, r *http.Request
 }
 
 func (h HTTPHandlers) WalletLinkVerify(w http.ResponseWriter, r *http.Request) {
-	claims, ok := h.requireClaims(w, r)
+	claims, req, ok := decodeAuthenticatedWalletRequest[WalletLinkVerifyRequest](h, w, r, 8<<10)
 	if !ok {
-		return
-	}
-
-	var req WalletLinkVerifyRequest
-	if !decodeRequest(w, r, &req, 8<<10) {
 		return
 	}
 
 	response, err := h.Application().VerifyWalletLink(r.Context(), claims.UserID, req.ChallengeID, req.Address, req.Signature)
 	if err != nil {
-		switch {
-		case errors.Is(err, ErrUnauthorized):
-			writeAppErrorJSON(w, coreerrs.AuthUnauthorized())
-		case errors.Is(err, ErrInvalidWalletAddress):
-			writeAppErrorJSON(w, coreerrs.WalletInvalidAddress())
-		case errors.Is(err, ErrInvalidWalletSignature):
-			writeAppErrorJSON(w, coreerrs.WalletInvalidSignature())
-		case errors.Is(err, ErrWalletChallengeNotFound):
-			writeAppErrorJSON(w, coreerrs.WalletChallengeNotFound())
-		case errors.Is(err, ErrChallengeExpired):
-			writeAppErrorJSON(w, coreerrs.WalletChallengeExpired())
-		case errors.Is(err, ErrChallengeUsed):
-			writeAppErrorJSON(w, coreerrs.WalletChallengeUsed())
-		case errors.Is(err, ErrWalletChallengePurpose):
-			writeAppErrorJSON(w, coreerrs.WalletChallengePurposeMismatch())
-		case errors.Is(err, ErrWalletLinkChallengeMismatch):
-			writeAppErrorJSON(w, coreerrs.WalletLinkChallengeUserMismatch())
-		case errors.Is(err, ErrWalletIdentityAlreadyLinked):
-			writeAppErrorJSON(w, coreerrs.WalletAlreadyLinked())
-		case errors.Is(err, ErrWalletAlreadyLinkedToUser):
-			writeAppErrorJSON(w, coreerrs.WalletAlreadyLinkedToUser())
-		default:
-			writeAppErrorJSON(w, coreerrs.WalletLinkVerifyError(nil))
-		}
+		writeWalletLinkVerifyError(w, err)
 		return
 	}
 
@@ -240,26 +181,14 @@ func (h HTTPHandlers) WalletLinkVerify(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h HTTPHandlers) WalletAccountMergeChallenge(w http.ResponseWriter, r *http.Request) {
-	claims, ok := h.requireClaims(w, r)
+	claims, req, ok := decodeAuthenticatedWalletRequest[WalletAccountMergeChallengeRequest](h, w, r, 4<<10)
 	if !ok {
-		return
-	}
-
-	var req WalletAccountMergeChallengeRequest
-	if !decodeRequest(w, r, &req, 4<<10) {
 		return
 	}
 
 	response, err := h.Application().CreateWalletAccountMergeChallenge(r.Context(), claims.UserID, req.Address, req.Chain)
 	if err != nil {
-		switch {
-		case errors.Is(err, ErrUnauthorized):
-			writeAppErrorJSON(w, coreerrs.AuthUnauthorized())
-		case errors.Is(err, ErrInvalidWalletAddress):
-			writeAppErrorJSON(w, coreerrs.WalletInvalidAddress())
-		default:
-			writeAppErrorJSON(w, coreerrs.WalletAccountMergeChallengeError(nil))
-		}
+		writeWalletAccountMergeChallengeError(w, err)
 		return
 	}
 
@@ -267,42 +196,14 @@ func (h HTTPHandlers) WalletAccountMergeChallenge(w http.ResponseWriter, r *http
 }
 
 func (h HTTPHandlers) WalletAccountMergeVerify(w http.ResponseWriter, r *http.Request) {
-	claims, ok := h.requireClaims(w, r)
+	claims, req, ok := decodeAuthenticatedWalletRequest[WalletAccountMergeVerifyRequest](h, w, r, 8<<10)
 	if !ok {
-		return
-	}
-
-	var req WalletAccountMergeVerifyRequest
-	if !decodeRequest(w, r, &req, 8<<10) {
 		return
 	}
 
 	response, err := h.Application().VerifyWalletAccountMerge(r.Context(), claims.UserID, req.ChallengeID, req.Address, req.Signature)
 	if err != nil {
-		switch {
-		case errors.Is(err, ErrUnauthorized):
-			writeAppErrorJSON(w, coreerrs.AuthUnauthorized())
-		case errors.Is(err, ErrInvalidWalletAddress):
-			writeAppErrorJSON(w, coreerrs.WalletInvalidAddress())
-		case errors.Is(err, ErrInvalidWalletSignature):
-			writeAppErrorJSON(w, coreerrs.WalletInvalidSignature())
-		case errors.Is(err, ErrWalletChallengeNotFound):
-			writeAppErrorJSON(w, coreerrs.WalletChallengeNotFound())
-		case errors.Is(err, ErrChallengeExpired):
-			writeAppErrorJSON(w, coreerrs.WalletChallengeExpired())
-		case errors.Is(err, ErrChallengeUsed):
-			writeAppErrorJSON(w, coreerrs.WalletChallengeUsed())
-		case errors.Is(err, ErrWalletChallengePurpose):
-			writeAppErrorJSON(w, coreerrs.WalletChallengePurposeMismatch())
-		case errors.Is(err, ErrWalletLinkChallengeMismatch):
-			writeAppErrorJSON(w, coreerrs.WalletAccountMergeUserMismatch())
-		case errors.Is(err, ErrWalletMergeSourceNotLinked):
-			writeAppErrorJSON(w, coreerrs.WalletAccountMergeSourceNotLinked())
-		case errors.Is(err, ErrWalletMergeSameUser):
-			writeAppErrorJSON(w, coreerrs.WalletAccountMergeNotRequired())
-		default:
-			writeAppErrorJSON(w, coreerrs.WalletAccountMergeVerifyError(nil))
-		}
+		writeWalletAccountMergeVerifyError(w, err)
 		return
 	}
 
@@ -310,30 +211,14 @@ func (h HTTPHandlers) WalletAccountMergeVerify(w http.ResponseWriter, r *http.Re
 }
 
 func (h HTTPHandlers) WalletDetachCheck(w http.ResponseWriter, r *http.Request) {
-	claims, ok := h.requireClaims(w, r)
+	claims, req, ok := decodeAuthenticatedWalletRequest[WalletDetachCheckRequest](h, w, r, 4<<10)
 	if !ok {
-		return
-	}
-
-	var req WalletDetachCheckRequest
-	if !decodeRequest(w, r, &req, 4<<10) {
 		return
 	}
 
 	response, err := h.Application().CheckWalletDetach(r.Context(), claims.UserID, req.Address)
 	if err != nil {
-		switch {
-		case errors.Is(err, ErrUnauthorized):
-			writeAppErrorJSON(w, coreerrs.AuthUnauthorized())
-		case errors.Is(err, ErrInvalidWalletAddress):
-			writeAppErrorJSON(w, coreerrs.WalletInvalidAddress())
-		case errors.Is(err, ErrWalletIdentityNotFound):
-			writeAppErrorJSON(w, coreerrs.WalletNotFound())
-		case errors.Is(err, ErrWalletNotOwnedByUser):
-			writeAppErrorJSON(w, coreerrs.WalletNotOwnedByUser())
-		default:
-			writeAppErrorJSON(w, coreerrs.WalletDetachCheckError(nil))
-		}
+		writeWalletDetachCheckError(w, err)
 		return
 	}
 
@@ -341,32 +226,14 @@ func (h HTTPHandlers) WalletDetachCheck(w http.ResponseWriter, r *http.Request) 
 }
 
 func (h HTTPHandlers) WalletDetach(w http.ResponseWriter, r *http.Request) {
-	claims, ok := h.requireClaims(w, r)
+	claims, req, ok := decodeAuthenticatedWalletRequest[WalletDetachExecuteRequest](h, w, r, 4<<10)
 	if !ok {
-		return
-	}
-
-	var req WalletDetachExecuteRequest
-	if !decodeRequest(w, r, &req, 4<<10) {
 		return
 	}
 
 	response, err := h.Application().ExecuteWalletDetach(r.Context(), claims.UserID, req.Address)
 	if err != nil {
-		switch {
-		case errors.Is(err, ErrUnauthorized):
-			writeAppErrorJSON(w, coreerrs.AuthUnauthorized())
-		case errors.Is(err, ErrInvalidWalletAddress):
-			writeAppErrorJSON(w, coreerrs.WalletInvalidAddress())
-		case errors.Is(err, ErrWalletIdentityNotFound):
-			writeAppErrorJSON(w, coreerrs.WalletNotFound())
-		case errors.Is(err, ErrWalletNotOwnedByUser):
-			writeAppErrorJSON(w, coreerrs.WalletNotOwnedByUser())
-		case errors.Is(err, ErrWalletDetachNotEligible):
-			writeAppErrorJSON(w, coreerrs.WalletCannotDetach(map[string]any{"check": response.Check}))
-		default:
-			writeAppErrorJSON(w, coreerrs.WalletDetachError(nil))
-		}
+		writeWalletDetachError(w, err, response)
 		return
 	}
 
@@ -374,32 +241,182 @@ func (h HTTPHandlers) WalletDetach(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h HTTPHandlers) WalletSetPrimary(w http.ResponseWriter, r *http.Request) {
-	claims, ok := h.requireClaims(w, r)
+	claims, req, ok := decodeAuthenticatedWalletRequest[WalletPrimarySetRequest](h, w, r, 4<<10)
 	if !ok {
-		return
-	}
-
-	var req WalletPrimarySetRequest
-	if !decodeRequest(w, r, &req, 4<<10) {
 		return
 	}
 
 	response, err := h.Application().SetPrimaryWallet(r.Context(), claims.UserID, req.Address)
 	if err != nil {
-		switch {
-		case errors.Is(err, ErrUnauthorized):
-			writeAppErrorJSON(w, coreerrs.AuthUnauthorized())
-		case errors.Is(err, ErrInvalidWalletAddress):
-			writeAppErrorJSON(w, coreerrs.WalletInvalidAddress())
-		case errors.Is(err, ErrWalletIdentityNotFound):
-			writeAppErrorJSON(w, coreerrs.WalletNotFound())
-		case errors.Is(err, ErrWalletNotOwnedByUser):
-			writeAppErrorJSON(w, coreerrs.WalletNotOwnedByUser())
-		default:
-			writeAppErrorJSON(w, coreerrs.WalletPrimarySetError(nil))
-		}
+		writeWalletPrimarySetError(w, err)
 		return
 	}
 
 	writeJSON(w, http.StatusOK, response)
+}
+
+func decodeAuthenticatedWalletRequest[T any](h HTTPHandlers, w http.ResponseWriter, r *http.Request, maxBodyBytes int64) (*coreauth.Claims, T, bool) {
+	var req T
+
+	claims, ok := h.requireClaims(w, r)
+	if !ok {
+		return nil, req, false
+	}
+
+	if !decodeRequest(w, r, &req, maxBodyBytes) {
+		return nil, req, false
+	}
+
+	return claims, req, true
+}
+
+func writeWalletChallengeError(w http.ResponseWriter, err error) {
+	switch {
+	case errors.Is(err, ErrInvalidWalletAddress):
+		writeAppErrorJSON(w, coreerrs.WalletInvalidAddress())
+	default:
+		writeAppErrorJSON(w, coreerrs.WalletChallengeError(nil))
+	}
+}
+
+func writeWalletVerifyError(w http.ResponseWriter, err error) {
+	switch {
+	case errors.Is(err, ErrInvalidWalletAddress):
+		writeAppErrorJSON(w, coreerrs.WalletInvalidAddress())
+	case errors.Is(err, ErrInvalidWalletSignature):
+		writeAppErrorJSON(w, coreerrs.WalletInvalidSignature())
+	case errors.Is(err, ErrWalletChallengeNotFound):
+		writeAppErrorJSON(w, coreerrs.WalletChallengeNotFound())
+	case errors.Is(err, ErrChallengeExpired):
+		writeAppErrorJSON(w, coreerrs.WalletChallengeExpired())
+	case errors.Is(err, ErrChallengeUsed):
+		writeAppErrorJSON(w, coreerrs.WalletChallengeUsed())
+	case errors.Is(err, ErrWalletChallengePurpose):
+		writeAppErrorJSON(w, coreerrs.WalletChallengePurposeMismatch())
+	default:
+		writeAppErrorJSON(w, coreerrs.WalletVerifyError(nil))
+	}
+}
+
+func writeWalletLinkChallengeError(w http.ResponseWriter, err error) {
+	switch {
+	case errors.Is(err, ErrUnauthorized):
+		writeAppErrorJSON(w, coreerrs.AuthUnauthorized())
+	case errors.Is(err, ErrInvalidWalletAddress):
+		writeAppErrorJSON(w, coreerrs.WalletInvalidAddress())
+	default:
+		writeAppErrorJSON(w, coreerrs.WalletLinkChallengeError(nil))
+	}
+}
+
+func writeWalletLinkVerifyError(w http.ResponseWriter, err error) {
+	switch {
+	case errors.Is(err, ErrUnauthorized):
+		writeAppErrorJSON(w, coreerrs.AuthUnauthorized())
+	case errors.Is(err, ErrInvalidWalletAddress):
+		writeAppErrorJSON(w, coreerrs.WalletInvalidAddress())
+	case errors.Is(err, ErrInvalidWalletSignature):
+		writeAppErrorJSON(w, coreerrs.WalletInvalidSignature())
+	case errors.Is(err, ErrWalletChallengeNotFound):
+		writeAppErrorJSON(w, coreerrs.WalletChallengeNotFound())
+	case errors.Is(err, ErrChallengeExpired):
+		writeAppErrorJSON(w, coreerrs.WalletChallengeExpired())
+	case errors.Is(err, ErrChallengeUsed):
+		writeAppErrorJSON(w, coreerrs.WalletChallengeUsed())
+	case errors.Is(err, ErrWalletChallengePurpose):
+		writeAppErrorJSON(w, coreerrs.WalletChallengePurposeMismatch())
+	case errors.Is(err, ErrWalletLinkChallengeMismatch):
+		writeAppErrorJSON(w, coreerrs.WalletLinkChallengeUserMismatch())
+	case errors.Is(err, ErrWalletIdentityAlreadyLinked):
+		writeAppErrorJSON(w, coreerrs.WalletAlreadyLinked())
+	case errors.Is(err, ErrWalletAlreadyLinkedToUser):
+		writeAppErrorJSON(w, coreerrs.WalletAlreadyLinkedToUser())
+	default:
+		writeAppErrorJSON(w, coreerrs.WalletLinkVerifyError(nil))
+	}
+}
+
+func writeWalletAccountMergeChallengeError(w http.ResponseWriter, err error) {
+	switch {
+	case errors.Is(err, ErrUnauthorized):
+		writeAppErrorJSON(w, coreerrs.AuthUnauthorized())
+	case errors.Is(err, ErrInvalidWalletAddress):
+		writeAppErrorJSON(w, coreerrs.WalletInvalidAddress())
+	default:
+		writeAppErrorJSON(w, coreerrs.WalletAccountMergeChallengeError(nil))
+	}
+}
+
+func writeWalletAccountMergeVerifyError(w http.ResponseWriter, err error) {
+	switch {
+	case errors.Is(err, ErrUnauthorized):
+		writeAppErrorJSON(w, coreerrs.AuthUnauthorized())
+	case errors.Is(err, ErrInvalidWalletAddress):
+		writeAppErrorJSON(w, coreerrs.WalletInvalidAddress())
+	case errors.Is(err, ErrInvalidWalletSignature):
+		writeAppErrorJSON(w, coreerrs.WalletInvalidSignature())
+	case errors.Is(err, ErrWalletChallengeNotFound):
+		writeAppErrorJSON(w, coreerrs.WalletChallengeNotFound())
+	case errors.Is(err, ErrChallengeExpired):
+		writeAppErrorJSON(w, coreerrs.WalletChallengeExpired())
+	case errors.Is(err, ErrChallengeUsed):
+		writeAppErrorJSON(w, coreerrs.WalletChallengeUsed())
+	case errors.Is(err, ErrWalletChallengePurpose):
+		writeAppErrorJSON(w, coreerrs.WalletChallengePurposeMismatch())
+	case errors.Is(err, ErrWalletLinkChallengeMismatch):
+		writeAppErrorJSON(w, coreerrs.WalletAccountMergeUserMismatch())
+	case errors.Is(err, ErrWalletMergeSourceNotLinked):
+		writeAppErrorJSON(w, coreerrs.WalletAccountMergeSourceNotLinked())
+	case errors.Is(err, ErrWalletMergeSameUser):
+		writeAppErrorJSON(w, coreerrs.WalletAccountMergeNotRequired())
+	default:
+		writeAppErrorJSON(w, coreerrs.WalletAccountMergeVerifyError(nil))
+	}
+}
+
+func writeWalletDetachCheckError(w http.ResponseWriter, err error) {
+	switch {
+	case errors.Is(err, ErrUnauthorized):
+		writeAppErrorJSON(w, coreerrs.AuthUnauthorized())
+	case errors.Is(err, ErrInvalidWalletAddress):
+		writeAppErrorJSON(w, coreerrs.WalletInvalidAddress())
+	case errors.Is(err, ErrWalletIdentityNotFound):
+		writeAppErrorJSON(w, coreerrs.WalletNotFound())
+	case errors.Is(err, ErrWalletNotOwnedByUser):
+		writeAppErrorJSON(w, coreerrs.WalletNotOwnedByUser())
+	default:
+		writeAppErrorJSON(w, coreerrs.WalletDetachCheckError(nil))
+	}
+}
+
+func writeWalletDetachError(w http.ResponseWriter, err error, response WalletDetachExecuteResponse) {
+	switch {
+	case errors.Is(err, ErrUnauthorized):
+		writeAppErrorJSON(w, coreerrs.AuthUnauthorized())
+	case errors.Is(err, ErrInvalidWalletAddress):
+		writeAppErrorJSON(w, coreerrs.WalletInvalidAddress())
+	case errors.Is(err, ErrWalletIdentityNotFound):
+		writeAppErrorJSON(w, coreerrs.WalletNotFound())
+	case errors.Is(err, ErrWalletNotOwnedByUser):
+		writeAppErrorJSON(w, coreerrs.WalletNotOwnedByUser())
+	case errors.Is(err, ErrWalletDetachNotEligible):
+		writeAppErrorJSON(w, coreerrs.WalletCannotDetach(map[string]any{"check": response.Check}))
+	default:
+		writeAppErrorJSON(w, coreerrs.WalletDetachError(nil))
+	}
+}
+
+func writeWalletPrimarySetError(w http.ResponseWriter, err error) {
+	switch {
+	case errors.Is(err, ErrUnauthorized):
+		writeAppErrorJSON(w, coreerrs.AuthUnauthorized())
+	case errors.Is(err, ErrInvalidWalletAddress):
+		writeAppErrorJSON(w, coreerrs.WalletInvalidAddress())
+	case errors.Is(err, ErrWalletIdentityNotFound):
+		writeAppErrorJSON(w, coreerrs.WalletNotFound())
+	case errors.Is(err, ErrWalletNotOwnedByUser):
+		writeAppErrorJSON(w, coreerrs.WalletNotOwnedByUser())
+	default:
+		writeAppErrorJSON(w, coreerrs.WalletPrimarySetError(nil))
+	}
 }
