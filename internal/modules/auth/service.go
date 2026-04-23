@@ -3,7 +3,6 @@ package auth
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strings"
 	"time"
 
@@ -34,8 +33,6 @@ type LoginResult struct {
 	AuthMethod    string
 }
 
-// SessionView already has a stable canonical shape in auth/app.
-// For root compatibility, keep it as an alias here.
 type SessionView = authapp.SessionView
 
 func NewService(tokens *coreauth.TokenService, users *usermod.Service, ttl time.Duration) *Service {
@@ -58,134 +55,42 @@ func (s *Service) appService() *authapp.Service {
 }
 
 func (s *Service) LoginDev(ctx context.Context, email, password string) (*LoginResult, error) {
-	if s == nil || s.tokens == nil {
-		return nil, fmt.Errorf("token service not configured")
-	}
-
-	email = normalizeEmail(email)
-	if email == "" || strings.TrimSpace(password) != "dev" {
-		return nil, ErrInvalidCredentials
-	}
-
-	userID := "u_" + strings.ReplaceAll(email, "@", "_")
-	var user *usermod.User
-	var err error
-
-	if s.users != nil {
-		user, err = s.users.ResolveOrCreateDevUser(ctx, email)
-		if err != nil {
-			return nil, err
-		}
-		userID = user.ID
-	}
-
-	token, err := s.tokens.Mint(userID, email)
+	result, err := s.appService().LoginDev(ctx, email, password)
 	if err != nil {
-		return nil, err
+		return nil, normalizeServiceError(err)
 	}
-
-	return &LoginResult{
-		AccessToken: token,
-		TokenType:   "Bearer",
-		ExpiresIn:   int64(s.ttl.Seconds()),
-		User:        user,
-		AuthMethod:  "password_dev",
-	}, nil
+	return mapLoginResultFromApp(result), nil
 }
 
 func (s *Service) LoginWallet(ctx context.Context, walletID, address, chain string) (*LoginResult, error) {
-	return s.LoginWalletForUser(ctx, walletUser(address), walletID, address, chain)
+	result, err := s.appService().LoginWallet(ctx, walletID, address, chain)
+	if err != nil {
+		return nil, normalizeServiceError(err)
+	}
+	return mapLoginResultFromApp(result), nil
 }
 
 func (s *Service) LoginWalletForUser(ctx context.Context, user *usermod.User, walletID, address, chain string) (*LoginResult, error) {
-	if s == nil || s.tokens == nil {
-		return nil, fmt.Errorf("token service not configured")
-	}
-
-	address = normalizeWalletAddress(address)
-	if !evmAddressRE.MatchString(address) {
-		return nil, ErrInvalidWalletAddress
-	}
-	chain = normalizeChain(chain)
-	walletID = strings.TrimSpace(walletID)
-
-	if user == nil {
-		user = walletUser(address)
-	}
-
-	token, err := s.tokens.MintWithOptions(coreauth.MintOptions{
-		UserID:        strings.TrimSpace(user.ID),
-		Email:         normalizeEmail(user.Email),
-		WalletID:      walletID,
-		WalletAddress: address,
-		AuthMethod:    "wallet_evm",
-		Chain:         chain,
-		Subject:       address,
-	})
+	result, err := s.appService().LoginWalletForUser(ctx, user, walletID, address, chain)
 	if err != nil {
-		return nil, err
+		return nil, normalizeServiceError(err)
 	}
-
-	return &LoginResult{
-		AccessToken:   token,
-		TokenType:     "Bearer",
-		ExpiresIn:     int64(s.ttl.Seconds()),
-		User:          user,
-		WalletID:      walletID,
-		WalletAddress: address,
-		Chain:         chain,
-		AuthMethod:    "wallet_evm",
-	}, nil
+	return mapLoginResultFromApp(result), nil
 }
 
 func (s *Service) ResolveCurrentUser(ctx context.Context, token string) (*usermod.User, error) {
-	if s == nil || s.tokens == nil {
-		return nil, ErrUnauthorized
+	user, err := s.appService().ResolveCurrentUser(ctx, token)
+	if err != nil {
+		return nil, normalizeServiceError(err)
 	}
-
-	token = strings.TrimSpace(token)
-	if token == "" {
-		return nil, ErrUnauthorized
-	}
-
-	claims, err := s.tokens.Parse(token)
-	if err != nil || claims == nil || strings.TrimSpace(claims.UserID) == "" {
-		return nil, ErrUnauthorized
-	}
-
-	return s.ResolveCurrentUserClaims(ctx, claims)
+	return user, nil
 }
 
 func (s *Service) ResolveCurrentUserClaims(ctx context.Context, claims *coreauth.Claims) (*usermod.User, error) {
-	if claims == nil || strings.TrimSpace(claims.UserID) == "" {
-		return nil, ErrUnauthorized
-	}
-
-	if s.users == nil {
-		if strings.TrimSpace(claims.WalletAddress) != "" {
-			return walletUser(claims.WalletAddress), nil
-		}
-
-		now := time.Now().UTC()
-		return &usermod.User{
-			ID:        claims.UserID,
-			Email:     normalizeEmail(claims.Email),
-			CreatedAt: now,
-			UpdatedAt: now,
-		}, nil
-	}
-
-	user, err := s.users.GetByID(ctx, claims.UserID, claims.Email)
+	user, err := s.appService().ResolveCurrentUserClaims(ctx, claims)
 	if err != nil {
-		if errors.Is(err, usermod.ErrUserNotFound) {
-			if strings.TrimSpace(claims.WalletAddress) != "" {
-				return walletUser(claims.WalletAddress), nil
-			}
-			return nil, ErrUnauthorized
-		}
-		return nil, err
+		return nil, normalizeServiceError(err)
 	}
-
 	return user, nil
 }
 
@@ -205,20 +110,18 @@ func (s *Service) ResolveSessionClaims(ctx context.Context, claims *coreauth.Cla
 	return session, nil
 }
 
-// Keep this helper in root for now because service.go still owns real runtime
-// behavior for login/current-user paths in 0.11.4C3.1b1.
+// Kept in root as compatibility helper for remaining package-level consumers.
 func buildSessionViewWithUser(claims *coreauth.Claims, user *usermod.User) *SessionView {
 	return authapp.BuildSessionViewWithUser(claims, user)
 }
 
-// Root compatibility helper still needed by auth_context.go and current service
-// flows. This remains intentionally local in 0.11.4C3.1b1.
+// Kept in root as compatibility helper for remaining package-level consumers.
 func normalizeEmail(email string) string {
 	return strings.TrimSpace(strings.ToLower(email))
 }
 
-// Root compatibility wallet user helpers remain local for now because
-// ResolveCurrentUserClaims and wallet login flows still depend on them directly.
+// Kept in root as compatibility helper for remaining package-level consumers.
+// walletUserID and walletUserEmail already exist elsewhere in the auth package.
 func walletUser(address string) *usermod.User {
 	now := time.Now().UTC()
 	address = normalizeWalletAddress(address)
@@ -244,5 +147,22 @@ func normalizeServiceError(err error) error {
 		return ErrInvalidWalletAddress
 	default:
 		return err
+	}
+}
+
+func mapLoginResultFromApp(result *authapp.LoginResult) *LoginResult {
+	if result == nil {
+		return nil
+	}
+
+	return &LoginResult{
+		AccessToken:   result.AccessToken,
+		TokenType:     result.TokenType,
+		ExpiresIn:     result.ExpiresIn,
+		User:          result.User,
+		WalletID:      result.WalletID,
+		WalletAddress: result.WalletAddress,
+		Chain:         result.Chain,
+		AuthMethod:    result.AuthMethod,
 	}
 }
