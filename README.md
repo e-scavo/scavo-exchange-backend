@@ -23,9 +23,9 @@ The backend follows a **wallet-first identity model** that progressively evolves
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.11 — Domain Module Pattern  
-**Latest Completed Subphase:** **0.11.3 — UserSettings Module Refactor**  
+**Latest Completed Subphase:** **0.11.4 — Auth Module Alignment**  
 **Phase Status:** **In Progress**  
-**Next Planned Subphase:** **0.11.4 — Auth Module Alignment**
+**Next Planned Subphase:** **0.11.5 — Cross-Module Contract Consolidation**
 
 ---
 
@@ -2680,8 +2680,8 @@ The architectural intention is explicit separation of responsibilities:
 
 - **0.11.1 — Domain Module Pattern Definition** ✔ Completed
 - **0.11.2 — User Module Refactor** ✔ Completed
-- **0.11.3 — UserSettings Module Refactor** ◑ Defined
-- **0.11.4 — Auth Module Alignment** ◑ Defined
+- **0.11.3 — UserSettings Module Refactor** ✔ Completed
+- **0.11.4 — Auth Module Alignment** ✔ Completed
 - **0.11.5 — Cross-Module Contract Consolidation** ◑ Defined
 - **0.11.6 — Documentation & Phase Closure** ◑ Defined
 

@@ -223,7 +223,7 @@ Expected result:
 
 ### 0.11.4 — Auth Module Alignment
 
-Status: ◑ Defined
+Status: ✔ Completed
 
 Apply the pattern conservatively to `internal/modules/auth`.
 
@@ -375,7 +375,9 @@ At this repository point, Phase 0.11 is no longer only a defined target. The pha
 
 0.11.2 is also completed in runtime repository state. The `internal/modules/user` package is now the first concrete implementation of the pattern, with explicit `app`, `domain` and `repository` boundaries and backward-compatible package access preserved for existing consumers.
 
-0.11.3 is now also completed in runtime repository state. The `internal/modules/usersettings` package follows the same pattern with explicit `app`, `domain` and `repository` boundaries while preserving settings-specific semantics and backward-compatible package access for existing consumers.\n\n0.11.4 is now completed in runtime repository state. The `internal/modules/auth` package has been aligned conservatively: `auth/app` owns runtime/application orchestration, `auth/domain` owns canonical wallet contracts, root `auth` remains a compatibility and transport surface, and root wallet stores remain intentionally accepted runtime implementations behind a documented repository façade.
+0.11.3 is now also completed in runtime repository state. The `internal/modules/usersettings` package follows the same pattern with explicit `app`, `domain` and `repository` boundaries while preserving settings-specific semantics and backward-compatible package access for existing consumers.
+
+0.11.4 is now completed in runtime repository state. The `internal/modules/auth` package has been aligned conservatively: `auth/app` owns runtime/application orchestration, `auth/domain` owns canonical wallet contracts, root `auth` remains a compatibility and transport surface, and root wallet stores remain intentionally accepted runtime implementations behind a documented repository façade.
 
 ## Current Result After 0.11.1
 
@@ -391,7 +393,7 @@ No runtime behavior was changed by 0.11.1. Its purpose was to close the structur
 
 ### Next
 
-0.11.4 — Auth Module Alignment
+0.11.5 — Cross-Module Contract Consolidation
 
 ## Current Result After 0.11.2
 

@@ -47,3 +47,7 @@ All Markdown files in the ZIP were inventoried before applying changes. The chan
 - `docs/phase0_11_domain_module_pattern.md`: 411 -> 434 lines
 - `docs/roadmap.md`: 235 -> 237 lines
 - `docs/testing.md`: 1725 -> 1754 lines
+
+## Final Coherence Patch
+
+A final documentation coherence pass corrected Stage 0.11 status drift after 0.11.4E: README, docs/index.md, docs/handoff/backend-status.md and docs/phase0_11_domain_module_pattern.md now consistently mark 0.11.3 and 0.11.4 as completed and identify 0.11.5 as the next planned subphase. Literal escaped newline artifacts introduced during the documentation reprocess were also removed.

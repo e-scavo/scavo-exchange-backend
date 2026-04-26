@@ -16,9 +16,9 @@ It is intended to:
 
 **Stage:** 0 — Foundation
 **Phase:** 0.11 — Domain Module Pattern
-**Latest Completed Subphase:** 0.11.3 — UserSettings Module Refactor
+**Latest Completed Subphase:** 0.11.4 — Auth Module Alignment
 **Phase Status:** In Progress
-**Next Planned Subphase:** 0.11.4 — Auth Module Alignment
+**Next Planned Subphase:** 0.11.5 — Cross-Module Contract Consolidation
 
 ---
 
@@ -960,11 +960,11 @@ Completed subphases:
 
 - ✔ 0.11.1 — Domain Module Pattern Definition
 - ✔ 0.11.2 — User Module Refactor
+- ✔ 0.11.3 — UserSettings Module Refactor
+- ✔ 0.11.4 — Auth Module Alignment
 
 Defined next subphases:
 
-- ◑ 0.11.3 — UserSettings Module Refactor
-- ◑ 0.11.4 — Auth Module Alignment
 - ◑ 0.11.5 — Cross-Module Contract Consolidation
 - ◑ 0.11.6 — Documentation & Phase Closure
 
@@ -972,7 +972,11 @@ Defined next subphases:
 
 0.11.1 established the repository-level architectural definition of the Domain Module Pattern, including responsibility split, dependency direction and ownership boundaries.
 
-0.11.2 applied that pattern to `internal/modules/user`. The user module is now the first concrete runtime reference implementation of the pattern, exposing explicit `app`, `domain` and `repository` boundaries while preserving current runtime behavior and test compatibility.\n\n0.11.3 applied the same pattern to `internal/modules/usersettings`, preserving settings-specific semantics and backward-compatible root-package access.\n\n0.11.4 completed the conservative auth alignment. `auth/app` now owns runtime/application orchestration, `auth/domain` owns wallet contracts, root `auth` remains a compatibility/transport surface, and `auth/repository` is explicitly documented as a transitional façade while root stores remain active runtime implementations.
+0.11.2 applied that pattern to `internal/modules/user`. The user module is now the first concrete runtime reference implementation of the pattern, exposing explicit `app`, `domain` and `repository` boundaries while preserving current runtime behavior and test compatibility.
+
+0.11.3 applied the same pattern to `internal/modules/usersettings`, preserving settings-specific semantics and backward-compatible root-package access.
+
+0.11.4 completed the conservative auth alignment. `auth/app` now owns runtime/application orchestration, `auth/domain` owns wallet contracts, root `auth` remains a compatibility/transport surface, and `auth/repository` is explicitly documented as a transitional façade while root stores remain active runtime implementations.
 
 ### Next
 
