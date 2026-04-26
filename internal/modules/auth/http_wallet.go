@@ -11,6 +11,10 @@ import (
 	usermod "github.com/e-scavo/scavo-exchange-backend/internal/modules/user"
 )
 
+// =====================================================
+// WALLET BOOTSTRAP AUTH (PUBLIC - NO AUTH REQUIRED)
+// =====================================================
+
 type WalletChallengeRequest struct {
 	Address string `json:"address"`
 	Chain   string `json:"chain,omitempty"`
@@ -38,54 +42,6 @@ type WalletVerifyResponse struct {
 	User          *usermod.User    `json:"user,omitempty"`
 	Challenge     *WalletChallenge `json:"challenge,omitempty"`
 }
-
-type WalletLinkChallengeRequest struct {
-	Address string `json:"address"`
-	Chain   string `json:"chain,omitempty"`
-}
-
-type WalletLinkChallengeResponse = authapp.WalletLinkChallengeResponse
-
-type WalletLinkVerifyRequest struct {
-	ChallengeID string `json:"challenge_id"`
-	Address     string `json:"address"`
-	Signature   string `json:"signature"`
-}
-
-type WalletLinkVerifyResponse = authapp.WalletLinkVerifyResponse
-
-type WalletAccountMergeChallengeRequest struct {
-	Address string `json:"address"`
-	Chain   string `json:"chain,omitempty"`
-}
-
-type WalletAccountMergeChallengeResponse = authapp.WalletAccountMergeChallengeResponse
-
-type WalletAccountMergeVerifyRequest struct {
-	ChallengeID string `json:"challenge_id"`
-	Address     string `json:"address"`
-	Signature   string `json:"signature"`
-}
-
-type WalletAccountMergeVerifyResponse = authapp.WalletAccountMergeVerifyResponse
-
-type WalletDetachCheckRequest struct {
-	Address string `json:"wallet_address"`
-}
-
-type WalletDetachCheckResponse = authapp.WalletDetachCheckResponse
-
-type WalletDetachExecuteRequest struct {
-	Address string `json:"wallet_address"`
-}
-
-type WalletDetachExecuteResponse = authapp.WalletDetachExecuteResponse
-
-type WalletPrimarySetRequest struct {
-	Address string `json:"wallet_address"`
-}
-
-type WalletPrimarySetResponse = authapp.WalletPrimarySetResponse
 
 func (h HTTPHandlers) WalletChallenge(w http.ResponseWriter, r *http.Request) {
 	var req WalletChallengeRequest
@@ -149,6 +105,60 @@ func (h HTTPHandlers) WalletVerify(w http.ResponseWriter, r *http.Request) {
 		Challenge:     challenge,
 	})
 }
+
+// =====================================================
+// WALLET MANAGEMENT (AUTHENTICATED)
+// =====================================================
+
+type WalletLinkChallengeRequest struct {
+	Address string `json:"address"`
+	Chain   string `json:"chain,omitempty"`
+}
+
+type WalletLinkChallengeResponse = authapp.WalletLinkChallengeResponse
+
+type WalletLinkVerifyRequest struct {
+	ChallengeID string `json:"challenge_id"`
+	Address     string `json:"address"`
+	Signature   string `json:"signature"`
+}
+
+type WalletLinkVerifyResponse = authapp.WalletLinkVerifyResponse
+
+type WalletAccountMergeVerifyRequest struct {
+	ChallengeID string `json:"challenge_id"`
+	Address     string `json:"address"`
+	Signature   string `json:"signature"`
+}
+
+type WalletAccountMergeVerifyResponse = authapp.WalletAccountMergeVerifyResponse
+
+type WalletDetachCheckRequest struct {
+	Address string `json:"wallet_address"`
+}
+
+type WalletDetachCheckResponse = authapp.WalletDetachCheckResponse
+
+type WalletDetachExecuteRequest struct {
+	Address string `json:"wallet_address"`
+}
+
+type WalletDetachExecuteResponse = authapp.WalletDetachExecuteResponse
+
+type WalletPrimarySetRequest struct {
+	Address string `json:"wallet_address"`
+}
+
+type WalletPrimarySetResponse = authapp.WalletPrimarySetResponse
+
+// (handlers autenticados quedan EXACTAMENTE como los tenías, ya están bien)
+
+type WalletAccountMergeChallengeRequest struct {
+	Address string `json:"address"`
+	Chain   string `json:"chain,omitempty"`
+}
+
+type WalletAccountMergeChallengeResponse = authapp.WalletAccountMergeChallengeResponse
 
 func (h HTTPHandlers) WalletLinkChallenge(w http.ResponseWriter, r *http.Request) {
 	claims, req, ok := decodeAuthenticatedWalletRequest[WalletLinkChallengeRequest](h, w, r, 4<<10)
