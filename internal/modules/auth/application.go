@@ -31,12 +31,17 @@ func NewApplication(
 	challenges WalletChallengeStore,
 	walletIdentities WalletIdentityStore,
 ) *Application {
+	var userSettingsProvider authdomain.UserSettingsProvider
+	if userSettings != nil {
+		userSettingsProvider = userSettings
+	}
+
 	return &Application{
 		inner: authapp.NewApplication(
 			tokens,
 			ttl,
 			users,
-			userSettings,
+			userSettingsProvider,
 			publicBaseURL,
 			challengeTTL,
 			newWalletChallengeStoreAdapter(challenges, publicBaseURL, challengeTTL),

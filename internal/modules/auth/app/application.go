@@ -21,14 +21,14 @@ type Application struct {
 	Tokens           *coreauth.TokenService
 	TTL              time.Duration
 	Users            authdomain.UserProvider
-	UserSettings     *usersettingsmod.Service
+	UserSettings     authdomain.UserSettingsProvider
 	PublicBaseURL    string
 	ChallengeTTL     time.Duration
 	Challenges       authdomain.WalletChallengeStore
 	WalletIdentities authdomain.WalletIdentityStore
 }
 
-func NewApplication(tokens *coreauth.TokenService, ttl time.Duration, users authdomain.UserProvider, userSettings *usersettingsmod.Service, publicBaseURL string, challengeTTL time.Duration, challenges authdomain.WalletChallengeStore, walletIdentities authdomain.WalletIdentityStore) *Application {
+func NewApplication(tokens *coreauth.TokenService, ttl time.Duration, users authdomain.UserProvider, userSettings authdomain.UserSettingsProvider, publicBaseURL string, challengeTTL time.Duration, challenges authdomain.WalletChallengeStore, walletIdentities authdomain.WalletIdentityStore) *Application {
 	return &Application{
 		Tokens:           tokens,
 		TTL:              ttl,
