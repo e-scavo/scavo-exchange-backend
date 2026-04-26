@@ -95,7 +95,7 @@ func buildSessionViewWithUser(claims *coreauth.Claims, user *usermod.User) *Sess
 	return view
 }
 
-func buildProfileView(ctx context.Context, claims *coreauth.Claims, users *usermod.Service, walletStore authdomain.WalletIdentityStore) (*ProfileView, error) {
+func buildProfileView(ctx context.Context, claims *coreauth.Claims, users authdomain.UserProvider, walletStore authdomain.WalletIdentityStore) (*ProfileView, error) {
 	svc := NewService(nil, users, 24*time.Hour)
 	user, err := svc.ResolveCurrentUserClaims(ctx, claims)
 	if err != nil {
@@ -415,7 +415,7 @@ func BuildSessionViewWithUser(claims *coreauth.Claims, user *usermod.User) *Sess
 	return buildSessionViewWithUser(claims, user)
 }
 
-func BuildProfileView(ctx context.Context, claims *coreauth.Claims, users *usermod.Service, walletStore authdomain.WalletIdentityStore) (*ProfileView, error) {
+func BuildProfileView(ctx context.Context, claims *coreauth.Claims, users authdomain.UserProvider, walletStore authdomain.WalletIdentityStore) (*ProfileView, error) {
 	return buildProfileView(ctx, claims, users, walletStore)
 }
 

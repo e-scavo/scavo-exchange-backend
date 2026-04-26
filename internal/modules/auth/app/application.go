@@ -9,7 +9,6 @@ import (
 
 	coreauth "github.com/e-scavo/scavo-exchange-backend/internal/core/auth"
 	authdomain "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/domain"
-	usermod "github.com/e-scavo/scavo-exchange-backend/internal/modules/user"
 	usersettingsmod "github.com/e-scavo/scavo-exchange-backend/internal/modules/usersettings"
 )
 
@@ -21,7 +20,7 @@ var (
 type Application struct {
 	Tokens           *coreauth.TokenService
 	TTL              time.Duration
-	Users            *usermod.Service
+	Users            authdomain.UserProvider
 	UserSettings     *usersettingsmod.Service
 	PublicBaseURL    string
 	ChallengeTTL     time.Duration
@@ -29,7 +28,7 @@ type Application struct {
 	WalletIdentities authdomain.WalletIdentityStore
 }
 
-func NewApplication(tokens *coreauth.TokenService, ttl time.Duration, users *usermod.Service, userSettings *usersettingsmod.Service, publicBaseURL string, challengeTTL time.Duration, challenges authdomain.WalletChallengeStore, walletIdentities authdomain.WalletIdentityStore) *Application {
+func NewApplication(tokens *coreauth.TokenService, ttl time.Duration, users authdomain.UserProvider, userSettings *usersettingsmod.Service, publicBaseURL string, challengeTTL time.Duration, challenges authdomain.WalletChallengeStore, walletIdentities authdomain.WalletIdentityStore) *Application {
 	return &Application{
 		Tokens:           tokens,
 		TTL:              ttl,

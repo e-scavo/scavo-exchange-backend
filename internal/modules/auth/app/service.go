@@ -9,6 +9,7 @@ import (
 	"time"
 
 	coreauth "github.com/e-scavo/scavo-exchange-backend/internal/core/auth"
+	authdomain "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/domain"
 	usermod "github.com/e-scavo/scavo-exchange-backend/internal/modules/user"
 )
 
@@ -22,7 +23,7 @@ var evmAddressRE = regexp.MustCompile(`^0x[0-9a-fA-F]{40}$`)
 
 type Service struct {
 	tokens *coreauth.TokenService
-	users  *usermod.Service
+	users  authdomain.UserProvider
 	ttl    time.Duration
 }
 
@@ -37,7 +38,7 @@ type LoginResult struct {
 	AuthMethod    string
 }
 
-func NewService(tokens *coreauth.TokenService, users *usermod.Service, ttl time.Duration) *Service {
+func NewService(tokens *coreauth.TokenService, users authdomain.UserProvider, ttl time.Duration) *Service {
 	if ttl <= 0 {
 		ttl = 24 * time.Hour
 	}
