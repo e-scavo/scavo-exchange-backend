@@ -150,8 +150,16 @@ Aligned `internal/modules/auth` to the pattern conservatively while preserving t
 
 This subphase is delivered in repository state: `auth/app` owns application/runtime orchestration, `auth/domain` owns canonical wallet contracts, root `auth` remains a compatibility surface, wallet HTTP management is narrowed to transport/delegation, and repository migration is explicitly deferred behind a transitional façade.
 
-#### 0.11.5 — Cross-Module Contract Consolidation ◑ Defined
+#### 0.11.5 — Cross-Module Contract Consolidation ◑ In Progress
 Consolidate the explicit internal contracts between `auth`, `user` and `usersettings` so coordination remains possible without reintroducing ownership confusion or concrete cross-module coupling.
+
+Planned internal steps:
+
+- 0.11.5.0 — Subphase Definition & Documentation Alignment
+- 0.11.5.1 — Dependency Mapping
+- 0.11.5.2 — Contract Extraction
+- 0.11.5.3 — Interface Alignment
+- 0.11.5.4 — Runtime Compatibility Validation
 
 #### 0.11.6 — Documentation & Phase Closure ◑ Defined
 Update the trunk documentation set so the adopted module pattern, its scope and its completion criteria are recorded consistently across roadmap, status, architecture, handoff and the dedicated phase document.

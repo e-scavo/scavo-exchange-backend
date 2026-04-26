@@ -252,7 +252,7 @@ Delivered result:
 
 ### 0.11.5 — Cross-Module Contract Consolidation
 
-Status: ◑ Defined
+Status: ◑ In Progress
 
 Clarify and minimize the way the modules interact.
 
@@ -270,6 +270,14 @@ Key rule:
 Expected result:
 
 - the modules can collaborate without informal dependency growth
+
+Planned subphases:
+
+- 0.11.5.0 — Subphase Definition & Documentation Alignment
+- 0.11.5.1 — Dependency Mapping
+- 0.11.5.2 — Contract Extraction
+- 0.11.5.3 — Interface Alignment
+- 0.11.5.4 — Runtime Compatibility Validation
 
 ---
 
@@ -393,7 +401,7 @@ No runtime behavior was changed by 0.11.1. Its purpose was to close the structur
 
 ### Next
 
-0.11.5 — Cross-Module Contract Consolidation
+0.11.5.1 — Dependency Mapping
 
 ## Current Result After 0.11.2
 
@@ -433,4 +441,4 @@ Phase 0.11.4 specifically delivers:
 
 ### Next
 
-0.11.5 — Cross-Module Contract Consolidation
+0.11.5.1 — Dependency Mapping

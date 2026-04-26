@@ -18,7 +18,7 @@ It is intended to:
 **Phase:** 0.11 — Domain Module Pattern
 **Latest Completed Subphase:** 0.11.4 — Auth Module Alignment
 **Phase Status:** In Progress
-**Next Planned Subphase:** 0.11.5 — Cross-Module Contract Consolidation
+**Current Active Subphase:** 0.11.5 — Cross-Module Contract Consolidation
 
 ---
 
@@ -963,9 +963,17 @@ Completed subphases:
 - ✔ 0.11.3 — UserSettings Module Refactor
 - ✔ 0.11.4 — Auth Module Alignment
 
-Defined next subphases:
+Active subphase:
 
 - ◑ 0.11.5 — Cross-Module Contract Consolidation
+  - ◑ 0.11.5.0 — Subphase Definition & Documentation Alignment
+  - ◑ 0.11.5.1 — Dependency Mapping
+  - ◑ 0.11.5.2 — Contract Extraction
+  - ◑ 0.11.5.3 — Interface Alignment
+  - ◑ 0.11.5.4 — Runtime Compatibility Validation
+
+Defined next subphase:
+
 - ◑ 0.11.6 — Documentation & Phase Closure
 
 ### Current Operational Meaning
@@ -978,6 +986,18 @@ Defined next subphases:
 
 0.11.4 completed the conservative auth alignment. `auth/app` now owns runtime/application orchestration, `auth/domain` owns wallet contracts, root `auth` remains a compatibility/transport surface, and `auth/repository` is explicitly documented as a transitional façade while root stores remain active runtime implementations.
 
-### Next
+### Current Active Work
 
 0.11.5 — Cross-Module Contract Consolidation
+
+Planned internal steps:
+
+- 0.11.5.0 — Subphase Definition & Documentation Alignment
+- 0.11.5.1 — Dependency Mapping
+- 0.11.5.2 — Contract Extraction
+- 0.11.5.3 — Interface Alignment
+- 0.11.5.4 — Runtime Compatibility Validation
+
+### Next
+
+0.11.5.1 — Dependency Mapping

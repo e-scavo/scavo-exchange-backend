@@ -612,4 +612,8 @@ Phase 0.11 remains intentionally non-breaking. It preserves:
 - `auth/repository` is documented as a transitional façade, not the active implementation owner yet
 - wallet bootstrap auth remains public and stable, while authenticated wallet-management handlers are narrowed to transport/delegation
 
-Phase 0.11 is therefore **in progress**, not merely planned. Its next work is cross-module contract consolidation and then phase-level documentation closure.
+Phase 0.11 is therefore **in progress**, not merely planned. Its current active work is 0.11.5 cross-module contract consolidation, followed by phase-level documentation closure.
+
+### 0.11.5 Contract Consolidation Scope
+
+0.11.5 formalizes the expectation that `auth`, `user` and `usersettings` coordinate through explicit, minimal contracts rather than through accidental knowledge of each other's implementation details. The planned internal steps are dependency mapping, contract extraction, interface alignment and runtime compatibility validation. This remains a structural step only: it must not change public routes, payloads, authentication semantics or settings behavior.

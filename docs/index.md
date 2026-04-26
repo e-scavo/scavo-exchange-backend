@@ -120,7 +120,7 @@ Phase 0.9 ✔ Completed
 
 Phase 0.10 ✔ Completed
 
-Current planned next subphase: `0.11.5 — Cross-Module Contract Consolidation`
+Current active subphase: `0.11.5 — Cross-Module Contract Consolidation`
 
 
 ---
@@ -132,8 +132,13 @@ Current planned next subphase: `0.11.5 — Cross-Module Contract Consolidation`
 - 0.11.3 ✔ UserSettings Module Refactor
 - 0.11.4 ✔ Auth Module Alignment
 - 0.11.5 ◑ Cross-Module Contract Consolidation
+  - 0.11.5.0 ◑ Subphase Definition & Documentation Alignment
+  - 0.11.5.1 ◑ Dependency Mapping
+  - 0.11.5.2 ◑ Contract Extraction
+  - 0.11.5.3 ◑ Interface Alignment
+  - 0.11.5.4 ◑ Runtime Compatibility Validation
 - 0.11.6 ◑ Documentation & Phase Closure
 
-Phase 0.11 ◑ In Progress — latest completed: 0.11.4
+Phase 0.11 ◑ In Progress — latest completed: 0.11.4; current active: 0.11.5
 
 

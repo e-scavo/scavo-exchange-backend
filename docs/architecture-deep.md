@@ -906,6 +906,16 @@ That means:
 
 Where module interaction is real, it should be expressed through minimal explicit contracts rather than through direct knowledge of another module's internal models or implementation details.
 
+0.11.5 turns this principle into the active implementation plan. The subphase is intentionally split into:
+
+- 0.11.5.0 — Subphase Definition & Documentation Alignment
+- 0.11.5.1 — Dependency Mapping
+- 0.11.5.2 — Contract Extraction
+- 0.11.5.3 — Interface Alignment
+- 0.11.5.4 — Runtime Compatibility Validation
+
+The expected result is not a broad abstraction rewrite. It is a controlled consolidation of the real contracts needed for `auth`, `user` and `usersettings` to collaborate without reintroducing concrete ownership confusion.
+
 ### Semantic Ownership
 
 The pattern is reinforced by explicit ownership boundaries:

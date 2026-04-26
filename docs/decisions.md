@@ -408,3 +408,34 @@ This preserves wallet bootstrap, wallet verify, wallet management, session and t
 
 Accepted in 0.11.4C4.2.
 
+---
+
+## Decision — Cross-Module Coordination Must Use Explicit Minimal Contracts During 0.11.5
+
+### Decision
+
+0.11.5 will consolidate cross-module coordination between `auth`, `user` and `usersettings` through explicit minimal contracts where coordination is real.
+
+The objective is not to introduce a broad shared-kernel package or to move ownership between modules. Each module keeps its completed 0.11 ownership boundary:
+
+- `auth` owns authentication, session, wallet bootstrap and authenticated-entry behavior
+- `user` owns the user entity/profile boundary
+- `usersettings` owns settings and preference semantics
+
+### Reason
+
+After 0.11.2, 0.11.3 and 0.11.4, the three modules have explicit internal structure. The remaining risk is not folder layout; it is accidental cross-module knowledge through concrete services, models or implementation details.
+
+0.11.5 exists to map those dependencies, extract only the contracts that are actually needed, align call sites to those interfaces and validate runtime compatibility.
+
+### Impact
+
+- cross-module dependencies become intentional and reviewable
+- module ownership remains stable
+- public HTTP behavior remains unchanged
+- later phases can evolve modules independently with less coupling pressure
+
+### Status
+
+Accepted as the execution rule for 0.11.5.0 and the remaining 0.11.5 subphases.
+

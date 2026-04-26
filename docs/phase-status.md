@@ -1358,7 +1358,7 @@ This phase does not introduce new endpoints, payload shapes, authentication sema
 | 0.11.2 | User Module Refactor | ✅ Completed |
 | 0.11.3 | UserSettings Module Refactor | ✅ Completed |
 | 0.11.4 | Auth Module Alignment | ✅ Completed |
-| 0.11.5 | Cross-Module Contract Consolidation | ◑ Defined |
+| 0.11.5 | Cross-Module Contract Consolidation | ◑ In Progress |
 | 0.11.6 | Documentation & Phase Closure | ◑ Defined |
 
 ### Architectural Intent
@@ -1441,6 +1441,21 @@ Resulting state:
 
 Validated by a full `go test ./...` pass after the final C4.2/D state.
 
+
+### Current Scope For 0.11.5
+
+0.11.5 is now the active Phase 0.11 subphase. It exists to consolidate the contracts between the already-aligned `auth`, `user` and `usersettings` modules before the whole 0.11 phase is closed.
+
+Planned sub-steps within 0.11.5:
+
+- 0.11.5.0 — Subphase Definition & Documentation Alignment
+- 0.11.5.1 — Dependency Mapping
+- 0.11.5.2 — Contract Extraction
+- 0.11.5.3 — Interface Alignment
+- 0.11.5.4 — Runtime Compatibility Validation
+
+0.11.5 must not introduce new public API behavior. Its purpose is to make existing cross-module coordination explicit and interface-based where coordination is real, while preserving the ownership boundaries completed in 0.11.1 through 0.11.4.
+
 ### Expected Outcome
 
 When Phase 0.11 is eventually completed, the repository should expose:
@@ -1452,4 +1467,4 @@ When Phase 0.11 is eventually completed, the repository should expose:
 
 ### Next
 
-0.11.5 — Cross-Module Contract Consolidation
+0.11.5.1 — Dependency Mapping
