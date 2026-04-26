@@ -1,3 +1,21 @@
+// =====================================================
+// RUNTIME STORE IMPLEMENTATION (LEGACY COMPATIBILITY LAYER)
+// =====================================================
+//
+// This file contains the active runtime implementation used by the system.
+//
+// Current state (0.11.4):
+// - This is still the canonical runtime implementation
+// - It satisfies contracts defined in auth/domain
+// - It is consumed by services and application layer
+//
+// Architectural note:
+// - These implementations remain in auth root for stability
+// - Migration to auth/repository is intentionally deferred
+//
+// IMPORTANT:
+// Do NOT move or duplicate this implementation without coordinating
+// with the repository layer transition.
 package auth
 
 import (

@@ -1,3 +1,11 @@
+// =====================================================
+// DOMAIN CONTRACTS (CANONICAL SOURCE)
+// =====================================================
+//
+// This package defines the canonical contracts for wallet identity,
+// wallet challenges and related persistence.
+//
+// All runtime implementations MUST conform to these interfaces.
 package domain
 
 import (
