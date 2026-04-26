@@ -1723,3 +1723,32 @@ The current contract-testing layer now includes representative checks for:
 Testing scope now extends beyond handler correctness, error-envelope normalization and route exposure toward explicit protection of the frozen authenticated `v1` contract across both supported transport entry spaces.
 
 Phase 0.9.5 closes the loop by consolidating that testing intent in the trunk documentation set, so the project now records the same contract-governance rule in architecture, phase-status, README and handoff rather than only in isolated test-facing notes.
+
+## Phase 0.11.4 — Auth Module Alignment Testing Notes
+
+### Purpose
+
+Phase 0.11.4 is a structural auth-module alignment phase. Testing therefore focused on proving that the refactor preserved externally observable behavior while internal ownership moved toward `auth/app`, `auth/domain` and documented repository boundaries.
+
+### Coverage Direction
+
+The existing auth test suite remains the primary regression guard for this phase. The important protected areas are:
+
+- password login behavior and invalid-credential sentinels
+- wallet challenge and wallet verify behavior
+- authenticated wallet link, merge, primary and detach flows
+- wallet inventory behavior
+- bootstrap and session behavior
+- standardized error mapping and root sentinel compatibility
+- module compilation across `auth`, `httpx`, `user` and `usersettings`
+
+### Validation Command
+
+```bash
+go test ./...
+```
+
+### Result
+
+The final 0.11.4 state was validated with a full passing repository test run after repository/runtime decision lock and final auth alignment validation.
+

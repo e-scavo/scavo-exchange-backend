@@ -879,6 +879,16 @@ The user settings module should align to the same pattern without being treated 
 
 The auth module requires the most conservative alignment. It already sits on top of stabilized challenge/verify semantics, authenticated identity resolution and authorization-adjacent boundaries. In 0.11 it should be reorganized structurally, not functionally: authentication flows become clearer use cases, but the already delivered public behavior remains unchanged.
 
+0.11.4 completes that conservative alignment in repository state. The final structure is intentionally staged:
+
+- `auth/app` is the runtime/application owner for application orchestration, service behavior, wallet services, response models and reusable composition helpers
+- `auth/domain` is the canonical owner of wallet contracts and base wallet types
+- root `auth` remains a compatibility and transport surface where existing callers, sentinels and HTTP handlers still depend on package-level access
+- `auth/repository` is a transitional façade over root store implementations rather than the active implementation owner
+- root wallet store files remain the accepted runtime implementations until a dedicated repository migration phase moves them safely
+
+This preserves the public wallet bootstrap auth flow, authenticated wallet-management behavior, session behavior and error semantics while reducing the pre-0.11 handler/root ownership model.
+
 ### Cross-Module Contract Boundaries
 
 One of the deep architectural goals of 0.11 is to reduce concrete cross-module knowledge between `auth`, `user` and `usersettings`.
@@ -935,4 +945,6 @@ Because those foundations already exist, 0.11 can stay strictly structural. It d
 
 0.11.3 is also completed in runtime repository state. `internal/modules/usersettings` now follows the same structural pattern with explicit `app`, `domain` and `repository` boundaries while preserving settings-specific orchestration and external contract behavior.
 
-Phase 0.11 is therefore **in progress**. The remaining work is to apply the same discipline to `auth`, consolidate cross-module contracts and then close the phase coherently in the trunk documentation.
+0.11.4 is also completed in runtime repository state. `internal/modules/auth` now follows the same pattern conservatively, with `auth/app` as runtime/application owner, `auth/domain` as canonical contract owner, root `auth` as compatibility/transport surface and `auth/repository` as a documented transitional façade.
+
+Phase 0.11 is therefore **in progress**. The remaining work is to consolidate cross-module contracts and then close the phase coherently in the trunk documentation.

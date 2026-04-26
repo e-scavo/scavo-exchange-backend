@@ -145,8 +145,10 @@ Align `internal/modules/usersettings` to the same pattern while preserving its o
 
 This subphase is now delivered in repository state: the user settings module exposes explicit `app`, `domain` and `repository` boundaries while preserving backward-compatible package access for existing consumers and keeping settings-specific validation/orchestration in the application layer.
 
-#### 0.11.4 — Auth Module Alignment ◑ Defined
-Align `internal/modules/auth` to the pattern conservatively, expressing authentication flows as use cases while preserving the already stabilized challenge, verify and authorization-adjacent behavior.
+#### 0.11.4 — Auth Module Alignment ✔ Completed
+Aligned `internal/modules/auth` to the pattern conservatively while preserving the stabilized challenge, verify, wallet-management, session, bootstrap and authorization-adjacent behavior.
+
+This subphase is delivered in repository state: `auth/app` owns application/runtime orchestration, `auth/domain` owns canonical wallet contracts, root `auth` remains a compatibility surface, wallet HTTP management is narrowed to transport/delegation, and repository migration is explicitly deferred behind a transitional façade.
 
 #### 0.11.5 — Cross-Module Contract Consolidation ◑ Defined
 Consolidate the explicit internal contracts between `auth`, `user` and `usersettings` so coordination remains possible without reintroducing ownership confusion or concrete cross-module coupling.

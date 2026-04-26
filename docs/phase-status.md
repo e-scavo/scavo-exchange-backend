@@ -1357,7 +1357,7 @@ This phase does not introduce new endpoints, payload shapes, authentication sema
 | 0.11.1 | Domain Module Pattern Definition | ✅ Completed |
 | 0.11.2 | User Module Refactor | ✅ Completed |
 | 0.11.3 | UserSettings Module Refactor | ✅ Completed |
-| 0.11.4 | Auth Module Alignment | ◑ Defined |
+| 0.11.4 | Auth Module Alignment | ✅ Completed |
 | 0.11.5 | Cross-Module Contract Consolidation | ◑ Defined |
 | 0.11.6 | Documentation & Phase Closure | ◑ Defined |
 
@@ -1400,6 +1400,47 @@ The backend now also applies the Domain Module Pattern to `internal/modules/user
 
 This subphase is validated by the passing repository test state, including the `internal/modules/usersettings` package set.
 
+### Current Result After 0.11.4
+
+0.11.4 is completed in repository state.
+
+The `internal/modules/auth` package has been aligned conservatively to the Domain Module Pattern without changing public auth, wallet, bootstrap, session or authorization-adjacent behavior.
+
+Delivered sub-steps within 0.11.4:
+
+- 0.11.4A — boundary preparation
+- 0.11.4B1 — support surface extraction
+- 0.11.4B2a — app support decoupling
+- 0.11.4B2b1 — app service and wallet runtime support decoupling
+- 0.11.4B2b2.1 — wallet type ownership consolidation
+- 0.11.4B2b2.2 — wallet read model consolidation
+- 0.11.4B2b2.3 — wallet request/query compatibility alignment
+- 0.11.4B2b2.4 — helper ownership consolidation cleanup
+- 0.11.4B2b2.5 — application compatibility narrowing
+- 0.11.4C1 — bootstrap/root DTO ownership reduction
+- 0.11.4C2 — wallet response ownership reduction
+- 0.11.4C3.1a — root service dependency stabilization
+- 0.11.4C3.1b1 — session path narrowing
+- 0.11.4C3.1b2 — login/current-user narrowing
+- 0.11.4C3.2a — authenticated wallet management narrowing
+- 0.11.4C3.2b1 — wallet bootstrap auth boundary clarification
+- 0.11.4C4.1 — repository/runtime inventory
+- 0.11.4C4.2 — repository/runtime decision lock
+- 0.11.4D — final auth alignment validation
+- 0.11.4E — documentation and closure
+
+Resulting state:
+
+- `internal/modules/auth/app` owns the runtime/application orchestration for auth, session, bootstrap and wallet-management use cases.
+- `internal/modules/auth/domain` owns canonical wallet contracts and base wallet types.
+- root `internal/modules/auth` remains a backward-compatible transport/runtime façade where needed.
+- `internal/modules/auth/repository` is explicitly documented as a transitional façade, not the canonical implementation owner yet.
+- root wallet store implementations remain accepted runtime implementations for stability.
+- `http_bootstrap.go` and authenticated wallet-management handlers are narrowed to transport/delegation responsibilities.
+- public payloads, routes, error semantics and test expectations remain stable.
+
+Validated by a full `go test ./...` pass after the final C4.2/D state.
+
 ### Expected Outcome
 
 When Phase 0.11 is eventually completed, the repository should expose:
@@ -1411,4 +1452,4 @@ When Phase 0.11 is eventually completed, the repository should expose:
 
 ### Next
 
-0.11.4 — Auth Module Alignment
+0.11.5 — Cross-Module Contract Consolidation

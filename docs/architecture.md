@@ -604,4 +604,12 @@ Phase 0.11 remains intentionally non-breaking. It preserves:
 
 0.11.3 is now completed as well and applies the same structural discipline to `internal/modules/usersettings`, preserving its settings-specific semantics while exposing explicit `app`, `domain` and `repository` boundaries.
 
-Phase 0.11 is therefore **in progress**, not merely planned.
+0.11.4 is now completed for `internal/modules/auth`. The auth module is aligned conservatively rather than rewritten:
+
+- `auth/app` owns application/runtime orchestration for auth, session, bootstrap and authenticated wallet-management use cases
+- `auth/domain` owns canonical wallet contracts and base wallet types
+- root `auth` preserves compatibility, transport and intentionally deferred runtime-store surfaces
+- `auth/repository` is documented as a transitional façade, not the active implementation owner yet
+- wallet bootstrap auth remains public and stable, while authenticated wallet-management handlers are narrowed to transport/delegation
+
+Phase 0.11 is therefore **in progress**, not merely planned. Its next work is cross-module contract consolidation and then phase-level documentation closure.

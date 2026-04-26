@@ -1223,3 +1223,34 @@ The backend now exposes a clean, deterministic, and fully consistent execution f
 
 ### Phase 0.9 Impact — API Versioning
 The introduction of `/api/v1` as canonical API requires developers to consider versioned endpoints during development and testing.
+
+## Phase 0.11.4 — Auth Flow Preservation During Module Alignment
+
+### Flow impact
+
+0.11.4 changes internal ownership rather than public flow behavior.
+
+The following flows remain externally unchanged:
+
+- wallet bootstrap challenge and verify
+- authenticated wallet linking
+- authenticated wallet-owned account merge
+- primary wallet switching
+- detach check and detach execution
+- authenticated session resolution
+- authenticated bootstrap composition
+
+### Internal routing after alignment
+
+Authenticated auth and wallet management behavior now flows through the narrowed structure:
+
+```text
+HTTP handler → auth.Application compatibility wrapper → auth/app runtime → auth/domain contracts → runtime stores
+```
+
+Wallet bootstrap auth remains intentionally stable at the root HTTP boundary while the lower-level challenge and verification lifecycle stays unchanged.
+
+### Outcome
+
+The flow contract is preserved while the internal ownership model is clearer and safer for later repository migration.
+

@@ -2709,6 +2709,10 @@ This phase does **not** introduce:
 
 0.11.2 applied that pattern to `internal/modules/user`, making `user` the first concrete reference implementation of the new structure while preserving the current runtime contract. The refactor is validated in repository state by passing module and repository tests.
 
+0.11.3 applied the same pattern to `internal/modules/usersettings`, preserving settings-specific semantics while exposing explicit `app`, `domain` and `repository` boundaries.
+
+0.11.4 completed the conservative auth-module alignment. The auth module now has `auth/app` as the runtime/application owner, `auth/domain` as the canonical contract boundary, root `auth` as a compatibility surface, and `auth/repository` as a documented transitional façade. Public wallet bootstrap, authenticated wallet management, session, bootstrap and login behavior remain externally unchanged.
+
 ### Expected outcome
 
 When Phase 0.11 is implemented and closed, the backend should have:
@@ -2721,8 +2725,8 @@ When Phase 0.11 is implemented and closed, the backend should have:
 
 ### Status
 
-Phase 0.11 is **in progress**. The pattern definition is completed and the first concrete runtime migration has already been delivered through `0.11.2 — User Module Refactor`.
+Phase 0.11 is **in progress**. The pattern definition and the concrete `user`, `usersettings` and `auth` module alignments through 0.11.4 are completed. The next defined work is cross-module contract consolidation.
 
 ### Next
 
-0.11.3 — UserSettings Module Refactor
+0.11.5 — Cross-Module Contract Consolidation

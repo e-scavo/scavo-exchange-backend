@@ -380,3 +380,31 @@ The backend has reached a stage where authentication, authorization, API version
 - module-to-module dependencies must be expressed through minimal explicit contracts when needed
 - the pattern applies conservatively and does not imply a full clean-architecture rewrite
 - external contracts remain unchanged while internal maintainability improves
+
+## Decision — Auth Repository Runtime Compatibility During 0.11.4
+
+### Decision
+
+During 0.11.4, `internal/modules/auth/domain` became the canonical owner of wallet contracts and base wallet types, while the root `auth` wallet store implementations remain the active runtime implementations.
+
+`internal/modules/auth/repository` is intentionally a transitional façade in this phase. It is not yet the canonical owner of the concrete PostgreSQL or memory store implementations.
+
+### Reason
+
+The wallet identity and wallet challenge stores are large, active runtime implementations used by the current auth and wallet flows. Moving them into `auth/repository` during 0.11.4 would create a high-risk migration unrelated to the immediate goal of aligning application, domain and HTTP ownership.
+
+0.11.4 therefore locks the following staged decision:
+
+- domain contracts are canonical now
+- app/application/service ownership is canonical now
+- root stores remain runtime-compatible implementations now
+- repository migration is deferred to a dedicated future phase
+
+### Impact
+
+This preserves wallet bootstrap, wallet verify, wallet management, session and testing behavior while making the transitional state explicit. Future work must not duplicate or move the root store implementations without a dedicated repository migration plan.
+
+### Status
+
+Accepted in 0.11.4C4.2.
+

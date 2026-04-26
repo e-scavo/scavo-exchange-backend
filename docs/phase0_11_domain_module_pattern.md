@@ -239,6 +239,15 @@ Expected result:
 - auth flows become easier to reason about internally
 - completed 0.10 behavior remains externally unchanged
 
+Delivered result:
+
+- `auth/app` now owns the core application/runtime orchestration for auth, session, bootstrap and wallet-management flows
+- `auth/domain` now owns canonical wallet contracts and base wallet types
+- root `auth` is narrowed to compatibility, transport and transitional runtime surfaces where still required
+- `auth/repository` is explicitly documented as a transitional façade while root stores remain the active runtime implementations
+- wallet bootstrap auth remains public and intentionally root-adjacent for stability, while authenticated wallet-management handlers delegate through `Application`
+- no public route, payload, error model, session or wallet-flow behavior was changed
+
 ---
 
 ### 0.11.5 — Cross-Module Contract Consolidation
@@ -360,13 +369,13 @@ Phase 0.11 should only be considered complete when:
 
 ## Current Repository State
 
-At this repository point, Phase 0.11 is no longer only a defined target. The phase is **in progress**.
+At this repository point, Phase 0.11 is no longer only a defined target. The phase is **in progress**, with 0.11.1 through 0.11.4 completed in repository state.
 
 0.11.1 is completed at the architectural-definition level. The repository now has an explicit description of the Domain Module Pattern, explicit layer responsibilities, explicit dependency direction and explicit ownership boundaries between `auth`, `user` and `usersettings`.
 
 0.11.2 is also completed in runtime repository state. The `internal/modules/user` package is now the first concrete implementation of the pattern, with explicit `app`, `domain` and `repository` boundaries and backward-compatible package access preserved for existing consumers.
 
-0.11.3 is now also completed in runtime repository state. The `internal/modules/usersettings` package follows the same pattern with explicit `app`, `domain` and `repository` boundaries while preserving settings-specific semantics and backward-compatible package access for existing consumers.
+0.11.3 is now also completed in runtime repository state. The `internal/modules/usersettings` package follows the same pattern with explicit `app`, `domain` and `repository` boundaries while preserving settings-specific semantics and backward-compatible package access for existing consumers.\n\n0.11.4 is now completed in runtime repository state. The `internal/modules/auth` package has been aligned conservatively: `auth/app` owns runtime/application orchestration, `auth/domain` owns canonical wallet contracts, root `auth` remains a compatibility and transport surface, and root wallet stores remain intentionally accepted runtime implementations behind a documented repository façade.
 
 ## Current Result After 0.11.1
 
@@ -406,6 +415,20 @@ Phase 0.11.3 specifically delivers:
 
 The repository now contains two completed runtime applications of the pattern (`user` and `usersettings`) while preserving the Stage 0 public contract.
 
+## Current Result After 0.11.4
+
+Phase 0.11.4 specifically delivers:
+
+- conservative alignment of `internal/modules/auth` to the Domain Module Pattern
+- runtime ownership under `internal/modules/auth/app` for application, service, wallet-service, response-model and helper orchestration
+- canonical wallet type and store-contract ownership under `internal/modules/auth/domain`
+- root `auth` compatibility wrappers for application/service behavior and error identity preservation
+- narrowed `http_bootstrap.go`, `http_wallet_list.go` and authenticated wallet-management HTTP handlers
+- an explicit repository/runtime decision: root wallet store implementations remain active runtime implementations while `auth/repository` remains a documented transitional façade
+- preservation of wallet challenge, wallet verify, wallet management, bootstrap, session, error and authorization-adjacent behavior
+
+0.11.4 intentionally does not migrate the active wallet store implementations into `auth/repository` and does not redesign wallet bootstrap crypto/challenge verification. Those remain stable surfaces for future dedicated phases.
+
 ### Next
 
-0.11.4 — Auth Module Alignment
+0.11.5 — Cross-Module Contract Consolidation
