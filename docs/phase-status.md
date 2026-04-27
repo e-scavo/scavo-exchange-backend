@@ -1476,3 +1476,76 @@ With Phase 0.11 completed, the repository now exposes:
 ### Next
 
 0.12 — Read/Write Model Separation
+
+---
+
+## 🚧 Phase 0.12 — Read / Write Model Separation
+
+### Status
+
+In progress.
+
+### Latest Completed Subphase
+
+0.12.0 — Phase Definition & Documentation Lock.
+
+### Objective
+
+Establish explicit separation between read models, write models and domain-owned models across the current Stage 0 modules, while preserving public API behavior and runtime compatibility.
+
+### Scope
+
+Included:
+
+- complete model classification against the real repository
+- explicit read model extraction
+- explicit write model isolation
+- mapping-layer introduction
+- internal contract alignment after the 0.11 Domain Module Pattern
+- cumulative documentation updates
+
+Excluded:
+
+- full CQRS
+- event sourcing
+- public API version changes
+- business behavior changes
+- multi-tenant redesign
+- observability expansion
+
+### Subphase Plan
+
+| Subphase | Name | Status |
+| --- | --- | --- |
+| 0.12.0 | Phase Definition & Documentation Lock | ✅ Completed |
+| 0.12.1 | Model Classification Audit | ⬜ Pending |
+| 0.12.2 | Read Model Extraction | ⬜ Pending |
+| 0.12.3 | Write Model Isolation | ⬜ Pending |
+| 0.12.4 | Mapping Layer Introduction | ⬜ Pending |
+| 0.12.5 | Contract Alignment | ⬜ Pending |
+| 0.12.6 | Documentation & Phase Closure | ⬜ Pending |
+
+### 0.12.0 Result
+
+0.12.0 is documentation-only and is completed in this repository state. It defines the phase before implementation, records the subphase sequence and locks the non-goals that keep the phase compatibility-preserving.
+
+No Go code is changed in 0.12.0.
+
+### Real Baseline For 0.12.1
+
+The first implementation subphase must inspect the real models currently present under:
+
+- `internal/modules/auth`
+- `internal/modules/auth/app`
+- `internal/modules/auth/domain`
+- `internal/modules/user`
+- `internal/modules/user/app`
+- `internal/modules/user/domain`
+- `internal/modules/usersettings`
+- `internal/modules/usersettings/app`
+- `internal/modules/usersettings/domain`
+- relevant shared structures under `internal/core`
+
+### Next
+
+0.12.1 — Model Classification Audit.

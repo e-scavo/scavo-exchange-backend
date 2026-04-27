@@ -37,12 +37,14 @@
 * `phase0_9_api_versioning_strategy.md`
 * `phase0_10_authorization_layer.md`
 * `phase0_11_domain_module_pattern.md`
+* `phase0_12_read_write_model_separation.md`
 
 ---
 
 ## 🚧 Current Phase Focus
 
 * `phase0_11_domain_module_pattern.md`
+* `phase0_12_read_write_model_separation.md`
 * `phase0_10_authorization_layer.md`
   * `0.10.1 — Authorization Model Definition`
   * `0.10.2 — Authorization Context & Middleware`
@@ -121,7 +123,8 @@ Phase 0.9 ✔ Completed
 Phase 0.10 ✔ Completed
 
 Latest completed phase: `0.11 — Domain Module Pattern`  
-Next planned phase: `0.12 — Read/Write Model Separation`
+Current phase: `0.12 — Read / Write Model Separation`  
+Latest completed subphase: `0.12.0 — Phase Definition & Documentation Lock`
 
 
 ---
@@ -143,3 +146,17 @@ Next planned phase: `0.12 — Read/Write Model Separation`
 Phase 0.11 ✔ Completed — next planned phase: 0.12
 
 
+
+---
+
+### Phase 0.12 — Read / Write Model Separation
+
+- 0.12.0 ✔ Phase Definition & Documentation Lock
+- 0.12.1 ⬜ Model Classification Audit
+- 0.12.2 ⬜ Read Model Extraction
+- 0.12.3 ⬜ Write Model Isolation
+- 0.12.4 ⬜ Mapping Layer Introduction
+- 0.12.5 ⬜ Contract Alignment
+- 0.12.6 ⬜ Documentation & Phase Closure
+
+Phase 0.12 is in progress. 0.12.0 is completed as a documentation-only lock and the next implementation step is 0.12.1.

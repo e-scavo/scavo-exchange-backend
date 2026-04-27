@@ -4,3 +4,4 @@
 *.log
 scavo.exchange-backend*.zip
 scavo-exchange-backend*.zip
+/zip/

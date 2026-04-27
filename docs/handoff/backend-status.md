@@ -15,10 +15,10 @@ It is intended to:
 ## 📌 Current State
 
 **Stage:** 0 — Foundation
-**Phase:** 0.11 — Domain Module Pattern
-**Latest Completed Subphase:** 0.11.6 — Documentation & Phase Closure
-**Phase Status:** Completed
-**Next Planned Phase:** 0.12 — Read/Write Model Separation
+**Phase:** 0.12 — Read / Write Model Separation
+**Latest Completed Subphase:** 0.12.0 — Phase Definition & Documentation Lock
+**Phase Status:** In Progress
+**Next Planned Phase:** 0.12.1 — Model Classification Audit
 
 ---
 
@@ -997,3 +997,31 @@ Delivered internal steps:
 ### Next
 
 0.12 — Read/Write Model Separation
+
+---
+
+## Phase 0.12 — Read / Write Model Separation
+
+Phase 0.12 is now the active Stage 0 structural phase.
+
+### Current State
+
+0.12.0 — Phase Definition & Documentation Lock is completed.
+
+### Operational Meaning
+
+The backend is still externally aligned with the completed 0.11 runtime behavior. No code has been changed for 0.12.0. The repository now has a documented plan to separate read models, write models and domain-owned structures without changing public API behavior.
+
+### Subphase State
+
+- ✔ 0.12.0 — Phase Definition & Documentation Lock
+- ⬜ 0.12.1 — Model Classification Audit
+- ⬜ 0.12.2 — Read Model Extraction
+- ⬜ 0.12.3 — Write Model Isolation
+- ⬜ 0.12.4 — Mapping Layer Introduction
+- ⬜ 0.12.5 — Contract Alignment
+- ⬜ 0.12.6 — Documentation & Phase Closure
+
+### Next Required Action
+
+Run 0.12.1 against the real repository code and produce a complete model classification audit before extracting or renaming any model.

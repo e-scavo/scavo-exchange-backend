@@ -960,3 +960,54 @@ Because those foundations already exist, 0.11 can stay strictly structural. It d
 0.11.4 is also completed in runtime repository state. `internal/modules/auth` now follows the same pattern conservatively, with `auth/app` as runtime/application owner, `auth/domain` as canonical contract owner, root `auth` as compatibility/transport surface and `auth/repository` as a documented transitional façade.
 
 Phase 0.11 is therefore **completed**. Cross-module contracts have been consolidated and the trunk documentation now records the completed phase state coherently.
+
+---
+
+## Phase 0.12 — Read / Write Model Separation (Deep Architectural Definition)
+
+Phase 0.12 introduces a narrower model-responsibility discipline on top of the already completed module-boundary discipline from 0.11.
+
+The key distinction is not storage architecture. The backend is not moving to full CQRS. Instead, the distinction is about preventing the same structure from silently representing several different concepts at once.
+
+### Model Categories
+
+0.12.1 must classify real structures using the following categories:
+
+- **READ**: output/view/response-oriented shape
+- **WRITE**: input/command/mutation-oriented shape
+- **DOMAIN**: module-owned semantic model or invariant carrier
+- **CONTRACT**: explicit interface or minimal cross-module contract
+- **INFRASTRUCTURE**: persistence, transport, token, config or framework support shape
+- **HYBRID / TRANSITIONAL**: structure currently carrying more than one responsibility
+
+The classification is a documentation and design tool. It must be based on actual repository usage.
+
+### Mapping Discipline
+
+The target direction for later 0.12 subphases is explicit transformation:
+
+```text
+Write Model -> Domain / Application Use Case
+Domain / Application Result -> Read Model
+```
+
+Mappings may be local to the module while the module set is still small. The phase does not require a global shared mapper package unless the real code proves that such extraction is useful.
+
+### Non-Goals
+
+Phase 0.12 does not introduce:
+
+- independent read and write databases
+- event streams
+- projection rebuilds
+- public API payload migration
+- new versioned route spaces
+- frontend migration requirements
+
+### Deep Compatibility Constraint
+
+The separation must be invisible to current clients. Any extracted read or write model must preserve the public shape currently emitted or accepted by the relevant handler. Where names change internally, mapping must absorb the change.
+
+### 0.12.0 Result
+
+0.12.0 completes the documentary definition for this discipline. Code changes begin only after the 0.12.1 audit identifies real models and real hybrid points.

@@ -167,8 +167,32 @@ Updated the trunk documentation set so the adopted module pattern, its scope and
 #### Expected outcome
 Phase 0.11 closes with the same external HTTP behavior and a more uniform internal module structure, clearer ownership boundaries and safer foundations for later Stage 0 and post-Stage 0 work.
 
-### 0.12 — Read/Write Model Separation ⬜ Pending
-Formalize CQRS-lite approach across the system.
+### 0.12 — Read / Write Model Separation 🚧 In Progress
+Separate read-oriented, write-oriented and domain-owned model responsibilities without introducing full CQRS, event sourcing, public API changes or business behavior changes.
+
+#### 0.12.0 — Phase Definition & Documentation Lock ✔ Completed
+Define the complete phase scope, subphase order, compatibility constraints and documentary lock before changing code.
+
+#### 0.12.1 — Model Classification Audit ⬜ Pending
+Audit real repository models and classify them as READ, WRITE, DOMAIN, INFRASTRUCTURE, CONTRACT or HYBRID/TRANSITIONAL.
+
+#### 0.12.2 — Read Model Extraction ⬜ Pending
+Extract explicit read models for output/view/response paths while preserving current public response compatibility.
+
+#### 0.12.3 — Write Model Isolation ⬜ Pending
+Isolate input and mutation-oriented models so write paths do not reuse read models accidentally.
+
+#### 0.12.4 — Mapping Layer Introduction ⬜ Pending
+Introduce explicit mapping functions for Domain → Read Model and Write Model → Domain transformations.
+
+#### 0.12.5 — Contract Alignment ⬜ Pending
+Review the 0.11 contracts and align UserProvider/UserSettingsProvider usage with the read/write separation.
+
+#### 0.12.6 — Documentation & Phase Closure ⬜ Pending
+Update trunk documentation cumulatively and close the phase after implementation and validation.
+
+#### Expected outcome
+Phase 0.12 closes with clearer internal model responsibilities, explicit mapping boundaries and unchanged public HTTP/API behavior.
 
 ### 0.13 — Observability & Diagnostics Foundation ⬜ Pending
 Introduce structured logging, tracing, and metrics.

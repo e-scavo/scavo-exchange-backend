@@ -1,0 +1,200 @@
+# Phase 0.12 — Read / Write Model Separation
+
+## Status
+
+In progress.
+
+Latest completed subphase: **0.12.0 — Phase Definition & Documentation Lock**.
+
+---
+
+## Objective
+
+Separate explicitly the models used for reading data from the models used for writing data, while preserving the existing public HTTP/API behavior and the module boundaries completed in Phase 0.11.
+
+Phase 0.12 is a structural Stage 0 phase. It improves internal clarity without introducing new business behavior.
+
+---
+
+## Background
+
+Phase 0.11 completed the Domain Module Pattern across the current Stage 0 domain-facing modules:
+
+- `auth`
+- `user`
+- `usersettings`
+
+That work clarified where responsibilities live. Phase 0.12 now clarifies what responsibility each model has inside and across those boundaries.
+
+The current repository already contains response-oriented structures, request-oriented structures, domain structures, application result structures and cross-module contracts. Some are already explicit. Others still require audit before extraction.
+
+---
+
+## Scope
+
+### Included
+
+- identify all current model structures in the real repository
+- classify models as READ, WRITE, DOMAIN, CONTRACT, INFRASTRUCTURE or HYBRID / TRANSITIONAL
+- extract explicit read models where required
+- isolate write models where required
+- introduce explicit mapping functions
+- align internal contracts introduced or consolidated in 0.11
+- preserve current public route and payload compatibility
+- update trunk documentation cumulatively
+
+### Excluded
+
+- full CQRS
+- event sourcing
+- public API version changes
+- business behavior changes
+- multi-tenant redesign
+- independent read/write persistence stores
+- frontend migration requirements
+- observability expansion
+
+---
+
+## Architectural Direction
+
+The intended internal flow is:
+
+```text
+HTTP request DTO -> Write Model -> Application / Domain behavior
+Application / Domain result -> Read Model -> HTTP response DTO
+```
+
+This phase does not require every package to use identical filenames or folders. It requires model responsibility to be explicit and transformations to be visible.
+
+---
+
+## Model Categories
+
+### READ
+
+A read model is used for output, views, responses or bootstrap/session/profile data returned by application use cases or HTTP handlers.
+
+### WRITE
+
+A write model is used for input, command-style mutation requests or application-level write operations.
+
+### DOMAIN
+
+A domain model is owned by a module and represents module semantics, invariants or persistent identity concepts.
+
+### CONTRACT
+
+A contract is an explicit interface or minimal cross-module shape used to coordinate between modules without taking ownership of another module's implementation.
+
+### INFRASTRUCTURE
+
+An infrastructure model supports transport, storage, tokens, configuration, logging, errors or framework integration.
+
+### HYBRID / TRANSITIONAL
+
+A hybrid/transitional model currently carries more than one responsibility and must be considered for later extraction, isolation or mapping.
+
+---
+
+## Subphases
+
+### 0.12.0 — Phase Definition & Documentation Lock
+
+Status: **Completed**.
+
+Purpose:
+
+- define the phase before code changes
+- document scope and non-goals
+- register all subphases
+- update trunk documentation
+- preserve the completed 0.11 runtime state
+
+No code changes are included in this subphase.
+
+### 0.12.1 — Model Classification Audit
+
+Status: **Pending**.
+
+Purpose:
+
+- inspect real repository code
+- identify all relevant models
+- classify each model
+- detect hybrid/transitional structures
+- document required extraction candidates
+
+### 0.12.2 — Read Model Extraction
+
+Status: **Pending**.
+
+Purpose:
+
+- create explicit read models where required
+- preserve response compatibility
+- introduce Domain / Application → Read Model mappings where needed
+- validate with `go test ./...`
+
+### 0.12.3 — Write Model Isolation
+
+Status: **Pending**.
+
+Purpose:
+
+- create explicit write models where required
+- prevent response/read structures from being reused as mutation input models
+- preserve handler compatibility
+- validate with `go test ./...`
+
+### 0.12.4 — Mapping Layer Introduction
+
+Status: **Pending**.
+
+Purpose:
+
+- centralize or localize mapping functions according to real module needs
+- remove implicit transformations
+- make flow of data reviewable
+- preserve public behavior
+
+### 0.12.5 — Contract Alignment
+
+Status: **Pending**.
+
+Purpose:
+
+- revisit 0.11 cross-module contracts
+- align `UserProvider` and `UserSettingsProvider` usage with read/write separation
+- preserve runtime compatibility
+
+### 0.12.6 — Documentation & Phase Closure
+
+Status: **Pending**.
+
+Purpose:
+
+- reread trunk documentation
+- update documentation cumulatively
+- record final implementation state
+- close Phase 0.12 formally
+
+---
+
+## Compatibility Rules
+
+Phase 0.12 must preserve:
+
+- existing public routes
+- existing public payload semantics
+- existing authentication behavior
+- existing authorization behavior
+- existing standardized error model
+- existing API versioning policy
+- existing frontend alignment rule during Stage 0
+
+---
+
+## 0.12.0 Closure Statement
+
+0.12.0 is completed as a documentation-only subphase. The phase is now defined, its scope is locked and the next correct step is 0.12.1 — Model Classification Audit.

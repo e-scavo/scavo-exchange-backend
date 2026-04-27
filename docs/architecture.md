@@ -621,3 +621,41 @@ Phase 0.11 is therefore **completed**. Its final work consolidated cross-module 
 ### 0.11.6 Phase Closure Result
 
 0.11.6 closes the documentation state for the phase. The roadmap, phase-status, README, handoff and architecture documents now record Phase 0.11 as completed and preserve the boundary decisions needed for the next roadmap phase.
+
+---
+
+## Phase 0.12 — Read / Write Model Separation
+
+Phase 0.12 extends the completed Domain Module Pattern by clarifying model responsibility inside each module.
+
+The architectural rule introduced by this phase is that model shape must reflect intent:
+
+- read models are used for output, views and response-oriented application data
+- write models are used for input, commands and mutation-oriented application data
+- domain models remain owned by the module domain boundary
+- mapping functions make transformations explicit
+
+This is not a full CQRS adoption. The backend is not introducing separate read/write persistence stores, event sourcing or asynchronous projections. The separation is structural and internal, intended to reduce ambiguity in the current codebase while preserving the public HTTP contract.
+
+### Relationship To 0.11
+
+0.11 answered where module responsibilities live: `http`, `app`, `domain` and `repository` where useful.
+
+0.12 answers what model responsibility a structure has once it crosses those boundaries.
+
+The expected direction is:
+
+```text
+HTTP request DTO -> Write Model -> Domain / Application behavior
+Domain / Application result -> Read Model -> HTTP response DTO
+```
+
+The exact extraction points must be determined by 0.12.1 against the real code, not by assumption.
+
+### Compatibility Rule
+
+0.12 must not change public routes, public payload semantics, authentication behavior, authorization behavior, error envelopes or API versioning. Any model split must be backed by explicit mapping so current behavior remains stable.
+
+### 0.12.0 Result
+
+0.12.0 establishes this architectural definition and locks the phase documentation before code changes begin.

@@ -460,3 +460,37 @@ Phase 0.11 is closed after 0.11.6. The repository treats the Domain Module Patte
 ### Status
 
 Accepted in 0.11.6.
+
+---
+
+## ADR-0012 - Read / Write Model Separation Is Internal And Compatibility-Preserving
+
+### Context
+
+After Phase 0.11, the backend has explicit module boundaries for `auth`, `user` and `usersettings`. The remaining architectural ambiguity is that some model structures can still represent input, output, domain state or application results depending on the call path.
+
+### Decision
+
+Phase 0.12 will separate read-oriented and write-oriented model responsibilities internally while preserving the existing public HTTP contract.
+
+The accepted direction is:
+
+- read models are response/view-oriented
+- write models are input/command-oriented
+- domain models remain module-owned
+- mapping functions make transformations explicit
+
+### Non-Decision
+
+This is not an adoption of full CQRS or event sourcing. Phase 0.12 does not introduce separate persistence models, projections, asynchronous read stores or new API versions.
+
+### Consequences
+
+- Model intent becomes easier to review.
+- Future module changes can avoid reusing response shapes as mutation inputs.
+- The 0.11 contracts can evolve with clearer input/output boundaries.
+- Public clients should observe no behavioral change.
+
+### Status
+
+Accepted in 0.12.0.

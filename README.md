@@ -22,10 +22,10 @@ The backend follows a **wallet-first identity model** that progressively evolves
 ## 🚧 Current Stage
 
 **Stage:** 0 — Foundation  
-**Phase:** 0.11 — Domain Module Pattern  
-**Latest Completed Subphase:** **0.11.6 — Documentation & Phase Closure**  
-**Phase Status:** **Completed**  
-**Next Planned Phase:** **0.12 — Read/Write Model Separation**
+**Phase:** 0.12 — Read/Write Model Separation  
+**Latest Completed Subphase:** **0.12.0 — Phase Definition & Documentation Lock**  
+**Phase Status:** **In Progress**  
+**Next Planned Phase:** **0.12.1 — Model Classification Audit**
 
 ---
 
@@ -2739,3 +2739,63 @@ Phase 0.11 is **completed**. The repository now has the Domain Module Pattern de
 ### Next
 
 0.12 — Read/Write Model Separation
+
+---
+
+## Phase 0.12 — Read / Write Model Separation
+
+Phase 0.12 is the current structural Stage 0 step after the completed Domain Module Pattern. It formalizes an explicit separation between models used to read data from the system and models used to write or mutate data into the system.
+
+The phase is intentionally internal and compatibility-preserving. It does not introduce a public API version change, does not change business behavior and does not adopt full CQRS or event sourcing.
+
+### Objective
+
+Separate the current model surface into explicit responsibilities:
+
+- **Read models** for outputs, views and response-oriented structures
+- **Write models** for inputs, commands and mutation-oriented structures
+- **Domain models** for module-owned semantics and invariants
+- **Mapping functions** for explicit transformations between those responsibilities
+
+### Why this phase follows 0.11
+
+Phase 0.11 made module ownership explicit across `auth`, `user` and `usersettings`. Once module boundaries are explicit, the next ambiguity is inside those modules: several structures currently act as request DTOs, response DTOs, application result shapes or domain structures depending on where they are used.
+
+Phase 0.12 addresses that ambiguity without reopening the public contract.
+
+### Included scope
+
+- identify all current model structures in the real repository
+- classify them as read, write, domain, infrastructure, contract or hybrid/transitional
+- extract explicit read models where response-oriented structures are mixed with other concerns
+- isolate write models for mutation/input paths
+- introduce explicit mapping functions where transformations are currently implicit
+- align existing internal contracts after 0.11 without changing runtime compatibility
+- update trunk documentation cumulatively
+
+### Excluded scope
+
+- no full CQRS implementation
+- no event sourcing
+- no API version change
+- no business behavior change
+- no multi-tenant model redesign
+- no public payload migration during 0.12.0
+
+### Phase 0.12 subphases
+
+- **0.12.0 — Phase Definition & Documentation Lock** ✔ Completed
+- **0.12.1 — Model Classification Audit** ⬜ Pending
+- **0.12.2 — Read Model Extraction** ⬜ Pending
+- **0.12.3 — Write Model Isolation** ⬜ Pending
+- **0.12.4 — Mapping Layer Introduction** ⬜ Pending
+- **0.12.5 — Contract Alignment** ⬜ Pending
+- **0.12.6 — Documentation & Phase Closure** ⬜ Pending
+
+### Current result
+
+0.12.0 establishes the documentary lock for the phase. The repository documentation now defines the scope, non-goals, subphase order and compatibility requirements for Read / Write Model Separation before any code is changed.
+
+### Next
+
+0.12.1 — Model Classification Audit
