@@ -16,9 +16,9 @@ It is intended to:
 
 **Stage:** 0 — Foundation
 **Phase:** 0.11 — Domain Module Pattern
-**Latest Completed Subphase:** 0.11.4 — Auth Module Alignment
-**Phase Status:** In Progress
-**Current Active Subphase:** 0.11.5 — Cross-Module Contract Consolidation
+**Latest Completed Subphase:** 0.11.6 — Documentation & Phase Closure
+**Phase Status:** Completed
+**Next Planned Phase:** 0.12 — Read/Write Model Separation
 
 ---
 
@@ -954,7 +954,7 @@ The adopted module pattern is centered on:
 
 ### Phase State
 
-Phase 0.11 is **in progress**.
+Phase 0.11 is **completed**.
 
 Completed subphases:
 
@@ -962,19 +962,13 @@ Completed subphases:
 - ✔ 0.11.2 — User Module Refactor
 - ✔ 0.11.3 — UserSettings Module Refactor
 - ✔ 0.11.4 — Auth Module Alignment
-
-Active subphase:
-
-- ◑ 0.11.5 — Cross-Module Contract Consolidation
-  - ◑ 0.11.5.0 — Subphase Definition & Documentation Alignment
-  - ◑ 0.11.5.1 — Dependency Mapping
-  - ◑ 0.11.5.2 — Contract Extraction
-  - ◑ 0.11.5.3 — Interface Alignment
-  - ◑ 0.11.5.4 — Runtime Compatibility Validation
-
-Defined next subphase:
-
-- ◑ 0.11.6 — Documentation & Phase Closure
+- ✔ 0.11.5 — Cross-Module Contract Consolidation
+  - ✔ 0.11.5.0 — Subphase Definition & Documentation Alignment
+  - ✔ 0.11.5.1 — Dependency Mapping
+  - ✔ 0.11.5.2 — Contract Extraction
+  - ✔ 0.11.5.3 — Interface Alignment
+  - ✔ 0.11.5.4 — Runtime Compatibility Validation
+- ✔ 0.11.6 — Documentation & Phase Closure
 
 ### Current Operational Meaning
 
@@ -986,11 +980,13 @@ Defined next subphase:
 
 0.11.4 completed the conservative auth alignment. `auth/app` now owns runtime/application orchestration, `auth/domain` owns wallet contracts, root `auth` remains a compatibility/transport surface, and `auth/repository` is explicitly documented as a transitional façade while root stores remain active runtime implementations.
 
-### Current Active Work
+0.11.5 completed cross-module contract consolidation. `auth/app` now coordinates with `user` and `usersettings` through explicit minimal contracts while root `auth` preserves backward-compatible wiring and nil-service semantics.
 
-0.11.5 — Cross-Module Contract Consolidation
+### Completed 0.11.5 Work
 
-Planned internal steps:
+0.11.5 — Cross-Module Contract Consolidation is completed. It mapped the real cross-module dependencies between `auth`, `user` and `usersettings`, extracted minimal contracts, aligned `auth/app` to those contracts and validated runtime compatibility without changing public HTTP behavior.
+
+Delivered internal steps:
 
 - 0.11.5.0 — Subphase Definition & Documentation Alignment
 - 0.11.5.1 — Dependency Mapping
@@ -1000,4 +996,4 @@ Planned internal steps:
 
 ### Next
 
-0.11.5.1 — Dependency Mapping
+0.12 — Read/Write Model Separation

@@ -1254,3 +1254,16 @@ Wallet bootstrap auth remains intentionally stable at the root HTTP boundary whi
 
 The flow contract is preserved while the internal ownership model is clearer and safer for later repository migration.
 
+
+
+## Phase 0.11 Contract Consolidation Flow Impact
+
+Phase 0.11.5 does not introduce new runtime flows or public route behavior. Its effect is internal: `auth/app` coordinates with `user` and `usersettings` through explicit minimal contracts while the existing HTTP, session, bootstrap, wallet and settings flows remain externally unchanged.
+
+The validated flow direction after Phase 0.11 is:
+
+```text
+HTTP/root compatibility → auth/app contracts → user/usersettings runtime implementations
+```
+
+This preserves the current flow behavior while reducing accidental concrete service coupling inside the application layer.

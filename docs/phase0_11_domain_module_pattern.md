@@ -252,7 +252,7 @@ Delivered result:
 
 ### 0.11.5 — Cross-Module Contract Consolidation
 
-Status: ◑ In Progress
+Status: ✔ Completed
 
 Clarify and minimize the way the modules interact.
 
@@ -271,19 +271,19 @@ Expected result:
 
 - the modules can collaborate without informal dependency growth
 
-Planned subphases:
+Delivered subphases:
 
-- 0.11.5.0 — Subphase Definition & Documentation Alignment
-- 0.11.5.1 — Dependency Mapping
-- 0.11.5.2 — Contract Extraction
-- 0.11.5.3 — Interface Alignment
-- 0.11.5.4 — Runtime Compatibility Validation
+- 0.11.5.0 — Subphase Definition & Documentation Alignment ✔ Completed
+- 0.11.5.1 — Dependency Mapping ✔ Completed
+- 0.11.5.2 — Contract Extraction ✔ Completed
+- 0.11.5.3 — Interface Alignment ✔ Completed
+- 0.11.5.4 — Runtime Compatibility Validation ✔ Completed
 
 ---
 
 ### 0.11.6 — Documentation & Phase Closure
 
-Status: ◑ Defined
+Status: ✔ Completed
 
 Close the phase by aligning the trunk documentation set with the adopted module pattern.
 
@@ -377,7 +377,7 @@ Phase 0.11 should only be considered complete when:
 
 ## Current Repository State
 
-At this repository point, Phase 0.11 is no longer only a defined target. The phase is **in progress**, with 0.11.1 through 0.11.4 completed in repository state.
+At this repository point, Phase 0.11 is completed in repository state. The phase moved from architectural definition through concrete module alignment, cross-module contract consolidation and final documentation closure.
 
 0.11.1 is completed at the architectural-definition level. The repository now has an explicit description of the Domain Module Pattern, explicit layer responsibilities, explicit dependency direction and explicit ownership boundaries between `auth`, `user` and `usersettings`.
 
@@ -401,7 +401,7 @@ No runtime behavior was changed by 0.11.1. Its purpose was to close the structur
 
 ### Next
 
-0.11.5.1 — Dependency Mapping
+0.12 — Read/Write Model Separation
 
 ## Current Result After 0.11.2
 
@@ -441,4 +441,13 @@ Phase 0.11.4 specifically delivers:
 
 ### Next
 
-0.11.5.1 — Dependency Mapping
+0.12 — Read/Write Model Separation
+
+
+## Current Result After 0.11.5
+
+Phase 0.11.5 delivered the dependency map, minimal contracts (`UserProvider`, `UserSettingsProvider`), interface alignment in `auth/app` and runtime compatibility validation.
+
+## Current Result After 0.11.6
+
+Phase 0.11.6 closes the trunk documentation for Phase 0.11 and marks the phase complete.

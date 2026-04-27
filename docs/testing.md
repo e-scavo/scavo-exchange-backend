@@ -1752,3 +1752,30 @@ go test ./...
 
 The final 0.11.4 state was validated with a full passing repository test run after repository/runtime decision lock and final auth alignment validation.
 
+
+
+## Phase 0.11.5 — Cross-Module Contract Consolidation Testing Notes
+
+### Purpose
+
+Phase 0.11.5 is a structural contract-consolidation phase. Testing therefore focused on proving that replacing concrete cross-module service knowledge in `auth/app` with minimal contracts did not change runtime behavior.
+
+### Coverage Direction
+
+The important protected areas are:
+
+- login and session behavior through the auth service wrapper
+- authenticated bootstrap behavior, including nil user-settings service handling
+- wallet login and wallet-management flows that depend on auth service wiring
+- compatibility between root `auth` constructors and the `auth/app` contract-based runtime
+- module compilation across `auth`, `user` and `usersettings`
+
+### Validation Command
+
+```bash
+go test ./...
+```
+
+### Result
+
+The final 0.11.5 state was validated with a full passing repository test run after user and user-settings contract extraction, interface alignment and runtime compatibility validation.

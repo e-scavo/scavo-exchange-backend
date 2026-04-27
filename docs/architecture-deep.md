@@ -906,13 +906,15 @@ That means:
 
 Where module interaction is real, it should be expressed through minimal explicit contracts rather than through direct knowledge of another module's internal models or implementation details.
 
-0.11.5 turns this principle into the active implementation plan. The subphase is intentionally split into:
+0.11.5 turns this principle into completed implementation state. The subphase was intentionally split into:
 
-- 0.11.5.0 — Subphase Definition & Documentation Alignment
-- 0.11.5.1 — Dependency Mapping
-- 0.11.5.2 — Contract Extraction
-- 0.11.5.3 — Interface Alignment
-- 0.11.5.4 — Runtime Compatibility Validation
+- 0.11.5.0 — Subphase Definition & Documentation Alignment ✔ Completed
+- 0.11.5.1 — Dependency Mapping ✔ Completed
+- 0.11.5.2 — Contract Extraction ✔ Completed
+- 0.11.5.3 — Interface Alignment ✔ Completed
+- 0.11.5.4 — Runtime Compatibility Validation ✔ Completed
+
+The delivered result is that `auth/app` coordinates with `user` and `usersettings` through explicit minimal contracts, while root compatibility layers preserve existing service wiring and externally observable behavior.
 
 The expected result is not a broad abstraction rewrite. It is a controlled consolidation of the real contracts needed for `auth`, `user` and `usersettings` to collaborate without reintroducing concrete ownership confusion.
 
@@ -957,4 +959,4 @@ Because those foundations already exist, 0.11 can stay strictly structural. It d
 
 0.11.4 is also completed in runtime repository state. `internal/modules/auth` now follows the same pattern conservatively, with `auth/app` as runtime/application owner, `auth/domain` as canonical contract owner, root `auth` as compatibility/transport surface and `auth/repository` as a documented transitional façade.
 
-Phase 0.11 is therefore **in progress**. The remaining work is to consolidate cross-module contracts and then close the phase coherently in the trunk documentation.
+Phase 0.11 is therefore **completed**. Cross-module contracts have been consolidated and the trunk documentation now records the completed phase state coherently.

@@ -129,7 +129,7 @@ Apply progressive authorization checks to selected authenticated endpoints throu
 #### 0.10.5 — Documentation & Contract Consolidation ✔ Completed
 Align the trunk documentation set to the delivered authorization behavior and close the phase with a coherent architectural and operational narrative.
 
-### 0.11 — Domain Module Pattern ◑ In Progress
+### 0.11 — Domain Module Pattern ✔ Completed
 Standardize the internal structure of the current Stage 0 domain-facing modules so future growth builds on explicit HTTP / APP / DOMAIN boundaries, minimal internal contracts and reduced accidental coupling without changing the public API surface.
 
 #### 0.11.1 — Domain Module Pattern Definition ✔ Completed
@@ -150,22 +150,22 @@ Aligned `internal/modules/auth` to the pattern conservatively while preserving t
 
 This subphase is delivered in repository state: `auth/app` owns application/runtime orchestration, `auth/domain` owns canonical wallet contracts, root `auth` remains a compatibility surface, wallet HTTP management is narrowed to transport/delegation, and repository migration is explicitly deferred behind a transitional façade.
 
-#### 0.11.5 — Cross-Module Contract Consolidation ◑ In Progress
+#### 0.11.5 — Cross-Module Contract Consolidation ✔ Completed
 Consolidate the explicit internal contracts between `auth`, `user` and `usersettings` so coordination remains possible without reintroducing ownership confusion or concrete cross-module coupling.
 
-Planned internal steps:
+Delivered internal steps:
 
-- 0.11.5.0 — Subphase Definition & Documentation Alignment
-- 0.11.5.1 — Dependency Mapping
-- 0.11.5.2 — Contract Extraction
-- 0.11.5.3 — Interface Alignment
-- 0.11.5.4 — Runtime Compatibility Validation
+- 0.11.5.0 — Subphase Definition & Documentation Alignment ✔ Completed
+- 0.11.5.1 — Dependency Mapping ✔ Completed
+- 0.11.5.2 — Contract Extraction ✔ Completed
+- 0.11.5.3 — Interface Alignment ✔ Completed
+- 0.11.5.4 — Runtime Compatibility Validation ✔ Completed
 
-#### 0.11.6 — Documentation & Phase Closure ◑ Defined
-Update the trunk documentation set so the adopted module pattern, its scope and its completion criteria are recorded consistently across roadmap, status, architecture, handoff and the dedicated phase document.
+#### 0.11.6 — Documentation & Phase Closure ✔ Completed
+Updated the trunk documentation set so the adopted module pattern, its scope and its completion criteria are recorded consistently across roadmap, status, architecture, handoff and the dedicated phase document.
 
 #### Expected outcome
-By the end of Phase 0.11, the backend should keep the same external HTTP behavior while exposing a more uniform internal module structure, clearer ownership boundaries and safer foundations for later Stage 0 and post-Stage 0 work.
+Phase 0.11 closes with the same external HTTP behavior and a more uniform internal module structure, clearer ownership boundaries and safer foundations for later Stage 0 and post-Stage 0 work.
 
 ### 0.12 — Read/Write Model Separation ⬜ Pending
 Formalize CQRS-lite approach across the system.

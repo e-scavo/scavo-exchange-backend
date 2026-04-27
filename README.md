@@ -23,9 +23,9 @@ The backend follows a **wallet-first identity model** that progressively evolves
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.11 — Domain Module Pattern  
-**Latest Completed Subphase:** **0.11.4 — Auth Module Alignment**  
-**Phase Status:** **In Progress**  
-**Current Active Subphase:** **0.11.5 — Cross-Module Contract Consolidation**
+**Latest Completed Subphase:** **0.11.6 — Documentation & Phase Closure**  
+**Phase Status:** **Completed**  
+**Next Planned Phase:** **0.12 — Read/Write Model Separation**
 
 ---
 
@@ -2682,13 +2682,13 @@ The architectural intention is explicit separation of responsibilities:
 - **0.11.2 — User Module Refactor** ✔ Completed
 - **0.11.3 — UserSettings Module Refactor** ✔ Completed
 - **0.11.4 — Auth Module Alignment** ✔ Completed
-- **0.11.5 — Cross-Module Contract Consolidation** ◑ In Progress
-  - **0.11.5.0 — Subphase Definition & Documentation Alignment** ◑ In Progress
-  - **0.11.5.1 — Dependency Mapping** ◑ Defined
-  - **0.11.5.2 — Contract Extraction** ◑ Defined
-  - **0.11.5.3 — Interface Alignment** ◑ Defined
-  - **0.11.5.4 — Runtime Compatibility Validation** ◑ Defined
-- **0.11.6 — Documentation & Phase Closure** ◑ Defined
+- **0.11.5 — Cross-Module Contract Consolidation** ✔ Completed
+  - **0.11.5.0 — Subphase Definition & Documentation Alignment** ✔ Completed
+  - **0.11.5.1 — Dependency Mapping** ✔ Completed
+  - **0.11.5.2 — Contract Extraction** ✔ Completed
+  - **0.11.5.3 — Interface Alignment** ✔ Completed
+  - **0.11.5.4 — Runtime Compatibility Validation** ✔ Completed
+- **0.11.6 — Documentation & Phase Closure** ✔ Completed
 
 ### Intended scope
 
@@ -2718,9 +2718,13 @@ This phase does **not** introduce:
 
 0.11.4 completed the conservative auth-module alignment. The auth module now has `auth/app` as the runtime/application owner, `auth/domain` as the canonical contract boundary, root `auth` as a compatibility surface, and `auth/repository` as a documented transitional façade. Public wallet bootstrap, authenticated wallet management, session, bootstrap and login behavior remain externally unchanged.
 
+0.11.5 completed cross-module contract consolidation. `auth/app` now depends on explicit minimal contracts (`UserProvider` and `UserSettingsProvider`) instead of concrete `user` and `usersettings` services, while root `auth` preserves compatibility wiring and public behavior.
+
+0.11.6 closes the phase documentation. The trunk documentation now records Phase 0.11 as complete and keeps roadmap, status, architecture and handoff documents aligned with the delivered module pattern.
+
 ### Expected outcome
 
-When Phase 0.11 is implemented and closed, the backend should have:
+With Phase 0.11 implemented and closed, the backend now has:
 
 - a uniform internal module pattern for the currently relevant Stage 0 modules
 - thinner handlers and clearer use-case boundaries
@@ -2730,8 +2734,8 @@ When Phase 0.11 is implemented and closed, the backend should have:
 
 ### Status
 
-Phase 0.11 is **in progress**. The pattern definition and the concrete `user`, `usersettings` and `auth` module alignments through 0.11.4 are completed. The next defined work is cross-module contract consolidation.
+Phase 0.11 is **completed**. The repository now has the Domain Module Pattern defined and applied across `user`, `usersettings` and `auth`, with cross-module coordination expressed through explicit minimal contracts where coordination is required.
 
 ### Next
 
-0.11.5.1 — Dependency Mapping
+0.12 — Read/Write Model Separation

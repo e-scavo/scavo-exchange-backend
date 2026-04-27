@@ -437,5 +437,26 @@ After 0.11.2, 0.11.3 and 0.11.4, the three modules have explicit internal struct
 
 ### Status
 
-Accepted as the execution rule for 0.11.5.0 and the remaining 0.11.5 subphases.
+Accepted as the execution rule for 0.11.5.0 through 0.11.5.4 and confirmed during 0.11.6 phase closure.
 
+
+
+## Decision — Phase 0.11 Closure State
+
+### Context
+
+Phase 0.11 defined and applied the Domain Module Pattern across the current Stage 0 domain-facing modules. It also consolidated real cross-module dependencies between `auth`, `user` and `usersettings` through explicit minimal contracts.
+
+### Decision
+
+Phase 0.11 is closed after 0.11.6. The repository treats the Domain Module Pattern as delivered for the current module set, with `auth`, `user` and `usersettings` aligned to explicit internal boundaries and cross-module coordination constrained by minimal contracts where required.
+
+### Consequences
+
+- Future changes should not reintroduce concrete service coupling into `auth/app`.
+- Root compatibility layers may continue to preserve public behavior and existing wiring.
+- Further repository migration or read/write model separation should occur in later roadmap phases rather than being folded back into 0.11.
+
+### Status
+
+Accepted in 0.11.6.

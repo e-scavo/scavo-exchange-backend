@@ -1331,9 +1331,9 @@ Authorization is now both implemented and consistently documented. The backend k
 0.11 — Domain Module Pattern
 
 
-## ◑ Phase 0.11 — Domain Module Pattern
+## ✅ Phase 0.11 — Domain Module Pattern
 
-Status: ◑ In Progress
+Status: ✅ Completed
 
 ### Objective
 
@@ -1358,8 +1358,8 @@ This phase does not introduce new endpoints, payload shapes, authentication sema
 | 0.11.2 | User Module Refactor | ✅ Completed |
 | 0.11.3 | UserSettings Module Refactor | ✅ Completed |
 | 0.11.4 | Auth Module Alignment | ✅ Completed |
-| 0.11.5 | Cross-Module Contract Consolidation | ◑ In Progress |
-| 0.11.6 | Documentation & Phase Closure | ◑ Defined |
+| 0.11.5 | Cross-Module Contract Consolidation | ✅ Completed |
+| 0.11.6 | Documentation & Phase Closure | ✅ Completed |
 
 ### Architectural Intent
 
@@ -1442,11 +1442,13 @@ Resulting state:
 Validated by a full `go test ./...` pass after the final C4.2/D state.
 
 
-### Current Scope For 0.11.5
+### Current Result After 0.11.5
 
-0.11.5 is now the active Phase 0.11 subphase. It exists to consolidate the contracts between the already-aligned `auth`, `user` and `usersettings` modules before the whole 0.11 phase is closed.
+0.11.5 is completed in repository state.
 
-Planned sub-steps within 0.11.5:
+The backend now consolidates the contracts between the already-aligned `auth`, `user` and `usersettings` modules. The concrete result is that `auth/app` no longer depends on concrete `user.Service` or `usersettings.Service` implementations. Instead, it coordinates through explicit minimal contracts while root `auth` preserves backward-compatible wiring and public behavior.
+
+Delivered sub-steps within 0.11.5:
 
 - 0.11.5.0 — Subphase Definition & Documentation Alignment
 - 0.11.5.1 — Dependency Mapping
@@ -1454,11 +1456,17 @@ Planned sub-steps within 0.11.5:
 - 0.11.5.3 — Interface Alignment
 - 0.11.5.4 — Runtime Compatibility Validation
 
-0.11.5 must not introduce new public API behavior. Its purpose is to make existing cross-module coordination explicit and interface-based where coordination is real, while preserving the ownership boundaries completed in 0.11.1 through 0.11.4.
+0.11.5 did not introduce new public API behavior. Its purpose was to make existing cross-module coordination explicit and interface-based where coordination is real, while preserving the ownership boundaries completed in 0.11.1 through 0.11.4.
+
+### Current Result After 0.11.6
+
+0.11.6 is completed in repository state.
+
+The trunk documentation now records Phase 0.11 as closed. Roadmap, phase status, architecture, deep architecture, handoff and README now agree that the Domain Module Pattern has been defined, applied to `user`, `usersettings` and `auth`, and finalized with cross-module contract consolidation.
 
 ### Expected Outcome
 
-When Phase 0.11 is eventually completed, the repository should expose:
+With Phase 0.11 completed, the repository now exposes:
 
 - a consistent internal module pattern across `auth`, `user` and `usersettings`
 - clearer ownership boundaries between authentication, user entity concerns and user settings concerns
@@ -1467,4 +1475,4 @@ When Phase 0.11 is eventually completed, the repository should expose:
 
 ### Next
 
-0.11.5.1 — Dependency Mapping
+0.12 — Read/Write Model Separation

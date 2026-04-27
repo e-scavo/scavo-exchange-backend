@@ -612,8 +612,12 @@ Phase 0.11 remains intentionally non-breaking. It preserves:
 - `auth/repository` is documented as a transitional façade, not the active implementation owner yet
 - wallet bootstrap auth remains public and stable, while authenticated wallet-management handlers are narrowed to transport/delegation
 
-Phase 0.11 is therefore **in progress**, not merely planned. Its current active work is 0.11.5 cross-module contract consolidation, followed by phase-level documentation closure.
+Phase 0.11 is therefore **completed**. Its final work consolidated cross-module contracts and closed the phase documentation without changing public routes, payloads, authentication semantics or settings behavior.
 
-### 0.11.5 Contract Consolidation Scope
+### 0.11.5 Contract Consolidation Result
 
-0.11.5 formalizes the expectation that `auth`, `user` and `usersettings` coordinate through explicit, minimal contracts rather than through accidental knowledge of each other's implementation details. The planned internal steps are dependency mapping, contract extraction, interface alignment and runtime compatibility validation. This remains a structural step only: it must not change public routes, payloads, authentication semantics or settings behavior.
+0.11.5 formalizes and applies the expectation that `auth`, `user` and `usersettings` coordinate through explicit, minimal contracts rather than through accidental knowledge of each other's implementation details. The completed internal steps were dependency mapping, contract extraction, interface alignment and runtime compatibility validation. The result is that `auth/app` depends on `UserProvider` and `UserSettingsProvider` contracts while root `auth` preserves compatibility wiring. This remains a structural result only: it does not change public routes, payloads, authentication semantics or settings behavior.
+
+### 0.11.6 Phase Closure Result
+
+0.11.6 closes the documentation state for the phase. The roadmap, phase-status, README, handoff and architecture documents now record Phase 0.11 as completed and preserve the boundary decisions needed for the next roadmap phase.
