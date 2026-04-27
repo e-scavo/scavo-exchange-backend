@@ -173,8 +173,18 @@ Separate read-oriented, write-oriented and domain-owned model responsibilities w
 #### 0.12.0 — Phase Definition & Documentation Lock ✔ Completed
 Define the complete phase scope, subphase order, compatibility constraints and documentary lock before changing code.
 
-#### 0.12.1 — Model Classification Audit ⬜ Pending
+#### 0.12.1 — Model Classification Audit 🚧 In Progress
 Audit real repository models and classify them as READ, WRITE, DOMAIN, INFRASTRUCTURE, CONTRACT or HYBRID/TRANSITIONAL.
+
+Internal subdivision:
+
+- 0.12.1.0 — Definition & Documentation Lock ✔ Completed
+- 0.12.1.1 — Model Inventory Extraction ⬜ Pending
+- 0.12.1.2 — Model Classification ⬜ Pending
+- 0.12.1.3 — Cross-Layer Usage Analysis ⬜ Pending
+- 0.12.1.4 — Problem Detection & Risk Mapping ⬜ Pending
+- 0.12.1.5 — Target Separation Definition ⬜ Pending
+- 0.12.1.6 — Audit Consolidation & Closure ⬜ Pending
 
 #### 0.12.2 — Read Model Extraction ⬜ Pending
 Extract explicit read models for output/view/response paths while preserving current public response compatibility.

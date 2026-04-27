@@ -197,4 +197,4 @@ Phase 0.12 must preserve:
 
 ## 0.12.0 Closure Statement
 
-0.12.0 is completed as a documentation-only subphase. The phase is now defined, its scope is locked and the next correct step is 0.12.1 — Model Classification Audit.
+0.12.0 is completed as a documentation-only subphase. The phase is now defined, its scope is locked and Phase 0.12.1 has started with 0.12.1.0 as its audit-level documentation lock. The next correct step is 0.12.1.1 — Model Inventory Extraction.

@@ -1011,3 +1011,21 @@ The separation must be invisible to current clients. Any extracted read or write
 ### 0.12.0 Result
 
 0.12.0 completes the documentary definition for this discipline. Code changes begin only after the 0.12.1 audit identifies real models and real hybrid points.
+
+
+### 0.12.1.0 — Audit-Level Documentation Lock
+
+The Model Classification Audit is itself split into controlled internal steps because an incomplete audit would make later model extraction unsafe. 0.12.1.0 therefore locks the audit process before any inventory output is generated.
+
+The required audit sequence is:
+
+1. extract the complete model inventory from real code
+2. classify each structure using the Phase 0.12 vocabulary
+3. analyze cross-layer usage
+4. identify hybrid/transitional risk
+5. define the target separation direction
+6. consolidate the audit before implementation begins
+
+The deep architectural constraint is that classification is descriptive first. A structure marked HYBRID / TRANSITIONAL is not automatically changed during the audit. It becomes a documented candidate for later read/write/domain separation with explicit mapping.
+
+This preserves the compatibility rule that public payloads, route behavior, authentication behavior, authorization behavior, error envelopes and API versioning remain unchanged while the audit is performed.

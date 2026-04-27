@@ -16,9 +16,9 @@ It is intended to:
 
 **Stage:** 0 — Foundation
 **Phase:** 0.12 — Read / Write Model Separation
-**Latest Completed Subphase:** 0.12.0 — Phase Definition & Documentation Lock
+**Latest Completed Subphase:** 0.12.1.0 — Model Classification Audit Definition & Documentation Lock
 **Phase Status:** In Progress
-**Next Planned Phase:** 0.12.1 — Model Classification Audit
+**Next Planned Phase:** 0.12.1.1 — Model Inventory Extraction
 
 ---
 
@@ -1008,6 +1008,8 @@ Phase 0.12 is now the active Stage 0 structural phase.
 
 0.12.0 — Phase Definition & Documentation Lock is completed.
 
+0.12.1.0 — Model Classification Audit Definition & Documentation Lock is completed.
+
 ### Operational Meaning
 
 The backend is still externally aligned with the completed 0.11 runtime behavior. No code has been changed for 0.12.0. The repository now has a documented plan to separate read models, write models and domain-owned structures without changing public API behavior.
@@ -1015,7 +1017,14 @@ The backend is still externally aligned with the completed 0.11 runtime behavior
 ### Subphase State
 
 - ✔ 0.12.0 — Phase Definition & Documentation Lock
-- ⬜ 0.12.1 — Model Classification Audit
+- 🚧 0.12.1 — Model Classification Audit
+  - ✔ 0.12.1.0 — Definition & Documentation Lock
+  - ⬜ 0.12.1.1 — Model Inventory Extraction
+  - ⬜ 0.12.1.2 — Model Classification
+  - ⬜ 0.12.1.3 — Cross-Layer Usage Analysis
+  - ⬜ 0.12.1.4 — Problem Detection & Risk Mapping
+  - ⬜ 0.12.1.5 — Target Separation Definition
+  - ⬜ 0.12.1.6 — Audit Consolidation & Closure
 - ⬜ 0.12.2 — Read Model Extraction
 - ⬜ 0.12.3 — Write Model Isolation
 - ⬜ 0.12.4 — Mapping Layer Introduction
@@ -1024,4 +1033,4 @@ The backend is still externally aligned with the completed 0.11 runtime behavior
 
 ### Next Required Action
 
-Run 0.12.1 against the real repository code and produce a complete model classification audit before extracting or renaming any model.
+Run 0.12.1.1 against the real repository code and extract the complete model inventory before classification, extraction or renaming begins.

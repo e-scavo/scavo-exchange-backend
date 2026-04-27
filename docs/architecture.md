@@ -659,3 +659,19 @@ The exact extraction points must be determined by 0.12.1 against the real code, 
 ### 0.12.0 Result
 
 0.12.0 establishes this architectural definition and locks the phase documentation before code changes begin.
+
+
+### 0.12.1 Audit Definition Lock
+
+0.12.1 is subdivided because the audit must be exhaustive before read/write extraction begins. The first internal step, 0.12.1.0, is documentation-only and records the audit method, classification vocabulary and sub-subphase order.
+
+The audit introduces a formal model lifecycle classification layer for review purposes:
+
+- READ
+- WRITE
+- DOMAIN
+- CONTRACT
+- INFRASTRUCTURE
+- HYBRID / TRANSITIONAL
+
+This does not change runtime architecture by itself. It creates the documentary and analytical basis for later code changes in 0.12.2 through 0.12.5.

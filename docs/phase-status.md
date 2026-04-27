@@ -1487,7 +1487,7 @@ In progress.
 
 ### Latest Completed Subphase
 
-0.12.0 — Phase Definition & Documentation Lock.
+0.12.1.0 — Model Classification Audit Definition & Documentation Lock.
 
 ### Objective
 
@@ -1518,7 +1518,7 @@ Excluded:
 | Subphase | Name | Status |
 | --- | --- | --- |
 | 0.12.0 | Phase Definition & Documentation Lock | ✅ Completed |
-| 0.12.1 | Model Classification Audit | ⬜ Pending |
+| 0.12.1 | Model Classification Audit | 🚧 In Progress |
 | 0.12.2 | Read Model Extraction | ⬜ Pending |
 | 0.12.3 | Write Model Isolation | ⬜ Pending |
 | 0.12.4 | Mapping Layer Introduction | ⬜ Pending |
@@ -1530,6 +1530,25 @@ Excluded:
 0.12.0 is documentation-only and is completed in this repository state. It defines the phase before implementation, records the subphase sequence and locks the non-goals that keep the phase compatibility-preserving.
 
 No Go code is changed in 0.12.0.
+
+
+### 0.12.1 Internal Sub-Subphase Plan
+
+| Sub-subphase | Name | Status |
+| --- | --- | --- |
+| 0.12.1.0 | Definition & Documentation Lock | ✅ Completed |
+| 0.12.1.1 | Model Inventory Extraction | ⬜ Pending |
+| 0.12.1.2 | Model Classification | ⬜ Pending |
+| 0.12.1.3 | Cross-Layer Usage Analysis | ⬜ Pending |
+| 0.12.1.4 | Problem Detection & Risk Mapping | ⬜ Pending |
+| 0.12.1.5 | Target Separation Definition | ⬜ Pending |
+| 0.12.1.6 | Audit Consolidation & Closure | ⬜ Pending |
+
+### 0.12.1.0 Result
+
+0.12.1.0 is documentation-only and is completed in this repository state. It defines the Model Classification Audit methodology before inventory extraction starts. It also records the rule that when a subphase is subdivided, the `.0` step must lock trunk documentation before execution proceeds.
+
+No Go code is changed in 0.12.1.0.
 
 ### Real Baseline For 0.12.1
 
@@ -1548,4 +1567,4 @@ The first implementation subphase must inspect the real models currently present
 
 ### Next
 
-0.12.1 — Model Classification Audit.
+0.12.1.1 — Model Inventory Extraction.

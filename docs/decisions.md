@@ -494,3 +494,35 @@ This is not an adoption of full CQRS or event sourcing. Phase 0.12 does not intr
 ### Status
 
 Accepted in 0.12.0.
+
+
+---
+
+## ADR-0013 - Subdivided Subphases Must Start With A Documentation Lock
+
+### Context
+
+Phase 0.12.1 requires a detailed model audit before code changes. Some subphases may need to be subdivided into smaller execution units to avoid mixing definition, analysis and implementation.
+
+Without a mandatory `.0` lock, a subdivided subphase could begin producing implementation or audit output before the trunk documentation records its internal scope and order.
+
+### Decision
+
+When a subphase is subdivided, the first internal step must be a `.0` documentation lock.
+
+For Phase 0.12.1 this is:
+
+- 0.12.1.0 — Definition & Documentation Lock
+
+The `.0` step must update trunk documentation as applicable, register all sub-subphases and avoid code changes.
+
+### Consequences
+
+- Subdivided work remains traceable.
+- Trunk documentation stays ahead of implementation.
+- Audit or implementation work cannot silently expand without being recorded first.
+- Documentation-only locks remain explicit and reviewable.
+
+### Status
+
+Accepted in 0.12.1.0.
