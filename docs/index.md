@@ -152,21 +152,21 @@ Phase 0.11 ✔ Completed — next planned phase: 0.12
 ### Phase 0.12 — Read / Write Model Separation
 
 - 0.12.0 ✔ Phase Definition & Documentation Lock
-- 0.12.1 🚧 Model Classification Audit
+- 0.12.1 ✔ Model Classification Audit
   - 0.12.1.0 ✔ Definition & Documentation Lock
-  - 0.12.1.1 ⬜ Model Inventory Extraction
-  - 0.12.1.2 ⬜ Model Classification
-  - 0.12.1.3 ⬜ Cross-Layer Usage Analysis
-  - 0.12.1.4 ⬜ Problem Detection & Risk Mapping
-  - 0.12.1.5 ⬜ Target Separation Definition
-  - 0.12.1.6 ⬜ Audit Consolidation & Closure
+  - 0.12.1.1 ✔ Model Inventory Extraction
+  - 0.12.1.2 ✔ Model Classification
+  - 0.12.1.3 ✔ Cross-Layer Usage Analysis
+  - 0.12.1.4 ✔ Problem Detection & Risk Mapping
+  - 0.12.1.5 ✔ Target Separation Definition
+  - 0.12.1.6 ✔ Audit Consolidation & Closure
 - 0.12.2 ⬜ Read Model Extraction
 - 0.12.3 ⬜ Write Model Isolation
 - 0.12.4 ⬜ Mapping Layer Introduction
 - 0.12.5 ⬜ Contract Alignment
 - 0.12.6 ⬜ Documentation & Phase Closure
 
-Phase 0.12 is in progress. 0.12.0 is completed as the phase-level documentation lock, and 0.12.1.0 is completed as the audit-level documentation lock. The next implementation step is 0.12.1.1 — Model Inventory Extraction.
+Phase 0.12 is in progress. 0.12.0 is completed as the phase-level documentation lock, and 0.12.1 is completed as the audit sequence. The next implementation step is 0.12.2 — Read Model Extraction.
 
 
 ---
@@ -174,3 +174,9 @@ Phase 0.12 is in progress. 0.12.0 is completed as the phase-level documentation 
 ### Phase 0.12.1 Dedicated Document
 
 - `docs/phase0_12_1_model_classification_audit.md` — defines the 0.12.1 audit method, criteria and sub-subphase plan.
+- `docs/phase0_12_1_model_inventory.md` — records the complete model inventory extracted from the repository.
+- `docs/phase0_12_1_model_classification.md` — records READ / WRITE / HYBRID / INTERNAL classification results.
+- `docs/phase0_12_1_cross_layer_usage_analysis.md` — records cross-layer usage findings.
+- `docs/phase0_12_1_problem_detection_risk_mapping.md` — records problem and risk mapping.
+- `docs/phase0_12_1_target_separation_definition.md` — records the target separation direction.
+- `docs/phase0_12_1_audit_consolidation_closure.md` — closes the 0.12.1 audit sequence.

@@ -115,7 +115,7 @@ No code changes are included in this subphase.
 
 ### 0.12.1 — Model Classification Audit
 
-Status: **Pending**.
+Status: **Completed**.
 
 Purpose:
 
@@ -124,6 +124,17 @@ Purpose:
 - classify each model
 - detect hybrid/transitional structures
 - document required extraction candidates
+
+Result:
+
+- complete inventory extracted
+- 125 model-like structs recorded
+- classification completed
+- 11 hybrid/transitional structures identified
+- cross-layer usage analyzed
+- risk map produced
+- target separation direction defined
+- audit closure completed without Go code changes
 
 ### 0.12.2 — Read Model Extraction
 

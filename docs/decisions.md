@@ -526,3 +526,35 @@ The `.0` step must update trunk documentation as applicable, register all sub-su
 ### Status
 
 Accepted in 0.12.1.0.
+
+---
+
+## ADR-0014 - Model Audit Must Precede Read / Write Extraction
+
+### Context
+
+Phase 0.12 separates read-oriented, write-oriented and domain-owned model responsibilities. Performing extraction directly without an exhaustive audit would risk splitting the wrong structures, missing cross-layer coupling or changing public behavior accidentally.
+
+### Decision
+
+Complete 0.12.1 as an audit-only sequence before any Go code changes for Read / Write Model Separation.
+
+The audit sequence includes:
+
+- model inventory extraction
+- model classification
+- cross-layer usage analysis
+- problem detection and risk mapping
+- target separation definition
+- audit consolidation and closure
+
+### Consequences
+
+- 0.12.2 can start from documented model evidence.
+- Hybrid/transitional structures are identified before extraction.
+- Public contract preservation remains explicit.
+- Code changes are deferred until the audit is closed.
+
+### Status
+
+Accepted in 0.12.1.6.

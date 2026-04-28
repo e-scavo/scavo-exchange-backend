@@ -1518,7 +1518,7 @@ Excluded:
 | Subphase | Name | Status |
 | --- | --- | --- |
 | 0.12.0 | Phase Definition & Documentation Lock | ✅ Completed |
-| 0.12.1 | Model Classification Audit | 🚧 In Progress |
+| 0.12.1 | Model Classification Audit | ✅ Completed |
 | 0.12.2 | Read Model Extraction | ⬜ Pending |
 | 0.12.3 | Write Model Isolation | ⬜ Pending |
 | 0.12.4 | Mapping Layer Introduction | ⬜ Pending |
@@ -1537,12 +1537,12 @@ No Go code is changed in 0.12.0.
 | Sub-subphase | Name | Status |
 | --- | --- | --- |
 | 0.12.1.0 | Definition & Documentation Lock | ✅ Completed |
-| 0.12.1.1 | Model Inventory Extraction | ⬜ Pending |
-| 0.12.1.2 | Model Classification | ⬜ Pending |
-| 0.12.1.3 | Cross-Layer Usage Analysis | ⬜ Pending |
-| 0.12.1.4 | Problem Detection & Risk Mapping | ⬜ Pending |
-| 0.12.1.5 | Target Separation Definition | ⬜ Pending |
-| 0.12.1.6 | Audit Consolidation & Closure | ⬜ Pending |
+| 0.12.1.1 | Model Inventory Extraction | ✅ Completed |
+| 0.12.1.2 | Model Classification | ✅ Completed |
+| 0.12.1.3 | Cross-Layer Usage Analysis | ✅ Completed |
+| 0.12.1.4 | Problem Detection & Risk Mapping | ✅ Completed |
+| 0.12.1.5 | Target Separation Definition | ✅ Completed |
+| 0.12.1.6 | Audit Consolidation & Closure | ✅ Completed |
 
 ### 0.12.1.0 Result
 
@@ -1565,6 +1565,12 @@ The first implementation subphase must inspect the real models currently present
 - `internal/modules/usersettings/domain`
 - relevant shared structures under `internal/core`
 
+### 0.12.1.6 Result
+
+0.12.1 is completed as an audit-only subphase. It produced the full model inventory, model classification, cross-layer usage analysis, problem and risk mapping, target separation definition and closure documentation required before code-level extraction begins.
+
+The audit baseline records 125 model-like structs, with 11 hybrid/transitional structures requiring explicit separation planning. No Go code was modified during 0.12.1.
+
 ### Next
 
-0.12.1.1 — Model Inventory Extraction.
+0.12.2 — Read Model Extraction.

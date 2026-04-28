@@ -16,7 +16,7 @@ It is intended to:
 
 **Stage:** 0 — Foundation
 **Phase:** 0.12 — Read / Write Model Separation
-**Latest Completed Subphase:** 0.12.1.0 — Model Classification Audit Definition & Documentation Lock
+**Latest Completed Subphase:** 0.12.1.6 — Audit Consolidation & Closure
 **Phase Status:** In Progress
 **Next Planned Phase:** 0.12.1.1 — Model Inventory Extraction
 
@@ -1008,7 +1008,7 @@ Phase 0.12 is now the active Stage 0 structural phase.
 
 0.12.0 — Phase Definition & Documentation Lock is completed.
 
-0.12.1.0 — Model Classification Audit Definition & Documentation Lock is completed.
+0.12.1 — Model Classification Audit is completed through 0.12.1.6.
 
 ### Operational Meaning
 
@@ -1017,14 +1017,14 @@ The backend is still externally aligned with the completed 0.11 runtime behavior
 ### Subphase State
 
 - ✔ 0.12.0 — Phase Definition & Documentation Lock
-- 🚧 0.12.1 — Model Classification Audit
+- ✔ 0.12.1 — Model Classification Audit
   - ✔ 0.12.1.0 — Definition & Documentation Lock
-  - ⬜ 0.12.1.1 — Model Inventory Extraction
-  - ⬜ 0.12.1.2 — Model Classification
-  - ⬜ 0.12.1.3 — Cross-Layer Usage Analysis
-  - ⬜ 0.12.1.4 — Problem Detection & Risk Mapping
-  - ⬜ 0.12.1.5 — Target Separation Definition
-  - ⬜ 0.12.1.6 — Audit Consolidation & Closure
+  - ✔ 0.12.1.1 — Model Inventory Extraction
+  - ✔ 0.12.1.2 — Model Classification
+  - ✔ 0.12.1.3 — Cross-Layer Usage Analysis
+  - ✔ 0.12.1.4 — Problem Detection & Risk Mapping
+  - ✔ 0.12.1.5 — Target Separation Definition
+  - ✔ 0.12.1.6 — Audit Consolidation & Closure
 - ⬜ 0.12.2 — Read Model Extraction
 - ⬜ 0.12.3 — Write Model Isolation
 - ⬜ 0.12.4 — Mapping Layer Introduction
@@ -1033,4 +1033,17 @@ The backend is still externally aligned with the completed 0.11 runtime behavior
 
 ### Next Required Action
 
-Run 0.12.1.1 against the real repository code and extract the complete model inventory before classification, extraction or renaming begins.
+Start 0.12.2 — Read Model Extraction using the completed 0.12.1 audit artifacts as the source of model evidence. No code changes were made during 0.12.1.
+
+### 0.12.1 Audit Closure Summary
+
+0.12.1 is completed. The repository now contains the complete audit chain:
+
+- `docs/phase0_12_1_model_inventory.md`
+- `docs/phase0_12_1_model_classification.md`
+- `docs/phase0_12_1_cross_layer_usage_analysis.md`
+- `docs/phase0_12_1_problem_detection_risk_mapping.md`
+- `docs/phase0_12_1_target_separation_definition.md`
+- `docs/phase0_12_1_audit_consolidation_closure.md`
+
+The next phase must not start by guessing model ownership. It must use these audit artifacts to drive read model extraction.

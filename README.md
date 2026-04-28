@@ -23,9 +23,9 @@ The backend follows a **wallet-first identity model** that progressively evolves
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.12 — Read/Write Model Separation  
-**Latest Completed Subphase:** **0.12.1.0 — Model Classification Audit Definition & Documentation Lock**  
+**Latest Completed Subphase:** **0.12.1.6 — Audit Consolidation & Closure**  
 **Phase Status:** **In Progress**  
-**Next Planned Phase:** **0.12.1.1 — Model Inventory Extraction**
+**Next Planned Phase:** **0.12.2 — Read Model Extraction**
 
 ---
 
@@ -2785,14 +2785,14 @@ Phase 0.12 addresses that ambiguity without reopening the public contract.
 ### Phase 0.12 subphases
 
 - **0.12.0 — Phase Definition & Documentation Lock** ✔ Completed
-- **0.12.1 — Model Classification Audit** 🚧 In Progress
+- **0.12.1 — Model Classification Audit** ✔ Completed
   - **0.12.1.0 — Definition & Documentation Lock** ✔ Completed
-  - **0.12.1.1 — Model Inventory Extraction** ⬜ Pending
-  - **0.12.1.2 — Model Classification** ⬜ Pending
-  - **0.12.1.3 — Cross-Layer Usage Analysis** ⬜ Pending
-  - **0.12.1.4 — Problem Detection & Risk Mapping** ⬜ Pending
-  - **0.12.1.5 — Target Separation Definition** ⬜ Pending
-  - **0.12.1.6 — Audit Consolidation & Closure** ⬜ Pending
+  - **0.12.1.1 — Model Inventory Extraction** ✔ Completed
+  - **0.12.1.2 — Model Classification** ✔ Completed
+  - **0.12.1.3 — Cross-Layer Usage Analysis** ✔ Completed
+  - **0.12.1.4 — Problem Detection & Risk Mapping** ✔ Completed
+  - **0.12.1.5 — Target Separation Definition** ✔ Completed
+  - **0.12.1.6 — Audit Consolidation & Closure** ✔ Completed
 - **0.12.2 — Read Model Extraction** ⬜ Pending
 - **0.12.3 — Write Model Isolation** ⬜ Pending
 - **0.12.4 — Mapping Layer Introduction** ⬜ Pending
@@ -2805,6 +2805,8 @@ Phase 0.12 addresses that ambiguity without reopening the public contract.
 
 0.12.1.0 extends that documentary discipline to the Model Classification Audit itself. Because 0.12.1 is subdivided into smaller audit steps, the `.0` step records the audit method, classification criteria and sub-subphase order before inventory extraction begins.
 
+0.12.1.1 through 0.12.1.6 complete the audit sequence. The repository now contains a full model inventory, model classification, cross-layer usage analysis, problem/risk mapping and target separation definition. The audit reviewed 125 model-like structs and identified 11 hybrid/transitional structures that must guide the extraction work in 0.12.2 and later.
+
 ### Next
 
-0.12.1.1 — Model Inventory Extraction
+0.12.2 — Read Model Extraction

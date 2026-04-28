@@ -675,3 +675,15 @@ The audit introduces a formal model lifecycle classification layer for review pu
 - HYBRID / TRANSITIONAL
 
 This does not change runtime architecture by itself. It creates the documentary and analytical basis for later code changes in 0.12.2 through 0.12.5.
+
+### 0.12.1 Model Classification Audit Result
+
+0.12.1 is completed as an audit-only architectural step. The repository now has a complete model inventory, explicit classification results, cross-layer usage analysis, risk mapping and target separation direction.
+
+The audit establishes the next structural rule for implementation work:
+
+```text
+HYBRID / TRANSITIONAL -> READ + WRITE + DOMAIN where required
+```
+
+The implementation of that target is deferred to 0.12.2 and later. Public HTTP behavior, authentication, authorization, error envelopes and API versioning remain unchanged.

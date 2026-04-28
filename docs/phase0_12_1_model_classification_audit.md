@@ -46,12 +46,12 @@ Excluded:
 | Sub-subphase | Name | Status | Purpose |
 | --- | --- | --- | --- |
 | 0.12.1.0 | Definition & Documentation Lock | ✅ Completed | Lock the audit method and subdivision before code review output is produced. |
-| 0.12.1.1 | Model Inventory Extraction | ⬜ Pending | Extract the complete list of real model-like structures from the repository. |
-| 0.12.1.2 | Model Classification | ⬜ Pending | Classify each structure as READ, WRITE, DOMAIN, CONTRACT, INFRASTRUCTURE or HYBRID / TRANSITIONAL. |
-| 0.12.1.3 | Cross-Layer Usage Analysis | ⬜ Pending | Detect structures crossing HTTP, application, domain, repository, core or transport boundaries. |
-| 0.12.1.4 | Problem Detection & Risk Mapping | ⬜ Pending | Identify hybrid responsibility, duplication, leakage and migration risk. |
-| 0.12.1.5 | Target Separation Definition | ⬜ Pending | Define the target separation direction for each hybrid or transitional structure without implementing it. |
-| 0.12.1.6 | Audit Consolidation & Closure | ⬜ Pending | Consolidate the final audit and prepare the repository for 0.12.2. |
+| 0.12.1.1 | Model Inventory Extraction | ✅ Completed | Extract the complete list of real model-like structures from the repository. |
+| 0.12.1.2 | Model Classification | ✅ Completed | Classify each structure as READ, WRITE, DOMAIN, CONTRACT, INFRASTRUCTURE or HYBRID / TRANSITIONAL. |
+| 0.12.1.3 | Cross-Layer Usage Analysis | ✅ Completed | Detect structures crossing HTTP, application, domain, repository, core or transport boundaries. |
+| 0.12.1.4 | Problem Detection & Risk Mapping | ✅ Completed | Identify hybrid responsibility, duplication, leakage and migration risk. |
+| 0.12.1.5 | Target Separation Definition | ✅ Completed | Define the target separation direction for each hybrid or transitional structure without implementing it. |
+| 0.12.1.6 | Audit Consolidation & Closure | ✅ Completed | Consolidate the final audit and prepare the repository for 0.12.2. |
 
 ### Classification Criteria
 
@@ -190,4 +190,6 @@ The audit output must identify:
 
 ### Closure Statement
 
-0.12.1.0 is completed when the documentation records the subdivision and methodology for 0.12.1. The next correct step is 0.12.1.1 — Model Inventory Extraction.
+0.12.1.0 is completed when the documentation records the subdivision and methodology for 0.12.1.
+
+0.12.1.6 completes the audit sequence. The repository now contains the full inventory, classification, cross-layer usage analysis, problem/risk mapping, target separation definition and closure record. The next correct step is 0.12.2 — Read Model Extraction.
