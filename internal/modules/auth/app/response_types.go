@@ -3,31 +3,26 @@ package app
 import (
 	"time"
 
-	authdomain "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/domain"
-	usermod "github.com/e-scavo/scavo-exchange-backend/internal/modules/user"
-	usersettingsmod "github.com/e-scavo/scavo-exchange-backend/internal/modules/usersettings"
+	authreadmodels "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/readmodels"
+	userreadmodels "github.com/e-scavo/scavo-exchange-backend/internal/modules/user/readmodels"
+	usersettingsreadmodels "github.com/e-scavo/scavo-exchange-backend/internal/modules/usersettings/readmodels"
 )
 
-type LoginResponse struct {
-	AccessToken string `json:"access_token"`
-	TokenType   string `json:"token_type"`
-	ExpiresIn   int64  `json:"expires_in"`
-	UserID      string `json:"user_id"`
-}
+type LoginResponse = authreadmodels.AuthLoginReadModel
 
 type SessionView struct {
-	Authenticated bool          `json:"authenticated"`
-	TokenType     string        `json:"token_type"`
-	UserID        string        `json:"user_id"`
-	Email         string        `json:"email,omitempty"`
-	WalletID      string        `json:"wallet_id,omitempty"`
-	WalletAddress string        `json:"wallet_address,omitempty"`
-	AuthMethod    string        `json:"auth_method,omitempty"`
-	Chain         string        `json:"chain,omitempty"`
-	Subject       string        `json:"subject,omitempty"`
-	Issuer        string        `json:"issuer,omitempty"`
-	ExpiresAt     *time.Time    `json:"expires_at,omitempty"`
-	User          *usermod.User `json:"user,omitempty"`
+	Authenticated bool                          `json:"authenticated"`
+	TokenType     string                        `json:"token_type"`
+	UserID        string                        `json:"user_id"`
+	Email         string                        `json:"email,omitempty"`
+	WalletID      string                        `json:"wallet_id,omitempty"`
+	WalletAddress string                        `json:"wallet_address,omitempty"`
+	AuthMethod    string                        `json:"auth_method,omitempty"`
+	Chain         string                        `json:"chain,omitempty"`
+	Subject       string                        `json:"subject,omitempty"`
+	Issuer        string                        `json:"issuer,omitempty"`
+	ExpiresAt     *time.Time                    `json:"expires_at,omitempty"`
+	User          *userreadmodels.UserReadModel `json:"user,omitempty"`
 }
 
 type ProfileWalletView struct {
@@ -40,23 +35,23 @@ type ProfileWalletView struct {
 }
 
 type ProfileView struct {
-	User                *usermod.User        `json:"user,omitempty"`
-	UserID              string               `json:"user_id"`
-	AuthMethod          string               `json:"auth_method,omitempty"`
-	WalletID            string               `json:"wallet_id,omitempty"`
-	WalletAddress       string               `json:"wallet_address,omitempty"`
-	Chain               string               `json:"chain,omitempty"`
-	PrimaryWallet       *ProfileWalletView   `json:"primary_wallet,omitempty"`
-	Wallets             []*ProfileWalletView `json:"wallets"`
-	WalletCount         int                  `json:"wallet_count"`
-	ActiveWalletCount   int                  `json:"active_wallet_count"`
-	DetachedWalletCount int                  `json:"detached_wallet_count"`
-	HasWalletSession    bool                 `json:"has_wallet_session"`
+	User                *userreadmodels.UserReadModel `json:"user,omitempty"`
+	UserID              string                        `json:"user_id"`
+	AuthMethod          string                        `json:"auth_method,omitempty"`
+	WalletID            string                        `json:"wallet_id,omitempty"`
+	WalletAddress       string                        `json:"wallet_address,omitempty"`
+	Chain               string                        `json:"chain,omitempty"`
+	PrimaryWallet       *ProfileWalletView            `json:"primary_wallet,omitempty"`
+	Wallets             []*ProfileWalletView          `json:"wallets"`
+	WalletCount         int                           `json:"wallet_count"`
+	ActiveWalletCount   int                           `json:"active_wallet_count"`
+	DetachedWalletCount int                           `json:"detached_wallet_count"`
+	HasWalletSession    bool                          `json:"has_wallet_session"`
 }
 
 type MeResponse struct {
-	User    *usermod.User `json:"user"`
-	Profile *ProfileView  `json:"profile,omitempty"`
+	User    *userreadmodels.UserReadModel `json:"user"`
+	Profile *ProfileView                  `json:"profile,omitempty"`
 }
 
 type SessionResponse struct {
@@ -69,25 +64,14 @@ type BootstrapWalletsView struct {
 }
 
 type BootstrapResponse struct {
-	Session  *SessionView         `json:"session"`
-	User     *usermod.User        `json:"user,omitempty"`
-	Profile  *ProfileView         `json:"profile,omitempty"`
-	Settings usersettingsmod.View `json:"settings"`
-	Wallets  BootstrapWalletsView `json:"wallets"`
+	Session  *SessionView                                 `json:"session"`
+	User     *userreadmodels.UserReadModel                `json:"user,omitempty"`
+	Profile  *ProfileView                                 `json:"profile,omitempty"`
+	Settings usersettingsreadmodels.UserSettingsReadModel `json:"settings"`
+	Wallets  BootstrapWalletsView                         `json:"wallets"`
 }
 
-type WalletReadModel struct {
-	ID                 string     `json:"id"`
-	Address            string     `json:"address"`
-	UserID             string     `json:"user_id,omitempty"`
-	LinkedAt           *time.Time `json:"linked_at,omitempty"`
-	DetachedAt         *time.Time `json:"detached_at,omitempty"`
-	IsPrimary          bool       `json:"is_primary"`
-	Status             string     `json:"status"`
-	CanSetPrimary      bool       `json:"can_set_primary"`
-	CanDetach          bool       `json:"can_detach"`
-	DetachBlockReasons []string   `json:"detach_block_reasons"`
-}
+type WalletReadModel = authreadmodels.AuthWalletReadModel
 
 type WalletsQuery struct {
 	Status         string
@@ -115,25 +99,25 @@ type WalletsResponse struct {
 }
 
 type WalletLinkChallengeResponse struct {
-	Challenge *authdomain.WalletChallenge `json:"challenge"`
+	Challenge *authreadmodels.AuthWalletChallengeReadModel `json:"challenge"`
 }
 
 type WalletLinkVerifyResponse struct {
-	LinkedWallet *authdomain.WalletIdentity   `json:"linked_wallet,omitempty"`
-	Wallets      []*authdomain.WalletIdentity `json:"wallets"`
-	Challenge    *authdomain.WalletChallenge  `json:"challenge,omitempty"`
+	LinkedWallet *WalletReadModel                             `json:"linked_wallet,omitempty"`
+	Wallets      []*WalletReadModel                           `json:"wallets"`
+	Challenge    *authreadmodels.AuthWalletChallengeReadModel `json:"challenge,omitempty"`
 }
 
 type WalletAccountMergeChallengeResponse struct {
-	Challenge *authdomain.WalletChallenge `json:"challenge"`
+	Challenge *authreadmodels.AuthWalletChallengeReadModel `json:"challenge"`
 }
 
 type WalletAccountMergeVerifyResponse struct {
-	MergedWallet *authdomain.WalletIdentity   `json:"merged_wallet,omitempty"`
-	Wallets      []*authdomain.WalletIdentity `json:"wallets"`
-	Challenge    *authdomain.WalletChallenge  `json:"challenge,omitempty"`
-	SourceUserID string                       `json:"source_user_id"`
-	TargetUserID string                       `json:"target_user_id"`
+	MergedWallet *WalletReadModel                             `json:"merged_wallet,omitempty"`
+	Wallets      []*WalletReadModel                           `json:"wallets"`
+	Challenge    *authreadmodels.AuthWalletChallengeReadModel `json:"challenge,omitempty"`
+	SourceUserID string                                       `json:"source_user_id"`
+	TargetUserID string                                       `json:"target_user_id"`
 }
 
 type WalletDetachCheckResponse struct {
@@ -145,12 +129,12 @@ type WalletDetachCheckResponse struct {
 }
 
 type WalletDetachExecuteResponse struct {
-	DetachedWallet *authdomain.WalletIdentity   `json:"detached_wallet,omitempty"`
-	Wallets        []*authdomain.WalletIdentity `json:"wallets"`
-	Check          *WalletDetachCheckResponse   `json:"check,omitempty"`
+	DetachedWallet *WalletReadModel           `json:"detached_wallet,omitempty"`
+	Wallets        []*WalletReadModel         `json:"wallets"`
+	Check          *WalletDetachCheckResponse `json:"check,omitempty"`
 }
 
 type WalletPrimarySetResponse struct {
-	PrimaryWallet *authdomain.WalletIdentity   `json:"primary_wallet,omitempty"`
-	Wallets       []*authdomain.WalletIdentity `json:"wallets"`
+	PrimaryWallet *WalletReadModel   `json:"primary_wallet,omitempty"`
+	Wallets       []*WalletReadModel `json:"wallets"`
 }

@@ -77,8 +77,11 @@ func walletStatus(wallet *authdomain.WalletIdentity) string {
 	if wallet == nil {
 		return "unknown"
 	}
-	if wallet.DetachedAt != nil || wallet.UserID == "" {
+	if wallet.UserID != "" {
+		return "active"
+	}
+	if wallet.DetachedAt != nil {
 		return "detached"
 	}
-	return "active"
+	return "unlinked"
 }

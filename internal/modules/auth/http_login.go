@@ -10,6 +10,7 @@ import (
 	coreauth "github.com/e-scavo/scavo-exchange-backend/internal/core/auth"
 	coreerrs "github.com/e-scavo/scavo-exchange-backend/internal/core/errs"
 	usermod "github.com/e-scavo/scavo-exchange-backend/internal/modules/user"
+	userreadmodels "github.com/e-scavo/scavo-exchange-backend/internal/modules/user/readmodels"
 	usersettingsmod "github.com/e-scavo/scavo-exchange-backend/internal/modules/usersettings"
 )
 
@@ -30,8 +31,8 @@ type UpdateMeRequest struct {
 }
 
 type MeResponse struct {
-	User    *usermod.User `json:"user"`
-	Profile *ProfileView  `json:"profile,omitempty"`
+	User    *userreadmodels.UserReadModel `json:"user"`
+	Profile *ProfileView                  `json:"profile,omitempty"`
 }
 
 type SessionResponse struct {

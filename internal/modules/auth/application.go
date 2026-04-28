@@ -144,7 +144,7 @@ func (a *Application) CreateWalletLinkChallenge(ctx context.Context, userID, add
 	}
 
 	return WalletLinkChallengeResponse{
-		Challenge: mapWalletChallengeFromDomain(response.Challenge),
+		Challenge: response.Challenge,
 	}, nil
 }
 
@@ -155,9 +155,9 @@ func (a *Application) VerifyWalletLink(ctx context.Context, userID, challengeID,
 	}
 
 	return WalletLinkVerifyResponse{
-		LinkedWallet: mapWalletIdentityFromDomain(response.LinkedWallet),
-		Wallets:      mapWalletIdentitiesFromDomain(response.Wallets),
-		Challenge:    mapWalletChallengeFromDomain(response.Challenge),
+		LinkedWallet: response.LinkedWallet,
+		Wallets:      mapWalletReadModelsFromApp(response.Wallets),
+		Challenge:    response.Challenge,
 	}, nil
 }
 
@@ -168,7 +168,7 @@ func (a *Application) CreateWalletAccountMergeChallenge(ctx context.Context, use
 	}
 
 	return WalletAccountMergeChallengeResponse{
-		Challenge: mapWalletChallengeFromDomain(response.Challenge),
+		Challenge: response.Challenge,
 	}, nil
 }
 
@@ -179,9 +179,9 @@ func (a *Application) VerifyWalletAccountMerge(ctx context.Context, userID, chal
 	}
 
 	return WalletAccountMergeVerifyResponse{
-		MergedWallet: mapWalletIdentityFromDomain(response.MergedWallet),
-		Wallets:      mapWalletIdentitiesFromDomain(response.Wallets),
-		Challenge:    mapWalletChallengeFromDomain(response.Challenge),
+		MergedWallet: response.MergedWallet,
+		Wallets:      mapWalletReadModelsFromApp(response.Wallets),
+		Challenge:    response.Challenge,
 		SourceUserID: response.SourceUserID,
 		TargetUserID: response.TargetUserID,
 	}, nil
@@ -194,8 +194,8 @@ func (a *Application) SetPrimaryWallet(ctx context.Context, userID, address stri
 	}
 
 	return WalletPrimarySetResponse{
-		PrimaryWallet: mapWalletIdentityFromDomain(response.PrimaryWallet),
-		Wallets:       mapWalletIdentitiesFromDomain(response.Wallets),
+		PrimaryWallet: response.PrimaryWallet,
+		Wallets:       mapWalletReadModelsFromApp(response.Wallets),
 	}, nil
 }
 
@@ -218,8 +218,8 @@ func (a *Application) ExecuteWalletDetach(ctx context.Context, userID, address s
 	response, err := a.inner.ExecuteWalletDetach(ctx, userID, address)
 
 	out := WalletDetachExecuteResponse{
-		DetachedWallet: mapWalletIdentityFromDomain(response.DetachedWallet),
-		Wallets:        mapWalletIdentitiesFromDomain(response.Wallets),
+		DetachedWallet: response.DetachedWallet,
+		Wallets:        mapWalletReadModelsFromApp(response.Wallets),
 		Check:          mapWalletDetachCheckFromApp(response.Check),
 	}
 

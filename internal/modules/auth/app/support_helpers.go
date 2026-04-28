@@ -8,7 +8,9 @@ import (
 
 	coreauth "github.com/e-scavo/scavo-exchange-backend/internal/core/auth"
 	authdomain "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/domain"
+	authreadmodels "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/readmodels"
 	usermod "github.com/e-scavo/scavo-exchange-backend/internal/modules/user"
+	userreadmodels "github.com/e-scavo/scavo-exchange-backend/internal/modules/user/readmodels"
 )
 
 type authenticatedContextView struct {
@@ -82,7 +84,7 @@ func buildSessionViewWithUser(claims *coreauth.Claims, user *usermod.User) *Sess
 		AuthMethod:    ctxView.AuthMethod,
 		Chain:         ctxView.Chain,
 		ExpiresAt:     expiresAt,
-		User:          user,
+		User:          userreadmodels.FromUser(user),
 	}
 	if claims != nil {
 		view.Subject = strings.TrimSpace(claims.Subject)
@@ -108,7 +110,7 @@ func buildProfileViewWithUser(ctx context.Context, claims *coreauth.Claims, user
 	ctxView := buildAuthenticatedContextView(claims)
 
 	view := &ProfileView{
-		User:             user,
+		User:             userreadmodels.FromUser(user),
 		UserID:           ctxView.UserID,
 		AuthMethod:       ctxView.AuthMethod,
 		WalletID:         ctxView.WalletID,
@@ -192,27 +194,7 @@ func buildBootstrapWalletsView(wallets []*WalletReadModel) BootstrapWalletsView 
 }
 
 func mapWalletIdentityToReadModel(wallet *authdomain.WalletIdentity) *WalletReadModel {
-	if wallet == nil {
-		return nil
-	}
-
-	status := "unlinked"
-	switch {
-	case wallet.UserID != "":
-		status = "active"
-	case wallet.DetachedAt != nil:
-		status = "detached"
-	}
-
-	return &WalletReadModel{
-		ID:         wallet.ID,
-		Address:    wallet.Address,
-		UserID:     wallet.UserID,
-		LinkedAt:   wallet.LinkedAt,
-		DetachedAt: wallet.DetachedAt,
-		IsPrimary:  wallet.IsPrimary,
-		Status:     status,
-	}
+	return authreadmodels.FromWalletIdentity(wallet)
 }
 
 func mapWalletIdentitiesToReadModels(wallets []*authdomain.WalletIdentity) []*WalletReadModel {

@@ -1,7 +1,11 @@
-.PHONY: run up down migrate migrate-down migrate-status test test-unit test-integration smoke-login
+.PHONY: run build up down migrate migrate-down migrate-status test test-unit test-integration smoke-login
 
 run:
 	go run ./cmd/scavo-server
+
+build:
+	mkdir -p ./build
+	go build -o ./build/scavo-server ./cmd/scavo-server
 
 up:
 	docker compose up -d

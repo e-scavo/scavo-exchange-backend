@@ -9,7 +9,9 @@ import (
 
 	coreauth "github.com/e-scavo/scavo-exchange-backend/internal/core/auth"
 	authdomain "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/domain"
-	usersettingsmod "github.com/e-scavo/scavo-exchange-backend/internal/modules/usersettings"
+	authreadmodels "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/readmodels"
+	userreadmodels "github.com/e-scavo/scavo-exchange-backend/internal/modules/user/readmodels"
+	usersettingsreadmodels "github.com/e-scavo/scavo-exchange-backend/internal/modules/usersettings/readmodels"
 )
 
 var (
@@ -65,12 +67,12 @@ func (a *Application) Login(ctx context.Context, email, password string) (LoginR
 	if result.User != nil {
 		userID = result.User.ID
 	}
-	return LoginResponse{
-		AccessToken: result.AccessToken,
-		TokenType:   result.TokenType,
-		ExpiresIn:   result.ExpiresIn,
-		UserID:      userID,
-	}, nil
+	return authreadmodels.NewAuthLoginReadModel(
+		result.AccessToken,
+		result.TokenType,
+		result.ExpiresIn,
+		userID,
+	), nil
 }
 
 func (a *Application) GetMe(ctx context.Context, claims *coreauth.Claims) (MeResponse, error) {
@@ -132,9 +134,9 @@ func (a *Application) GetBootstrap(ctx context.Context, claims *coreauth.Claims)
 	}
 	return BootstrapResponse{
 		Session:  session,
-		User:     user,
+		User:     userreadmodels.FromUser(user),
 		Profile:  profile,
-		Settings: usersettingsmod.ToView(settings),
+		Settings: usersettingsreadmodels.FromUserSettings(settings),
 		Wallets:  buildBootstrapWalletsView(wallets),
 	}, nil
 }
@@ -173,7 +175,7 @@ func (a *Application) CreateWalletLinkChallenge(ctx context.Context, userID, add
 	if err != nil {
 		return WalletLinkChallengeResponse{}, err
 	}
-	return WalletLinkChallengeResponse{Challenge: challenge}, nil
+	return WalletLinkChallengeResponse{Challenge: authreadmodels.FromWalletChallenge(challenge)}, nil
 }
 
 func (a *Application) VerifyWalletLink(ctx context.Context, userID, challengeID, address, signature string) (WalletLinkVerifyResponse, error) {
@@ -186,9 +188,9 @@ func (a *Application) VerifyWalletLink(ctx context.Context, userID, challengeID,
 		return WalletLinkVerifyResponse{}, err
 	}
 	return WalletLinkVerifyResponse{
-		LinkedWallet: result.Linked,
-		Wallets:      result.Wallets,
-		Challenge:    result.Challenge,
+		LinkedWallet: authreadmodels.FromWalletIdentity(result.Linked),
+		Wallets:      mapWalletIdentitiesToReadModels(result.Wallets),
+		Challenge:    authreadmodels.FromWalletChallenge(result.Challenge),
 	}, nil
 }
 
@@ -201,7 +203,7 @@ func (a *Application) CreateWalletAccountMergeChallenge(ctx context.Context, use
 	if err != nil {
 		return WalletAccountMergeChallengeResponse{}, err
 	}
-	return WalletAccountMergeChallengeResponse{Challenge: challenge}, nil
+	return WalletAccountMergeChallengeResponse{Challenge: authreadmodels.FromWalletChallenge(challenge)}, nil
 }
 
 func (a *Application) VerifyWalletAccountMerge(ctx context.Context, userID, challengeID, address, signature string) (WalletAccountMergeVerifyResponse, error) {
@@ -214,9 +216,9 @@ func (a *Application) VerifyWalletAccountMerge(ctx context.Context, userID, chal
 		return WalletAccountMergeVerifyResponse{}, err
 	}
 	return WalletAccountMergeVerifyResponse{
-		MergedWallet: result.MergedWallet,
-		Wallets:      result.Wallets,
-		Challenge:    result.Challenge,
+		MergedWallet: authreadmodels.FromWalletIdentity(result.MergedWallet),
+		Wallets:      mapWalletIdentitiesToReadModels(result.Wallets),
+		Challenge:    authreadmodels.FromWalletChallenge(result.Challenge),
 		SourceUserID: result.SourceUserID,
 		TargetUserID: result.TargetUserID,
 	}, nil
@@ -232,8 +234,8 @@ func (a *Application) SetPrimaryWallet(ctx context.Context, userID, address stri
 		return WalletPrimarySetResponse{}, err
 	}
 	return WalletPrimarySetResponse{
-		PrimaryWallet: result.Primary,
-		Wallets:       result.Wallets,
+		PrimaryWallet: authreadmodels.FromWalletIdentity(result.Primary),
+		Wallets:       mapWalletIdentitiesToReadModels(result.Wallets),
 	}, nil
 }
 
@@ -263,8 +265,8 @@ func (a *Application) ExecuteWalletDetach(ctx context.Context, userID, address s
 	result, err := svc.Execute(ctx, userID, address)
 	response := WalletDetachExecuteResponse{}
 	if result != nil {
-		response.DetachedWallet = result.Detached
-		response.Wallets = result.Wallets
+		response.DetachedWallet = authreadmodels.FromWalletIdentity(result.Detached)
+		response.Wallets = mapWalletIdentitiesToReadModels(result.Wallets)
 		if result.Check != nil {
 			response.Check = &WalletDetachCheckResponse{
 				WalletAddress:    result.Check.WalletAddress,
