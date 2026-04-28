@@ -646,3 +646,24 @@ The implementation must proceed through the locked 0.12.3 internal sequence:
 ### Status
 
 Accepted in 0.12.3.0.
+
+## Decision: Close Write Model Isolation Boundary
+
+### Context
+
+Phase 0.12.2 introduced explicit read models and established that read projections must remain output-only. Phase 0.12.3 introduced the write-side counterpart so mutation and command inputs do not reuse read projections or domain-owned structures directly.
+
+### Decision
+
+Close 0.12.3 with explicit write model packages, domain write input structures, Write → Domain mapping functions and handler alignment that preserves public request payload semantics.
+
+### Consequences
+
+- read models remain output-only
+- write models represent mutation/input intent
+- handlers can preserve existing HTTP contracts while routing through explicit write-side structures
+- future mapping consolidation can build on both Domain → Read and Write → Domain directions
+
+### Status
+
+Accepted in 0.12.3.6.

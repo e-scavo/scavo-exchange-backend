@@ -1035,21 +1035,21 @@ The backend is still externally aligned with the completed 0.11 runtime behavior
   - ✔ 0.12.2.4 — Response Alignment
   - ✔ 0.12.2.5 — Validation & Compatibility
   - ✔ 0.12.2.6 — Documentation & Closure
-- 🚧 0.12.3 — Write Model Isolation
+- ✔ 0.12.3 — Write Model Isolation
   - ✔ 0.12.3.0 — Definition & Documentation Lock
-  - ⬜ 0.12.3.1 — Write Model Design
-  - ⬜ 0.12.3.2 — Write Model Implementation
-  - ⬜ 0.12.3.3 — Write → Domain Mapping
-  - ⬜ 0.12.3.4 — Handler Alignment
-  - ⬜ 0.12.3.5 — Validation & Compatibility
-  - ⬜ 0.12.3.6 — Documentation & Closure
+  - ✔ 0.12.3.1 — Write Model Design
+  - ✔ 0.12.3.2 — Write Model Implementation
+  - ✔ 0.12.3.3 — Write → Domain Mapping
+  - ✔ 0.12.3.4 — Handler Alignment
+  - ✔ 0.12.3.5 — Validation & Compatibility
+  - ✔ 0.12.3.6 — Documentation & Closure
 - ⬜ 0.12.4 — Mapping Layer Introduction
 - ⬜ 0.12.5 — Contract Alignment
 - ⬜ 0.12.6 — Documentation & Phase Closure
 
 ### Next Required Action
 
-Start 0.12.3.1 — Write Model Design using the completed 0.12.1 audit artifacts, the completed 0.12.2 read model extraction and the 0.12.3.0 documentation lock as the baseline. Read-side compatibility is preserved and validated; write-side input compatibility must now be preserved as well.
+Start 0.12.4 — Mapping Layer Introduction using the completed 0.12.1 audit artifacts, completed 0.12.2 read model extraction and completed 0.12.3 write model isolation as the baseline. Both read-side response compatibility and write-side input compatibility are preserved and validated.
 
 ### 0.12.1 Audit Closure Summary
 
@@ -1068,8 +1068,8 @@ The next phase must not start by guessing model ownership. It must use these aud
 
 0.12.2 is completed. It introduced explicit read model packages, Domain/Application → Read mapping functions, response alignment and validation documentation. Public response compatibility remains preserved.
 
-The active step is 0.12.3 — Write Model Isolation. Its documentation lock is complete; the next implementation step is 0.12.3.1 — Write Model Design. It must build on the completed read-side boundary and avoid reusing read models as mutation/input models.
+The completed step is 0.12.3 — Write Model Isolation. The next planned step is 0.12.4 — Mapping Layer Introduction. It must consolidate the explicit mapping directions introduced in 0.12.2 and 0.12.3 without changing public HTTP contracts.
 
 ### 0.12.3.0 Write Model Isolation Definition Lock
 
-0.12.3.0 is completed as a documentation-only step. It defines the write-side internal sequence and records that read models introduced in 0.12.2 remain output-only. The next step is 0.12.3.1 — Write Model Design.
+0.12.3 is completed. It introduced write model packages, domain write inputs, Write → Domain mapping, handler alignment and validation documentation. The next step is 0.12.4 — Mapping Layer Introduction.

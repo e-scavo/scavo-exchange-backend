@@ -124,7 +124,7 @@ Phase 0.10 ✔ Completed
 
 Latest completed phase: `0.11 — Domain Module Pattern`  
 Current phase: `0.12 — Read / Write Model Separation`  
-Latest completed subphase: `0.12.3.0 — Write Model Isolation Definition & Documentation Lock`
+Latest completed subphase: `0.12.3.6 — Write Model Isolation Documentation & Closure`
 
 
 ---
@@ -168,19 +168,19 @@ Phase 0.11 ✔ Completed — next planned phase: 0.12
   - 0.12.2.4 ✔ Response Alignment
   - 0.12.2.5 ✔ Validation & Compatibility
   - 0.12.2.6 ✔ Documentation & Closure
-- 0.12.3 ⬜ Write Model Isolation
+- 0.12.3 ✔ Write Model Isolation
   - 0.12.3.0 ✔ Definition & Documentation Lock
-  - 0.12.3.1 ⬜ Write Model Design
-  - 0.12.3.2 ⬜ Write Model Implementation
-  - 0.12.3.3 ⬜ Write → Domain Mapping
-  - 0.12.3.4 ⬜ Handler Alignment
-  - 0.12.3.5 ⬜ Validation & Compatibility
-  - 0.12.3.6 ⬜ Documentation & Closure
+  - 0.12.3.1 ✔ Write Model Design
+  - 0.12.3.2 ✔ Write Model Implementation
+  - 0.12.3.3 ✔ Write → Domain Mapping
+  - 0.12.3.4 ✔ Handler Alignment
+  - 0.12.3.5 ✔ Validation & Compatibility
+  - 0.12.3.6 ✔ Documentation & Closure
 - 0.12.4 ⬜ Mapping Layer Introduction
 - 0.12.5 ⬜ Contract Alignment
 - 0.12.6 ⬜ Documentation & Phase Closure
 
-Phase 0.12 is in progress. 0.12.0 is completed as the phase-level documentation lock, 0.12.1 is completed as the audit sequence, and 0.12.2 is completed as the Read Model Extraction sequence. The next implementation step is 0.12.3.1 — Write Model Design, using the 0.12.3.0 documentation lock as the baseline.
+Phase 0.12 is in progress. 0.12.0 is completed as the phase-level documentation lock, 0.12.1 is completed as the audit sequence, 0.12.2 is completed as the Read Model Extraction sequence, and 0.12.3 is completed as the Write Model Isolation sequence. The next planned step is 0.12.4 — Mapping Layer Introduction.
 
 
 ---
@@ -204,4 +204,5 @@ Phase 0.12 is in progress. 0.12.0 is completed as the phase-level documentation 
 
 ### Phase 0.12.3 Dedicated Document
 
-- `docs/phase0_12_3_write_model_isolation.md` — defines the 0.12.3 write model isolation plan, internal sub-subphase order, compatibility rules and documentation lock.
+- `docs/phase0_12_3_write_model_isolation.md` — defines and closes the 0.12.3 write model isolation plan, internal sub-subphase order, compatibility rules and closure state.
+- `docs/phase0_12_3_documentation_closure.md` — records the final documentation closure for 0.12.3.

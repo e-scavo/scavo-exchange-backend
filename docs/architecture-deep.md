@@ -1090,3 +1090,9 @@ The implementation sequence is locked as:
 6. close documentation cumulatively
 
 The 0.12.2 read model packages remain read-only projection structures. They must not become input models during 0.12.3.
+
+### 0.12.3.6 — Write Model Isolation Closure
+
+Phase 0.12.3 completes the write-side counterpart to the read model extraction. The repository now includes `writemodels` packages for `auth`, `user` and `usersettings`, domain write input structures and explicit Write → Domain mappers.
+
+Handler alignment preserves public request payload semantics while introducing an internal input boundary. Read models remain output-only and are not reused as command/input structures. Validation for the completed sequence is recorded in `docs/phase0_12_3_validation_compatibility.md` and confirmed by `go test ./...` in the development environment.

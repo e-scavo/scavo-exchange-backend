@@ -44,12 +44,12 @@ Phase 0.12.1 completed the model audit. Phase 0.12.2 completed read model extrac
 | Sub-subphase | Name | Status |
 | --- | --- | --- |
 | 0.12.3.0 | Definition & Documentation Lock | Completed |
-| 0.12.3.1 | Write Model Design | Pending |
-| 0.12.3.2 | Write Model Implementation | Pending |
-| 0.12.3.3 | Write → Domain Mapping | Pending |
-| 0.12.3.4 | Handler Alignment | Pending |
-| 0.12.3.5 | Validation & Compatibility | Pending |
-| 0.12.3.6 | Documentation & Closure | Pending |
+| 0.12.3.1 | Write Model Design | Completed |
+| 0.12.3.2 | Write Model Implementation | Completed |
+| 0.12.3.3 | Write → Domain Mapping | Completed |
+| 0.12.3.4 | Handler Alignment | Completed |
+| 0.12.3.5 | Validation & Compatibility | Completed |
+| 0.12.3.6 | Documentation & Closure | Completed |
 
 ---
 
@@ -126,12 +126,16 @@ Mapping must be explicit where write models are introduced. No read model may be
 ## Status
 
 Phase: 0.12.3
-Subphase: 0.12.3.0
+Subphase: 0.12.3.6
 Status: Completed
-Code Impact: None
+Code Impact: Additive write model packages, domain write inputs, mappers and handler alignment completed during 0.12.3
 
 ---
 
+## 0.12.3.6 Closure
+
+0.12.3 is completed. The write-side boundary is now explicit through write model packages, domain write input structures, Write → Domain mapping functions and handler alignment. Existing public request payload semantics, authentication behavior, authorization behavior, standardized errors and API versioning are preserved. Validation is recorded in 0.12.3.5 and confirmed by `go test ./...`.
+
 ## Next Step
 
-0.12.3.1 — Write Model Design
+0.12.4 — Mapping Layer Introduction

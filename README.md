@@ -23,9 +23,9 @@ The backend follows a **wallet-first identity model** that progressively evolves
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.12 — Read/Write Model Separation  
-**Latest Completed Subphase:** **0.12.3.0 — Write Model Isolation Definition & Documentation Lock**  
+**Latest Completed Subphase:** **0.12.3.6 — Write Model Isolation Documentation & Closure**  
 **Phase Status:** **In Progress**  
-**Next Planned Phase:** **0.12.3.1 — Write Model Design**
+**Next Planned Phase:** **0.12.4 — Mapping Layer Introduction**
 
 ---
 
@@ -2801,14 +2801,14 @@ Phase 0.12 addresses that ambiguity without reopening the public contract.
   - **0.12.2.4 — Response Alignment** ✔ Completed
   - **0.12.2.5 — Validation & Compatibility** ✔ Completed
   - **0.12.2.6 — Documentation & Closure** ✔ Completed
-- **0.12.3 — Write Model Isolation** 🚧 In Progress
+- **0.12.3 — Write Model Isolation** ✔ Completed
   - **0.12.3.0 — Definition & Documentation Lock** ✔ Completed
-  - **0.12.3.1 — Write Model Design** ⬜ Pending
-  - **0.12.3.2 — Write Model Implementation** ⬜ Pending
-  - **0.12.3.3 — Write → Domain Mapping** ⬜ Pending
-  - **0.12.3.4 — Handler Alignment** ⬜ Pending
-  - **0.12.3.5 — Validation & Compatibility** ⬜ Pending
-  - **0.12.3.6 — Documentation & Closure** ⬜ Pending
+  - **0.12.3.1 — Write Model Design** ✔ Completed
+  - **0.12.3.2 — Write Model Implementation** ✔ Completed
+  - **0.12.3.3 — Write → Domain Mapping** ✔ Completed
+  - **0.12.3.4 — Handler Alignment** ✔ Completed
+  - **0.12.3.5 — Validation & Compatibility** ✔ Completed
+  - **0.12.3.6 — Documentation & Closure** ✔ Completed
 - **0.12.4 — Mapping Layer Introduction** ⬜ Pending
 - **0.12.5 — Contract Alignment** ⬜ Pending
 - **0.12.6 — Documentation & Phase Closure** ⬜ Pending
@@ -2831,8 +2831,8 @@ Phase 0.12 addresses that ambiguity without reopening the public contract.
 
 0.12.3.0 locks the Write Model Isolation plan before any Go code changes. It records the internal sub-subphase sequence, the compatibility constraints for input-preserving isolation and the rule that write models must not reuse read models introduced in 0.12.2.
 
-0.12.3 will isolate mutation/input-oriented structures while preserving current handlers, accepted payload semantics, authentication behavior, authorization behavior, standardized errors and API versioning.
+0.12.3 is completed. The repository now contains explicit write model packages for `auth`, `user` and `usersettings`, write-side domain input structures, explicit Write → Domain mapping functions, handler alignment preserving public request payload semantics and a validation record backed by `go test ./...`.
 
 ### Next
 
-0.12.3.1 — Write Model Design
+0.12.4 — Mapping Layer Introduction

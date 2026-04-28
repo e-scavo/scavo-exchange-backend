@@ -713,4 +713,8 @@ The intended direction is:
 HTTP request DTO -> Write Model -> Domain / Application behavior
 ```
 
-0.12.3.0 is documentation-only. Code-level write model design starts in 0.12.3.1.
+0.12.3 is completed. Write model packages now represent mutation/input intent separately from read projections, and handler alignment uses write-side mapping while preserving the public request contract.
+
+### 0.12.3 Write Model Isolation Closure
+
+The write-side boundary is now explicit for the current authentication-oriented flows. Public handlers continue to accept the same JSON payload semantics, while internal processing can route through write models and domain write inputs. This keeps the read model boundary output-only and prevents read structures from becoming mutation inputs.

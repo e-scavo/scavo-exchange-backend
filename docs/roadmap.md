@@ -207,18 +207,18 @@ Internal subdivision:
 
 0.12.2 is completed with explicit read model packages, Domain/Application → Read mapping functions, response alignment, compatibility validation and closure documentation. Public HTTP contracts remain unchanged.
 
-#### 0.12.3 — Write Model Isolation 🚧 In Progress
+#### 0.12.3 — Write Model Isolation ✔ Completed
 Isolate input and mutation-oriented models so write paths do not reuse read models accidentally.
 
 Internal subdivision:
 
 - 0.12.3.0 — Definition & Documentation Lock ✔ Completed
-- 0.12.3.1 — Write Model Design ⬜ Pending
-- 0.12.3.2 — Write Model Implementation ⬜ Pending
-- 0.12.3.3 — Write → Domain Mapping ⬜ Pending
-- 0.12.3.4 — Handler Alignment ⬜ Pending
-- 0.12.3.5 — Validation & Compatibility ⬜ Pending
-- 0.12.3.6 — Documentation & Closure ⬜ Pending
+- 0.12.3.1 — Write Model Design ✔ Completed
+- 0.12.3.2 — Write Model Implementation ✔ Completed
+- 0.12.3.3 — Write → Domain Mapping ✔ Completed
+- 0.12.3.4 — Handler Alignment ✔ Completed
+- 0.12.3.5 — Validation & Compatibility ✔ Completed
+- 0.12.3.6 — Documentation & Closure ✔ Completed
 
 #### 0.12.4 — Mapping Layer Introduction ⬜ Pending
 Introduce explicit mapping functions for Domain → Read Model and Write Model → Domain transformations.

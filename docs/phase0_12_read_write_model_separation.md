@@ -159,17 +159,17 @@ Purpose:
 
 ### 0.12.3 — Write Model Isolation
 
-Status: **In progress**.
+Status: **Completed**.
 
 Internal subdivision:
 
 - 0.12.3.0 — Definition & Documentation Lock ✔ Completed
-- 0.12.3.1 — Write Model Design ⬜ Pending
-- 0.12.3.2 — Write Model Implementation ⬜ Pending
-- 0.12.3.3 — Write → Domain Mapping ⬜ Pending
-- 0.12.3.4 — Handler Alignment ⬜ Pending
-- 0.12.3.5 — Validation & Compatibility ⬜ Pending
-- 0.12.3.6 — Documentation & Closure ⬜ Pending
+- 0.12.3.1 — Write Model Design ✔ Completed
+- 0.12.3.2 — Write Model Implementation ✔ Completed
+- 0.12.3.3 — Write → Domain Mapping ✔ Completed
+- 0.12.3.4 — Handler Alignment ✔ Completed
+- 0.12.3.5 — Validation & Compatibility ✔ Completed
+- 0.12.3.6 — Documentation & Closure ✔ Completed
 
 Purpose:
 
@@ -243,4 +243,9 @@ Validation was recorded in 0.12.2.5 using `go test ./...`. The next phase step i
 
 ## 0.12.3.0 Closure Statement
 
-0.12.3.0 is completed as a documentation-only subphase. Write Model Isolation is now defined, its internal sequence is locked and implementation must start with 0.12.3.1 — Write Model Design. No Go code is changed in 0.12.3.0.
+0.12.3.0 is completed as a documentation-only subphase. Write Model Isolation is now defined, its internal sequence is locked and the subsequent implementation subphases have been completed.
+
+## 0.12.3.6 Closure Statement
+
+0.12.3 is completed. The repository now contains explicit write model packages, domain write input structures, Write → Domain mappers, handler alignment preserving public request payload semantics and validation documentation backed by `go test ./...`. The next planned step is 0.12.4 — Mapping Layer Introduction.
+
