@@ -1520,7 +1520,7 @@ Excluded:
 | 0.12.0 | Phase Definition & Documentation Lock | ✅ Completed |
 | 0.12.1 | Model Classification Audit | ✅ Completed |
 | 0.12.2 | Read Model Extraction | ✅ Completed |
-| 0.12.3 | Write Model Isolation | ⬜ Pending |
+| 0.12.3 | Write Model Isolation | ⬜ In Progress |
 | 0.12.4 | Mapping Layer Introduction | ⬜ Pending |
 | 0.12.5 | Contract Alignment | ⬜ Pending |
 | 0.12.6 | Documentation & Phase Closure | ⬜ Pending |
@@ -1593,6 +1593,24 @@ No Go code is changed in 0.12.2.0.
 
 0.12.2 is completed. It introduced explicit read model packages for `auth`, `user` and `usersettings`, explicit mapping functions for Domain/Application → Read transformations, response alignment preserving public JSON contracts and a validation record backed by `go test ./...`.
 
+### 0.12.3 Internal Sub-Subphase Plan
+
+| Sub-subphase | Name | Status |
+| --- | --- | --- |
+| 0.12.3.0 | Definition & Documentation Lock | ✅ Completed |
+| 0.12.3.1 | Write Model Design | ⬜ Pending |
+| 0.12.3.2 | Write Model Implementation | ⬜ Pending |
+| 0.12.3.3 | Write → Domain Mapping | ⬜ Pending |
+| 0.12.3.4 | Handler Alignment | ⬜ Pending |
+| 0.12.3.5 | Validation & Compatibility | ⬜ Pending |
+| 0.12.3.6 | Documentation & Closure | ⬜ Pending |
+
+### 0.12.3.0 Result
+
+0.12.3.0 is documentation-only and is completed in this repository state. It defines the Write Model Isolation sequence before code-level design starts, records the input-compatibility constraints and requires the completed read-side boundary from 0.12.2 to remain untouched.
+
+No Go code is changed in 0.12.3.0.
+
 ### Next
 
-0.12.3 — Write Model Isolation.
+0.12.3.1 — Write Model Design.

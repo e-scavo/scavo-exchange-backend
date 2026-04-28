@@ -613,3 +613,36 @@ Close 0.12.2 with explicit read model packages, explicit Domain/Application → 
 ### Status
 
 Accepted in 0.12.2.6.
+
+---
+
+## ADR-0016 - Write Model Isolation Must Preserve Public Request Compatibility
+
+### Context
+
+Phase 0.12.2 completed read model extraction and introduced explicit read-side projection structures. Phase 0.12.3 isolates the write side. Without a documentation lock, write model extraction could accidentally reuse read models as inputs, change accepted payload semantics or blur the new read boundary.
+
+### Decision
+
+0.12.3 must introduce write models only as internal structural improvements. Existing public routes, request payload semantics, authentication behavior, authorization behavior, error model behavior and API versioning remain unchanged.
+
+The implementation must proceed through the locked 0.12.3 internal sequence:
+
+- 0.12.3.0 — Definition & Documentation Lock
+- 0.12.3.1 — Write Model Design
+- 0.12.3.2 — Write Model Implementation
+- 0.12.3.3 — Write → Domain Mapping
+- 0.12.3.4 — Handler Alignment
+- 0.12.3.5 — Validation & Compatibility
+- 0.12.3.6 — Documentation & Closure
+
+### Consequences
+
+- Write-side extraction becomes traceable.
+- Read models remain output-only and must not be reused as inputs.
+- Public request compatibility remains the controlling constraint.
+- Mapping must be explicit where write models are introduced.
+
+### Status
+
+Accepted in 0.12.3.0.

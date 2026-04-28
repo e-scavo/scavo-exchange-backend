@@ -159,7 +159,7 @@ Purpose:
 
 ### 0.12.3 — Write Model Isolation
 
-Status: **Pending**.
+Status: **In progress**.
 
 Purpose:
 
@@ -230,3 +230,7 @@ Phase 0.12 must preserve:
 0.12.2 — Read Model Extraction is completed. The repository now includes explicit read model packages, explicit Domain/Application → Read mapping functions and response alignment that preserves public HTTP compatibility.
 
 Validation was recorded in 0.12.2.5 using `go test ./...`. The next phase step is 0.12.3 — Write Model Isolation.
+
+## 0.12.3.0 Closure Statement
+
+0.12.3.0 is completed as a documentation-only subphase. Write Model Isolation is now defined, its internal sequence is locked and implementation must start with 0.12.3.1 — Write Model Design. No Go code is changed in 0.12.3.0.

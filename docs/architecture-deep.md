@@ -1075,3 +1075,18 @@ The 0.12.1 audit remains the evidence source. Any read model extraction that can
 0.12.2 closes with the read-side boundary implemented and validated. The extracted read models are projection-oriented structures used to assemble responses and application-facing output without reusing mutation/input structures.
 
 The implemented direction is Domain/Application → Read. Mapping is explicit and additive, which keeps public response compatibility stable while making ownership clearer inside `auth`, `user` and `usersettings`. The next structural risk is write-side reuse, which is reserved for 0.12.3 — Write Model Isolation.
+
+### 0.12.3.0 — Write Model Isolation Definition Lock
+
+Write Model Isolation is constrained by the same compatibility discipline used for read model extraction. The goal is to prevent mutation/input flows from depending on read-oriented response structures or domain-owned objects while keeping accepted request behavior stable.
+
+The implementation sequence is locked as:
+
+1. define write model design targets from audit evidence and current handlers
+2. introduce explicit write model structures where required
+3. introduce Write → Domain/Application mapping where input flow is currently implicit
+4. align handlers without changing public request semantics
+5. validate runtime compatibility and `go test ./...`
+6. close documentation cumulatively
+
+The 0.12.2 read model packages remain read-only projection structures. They must not become input models during 0.12.3.

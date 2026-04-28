@@ -702,3 +702,15 @@ The extraction target is limited to read-oriented output/view/response shapes. T
 0.12.2 completes the read-side extraction path. The repository now contains explicit read model packages under the relevant modules, mapping functions that transform module-owned data into read models and response alignment that keeps current public JSON contracts stable.
 
 The read model boundary is internal. It improves module clarity without changing routes, API versioning, authentication behavior, authorization behavior or standardized error envelopes. Write model isolation is intentionally deferred to 0.12.3.
+
+### 0.12.3 Write Model Isolation Definition Lock
+
+0.12.3 begins the write-side counterpart to the completed read model extraction. The write boundary is limited to input, command and mutation-oriented structures. It must not reuse read models as accepted input shapes and must not change public request payload semantics.
+
+The intended direction is:
+
+```text
+HTTP request DTO -> Write Model -> Domain / Application behavior
+```
+
+0.12.3.0 is documentation-only. Code-level write model design starts in 0.12.3.1.

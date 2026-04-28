@@ -2820,6 +2820,12 @@ Phase 0.12 addresses that ambiguity without reopening the public contract.
 
 0.12.2 is completed. The repository now contains explicit read model packages for `auth`, `user` and `usersettings`, explicit Domain/Application → Read mapping functions, response alignment that preserves public JSON contracts and a validation record backed by `go test ./...`.
 
+### 0.12.3.0 result
+
+0.12.3.0 locks the Write Model Isolation plan before any Go code changes. It records the internal sub-subphase sequence, the compatibility constraints for input-preserving isolation and the rule that write models must not reuse read models introduced in 0.12.2.
+
+0.12.3 will isolate mutation/input-oriented structures while preserving current handlers, accepted payload semantics, authentication behavior, authorization behavior, standardized errors and API versioning.
+
 ### Next
 
-0.12.3 — Write Model Isolation
+0.12.3.1 — Write Model Design
