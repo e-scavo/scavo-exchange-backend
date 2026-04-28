@@ -1010,7 +1010,7 @@ Phase 0.12 is now the active Stage 0 structural phase.
 
 0.12.1 — Model Classification Audit is completed through 0.12.1.6.
 
-0.12.2.0 — Read Model Extraction Definition & Documentation Lock is completed.
+0.12.2.6 — Read Model Extraction Documentation & Closure is completed.
 
 ### Operational Meaning
 
@@ -1027,14 +1027,14 @@ The backend is still externally aligned with the completed 0.11 runtime behavior
   - ✔ 0.12.1.4 — Problem Detection & Risk Mapping
   - ✔ 0.12.1.5 — Target Separation Definition
   - ✔ 0.12.1.6 — Audit Consolidation & Closure
-- 🚧 0.12.2 — Read Model Extraction
+- ✔ 0.12.2 — Read Model Extraction
   - ✔ 0.12.2.0 — Definition & Documentation Lock
-  - ⬜ 0.12.2.1 — Read Model Design
-  - ⬜ 0.12.2.2 — Read Model Implementation
-  - ⬜ 0.12.2.3 — Domain/Application → Read Mapping
-  - ⬜ 0.12.2.4 — Response Alignment
-  - ⬜ 0.12.2.5 — Validation & Compatibility
-  - ⬜ 0.12.2.6 — Documentation & Closure
+  - ✔ 0.12.2.1 — Read Model Design
+  - ✔ 0.12.2.2 — Read Model Implementation
+  - ✔ 0.12.2.3 — Domain/Application → Read Mapping
+  - ✔ 0.12.2.4 — Response Alignment
+  - ✔ 0.12.2.5 — Validation & Compatibility
+  - ✔ 0.12.2.6 — Documentation & Closure
 - ⬜ 0.12.3 — Write Model Isolation
 - ⬜ 0.12.4 — Mapping Layer Introduction
 - ⬜ 0.12.5 — Contract Alignment
@@ -1042,7 +1042,7 @@ The backend is still externally aligned with the completed 0.11 runtime behavior
 
 ### Next Required Action
 
-Start 0.12.2.1 — Read Model Design using the completed 0.12.1 audit artifacts and the 0.12.2.0 extraction lock as the source of model evidence. No code changes were made during 0.12.1 or 0.12.2.0.
+Start 0.12.3 — Write Model Isolation using the completed 0.12.1 audit artifacts and the completed 0.12.2 read model extraction as the baseline. Read-side compatibility is preserved and validated.
 
 ### 0.12.1 Audit Closure Summary
 
@@ -1057,8 +1057,8 @@ Start 0.12.2.1 — Read Model Design using the completed 0.12.1 audit artifacts 
 
 The next phase must not start by guessing model ownership. It must use these audit artifacts to drive read model extraction.
 
-### 0.12.2.0 Read Model Extraction Lock Summary
+### 0.12.2.6 Read Model Extraction Closure Summary
 
-0.12.2.0 is completed as a documentation-only lock. It records the internal read model extraction sequence and keeps the next implementation step constrained by public response compatibility.
+0.12.2 is completed. It introduced explicit read model packages, Domain/Application → Read mapping functions, response alignment and validation documentation. Public response compatibility remains preserved.
 
-The next step is 0.12.2.1 — Read Model Design. It must not introduce code until candidate read model targets are tied back to the 0.12.1 audit artifacts and the 0.12.2 dedicated plan.
+The next step is 0.12.3 — Write Model Isolation. It must build on the completed read-side boundary and avoid reusing read models as mutation/input models.

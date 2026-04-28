@@ -190,22 +190,22 @@ Internal subdivision:
 
 0.12.1 is completed as a documentation and audit-only subphase. It produced the inventory, classification, cross-layer usage analysis, risk map and target separation definition required before read model extraction begins.
 
-The next planned subphase is 0.12.2 — Read Model Extraction.
+The next planned subphase is 0.12.3 — Write Model Isolation.
 
-#### 0.12.2 — Read Model Extraction 🚧 In Progress
+#### 0.12.2 — Read Model Extraction ✔ Completed
 Extract explicit read models for output/view/response paths while preserving current public response compatibility.
 
 Internal subdivision:
 
 - 0.12.2.0 — Definition & Documentation Lock ✔ Completed
-- 0.12.2.1 — Read Model Design ⬜ Pending
-- 0.12.2.2 — Read Model Implementation ⬜ Pending
-- 0.12.2.3 — Domain/Application → Read Mapping ⬜ Pending
-- 0.12.2.4 — Response Alignment ⬜ Pending
-- 0.12.2.5 — Validation & Compatibility ⬜ Pending
-- 0.12.2.6 — Documentation & Closure ⬜ Pending
+- 0.12.2.1 — Read Model Design ✔ Completed
+- 0.12.2.2 — Read Model Implementation ✔ Completed
+- 0.12.2.3 — Domain/Application → Read Mapping ✔ Completed
+- 0.12.2.4 — Response Alignment ✔ Completed
+- 0.12.2.5 — Validation & Compatibility ✔ Completed
+- 0.12.2.6 — Documentation & Closure ✔ Completed
 
-0.12.2.0 is documentation-only. It locks the read model extraction sequence before code-level design and implementation begin.
+0.12.2 is completed with explicit read model packages, Domain/Application → Read mapping functions, response alignment, compatibility validation and closure documentation. Public HTTP contracts remain unchanged.
 
 #### 0.12.3 — Write Model Isolation ⬜ Pending
 Isolate input and mutation-oriented models so write paths do not reuse read models accidentally.

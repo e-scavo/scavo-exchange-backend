@@ -93,12 +93,12 @@ Introducing an internal read model is acceptable only when the externally observ
 | Sub-subphase | Name | Status |
 | --- | --- | --- |
 | 0.12.2.0 | Definition & Documentation Lock | Completed |
-| 0.12.2.1 | Read Model Design | Pending |
-| 0.12.2.2 | Read Model Implementation | Pending |
-| 0.12.2.3 | Domain/Application → Read Mapping | Pending |
-| 0.12.2.4 | Response Alignment | Pending |
-| 0.12.2.5 | Validation & Compatibility | Pending |
-| 0.12.2.6 | Documentation & Closure | Pending |
+| 0.12.2.1 | Read Model Design | Completed |
+| 0.12.2.2 | Read Model Implementation | Completed |
+| 0.12.2.3 | Domain/Application → Read Mapping | Completed |
+| 0.12.2.4 | Response Alignment | Completed |
+| 0.12.2.5 | Validation & Compatibility | Completed |
+| 0.12.2.6 | Documentation & Closure | Completed |
 
 ---
 
@@ -158,10 +158,10 @@ When completed, 0.12.2 should leave the repository with:
 
 ## Status
 
-Subphase: 0.12.2.3
+Subphase: 0.12.2.6
 
 Status: Completed
 
-Code impact: Additive mapping functions introduced; handlers and HTTP contracts unchanged
+Code impact: Read model packages, explicit Domain/Application → Read mapping and response alignment completed with public compatibility preserved
 
-Next: 0.12.2.4 — Response Alignment
+Next: 0.12.3 — Write Model Isolation

@@ -23,9 +23,9 @@ The backend follows a **wallet-first identity model** that progressively evolves
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.12 — Read/Write Model Separation  
-**Latest Completed Subphase:** **0.12.2.0 — Read Model Extraction Definition & Documentation Lock**  
+**Latest Completed Subphase:** **0.12.2.6 — Read Model Extraction Documentation & Closure**  
 **Phase Status:** **In Progress**  
-**Next Planned Phase:** **0.12.2.1 — Read Model Design**
+**Next Planned Phase:** **0.12.3 — Write Model Isolation**
 
 ---
 
@@ -2793,14 +2793,14 @@ Phase 0.12 addresses that ambiguity without reopening the public contract.
   - **0.12.1.4 — Problem Detection & Risk Mapping** ✔ Completed
   - **0.12.1.5 — Target Separation Definition** ✔ Completed
   - **0.12.1.6 — Audit Consolidation & Closure** ✔ Completed
-- **0.12.2 — Read Model Extraction** 🚧 In Progress
+- **0.12.2 — Read Model Extraction** ✔ Completed
   - **0.12.2.0 — Definition & Documentation Lock** ✔ Completed
-  - **0.12.2.1 — Read Model Design** ⬜ Pending
-  - **0.12.2.2 — Read Model Implementation** ⬜ Pending
-  - **0.12.2.3 — Domain/Application → Read Mapping** ⬜ Pending
-  - **0.12.2.4 — Response Alignment** ⬜ Pending
-  - **0.12.2.5 — Validation & Compatibility** ⬜ Pending
-  - **0.12.2.6 — Documentation & Closure** ⬜ Pending
+  - **0.12.2.1 — Read Model Design** ✔ Completed
+  - **0.12.2.2 — Read Model Implementation** ✔ Completed
+  - **0.12.2.3 — Domain/Application → Read Mapping** ✔ Completed
+  - **0.12.2.4 — Response Alignment** ✔ Completed
+  - **0.12.2.5 — Validation & Compatibility** ✔ Completed
+  - **0.12.2.6 — Documentation & Closure** ✔ Completed
 - **0.12.3 — Write Model Isolation** ⬜ Pending
 - **0.12.4 — Mapping Layer Introduction** ⬜ Pending
 - **0.12.5 — Contract Alignment** ⬜ Pending
@@ -2818,8 +2818,8 @@ Phase 0.12 addresses that ambiguity without reopening the public contract.
 
 0.12.2.0 locks the Read Model Extraction plan before any Go code changes. It records the internal sub-subphase sequence, the compatibility constraints for response-preserving extraction and the rule that 0.12.2 must use the 0.12.1 audit artifacts as evidence.
 
-No Go code is changed in 0.12.2.0. The next implementation step is 0.12.2.1 — Read Model Design.
+0.12.2 is completed. The repository now contains explicit read model packages for `auth`, `user` and `usersettings`, explicit Domain/Application → Read mapping functions, response alignment that preserves public JSON contracts and a validation record backed by `go test ./...`.
 
 ### Next
 
-0.12.2.1 — Read Model Design
+0.12.3 — Write Model Isolation

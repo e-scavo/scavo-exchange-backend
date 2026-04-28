@@ -1068,3 +1068,10 @@ The implementation sequence is locked as:
 6. close documentation cumulatively
 
 The 0.12.1 audit remains the evidence source. Any read model extraction that cannot be connected to the inventory/classification/cross-layer/risk/target documents must be deferred instead of guessed.
+
+
+### 0.12.2.6 — Read Model Extraction Closure
+
+0.12.2 closes with the read-side boundary implemented and validated. The extracted read models are projection-oriented structures used to assemble responses and application-facing output without reusing mutation/input structures.
+
+The implemented direction is Domain/Application → Read. Mapping is explicit and additive, which keeps public response compatibility stable while making ownership clearer inside `auth`, `user` and `usersettings`. The next structural risk is write-side reuse, which is reserved for 0.12.3 — Write Model Isolation.

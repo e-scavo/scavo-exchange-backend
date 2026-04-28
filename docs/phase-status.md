@@ -1519,7 +1519,7 @@ Excluded:
 | --- | --- | --- |
 | 0.12.0 | Phase Definition & Documentation Lock | ✅ Completed |
 | 0.12.1 | Model Classification Audit | ✅ Completed |
-| 0.12.2 | Read Model Extraction | 🚧 In Progress |
+| 0.12.2 | Read Model Extraction | ✅ Completed |
 | 0.12.3 | Write Model Isolation | ⬜ Pending |
 | 0.12.4 | Mapping Layer Introduction | ⬜ Pending |
 | 0.12.5 | Contract Alignment | ⬜ Pending |
@@ -1576,12 +1576,12 @@ The audit baseline records 125 model-like structs, with 11 hybrid/transitional s
 | Sub-subphase | Name | Status |
 | --- | --- | --- |
 | 0.12.2.0 | Definition & Documentation Lock | ✅ Completed |
-| 0.12.2.1 | Read Model Design | ⬜ Pending |
-| 0.12.2.2 | Read Model Implementation | ⬜ Pending |
-| 0.12.2.3 | Domain/Application → Read Mapping | ⬜ Pending |
-| 0.12.2.4 | Response Alignment | ⬜ Pending |
-| 0.12.2.5 | Validation & Compatibility | ⬜ Pending |
-| 0.12.2.6 | Documentation & Closure | ⬜ Pending |
+| 0.12.2.1 | Read Model Design | ✅ Completed |
+| 0.12.2.2 | Read Model Implementation | ✅ Completed |
+| 0.12.2.3 | Domain/Application → Read Mapping | ✅ Completed |
+| 0.12.2.4 | Response Alignment | ✅ Completed |
+| 0.12.2.5 | Validation & Compatibility | ✅ Completed |
+| 0.12.2.6 | Documentation & Closure | ✅ Completed |
 
 ### 0.12.2.0 Result
 
@@ -1589,6 +1589,10 @@ The audit baseline records 125 model-like structs, with 11 hybrid/transitional s
 
 No Go code is changed in 0.12.2.0.
 
+### 0.12.2.6 Result
+
+0.12.2 is completed. It introduced explicit read model packages for `auth`, `user` and `usersettings`, explicit mapping functions for Domain/Application → Read transformations, response alignment preserving public JSON contracts and a validation record backed by `go test ./...`.
+
 ### Next
 
-0.12.2.1 — Read Model Design.
+0.12.3 — Write Model Isolation.

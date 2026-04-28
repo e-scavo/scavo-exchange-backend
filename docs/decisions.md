@@ -591,3 +591,25 @@ The implementation must be driven by the 0.12.1 audit artifacts and must proceed
 ### Status
 
 Accepted in 0.12.2.0.
+
+
+## Decision: Close Read Model Extraction With Internal Compatibility Preservation
+
+### Context
+
+Phase 0.12.2 introduced read models after the 0.12.1 audit identified hybrid/transitional structures and target separation needs. The implementation had to improve internal structure without changing public HTTP behavior.
+
+### Decision
+
+Close 0.12.2 with explicit read model packages, explicit Domain/Application → Read mapping functions, response alignment and compatibility validation. Public routes, response envelopes, JSON tags, authentication behavior, authorization behavior, standardized errors and API versioning remain unchanged.
+
+### Consequences
+
+- read-side output responsibilities are now explicit
+- mapping is no longer implicit in the aligned paths
+- handlers keep public compatibility
+- write-side isolation remains deferred to 0.12.3
+
+### Status
+
+Accepted in 0.12.2.6.

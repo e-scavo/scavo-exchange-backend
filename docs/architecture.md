@@ -695,3 +695,10 @@ The implementation of that target is deferred to 0.12.2 and later. Public HTTP b
 The extraction target is limited to read-oriented output/view/response shapes. The public HTTP contract must remain compatible; therefore read models may be introduced internally only when their mapping preserves the existing externally observable response semantics.
 
 0.12.2 must use the completed 0.12.1 audit artifacts as evidence. Hybrid/transitional models are not split by assumption; each read model candidate must be tied back to the inventory, classification, cross-layer analysis, risk map and target separation definition.
+
+
+### 0.12.2 Read Model Extraction Closure
+
+0.12.2 completes the read-side extraction path. The repository now contains explicit read model packages under the relevant modules, mapping functions that transform module-owned data into read models and response alignment that keeps current public JSON contracts stable.
+
+The read model boundary is internal. It improves module clarity without changing routes, API versioning, authentication behavior, authorization behavior or standardized error envelopes. Write model isolation is intentionally deferred to 0.12.3.
