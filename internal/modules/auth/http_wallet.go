@@ -8,6 +8,7 @@ import (
 	coreauth "github.com/e-scavo/scavo-exchange-backend/internal/core/auth"
 	coreerrs "github.com/e-scavo/scavo-exchange-backend/internal/core/errs"
 	authapp "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/app"
+	authwritemodels "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/writemodels"
 	usermod "github.com/e-scavo/scavo-exchange-backend/internal/modules/user"
 )
 
@@ -15,20 +16,13 @@ import (
 // WALLET BOOTSTRAP AUTH (PUBLIC - NO AUTH REQUIRED)
 // =====================================================
 
-type WalletChallengeRequest struct {
-	Address string `json:"address"`
-	Chain   string `json:"chain,omitempty"`
-}
+type WalletChallengeRequest = authwritemodels.AuthWalletChallengeWriteModel
 
 type WalletChallengeResponse struct {
 	Challenge *WalletChallenge `json:"challenge"`
 }
 
-type WalletVerifyRequest struct {
-	ChallengeID string `json:"challenge_id"`
-	Address     string `json:"address"`
-	Signature   string `json:"signature"`
-}
+type WalletVerifyRequest = authwritemodels.AuthWalletVerifyWriteModel
 
 type WalletVerifyResponse struct {
 	AccessToken   string           `json:"access_token"`
@@ -54,8 +48,10 @@ func (h HTTPHandlers) WalletChallenge(w http.ResponseWriter, r *http.Request) {
 		challengeTTL = 5 * time.Minute
 	}
 
+	input := req.ToDomainInput()
+
 	svc := NewWalletChallengeService(h.Challenges, h.PublicBaseURL, challengeTTL)
-	challenge, err := svc.Create(r.Context(), req.Address, req.Chain)
+	challenge, err := svc.Create(r.Context(), input.Address, input.Chain)
 	if err != nil {
 		writeWalletChallengeError(w, err)
 		return
@@ -79,7 +75,9 @@ func (h HTTPHandlers) WalletVerify(w http.ResponseWriter, r *http.Request) {
 	loginSvc := NewService(h.Tokens, h.Users, h.TTL)
 	verifySvc := NewWalletVerificationService(challengeSvc, loginSvc, h.WalletIdentities)
 
-	result, challenge, err := verifySvc.VerifyAndLogin(r.Context(), req.ChallengeID, req.Address, req.Signature)
+	input := req.ToDomainInput()
+
+	result, challenge, err := verifySvc.VerifyAndLogin(r.Context(), input.ChallengeID, input.Address, input.Signature)
 	if err != nil {
 		writeWalletVerifyError(w, err)
 		return
@@ -110,53 +108,33 @@ func (h HTTPHandlers) WalletVerify(w http.ResponseWriter, r *http.Request) {
 // WALLET MANAGEMENT (AUTHENTICATED)
 // =====================================================
 
-type WalletLinkChallengeRequest struct {
-	Address string `json:"address"`
-	Chain   string `json:"chain,omitempty"`
-}
+type WalletLinkChallengeRequest = authwritemodels.AuthWalletLinkChallengeWriteModel
 
 type WalletLinkChallengeResponse = authapp.WalletLinkChallengeResponse
 
-type WalletLinkVerifyRequest struct {
-	ChallengeID string `json:"challenge_id"`
-	Address     string `json:"address"`
-	Signature   string `json:"signature"`
-}
+type WalletLinkVerifyRequest = authwritemodels.AuthWalletLinkVerifyWriteModel
 
 type WalletLinkVerifyResponse = authapp.WalletLinkVerifyResponse
 
-type WalletAccountMergeVerifyRequest struct {
-	ChallengeID string `json:"challenge_id"`
-	Address     string `json:"address"`
-	Signature   string `json:"signature"`
-}
+type WalletAccountMergeVerifyRequest = authwritemodels.AuthWalletAccountMergeVerifyWriteModel
 
 type WalletAccountMergeVerifyResponse = authapp.WalletAccountMergeVerifyResponse
 
-type WalletDetachCheckRequest struct {
-	Address string `json:"wallet_address"`
-}
+type WalletDetachCheckRequest = authwritemodels.AuthWalletDetachCheckWriteModel
 
 type WalletDetachCheckResponse = authapp.WalletDetachCheckResponse
 
-type WalletDetachExecuteRequest struct {
-	Address string `json:"wallet_address"`
-}
+type WalletDetachExecuteRequest = authwritemodels.AuthWalletDetachExecuteWriteModel
 
 type WalletDetachExecuteResponse = authapp.WalletDetachExecuteResponse
 
-type WalletPrimarySetRequest struct {
-	Address string `json:"wallet_address"`
-}
+type WalletPrimarySetRequest = authwritemodels.AuthWalletPrimarySetWriteModel
 
 type WalletPrimarySetResponse = authapp.WalletPrimarySetResponse
 
 // (handlers autenticados quedan EXACTAMENTE como los tenías, ya están bien)
 
-type WalletAccountMergeChallengeRequest struct {
-	Address string `json:"address"`
-	Chain   string `json:"chain,omitempty"`
-}
+type WalletAccountMergeChallengeRequest = authwritemodels.AuthWalletAccountMergeChallengeWriteModel
 
 type WalletAccountMergeChallengeResponse = authapp.WalletAccountMergeChallengeResponse
 
@@ -166,7 +144,9 @@ func (h HTTPHandlers) WalletLinkChallenge(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	response, err := h.Application().CreateWalletLinkChallenge(r.Context(), claims.UserID, req.Address, req.Chain)
+	input := req.ToDomainInput()
+
+	response, err := h.Application().CreateWalletLinkChallenge(r.Context(), claims.UserID, input.Address, input.Chain)
 	if err != nil {
 		writeWalletLinkChallengeError(w, err)
 		return
@@ -181,7 +161,9 @@ func (h HTTPHandlers) WalletLinkVerify(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response, err := h.Application().VerifyWalletLink(r.Context(), claims.UserID, req.ChallengeID, req.Address, req.Signature)
+	input := req.ToDomainInput()
+
+	response, err := h.Application().VerifyWalletLink(r.Context(), claims.UserID, input.ChallengeID, input.Address, input.Signature)
 	if err != nil {
 		writeWalletLinkVerifyError(w, err)
 		return
@@ -196,7 +178,9 @@ func (h HTTPHandlers) WalletAccountMergeChallenge(w http.ResponseWriter, r *http
 		return
 	}
 
-	response, err := h.Application().CreateWalletAccountMergeChallenge(r.Context(), claims.UserID, req.Address, req.Chain)
+	input := req.ToDomainInput()
+
+	response, err := h.Application().CreateWalletAccountMergeChallenge(r.Context(), claims.UserID, input.Address, input.Chain)
 	if err != nil {
 		writeWalletAccountMergeChallengeError(w, err)
 		return
@@ -211,7 +195,9 @@ func (h HTTPHandlers) WalletAccountMergeVerify(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	response, err := h.Application().VerifyWalletAccountMerge(r.Context(), claims.UserID, req.ChallengeID, req.Address, req.Signature)
+	input := req.ToDomainInput()
+
+	response, err := h.Application().VerifyWalletAccountMerge(r.Context(), claims.UserID, input.ChallengeID, input.Address, input.Signature)
 	if err != nil {
 		writeWalletAccountMergeVerifyError(w, err)
 		return
@@ -226,7 +212,9 @@ func (h HTTPHandlers) WalletDetachCheck(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	response, err := h.Application().CheckWalletDetach(r.Context(), claims.UserID, req.Address)
+	input := req.ToDomainInput()
+
+	response, err := h.Application().CheckWalletDetach(r.Context(), claims.UserID, input.Address)
 	if err != nil {
 		writeWalletDetachCheckError(w, err)
 		return
@@ -241,7 +229,9 @@ func (h HTTPHandlers) WalletDetach(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response, err := h.Application().ExecuteWalletDetach(r.Context(), claims.UserID, req.Address)
+	input := req.ToDomainInput()
+
+	response, err := h.Application().ExecuteWalletDetach(r.Context(), claims.UserID, input.Address)
 	if err != nil {
 		writeWalletDetachError(w, err, response)
 		return
@@ -256,7 +246,9 @@ func (h HTTPHandlers) WalletSetPrimary(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response, err := h.Application().SetPrimaryWallet(r.Context(), claims.UserID, req.Address)
+	input := req.ToDomainInput()
+
+	response, err := h.Application().SetPrimaryWallet(r.Context(), claims.UserID, input.Address)
 	if err != nil {
 		writeWalletPrimarySetError(w, err)
 		return

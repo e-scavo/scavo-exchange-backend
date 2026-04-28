@@ -9,15 +9,13 @@ import (
 
 	coreauth "github.com/e-scavo/scavo-exchange-backend/internal/core/auth"
 	coreerrs "github.com/e-scavo/scavo-exchange-backend/internal/core/errs"
+	authwritemodels "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/writemodels"
 	usermod "github.com/e-scavo/scavo-exchange-backend/internal/modules/user"
 	userreadmodels "github.com/e-scavo/scavo-exchange-backend/internal/modules/user/readmodels"
 	usersettingsmod "github.com/e-scavo/scavo-exchange-backend/internal/modules/usersettings"
 )
 
-type LoginRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
+type LoginRequest = authwritemodels.AuthLoginWriteModel
 
 type LoginResponse struct {
 	AccessToken string `json:"access_token"`
@@ -26,9 +24,7 @@ type LoginResponse struct {
 	UserID      string `json:"user_id"`
 }
 
-type UpdateMeRequest struct {
-	DisplayName string `json:"display_name"`
-}
+type UpdateMeRequest = authwritemodels.AuthUpdateProfileWriteModel
 
 type MeResponse struct {
 	User    *userreadmodels.UserReadModel `json:"user"`
@@ -39,9 +35,7 @@ type SessionResponse struct {
 	Session *SessionView `json:"session"`
 }
 
-type UpdateMeSettingsRequest struct {
-	Preferences json.RawMessage `json:"preferences"`
-}
+type UpdateMeSettingsRequest = authwritemodels.AuthUpdateSettingsWriteModel
 
 type MeSettingsResponse struct {
 	Settings usersettingsmod.View `json:"settings"`
@@ -110,7 +104,9 @@ func (h HTTPHandlers) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp, err := h.Application().Login(r.Context(), req.Email, req.Password)
+	input := req.ToDomainInput()
+
+	resp, err := h.Application().Login(r.Context(), input.Email, input.Password)
 	if err != nil {
 		switch {
 		case errors.Is(err, ErrInvalidCredentials):
@@ -159,7 +155,9 @@ func (h HTTPHandlers) UpdateMe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	updatedUser, err := h.Users.UpdateDisplayName(r.Context(), claims.UserID, req.DisplayName)
+	input := req.ToDomainInput()
+
+	updatedUser, err := h.Users.UpdateDisplayName(r.Context(), claims.UserID, input.DisplayName)
 	if err != nil {
 		switch {
 		case errors.Is(err, usermod.ErrEmptyUserID):
@@ -209,13 +207,13 @@ func (h HTTPHandlers) UpdateMeSettings(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var patch map[string]any
-	if err := json.Unmarshal(req.Preferences, &patch); err != nil {
+	input, err := req.ToDomainInput()
+	if err != nil {
 		writeAppErrorJSON(w, coreerrs.SettingsInvalidPayload())
 		return
 	}
 
-	settings, err := h.UserSettings.UpdatePreferences(r.Context(), claims.UserID, patch)
+	settings, err := h.UserSettings.UpdatePreferences(r.Context(), claims.UserID, input.Preferences)
 	if err != nil {
 		switch {
 		case errors.Is(err, usersettingsmod.ErrUserIDRequired):
