@@ -138,7 +138,17 @@ Result:
 
 ### 0.12.2 — Read Model Extraction
 
-Status: **Pending**.
+Status: **In progress**.
+
+Internal subdivision:
+
+- 0.12.2.0 — Definition & Documentation Lock ✔ Completed
+- 0.12.2.1 — Read Model Design ⬜ Pending
+- 0.12.2.2 — Read Model Implementation ⬜ Pending
+- 0.12.2.3 — Domain/Application → Read Mapping ⬜ Pending
+- 0.12.2.4 — Response Alignment ⬜ Pending
+- 0.12.2.5 — Validation & Compatibility ⬜ Pending
+- 0.12.2.6 — Documentation & Closure ⬜ Pending
 
 Purpose:
 
@@ -209,3 +219,7 @@ Phase 0.12 must preserve:
 ## 0.12.0 Closure Statement
 
 0.12.0 is completed as a documentation-only subphase. The phase is now defined, its scope is locked and Phase 0.12.1 has started with 0.12.1.0 as its audit-level documentation lock. The next correct step is 0.12.1.1 — Model Inventory Extraction.
+
+## 0.12.2.0 Closure Statement
+
+0.12.2.0 is completed as a documentation-only subphase. Read Model Extraction is now defined, its internal sequence is locked and implementation must start with 0.12.2.1 — Read Model Design. No Go code is changed in 0.12.2.0.

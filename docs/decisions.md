@@ -558,3 +558,36 @@ The audit sequence includes:
 ### Status
 
 Accepted in 0.12.1.6.
+
+---
+
+## ADR-0015 - Read Model Extraction Must Preserve Public Response Compatibility
+
+### Context
+
+Phase 0.12.1 identified hybrid/transitional structures and defined target separation direction. Phase 0.12.2 begins the read-side extraction path. Without an explicit compatibility rule, introducing read models could accidentally change public payloads or move response semantics away from existing handlers.
+
+### Decision
+
+0.12.2 must introduce read models only as internal structural improvements. Existing public routes, status codes, response envelopes, authentication behavior, authorization behavior, error model behavior and API versioning remain unchanged.
+
+The implementation must be driven by the 0.12.1 audit artifacts and must proceed through the locked 0.12.2 internal sequence:
+
+- 0.12.2.0 — Definition & Documentation Lock
+- 0.12.2.1 — Read Model Design
+- 0.12.2.2 — Read Model Implementation
+- 0.12.2.3 — Domain/Application → Read Mapping
+- 0.12.2.4 — Response Alignment
+- 0.12.2.5 — Validation & Compatibility
+- 0.12.2.6 — Documentation & Closure
+
+### Consequences
+
+- Read-side extraction becomes traceable.
+- Public compatibility remains the controlling constraint.
+- Mapping must be explicit where read models are introduced.
+- Any unsupported or speculative extraction target must be deferred.
+
+### Status
+
+Accepted in 0.12.2.0.

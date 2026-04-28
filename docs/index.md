@@ -124,7 +124,7 @@ Phase 0.10 ✔ Completed
 
 Latest completed phase: `0.11 — Domain Module Pattern`  
 Current phase: `0.12 — Read / Write Model Separation`  
-Latest completed subphase: `0.12.1.0 — Model Classification Audit Definition & Documentation Lock`
+Latest completed subphase: `0.12.2.0 — Read Model Extraction Definition & Documentation Lock`
 
 
 ---
@@ -160,13 +160,20 @@ Phase 0.11 ✔ Completed — next planned phase: 0.12
   - 0.12.1.4 ✔ Problem Detection & Risk Mapping
   - 0.12.1.5 ✔ Target Separation Definition
   - 0.12.1.6 ✔ Audit Consolidation & Closure
-- 0.12.2 ⬜ Read Model Extraction
+- 0.12.2 🚧 Read Model Extraction
+  - 0.12.2.0 ✔ Definition & Documentation Lock
+  - 0.12.2.1 ⬜ Read Model Design
+  - 0.12.2.2 ⬜ Read Model Implementation
+  - 0.12.2.3 ⬜ Domain/Application → Read Mapping
+  - 0.12.2.4 ⬜ Response Alignment
+  - 0.12.2.5 ⬜ Validation & Compatibility
+  - 0.12.2.6 ⬜ Documentation & Closure
 - 0.12.3 ⬜ Write Model Isolation
 - 0.12.4 ⬜ Mapping Layer Introduction
 - 0.12.5 ⬜ Contract Alignment
 - 0.12.6 ⬜ Documentation & Phase Closure
 
-Phase 0.12 is in progress. 0.12.0 is completed as the phase-level documentation lock, and 0.12.1 is completed as the audit sequence. The next implementation step is 0.12.2 — Read Model Extraction.
+Phase 0.12 is in progress. 0.12.0 is completed as the phase-level documentation lock, 0.12.1 is completed as the audit sequence, and 0.12.2.0 is completed as the Read Model Extraction documentation lock. The next implementation step is 0.12.2.1 — Read Model Design.
 
 
 ---
@@ -180,3 +187,9 @@ Phase 0.12 is in progress. 0.12.0 is completed as the phase-level documentation 
 - `docs/phase0_12_1_problem_detection_risk_mapping.md` — records problem and risk mapping.
 - `docs/phase0_12_1_target_separation_definition.md` — records the target separation direction.
 - `docs/phase0_12_1_audit_consolidation_closure.md` — closes the 0.12.1 audit sequence.
+
+---
+
+### Phase 0.12.2 Dedicated Document
+
+- `docs/phase0_12_2_read_model_extraction.md` — defines the 0.12.2 read model extraction plan, internal sub-subphase order, compatibility rules and documentation lock.

@@ -1051,3 +1051,20 @@ The audit baseline records:
 - Risk levels used: CRITICAL, HIGH, MEDIUM and LOW
 
 This result does not itself change architecture at runtime. It constrains the next implementation phases so extraction work is based on documented evidence rather than assumption.
+
+### 0.12.2.0 — Read Model Extraction Definition Lock
+
+Read Model Extraction is the first Phase 0.12 subphase that prepares for code-level model separation. The `.0` step is intentionally documentation-only so the extraction path is constrained before implementation begins.
+
+The deep architectural rule for 0.12.2 is that read models represent output intent. They may serve response assembly, view-style application results or transport-facing response shapes, but they must not become mutation/input models and must not absorb domain invariants that belong to module-owned domain structures.
+
+The implementation sequence is locked as:
+
+1. define read model design targets from the audit evidence
+2. introduce explicit read model structures where required
+3. introduce Domain/Application → Read mapping where the flow is currently implicit
+4. align existing responses without changing public payload semantics
+5. validate runtime compatibility and `go test ./...`
+6. close documentation cumulatively
+
+The 0.12.1 audit remains the evidence source. Any read model extraction that cannot be connected to the inventory/classification/cross-layer/risk/target documents must be deferred instead of guessed.

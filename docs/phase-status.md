@@ -1487,7 +1487,7 @@ In progress.
 
 ### Latest Completed Subphase
 
-0.12.1.0 — Model Classification Audit Definition & Documentation Lock.
+0.12.2.0 — Read Model Extraction Definition & Documentation Lock.
 
 ### Objective
 
@@ -1519,7 +1519,7 @@ Excluded:
 | --- | --- | --- |
 | 0.12.0 | Phase Definition & Documentation Lock | ✅ Completed |
 | 0.12.1 | Model Classification Audit | ✅ Completed |
-| 0.12.2 | Read Model Extraction | ⬜ Pending |
+| 0.12.2 | Read Model Extraction | 🚧 In Progress |
 | 0.12.3 | Write Model Isolation | ⬜ Pending |
 | 0.12.4 | Mapping Layer Introduction | ⬜ Pending |
 | 0.12.5 | Contract Alignment | ⬜ Pending |
@@ -1571,6 +1571,24 @@ The first implementation subphase must inspect the real models currently present
 
 The audit baseline records 125 model-like structs, with 11 hybrid/transitional structures requiring explicit separation planning. No Go code was modified during 0.12.1.
 
+### 0.12.2 Internal Sub-Subphase Plan
+
+| Sub-subphase | Name | Status |
+| --- | --- | --- |
+| 0.12.2.0 | Definition & Documentation Lock | ✅ Completed |
+| 0.12.2.1 | Read Model Design | ⬜ Pending |
+| 0.12.2.2 | Read Model Implementation | ⬜ Pending |
+| 0.12.2.3 | Domain/Application → Read Mapping | ⬜ Pending |
+| 0.12.2.4 | Response Alignment | ⬜ Pending |
+| 0.12.2.5 | Validation & Compatibility | ⬜ Pending |
+| 0.12.2.6 | Documentation & Closure | ⬜ Pending |
+
+### 0.12.2.0 Result
+
+0.12.2.0 is documentation-only and is completed in this repository state. It defines the Read Model Extraction sequence before code-level design starts, records the response-compatibility constraints and requires the 0.12.1 audit artifacts to drive all extraction decisions.
+
+No Go code is changed in 0.12.2.0.
+
 ### Next
 
-0.12.2 — Read Model Extraction.
+0.12.2.1 — Read Model Design.

@@ -192,8 +192,20 @@ Internal subdivision:
 
 The next planned subphase is 0.12.2 — Read Model Extraction.
 
-#### 0.12.2 — Read Model Extraction ⬜ Pending
+#### 0.12.2 — Read Model Extraction 🚧 In Progress
 Extract explicit read models for output/view/response paths while preserving current public response compatibility.
+
+Internal subdivision:
+
+- 0.12.2.0 — Definition & Documentation Lock ✔ Completed
+- 0.12.2.1 — Read Model Design ⬜ Pending
+- 0.12.2.2 — Read Model Implementation ⬜ Pending
+- 0.12.2.3 — Domain/Application → Read Mapping ⬜ Pending
+- 0.12.2.4 — Response Alignment ⬜ Pending
+- 0.12.2.5 — Validation & Compatibility ⬜ Pending
+- 0.12.2.6 — Documentation & Closure ⬜ Pending
+
+0.12.2.0 is documentation-only. It locks the read model extraction sequence before code-level design and implementation begin.
 
 #### 0.12.3 — Write Model Isolation ⬜ Pending
 Isolate input and mutation-oriented models so write paths do not reuse read models accidentally.

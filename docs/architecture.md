@@ -687,3 +687,11 @@ HYBRID / TRANSITIONAL -> READ + WRITE + DOMAIN where required
 ```
 
 The implementation of that target is deferred to 0.12.2 and later. Public HTTP behavior, authentication, authorization, error envelopes and API versioning remain unchanged.
+
+### 0.12.2 Read Model Extraction Definition Lock
+
+0.12.2 begins the first implementation-oriented part of Phase 0.12, but 0.12.2.0 remains documentation-only. It locks the read model extraction sequence before any Go structs, mappings or handlers are changed.
+
+The extraction target is limited to read-oriented output/view/response shapes. The public HTTP contract must remain compatible; therefore read models may be introduced internally only when their mapping preserves the existing externally observable response semantics.
+
+0.12.2 must use the completed 0.12.1 audit artifacts as evidence. Hybrid/transitional models are not split by assumption; each read model candidate must be tied back to the inventory, classification, cross-layer analysis, risk map and target separation definition.
