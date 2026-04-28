@@ -1035,7 +1035,7 @@ The backend is still externally aligned with the completed 0.11 runtime behavior
   - ✔ 0.12.2.4 — Response Alignment
   - ✔ 0.12.2.5 — Validation & Compatibility
   - ✔ 0.12.2.6 — Documentation & Closure
-- ⬜ 0.12.3 — Write Model Isolation
+- 🚧 0.12.3 — Write Model Isolation
   - ✔ 0.12.3.0 — Definition & Documentation Lock
   - ⬜ 0.12.3.1 — Write Model Design
   - ⬜ 0.12.3.2 — Write Model Implementation
@@ -1068,7 +1068,7 @@ The next phase must not start by guessing model ownership. It must use these aud
 
 0.12.2 is completed. It introduced explicit read model packages, Domain/Application → Read mapping functions, response alignment and validation documentation. Public response compatibility remains preserved.
 
-The next step is 0.12.3 — Write Model Isolation. It must build on the completed read-side boundary and avoid reusing read models as mutation/input models.
+The active step is 0.12.3 — Write Model Isolation. Its documentation lock is complete; the next implementation step is 0.12.3.1 — Write Model Design. It must build on the completed read-side boundary and avoid reusing read models as mutation/input models.
 
 ### 0.12.3.0 Write Model Isolation Definition Lock
 

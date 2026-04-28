@@ -138,17 +138,17 @@ Result:
 
 ### 0.12.2 — Read Model Extraction
 
-Status: **In progress**.
+Status: **Completed**.
 
 Internal subdivision:
 
 - 0.12.2.0 — Definition & Documentation Lock ✔ Completed
-- 0.12.2.1 — Read Model Design ⬜ Pending
-- 0.12.2.2 — Read Model Implementation ⬜ Pending
-- 0.12.2.3 — Domain/Application → Read Mapping ⬜ Pending
-- 0.12.2.4 — Response Alignment ⬜ Pending
-- 0.12.2.5 — Validation & Compatibility ⬜ Pending
-- 0.12.2.6 — Documentation & Closure ⬜ Pending
+- 0.12.2.1 — Read Model Design ✔ Completed
+- 0.12.2.2 — Read Model Implementation ✔ Completed
+- 0.12.2.3 — Domain/Application → Read Mapping ✔ Completed
+- 0.12.2.4 — Response Alignment ✔ Completed
+- 0.12.2.5 — Validation & Compatibility ✔ Completed
+- 0.12.2.6 — Documentation & Closure ✔ Completed
 
 Purpose:
 
@@ -160,6 +160,16 @@ Purpose:
 ### 0.12.3 — Write Model Isolation
 
 Status: **In progress**.
+
+Internal subdivision:
+
+- 0.12.3.0 — Definition & Documentation Lock ✔ Completed
+- 0.12.3.1 — Write Model Design ⬜ Pending
+- 0.12.3.2 — Write Model Implementation ⬜ Pending
+- 0.12.3.3 — Write → Domain Mapping ⬜ Pending
+- 0.12.3.4 — Handler Alignment ⬜ Pending
+- 0.12.3.5 — Validation & Compatibility ⬜ Pending
+- 0.12.3.6 — Documentation & Closure ⬜ Pending
 
 Purpose:
 
