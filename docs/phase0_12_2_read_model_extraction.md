@@ -158,10 +158,10 @@ When completed, 0.12.2 should leave the repository with:
 
 ## Status
 
-Subphase: 0.12.2.0
+Subphase: 0.12.2.3
 
 Status: Completed
 
-Code impact: None
+Code impact: Additive mapping functions introduced; handlers and HTTP contracts unchanged
 
-Next: 0.12.2.1 — Read Model Design
+Next: 0.12.2.4 — Response Alignment
