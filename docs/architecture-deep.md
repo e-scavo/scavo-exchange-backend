@@ -1113,3 +1113,10 @@ This package becomes the owner of explicit boundary transformations while model 
 - Domain/Application → Read for response projection
 
 The `.0` step is documentation-only. It prevents implementation from starting before the ownership rule, compatibility constraints and sub-subphase sequence are locked.
+
+
+### 0.12.4.6 — Mapping Layer Closure
+
+The mapping layer introduction sequence is completed. The backend now has centralized module-local packages for explicit transformation directions: Write → Domain and Domain → Read. Application-layer helper code delegates to these packages where 0.12.4 targeted consolidation, while compatibility wrappers remain only where they preserve stable public behavior or keep staged refactor risk low.
+
+Validation status: `go test ./...` passed in the developer environment after 0.12.4.5 and remained valid for the closure baseline.

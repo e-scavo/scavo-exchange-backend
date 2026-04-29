@@ -23,9 +23,9 @@ The backend follows a **wallet-first identity model** that progressively evolves
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.12 — Read/Write Model Separation  
-**Latest Completed Subphase:** **0.12.4.0 — Mapping Layer Introduction Definition & Documentation Lock**  
+**Latest Completed Subphase:** **0.12.4.6 — Mapping Layer Introduction Documentation & Closure**  
 **Phase Status:** **In Progress**  
-**Next Planned Phase:** **0.12.4.1 — Mapping Layer Design**
+**Next Planned Phase:** **0.12.5 — Contract Alignment**
 
 ---
 
@@ -2809,14 +2809,14 @@ Phase 0.12 addresses that ambiguity without reopening the public contract.
   - **0.12.3.4 — Handler Alignment** ✔ Completed
   - **0.12.3.5 — Validation & Compatibility** ✔ Completed
   - **0.12.3.6 — Documentation & Closure** ✔ Completed
-- **0.12.4 — Mapping Layer Introduction** 🚧 In progress
+- **0.12.4 — Mapping Layer Introduction** ✔ Completed
   - **0.12.4.0 — Definition & Documentation Lock** ✔ Completed
-  - **0.12.4.1 — Mapping Layer Design** ⬜ Pending
-  - **0.12.4.2 — Mapping Layer Implementation** ⬜ Pending
-  - **0.12.4.3 — Mapping Consolidation** ⬜ Pending
-  - **0.12.4.4 — Application Refactor** ⬜ Pending
-  - **0.12.4.5 — Validation & Compatibility** ⬜ Pending
-  - **0.12.4.6 — Documentation & Closure** ⬜ Pending
+  - **0.12.4.1 — Mapping Layer Design** ✔ Completed
+  - **0.12.4.2 — Mapping Layer Implementation** ✔ Completed
+  - **0.12.4.3 — Mapping Consolidation** ✔ Completed
+  - **0.12.4.4 — Application Refactor** ✔ Completed
+  - **0.12.4.5 — Validation & Compatibility** ✔ Completed
+  - **0.12.4.6 — Documentation & Closure** ✔ Completed
 - **0.12.5 — Contract Alignment** ⬜ Pending
 - **0.12.6 — Documentation & Phase Closure** ⬜ Pending
 
@@ -2847,3 +2847,8 @@ Phase 0.12 addresses that ambiguity without reopening the public contract.
 ### 0.12.4.0 result
 
 0.12.4.0 is completed as a documentation-only subphase. It locks the Mapping Layer Introduction plan before any Go code changes, defines the centralized mapper package direction and records that existing read/write mapper behavior must remain compatible until consolidation is implemented.
+
+
+## Phase 0.12.4 Closure
+
+Phase 0.12.4 — Mapping Layer Introduction is completed. The backend now contains module-local mapper packages, consolidated read/write transformation ownership, reduced application-layer mapping residuals and validation documentation backed by `go test ./...`. The next planned phase is 0.12.5 — Contract Alignment.

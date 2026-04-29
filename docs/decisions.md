@@ -704,4 +704,26 @@ The locked internal sequence is:
 
 ### Status
 
-Accepted in 0.12.4.0.
+Accepted in 0.12.4.0. Completed in 0.12.4.6.
+
+
+## Decision: Close Phase 0.12.4 Mapping Layer Introduction
+
+### Context
+
+Phase 0.12.4 implemented the mapping ownership target defined after read model extraction and write model isolation. Mapping logic now has explicit module-local ownership instead of remaining distributed across read model, write model and application packages.
+
+### Decision
+
+Close Phase 0.12.4 as completed. The backend will proceed to Phase 0.12.5 — Contract Alignment using the centralized mapper packages as the baseline.
+
+### Consequences
+
+- Public HTTP request and response contracts remain stable.
+- Read and write model packages remain focused on data shape ownership.
+- Mapping packages own transformation logic.
+- Future contract alignment must use the centralized mapping layer rather than adding new mapping logic to application handlers.
+
+### Status
+
+Accepted in 0.12.4.6.

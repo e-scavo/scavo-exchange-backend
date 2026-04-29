@@ -193,12 +193,12 @@ Purpose:
 Internal sequence:
 
 - 0.12.4.0 — Definition & Documentation Lock ✔ Completed
-- 0.12.4.1 — Mapping Layer Design ⬜ Pending
-- 0.12.4.2 — Mapping Layer Implementation ⬜ Pending
-- 0.12.4.3 — Mapping Consolidation ⬜ Pending
-- 0.12.4.4 — Application Refactor ⬜ Pending
-- 0.12.4.5 — Validation & Compatibility ⬜ Pending
-- 0.12.4.6 — Documentation & Closure ⬜ Pending
+- 0.12.4.1 — Mapping Layer Design ✔ Completed
+- 0.12.4.2 — Mapping Layer Implementation ✔ Completed
+- 0.12.4.3 — Mapping Consolidation ✔ Completed
+- 0.12.4.4 — Application Refactor ✔ Completed
+- 0.12.4.5 — Validation & Compatibility ✔ Completed
+- 0.12.4.6 — Documentation & Closure ✔ Completed
 
 ### 0.12.5 — Contract Alignment
 
@@ -262,4 +262,4 @@ Validation was recorded in 0.12.2.5 using `go test ./...`. The next phase step i
 
 ## 0.12.4.0 Closure Statement
 
-0.12.4.0 is completed as a documentation-only subphase. Mapping Layer Introduction is now defined, its internal sequence is locked and the next step is 0.12.4.1 — Mapping Layer Design.
+0.12.4 is completed. Mapping Layer Introduction now has module-local mapper packages, consolidated mapping ownership, application-layer residual mapping reduction and validation documentation. The next phase is 0.12.5 — Contract Alignment.

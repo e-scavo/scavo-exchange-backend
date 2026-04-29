@@ -729,3 +729,8 @@ The layer owns explicit transformations in both directions already introduced by
 - Domain/Application → Read
 
 The definition lock does not move code yet. It records that future implementation must preserve public HTTP request and response contracts while reducing mapper ownership spread across read model, write model and application packages.
+
+
+### 0.12.4 Mapping Layer Closure
+
+Phase 0.12.4 completed the transition from distributed mapper ownership to module-local mapper packages under `internal/modules/<module>/mappers/`. The architecture now treats mapping as an explicit boundary between write models, domain inputs, domain state and read models. Public HTTP contracts remain unchanged.

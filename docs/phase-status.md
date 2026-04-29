@@ -1521,7 +1521,7 @@ Excluded:
 | 0.12.1 | Model Classification Audit | ✅ Completed |
 | 0.12.2 | Read Model Extraction | ✅ Completed |
 | 0.12.3 | Write Model Isolation | ✅ Completed |
-| 0.12.4 | Mapping Layer Introduction | 🚧 In progress |
+| 0.12.4 | Mapping Layer Introduction | ✅ Completed |
 | 0.12.5 | Contract Alignment | ⬜ Pending |
 | 0.12.6 | Documentation & Phase Closure | ⬜ Pending |
 
@@ -1620,12 +1620,12 @@ No Go code is changed in 0.12.3.0.
 | Sub-subphase | Name | Status |
 | --- | --- | --- |
 | 0.12.4.0 | Definition & Documentation Lock | ✅ Completed |
-| 0.12.4.1 | Mapping Layer Design | ⬜ Pending |
-| 0.12.4.2 | Mapping Layer Implementation | ⬜ Pending |
-| 0.12.4.3 | Mapping Consolidation | ⬜ Pending |
-| 0.12.4.4 | Application Refactor | ⬜ Pending |
-| 0.12.4.5 | Validation & Compatibility | ⬜ Pending |
-| 0.12.4.6 | Documentation & Closure | ⬜ Pending |
+| 0.12.4.1 | Mapping Layer Design | ✅ Completed |
+| 0.12.4.2 | Mapping Layer Implementation | ✅ Completed |
+| 0.12.4.3 | Mapping Consolidation | ✅ Completed |
+| 0.12.4.4 | Application Refactor | ✅ Completed |
+| 0.12.4.5 | Validation & Compatibility | ✅ Completed |
+| 0.12.4.6 | Documentation & Closure | ✅ Completed |
 
 ### 0.12.4.0 Result
 
@@ -1635,4 +1635,11 @@ No Go code is changed in 0.12.4.0.
 
 ### Next
 
-0.12.4.1 — Mapping Layer Design.
+0.12.5 — Contract Alignment.
+
+
+### 0.12.4.6 Result
+
+0.12.4 is completed. The phase introduced module-local `mappers` packages, consolidated read-side and write-side mapping ownership, reduced residual application mapping, preserved public HTTP contracts and recorded validation with `go test ./...`.
+
+Next planned phase: 0.12.5 — Contract Alignment.

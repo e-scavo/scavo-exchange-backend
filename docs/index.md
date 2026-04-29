@@ -124,7 +124,7 @@ Phase 0.10 ✔ Completed
 
 Latest completed phase: `0.11 — Domain Module Pattern`  
 Current phase: `0.12 — Read / Write Model Separation`  
-Latest completed subphase: `0.12.4.0 — Mapping Layer Introduction Definition & Documentation Lock`
+Latest completed subphase: `0.12.4.6 — Mapping Layer Introduction Documentation & Closure`
 
 
 ---
@@ -176,18 +176,18 @@ Phase 0.11 ✔ Completed — next planned phase: 0.12
   - 0.12.3.4 ✔ Handler Alignment
   - 0.12.3.5 ✔ Validation & Compatibility
   - 0.12.3.6 ✔ Documentation & Closure
-- 0.12.4 🚧 Mapping Layer Introduction
+- 0.12.4 ✔ Mapping Layer Introduction
   - 0.12.4.0 ✔ Definition & Documentation Lock
-  - 0.12.4.1 ⬜ Mapping Layer Design
-  - 0.12.4.2 ⬜ Mapping Layer Implementation
-  - 0.12.4.3 ⬜ Mapping Consolidation
-  - 0.12.4.4 ⬜ Application Refactor
-  - 0.12.4.5 ⬜ Validation & Compatibility
-  - 0.12.4.6 ⬜ Documentation & Closure
+  - 0.12.4.1 ✔ Mapping Layer Design
+  - 0.12.4.2 ✔ Mapping Layer Implementation
+  - 0.12.4.3 ✔ Mapping Consolidation
+  - 0.12.4.4 ✔ Application Refactor
+  - 0.12.4.5 ✔ Validation & Compatibility
+  - 0.12.4.6 ✔ Documentation & Closure
 - 0.12.5 ⬜ Contract Alignment
 - 0.12.6 ⬜ Documentation & Phase Closure
 
-Phase 0.12 is in progress. 0.12.0 is completed as the phase-level documentation lock, 0.12.1 is completed as the audit sequence, 0.12.2 is completed as the Read Model Extraction sequence, 0.12.3 is completed as the Write Model Isolation sequence, and 0.12.4.0 is completed as the Mapping Layer Introduction documentation lock. The next planned step is 0.12.4.1 — Mapping Layer Design.
+Phase 0.12 is in progress. 0.12.0 is completed as the phase-level documentation lock, 0.12.1 is completed as the audit sequence, 0.12.2 is completed as the Read Model Extraction sequence, 0.12.3 is completed as the Write Model Isolation sequence, and 0.12.4 is completed as the Mapping Layer Introduction sequence. The next planned step is 0.12.5 — Contract Alignment.
 
 
 ---
@@ -217,3 +217,10 @@ Phase 0.12 is in progress. 0.12.0 is completed as the phase-level documentation 
 ### Phase 0.12.4 Dedicated Document
 
 - `docs/phase0_12_4_mapping_layer.md` — defines the Mapping Layer Introduction plan, centralized mapper package direction, sub-subphase sequence and compatibility constraints.
+
+- `docs/phase0_12_4_mapping_layer_design.md` — records the centralized mapping layer design.
+- `docs/phase0_12_4_mapping_layer_implementation.md` — records the module-local mapper package implementation.
+- `docs/phase0_12_4_mapping_consolidation.md` — records mapping consolidation into centralized packages.
+- `docs/phase0_12_4_application_refactor.md` — records application-layer residual mapping reduction.
+- `docs/phase0_12_4_validation_compatibility.md` — records compatibility validation for 0.12.4.
+- `docs/phase0_12_4_documentation_closure.md` — records formal closure of Phase 0.12.4.
