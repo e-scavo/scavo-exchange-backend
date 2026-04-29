@@ -262,8 +262,14 @@ No Go source files were modified by this subphase.
 
 0.13.1 is completed as a documentation-only provider inventory and classification subphase.
 
-The repository is ready for:
+The repository completed the next documentation-only step:
 
 ```text
 0.13.2 — Provider Interface Design
+```
+
+The repository is now ready for:
+
+```text
+0.13.3 — Provider Implementation
 ```

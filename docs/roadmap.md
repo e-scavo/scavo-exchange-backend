@@ -258,8 +258,8 @@ Locked the phase definition, corrected roadmap consistency and registered the su
 #### 0.13.1 — Provider Inventory & Classification ✔ Completed
 Inventoried existing provider-like responsibilities, missing provider boundaries, compatibility wiring and direct access patterns without changing Go code.
 
-#### 0.13.2 — Provider Interface Design ⬜ Pending
-Define narrow provider interfaces aligned with the 0.13.1 inventory findings, read/write model separation and module ownership.
+#### 0.13.2 — Provider Interface Design ✔ Completed
+Defined narrow provider interfaces aligned with the 0.13.1 inventory findings, read/write model separation and module ownership. No Go code or public API behavior was changed.
 
 #### 0.13.3 — Provider Implementation ⬜ Pending
 Implement provider boundaries incrementally while preserving compatibility.

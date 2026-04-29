@@ -1710,7 +1710,7 @@ Excluded:
 | --- | --- | --- |
 | 0.13.0 | Definition & Documentation Lock | ✅ Completed |
 | 0.13.1 | Provider Inventory & Classification | ✅ Completed |
-| 0.13.2 | Provider Interface Design | ⬜ Pending |
+| 0.13.2 | Provider Interface Design | ✅ Completed |
 | 0.13.3 | Provider Implementation | ⬜ Pending |
 | 0.13.4 | Application Integration | ⬜ Pending |
 | 0.13.5 | Validation & Compatibility | ⬜ Pending |
@@ -1724,6 +1724,10 @@ Excluded:
 
 0.13.1 is completed as a documentation-only provider inventory and classification step. It identifies existing provider-like responsibilities, missing provider boundaries, compatibility wiring and risky direct access patterns across the composition root, auth, user, user settings, system and core runtime surfaces. No Go code was modified.
 
+### 0.13.2 Result
+
+0.13.2 is completed as a documentation-only provider interface design step. It locks the target provider interface boundaries for session/bootstrap, authenticated account/profile/settings and wallet orchestration flows, preserving the Phase 0.12 read/write model separation and public HTTP/API contracts. No Go code was modified.
+
 ### Next
 
-Start 0.13.2 — Provider Interface Design.
+Start 0.13.3 — Provider Implementation.

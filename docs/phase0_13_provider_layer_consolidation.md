@@ -8,7 +8,9 @@ Phase 0.13.0 — Definition & Documentation Lock is **COMPLETED** as the documen
 
 Phase 0.13.1 — Provider Inventory & Classification is **COMPLETED** as the documentation-only inventory step.
 
-No Go code was changed by 0.13.0 or 0.13.1.
+Phase 0.13.2 — Provider Interface Design is **COMPLETED** as the documentation-only interface design step.
+
+No Go code was changed by 0.13.0, 0.13.1 or 0.13.2.
 
 ---
 
@@ -70,7 +72,7 @@ The direction is structural. It does not imply that every module must receive a 
 | --- | --- | --- |
 | 0.13.0 | Definition & Documentation Lock | COMPLETED |
 | 0.13.1 | Provider Inventory & Classification | COMPLETED |
-| 0.13.2 | Provider Interface Design | PENDING |
+| 0.13.2 | Provider Interface Design | COMPLETED |
 | 0.13.3 | Provider Implementation | PENDING |
 | 0.13.4 | Application Integration | PENDING |
 | 0.13.5 | Validation & Compatibility | PENDING |
@@ -125,7 +127,7 @@ Main findings:
 - wallet challenge/verification and authenticated profile/settings flows still contain direct handler-level service or store access that should feed 0.13.2 design.
 - composition-root dependency wiring remains compatibility wiring until provider construction is explicitly designed.
 
-Next step: 0.13.2 — Provider Interface Design
+Next step: 0.13.3 — Provider Implementation
 
 ---
 

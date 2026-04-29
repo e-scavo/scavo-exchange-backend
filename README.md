@@ -2913,7 +2913,7 @@ Establish a consistent provider boundary so handlers and application flows do no
 
 - **0.13.0 — Definition & Documentation Lock** ✔ Completed
 - **0.13.1 — Provider Inventory & Classification** ✔ Completed
-- **0.13.2 — Provider Interface Design** ⬜ Pending
+- **0.13.2 — Provider Interface Design** ✔ Completed
 - **0.13.3 — Provider Implementation** ⬜ Pending
 - **0.13.4 — Application Integration** ⬜ Pending
 - **0.13.5 — Validation & Compatibility** ⬜ Pending
@@ -2921,4 +2921,4 @@ Establish a consistent provider boundary so handlers and application flows do no
 
 ### Current status
 
-Phase 0.13 is in progress. Phase 0.13.1 is completed as the documentation-only provider inventory and classification step; the next implementation step is 0.13.2 — Provider Interface Design.
+Phase 0.13 is in progress. Phase 0.13.2 is completed as the documentation-only provider interface design step; the next implementation step is 0.13.3 — Provider Implementation.
