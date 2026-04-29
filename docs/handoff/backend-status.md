@@ -1059,11 +1059,9 @@ The backend is still externally aligned with the completed 0.11 runtime behavior
   - ✔ 0.12.5.4 — Handler Contract Adjustment
   - ✔ 0.12.5.5 — Validation & Compatibility
   - ✔ 0.12.5.6 — Documentation & Closure
-- ⬜ 0.12.6 — Documentation & Phase Closure
-
 ### Next Required Action
 
-Start 0.12.6 — Documentation & Phase Closure using the completed 0.12.1 audit artifacts, completed 0.12.2 read model extraction, completed 0.12.3 write model isolation, completed 0.12.4 mapping layer introduction and completed 0.12.5 contract alignment as the baseline.
+Start the next roadmap-defined phase using the completed 0.12.1 audit artifacts, completed 0.12.2 read model extraction, completed 0.12.3 write model isolation, completed 0.12.4 mapping layer introduction and completed 0.12.5 contract alignment as the baseline.
 
 ### 0.12.1 Audit Closure Summary
 
@@ -1120,4 +1118,4 @@ Current contract alignment target:
 
 0.12.5 is completed. The backend now has contract inventory documentation, contract normalization design, implementation-level contract alignment, centralized HTTP contract aliases, handler contract adjustment and validation documentation backed by `go test ./...`.
 
-Next planned step: 0.12.6 — Documentation & Phase Closure.
+Next planned step: next roadmap-defined phase.

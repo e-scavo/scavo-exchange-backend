@@ -221,19 +221,6 @@ Internal sequence:
 - 0.12.5.5 — Validation & Compatibility ✔ Completed
 - 0.12.5.6 — Documentation & Closure ✔ Completed
 
-### 0.12.6 — Documentation & Phase Closure
-
-Status: **Pending**.
-
-Purpose:
-
-- reread trunk documentation
-- update documentation cumulatively
-- record final implementation state
-- close Phase 0.12 formally
-
----
-
 ## Compatibility Rules
 
 Phase 0.12 must preserve:
@@ -277,4 +264,4 @@ Validation was recorded in 0.12.2.5 using `go test ./...`. The next phase step i
 
 ## Phase 0.12.5.0 Contract Alignment Definition Lock
 
-0.12.5 is completed. Contract inventory, contract normalization design, contract alignment implementation, handler contract adjustment, validation and documentation closure are now recorded. Public HTTP/API behavior remains unchanged and validation is backed by `go test ./...`. The next step is 0.12.6 — Documentation & Phase Closure.
+0.12.5 is completed. Contract inventory, contract normalization design, contract alignment implementation, handler contract adjustment, validation and documentation closure are now recorded. Public HTTP/API behavior remains unchanged and validation is backed by `go test ./...`. Phase 0.12 is complete.

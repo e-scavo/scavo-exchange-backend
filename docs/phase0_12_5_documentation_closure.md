@@ -8,7 +8,7 @@
 
 Close Phase 0.12.5 after contract inventory, normalization design, implementation, handler contract adjustment and validation were completed.
 
-This closure records the final state of Contract Alignment and prepares the backend for Phase 0.12.6 — Documentation & Phase Closure.
+This closure records the final state of Contract Alignment and completes the Phase 0.12 path.
 
 ---
 
@@ -90,7 +90,7 @@ The canonical subphase names are:
 ## Next Step
 
 ```text
-0.12.6 — Documentation & Phase Closure
+Next roadmap-defined phase
 ```
 
 ---
@@ -101,4 +101,4 @@ Phase: 0.12.5
 Subphase: 0.12.5.6  
 Status: Completed  
 Code impact: None  
-Next: 0.12.6 — Documentation & Phase Closure
+Next: next roadmap-defined phase

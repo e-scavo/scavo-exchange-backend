@@ -2825,8 +2825,6 @@ Phase 0.12 addresses that ambiguity without reopening the public contract.
   - **0.12.5.4 — Handler Contract Adjustment** ✔ Completed
   - **0.12.5.5 — Validation & Compatibility** ✔ Completed
   - **0.12.5.6 — Documentation & Closure** ✔ Completed
-- **0.12.6 — Documentation & Phase Closure** ⬜ Pending
-
 ### Current result
 
 0.12.0 establishes the documentary lock for the phase. The repository documentation now defines the scope, non-goals, subphase order and compatibility requirements for Read / Write Model Separation before any code is changed.
@@ -2882,4 +2880,4 @@ The completed subphase sequence is:
 - **0.12.5.5 — Validation & Compatibility** ✔ Completed
 - **0.12.5.6 — Documentation & Closure** ✔ Completed
 
-Next planned step: **0.12.6 — Documentation & Phase Closure**.
+Phase 0.12 is complete. Next work must start from the next roadmap-defined phase definition.

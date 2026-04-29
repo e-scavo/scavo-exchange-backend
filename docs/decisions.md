@@ -761,4 +761,4 @@ Decision:
 Close Contract Alignment as completed while preserving existing public HTTP routes, JSON request fields, JSON response fields and API versioning. Internal contract ownership is now clearer through centralized HTTP contract aliases and mapper-owned transformations.
 
 Consequences:
-Phase 0.12 can proceed to 0.12.6 — Documentation & Phase Closure with model separation, mapping ownership and contract alignment consistently documented and validated.
+Phase 0.12 can close with model separation, mapping ownership and contract alignment consistently documented and validated.

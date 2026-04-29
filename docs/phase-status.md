@@ -1523,7 +1523,6 @@ Excluded:
 | 0.12.3 | Write Model Isolation | ✅ Completed |
 | 0.12.4 | Mapping Layer Introduction | ✅ Completed |
 | 0.12.5 | Contract Alignment | ✅ Completed |
-| 0.12.6 | Documentation & Phase Closure | ⬜ Pending |
 
 ### 0.12.0 Result
 
@@ -1668,4 +1667,4 @@ No Go code is changed in 0.12.5.0.
 
 ### Next
 
-0.12.6 — Documentation & Phase Closure.
+Phase 0.12 is complete. Continue with the next roadmap-defined phase.

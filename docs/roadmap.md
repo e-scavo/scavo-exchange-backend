@@ -246,9 +246,6 @@ Internal subdivision:
 - 0.12.5.5 — Validation & Compatibility ✔ Completed
 - 0.12.5.6 — Documentation & Closure ✔ Completed
 
-#### 0.12.6 — Documentation & Phase Closure ⬜ Pending
-Update trunk documentation cumulatively and close the phase after implementation and validation.
-
 #### Expected outcome
 Phase 0.12 closes with clearer internal model responsibilities, explicit mapping boundaries and unchanged public HTTP/API behavior.
 

@@ -177,7 +177,7 @@ Purpose:
 
 - update trunk documentation cumulatively
 - close Phase 0.12.5
-- prepare Phase 0.12.6
+- prepare the next roadmap-defined phase
 
 ---
 
@@ -189,7 +189,7 @@ After Phase 0.12.5 is completed:
 - contract usage is aligned with centralized mapper ownership
 - application services no longer obscure contract transformation semantics
 - public HTTP/API behavior remains unchanged
-- the backend is ready for Phase 0.12.6 documentation and phase closure
+- the backend is ready for the next roadmap-defined phase
 
 ---
 
@@ -199,4 +199,4 @@ Phase: 0.12.5
 Subphase: 0.12.5.6  
 Status: Completed  
 Code impact: None in closure  
-Next: 0.12.6 — Documentation & Phase Closure
+Next: next roadmap-defined phase
