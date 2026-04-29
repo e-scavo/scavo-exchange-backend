@@ -2,7 +2,7 @@
 
 ## Status
 
-Phase 0.13 is **IN PROGRESS**.
+Phase 0.13 is **COMPLETED**.
 
 Phase 0.13.0 — Definition & Documentation Lock is **COMPLETED** as the documentation-only entry point for the phase.
 
@@ -10,7 +10,7 @@ Phase 0.13.1 — Provider Inventory & Classification is **COMPLETED** as the doc
 
 Phase 0.13.2 — Provider Interface Design is **COMPLETED** as the documentation-only interface design step.
 
-No Go code was changed by 0.13.0, 0.13.1 or 0.13.2.
+0.13.0, 0.13.1 and 0.13.2 were documentation-only. 0.13.3 and 0.13.4 introduced and integrated the provider boundary. 0.13.5 validated compatibility. 0.13.6 closed documentation without Go code changes.
 
 ---
 
@@ -76,7 +76,7 @@ The direction is structural. It does not imply that every module must receive a 
 | 0.13.3 | Provider Implementation | COMPLETED |
 | 0.13.4 | Application Integration | COMPLETED |
 | 0.13.5 | Validation & Compatibility | COMPLETED |
-| 0.13.6 | Documentation & Closure | PENDING |
+| 0.13.6 | Documentation & Closure | COMPLETED |
 
 ---
 
@@ -175,7 +175,11 @@ The compatibility checkpoint confirms that the provider-oriented HTTP/applicatio
 
 ## 0.13.6 — Documentation & Closure
 
-Close the phase by updating all required documentation, recording the final provider boundary state, and confirming compatibility preservation.
+Close the phase by updating all required documentation, recording the final provider boundary state, correcting drift introduced during intermediate documentation updates and confirming compatibility preservation.
+
+Result: completed as `docs/phase0_13_6_documentation_closure.md`.
+
+The closure removed generic status-only blocks, corrected misplaced roadmap text, aligned final subphase state across trunk documentation and recorded the concrete provider-layer effect in architecture, deep architecture, flows, decisions, testing, development and observability documentation.
 
 ---
 

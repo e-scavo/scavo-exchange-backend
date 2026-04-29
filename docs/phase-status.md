@@ -1671,15 +1671,11 @@ Phase 0.12 is complete. Continue with the next roadmap-defined phase.
 
 ---
 
-## 🚧 Phase 0.13 — Provider Layer Consolidation
+## ✅ Phase 0.13 — Provider Layer Consolidation
 
 ### Status
 
-🚧 In Progress
-
-### Latest Completed Subphase
-
-0.13.1 — Provider Inventory & Classification.
+✅ Completed
 
 ### Objective
 
@@ -1714,29 +1710,36 @@ Excluded:
 | 0.13.3 | Provider Implementation | ✅ Completed |
 | 0.13.4 | Application Integration | ✅ Completed |
 | 0.13.5 | Validation & Compatibility | ✅ Completed |
-| 0.13.6 | Documentation & Closure | ⬜ Pending |
+| 0.13.6 | Documentation & Closure | ✅ Completed |
 
 ### 0.13.0 Result
 
-0.13.0 is completed as a documentation-only lock. It locks the Provider Layer Consolidation scope, corrects the roadmap-level Phase 0.13 definition, expands the full subphase sequence consistently across trunk documentation and prepares the repository for provider inventory without changing Go code.
+0.13.0 completed the documentation lock for Provider Layer Consolidation, corrected the roadmap-level Phase 0.13 definition and expanded the subphase sequence before provider inventory began.
 
 ### 0.13.1 Result
 
-0.13.1 is completed as a documentation-only provider inventory and classification step. It identifies existing provider-like responsibilities, missing provider boundaries, compatibility wiring and risky direct access patterns across the composition root, auth, user, user settings, system and core runtime surfaces. No Go code was modified.
+0.13.1 completed provider inventory and classification. It identified existing provider-like boundaries, missing provider boundaries, compatibility wiring and risky direct access patterns without changing Go code.
 
 ### 0.13.2 Result
 
-0.13.2 is completed as a documentation-only provider interface design step. It locks the target provider interface boundaries for session/bootstrap, authenticated account/profile/settings and wallet orchestration flows, preserving the Phase 0.12 read/write model separation and public HTTP/API contracts. No Go code was modified.
+0.13.2 completed provider interface design. It locked target provider interface boundaries for session/bootstrap, authenticated account/profile/settings and wallet orchestration flows while preserving read/write model separation and public HTTP/API contracts.
 
-### Next
+### 0.13.3 Result
 
-Start 0.13.6 — Documentation & Closure.
-
+0.13.3 implemented the first concrete provider boundary. The auth module exposes explicit provider interfaces, the composition root builds a consolidated auth provider and HTTP handlers route relevant operations through that provider boundary while preserving public behavior.
 
 ### 0.13.4 Result
 
-0.13.4 is completed as the application integration step. Runtime HTTP wiring now consumes the consolidated auth provider boundary directly through router construction. Direct service/store implementation details are no longer passed from the router into HTTP handlers during production wiring. Public routes, middleware, request/response contracts and authorization behavior remain unchanged.
+0.13.4 completed application integration. Runtime HTTP wiring now consumes the consolidated provider boundary directly through router construction instead of passing lower-level user services, settings services, wallet stores and challenge configuration through production handler wiring.
 
 ### 0.13.5 Result
 
-0.13.5 is completed as the validation and compatibility step. The current Provider Layer integration preserves public HTTP/API behavior, versioned route behavior, error envelope behavior and existing module compatibility. External validation confirmed `make build` and `go test ./...` after the 0.13.4 router compatibility fix path; this subphase records the compatibility state without changing production code.
+0.13.5 completed validation and compatibility. External validation confirmed `make build` and `go test ./...` after the 0.13.4 router compatibility fix path. Public HTTP/API behavior, versioned route behavior, error envelopes and module compatibility remain unchanged.
+
+### 0.13.6 Result
+
+0.13.6 completed documentation closure. The closure corrected misplaced roadmap content, removed generic repeated status-only blocks from trunk documentation, expanded the final subphase state consistently and documented the actual Provider Layer impact in architecture, flows, testing, development and observability documentation.
+
+### Next
+
+Phase 0.13 is complete. Continue with the next roadmap-defined phase: 0.14 — Contract Hardening & Freeze.

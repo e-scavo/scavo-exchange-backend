@@ -411,16 +411,31 @@ The introduction of `/api/v1` as canonical API requires developers to consider v
 
 ---
 
-## Phase 0.13 Documentation Update — Provider Layer Consolidation
+## Phase 0.13 — Development Guidance For Provider Layer
 
-After the completed Phase 0.12 Read / Write Model Separation, the next roadmap-defined phase is Phase 0.13 — Provider Layer Consolidation.
+Phase 0.13 establishes the Provider Layer as the development boundary between HTTP handlers and module application/domain responsibilities.
 
-This update does not change the historical guidance above. It records the current Stage 0 direction: provider boundaries must be inventoried, designed, implemented where required, integrated with handlers/application services and validated without public API drift.
+### Development rule
 
-The existing observability direction remains valid as an infrastructure concern, but Phase 0.13 is Provider Layer Consolidation rather than Observability & Diagnostics Foundation.
+New handler-facing orchestration should prefer provider contracts over direct handler access to lower-level services, stores or domain dependencies. A handler may decode requests and write responses, but it should not assemble domain orchestration that belongs behind a provider boundary.
 
+### Implementation guidance
 
-### Phase 0.13 Subphase State
+- Keep provider contracts narrow and module-owned.
+- Preserve application services as use-case owners.
+- Preserve mapper packages as the only read/write model translation owners.
+- Do not introduce public route or payload changes as part of provider consolidation.
+- Update tests when constructor contracts change so they use the current provider-oriented wiring.
+
+### Validation
+
+Provider-facing changes must continue to pass:
+
+```bash
+go test ./...
+```
+
+### Phase 0.13 subphase state
 
 - 0.13.0 ✔ Definition & Documentation Lock
 - 0.13.1 ✔ Provider Inventory & Classification
@@ -428,6 +443,6 @@ The existing observability direction remains valid as an infrastructure concern,
 - 0.13.3 ✔ Provider Implementation
 - 0.13.4 ✔ Application Integration
 - 0.13.5 ✔ Validation & Compatibility
-- 0.13.6 ⬜ Documentation & Closure
+- 0.13.6 ✔ Documentation & Closure
 
-0.13.5 is completed as validation and compatibility. The next step is 0.13.6 — Documentation & Closure.
+Phase 0.13 is complete. Future development should treat provider-oriented wiring as the default backend composition pattern.

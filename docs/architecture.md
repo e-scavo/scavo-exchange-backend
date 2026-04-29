@@ -753,20 +753,30 @@ Phase 0.12.5 completed the alignment between HTTP handler contracts, internal wr
 
 ## Phase 0.13 Provider Layer Consolidation Boundary
 
-Phase 0.13 follows the completed Read / Write Model Separation phase.
+Phase 0.13 closes the boundary work that started after Read / Write Model Separation and contract alignment. The architectural result is not a new business capability; it is a clearer runtime ownership model for authenticated module orchestration.
 
-The architectural target is to consolidate provider boundaries as the explicit entry point between transport/application orchestration and domain services.
-
-The intended direction is:
+The intended direction is now explicit:
 
 ```text
 HTTP → Provider → Application → Domain → Repository
 ```
 
-This phase must preserve the public HTTP/API surface and must not introduce business behavior changes. Provider consolidation is an internal boundary clarification built on top of the Phase 0.12 mapper and contract alignment results.
+In the current backend, the Provider Layer is represented by module-owned provider contracts and concrete provider construction. The auth surface is the first concrete consolidation point because it coordinates session bootstrap, login, authenticated account context, user settings and wallet-related flows. Router-level production wiring now depends on the provider boundary instead of assembling handler dependencies from lower-level services and stores.
 
+### Architectural ownership after 0.13
 
-### Phase 0.13 Subphase State
+- HTTP handlers remain responsible for transport concerns: decoding requests, invoking the provider boundary and emitting standardized responses.
+- Providers own orchestration boundaries that combine module application services, stores and compatibility dependencies.
+- Application services keep use-case behavior and must not become hidden transport adapters.
+- Domain contracts remain narrow and module-owned.
+- Mapper packages remain the centralized ownership point for read/write model translation.
+- Public HTTP/API behavior, route registration and standardized error envelopes remain unchanged.
+
+### Provider boundary constraints
+
+The Provider Layer does not replace the Domain or Repository layers. It prevents handlers and router construction from depending directly on scattered implementation details. A provider may compose existing application services, but it must not introduce unrelated API behavior, versioning changes or business-rule changes.
+
+### Phase 0.13 subphase state
 
 - 0.13.0 ✔ Definition & Documentation Lock
 - 0.13.1 ✔ Provider Inventory & Classification
@@ -774,6 +784,6 @@ This phase must preserve the public HTTP/API surface and must not introduce busi
 - 0.13.3 ✔ Provider Implementation
 - 0.13.4 ✔ Application Integration
 - 0.13.5 ✔ Validation & Compatibility
-- 0.13.6 ⬜ Documentation & Closure
+- 0.13.6 ✔ Documentation & Closure
 
-0.13.5 is completed as validation and compatibility. Build/test compatibility was confirmed externally after the 0.13.4 integration fix path, and no public HTTP/API behavior changes were introduced by this documentation-only validation step.
+Phase 0.13 is complete. The architecture baseline for later Stage 0 work is now a provider-oriented runtime path with unchanged public contracts.

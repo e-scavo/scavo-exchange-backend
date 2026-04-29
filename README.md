@@ -2917,11 +2917,11 @@ Establish a consistent provider boundary so handlers and application flows do no
 - **0.13.3 — Provider Implementation** ✔ Completed
 - **0.13.4 — Application Integration** ✔ Completed
 - **0.13.5 — Validation & Compatibility** ✔ Completed
-- **0.13.6 — Documentation & Closure** ⬜ Pending
+- **0.13.6 — Documentation & Closure** ✔ Completed
 
 ### Current status
 
-Phase 0.13 is in progress. Phase 0.13.5 is completed as the validation and compatibility step; the next step is 0.13.6 — Documentation & Closure.
+Phase 0.13 is completed. Provider Layer Consolidation is now the documented runtime boundary between HTTP handlers and module application/domain responsibilities.
 
 
 ### Phase 0.13.3 result
@@ -2936,3 +2936,8 @@ Application integration aligned runtime HTTP wiring with the Provider Layer boun
 ### Phase 0.13.5 result
 
 Phase 0.13.5 completed the validation and compatibility checkpoint for Provider Layer Consolidation. The validation baseline confirms that the 0.13.4 provider integration path builds and passes `go test ./...` in the project environment after the router test compatibility fix. This subphase does not introduce production code changes.
+
+
+### Phase 0.13.6 result
+
+Phase 0.13.6 closed Provider Layer Consolidation documentation. The closure removed generic repeated phase-status blocks, corrected misplaced roadmap content, expanded the final subphase state consistently and evolved trunk documentation with the actual provider-layer impact instead of only marking state transitions. No Go code or public API behavior was changed by this closure step.

@@ -249,7 +249,7 @@ Internal subdivision:
 #### Expected outcome
 Phase 0.12 closes with clearer internal model responsibilities, explicit mapping boundaries and unchanged public HTTP/API behavior.
 
-### 0.13 — Provider Layer Consolidation 🚧 In Progress
+### 0.13 — Provider Layer Consolidation ✔ Completed
 Consolidate the Provider Layer as the explicit entry point to domain services after Read / Write Model Separation.
 
 #### 0.13.0 — Definition & Documentation Lock ✔ Completed
@@ -269,9 +269,10 @@ Integrated runtime HTTP wiring with the consolidated provider boundary while pre
 
 #### 0.13.5 — Validation & Compatibility ✔ Completed
 Validate public contract preservation and runtime compatibility.
+It records compatibility after provider application integration. The validation baseline confirms that the provider-oriented routing path remains build/test compatible and preserves existing public contracts.
 
-#### 0.13.6 — Documentation & Closure ⬜ Pending
-Record the final provider boundary state and close the phase.
+#### 0.13.6 — Documentation & Closure ✔ Completed
+Closed the phase documentation, removed generic repeated status-only updates, corrected misplaced roadmap text and recorded the final provider boundary state across trunk documentation.
 
 ### 0.14 — Contract Hardening & Freeze ⬜ Pending
 Stabilize and freeze API contracts before feature expansion.
@@ -344,4 +345,3 @@ Stabilize and freeze API contracts before feature expansion.
 - Internal testing
 - Release candidate
 
-0.13.5 records compatibility after provider application integration. The validation baseline confirms that the provider-oriented routing path remains build/test compatible and preserves existing public contracts.

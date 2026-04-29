@@ -57,8 +57,8 @@
 
 Latest completed phase: `0.12 — Read / Write Model Separation`  
 Current phase: `0.13 — Provider Layer Consolidation`  
-Latest completed subphase: `0.13.5 — Validation & Compatibility`  
-Next subphase: `0.13.6 — Documentation & Closure`
+Latest completed phase: `0.13 — Provider Layer Consolidation`  
+Next phase: `0.14 — Contract Hardening & Freeze`
 
 * `phase0_13_provider_layer_consolidation.md`
   * `0.13.0 — Definition & Documentation Lock` ✔ Completed
@@ -67,7 +67,7 @@ Next subphase: `0.13.6 — Documentation & Closure`
   * `0.13.3 — Provider Implementation` ✔ Completed
   * `0.13.4 — Application Integration` ✔ Completed
   * `0.13.5 — Validation & Compatibility` ✔ Completed
-  * `0.13.6 — Documentation & Closure` ⬜ Pending
+  * `0.13.6 — Documentation & Closure` ✔ Completed
 
 ---
 
@@ -204,9 +204,9 @@ Phase 0.12 ✔ Completed
 - 0.13.3 ✔ Provider Implementation
 - 0.13.4 ✔ Application Integration
 - 0.13.5 ✔ Validation & Compatibility
-- 0.13.6 ⬜ Documentation & Closure
+- 0.13.6 ✔ Documentation & Closure
 
-Phase 0.13 🚧 In Progress — latest completed subphase: 0.13.2; next subphase: 0.13.3.
+Phase 0.13 ✔ Completed
 
 ---
 
@@ -260,3 +260,7 @@ Phase 0.13 🚧 In Progress — latest completed subphase: 0.13.2; next subphase
 - `docs/phase0_13_0_documentation_reprocess_report.md` — records the Phase 0.13.0 documentation reprocess and consistency validation.
 - `docs/phase0_13_1_provider_inventory.md` — records the Phase 0.13.1 provider inventory, classification, missing provider boundaries and interface-design recommendations.
 - `docs/phase0_13_2_provider_interface_design.md` — records the Phase 0.13.2 provider interface design, target provider contracts, implementation constraints and 0.13.3 handoff.
+- `docs/phase0_13_3_provider_implementation.md` — records the Phase 0.13.3 provider implementation and concrete auth provider boundary.
+- `docs/phase0_13_4_application_integration.md` — records the Phase 0.13.4 application integration and runtime wiring adjustment.
+- `docs/phase0_13_5_validation_compatibility.md` — records the Phase 0.13.5 validation and compatibility checkpoint.
+- `docs/phase0_13_6_documentation_closure.md` — records the Phase 0.13.6 documentation closure and final provider boundary state.

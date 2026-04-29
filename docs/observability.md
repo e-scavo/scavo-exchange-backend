@@ -249,16 +249,19 @@ The introduction of `/api/v1` as canonical API requires developers to consider v
 
 ---
 
-## Phase 0.13 Documentation Update — Provider Layer Consolidation
+## Phase 0.13 — Provider Layer And Observability Boundary
 
-After the completed Phase 0.12 Read / Write Model Separation, the next roadmap-defined phase is Phase 0.13 — Provider Layer Consolidation.
+Phase 0.13 is Provider Layer Consolidation, not an observability implementation phase. The earlier observability direction remains valid as a future infrastructure concern, but this phase intentionally avoids adding logging, tracing, metrics or diagnostics behavior.
 
-This update does not change the historical guidance above. It records the current Stage 0 direction: provider boundaries must be inventoried, designed, implemented where required, integrated with handlers/application services and validated without public API drift.
+### Observability implication
 
-The existing observability direction remains valid as an infrastructure concern, but Phase 0.13 is Provider Layer Consolidation rather than Observability & Diagnostics Foundation.
+Provider consolidation improves future observability readiness because orchestration now has a clearer boundary. Later diagnostics work can attach observations around provider entry points without requiring handlers to expose lower-level service/store dependency details.
 
+### Constraint
 
-### Phase 0.13 Subphase State
+No new observability behavior is introduced by Phase 0.13. Existing logs, middleware behavior, error responses and runtime diagnostics remain unchanged.
+
+### Phase 0.13 subphase state
 
 - 0.13.0 ✔ Definition & Documentation Lock
 - 0.13.1 ✔ Provider Inventory & Classification
@@ -266,6 +269,6 @@ The existing observability direction remains valid as an infrastructure concern,
 - 0.13.3 ✔ Provider Implementation
 - 0.13.4 ✔ Application Integration
 - 0.13.5 ✔ Validation & Compatibility
-- 0.13.6 ⬜ Documentation & Closure
+- 0.13.6 ✔ Documentation & Closure
 
-0.13.5 is completed as validation and compatibility. The next step is 0.13.6 — Documentation & Closure.
+Phase 0.13 is complete. Any future observability phase should treat provider entry points as natural instrumentation candidates, while preserving public API behavior.

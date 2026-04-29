@@ -1133,20 +1133,17 @@ Next planned step: next roadmap-defined phase.
 
 ### Current State
 
-Phase 0.12 is completed. The backend has read/write model separation, centralized mapping ownership and aligned internal contracts.
-
-Phase 0.13 is in progress. 0.13.5 — Validation & Compatibility is completed and the next required step is 0.13.6 — Documentation & Closure.
+Phase 0.13 is completed. The backend now has an explicit Provider Layer boundary for the authenticated runtime surface, built on top of the Phase 0.12 read/write model separation and contract alignment baseline.
 
 ### Operational Meaning
 
-The next architectural movement is documentation closure. 0.13.1 confirmed existing provider-like boundaries, 0.13.2 locked the target provider interface design, 0.13.3 introduced the concrete provider boundary implementation, 0.13.4 integrated providers into application/runtime wiring, and 0.13.5 validated compatibility. 0.13.6 must close the phase documentation without introducing public API, business behavior or runtime changes.
+The runtime direction is now documented as:
 
+```text
+HTTP → Provider → Application → Domain → Repository
+```
 
-
-### 0.13.3 Result
-
-0.13.3 implemented the first concrete provider boundary. The auth module now exposes explicit provider interfaces, the composition root builds a composite auth provider, and HTTP handlers route session, profile, settings and wallet operations through that provider boundary. Public routes, request/response contracts, authorization behavior and API versioning remain unchanged.
-
+The auth module is the concrete consolidation point introduced during this phase. Runtime HTTP construction uses the consolidated auth provider boundary instead of assembling handlers from scattered lower-level services, stores and challenge configuration. Public routes, middleware, request/response contracts, authorization behavior and standardized error envelopes remain unchanged.
 
 ### Subphase State
 
@@ -1156,29 +1153,16 @@ The next architectural movement is documentation closure. 0.13.1 confirmed exist
 - 0.13.3 — Provider Implementation (COMPLETED)
 - 0.13.4 — Application Integration (COMPLETED)
 - 0.13.5 — Validation & Compatibility (COMPLETED)
-- 0.13.6 — Documentation & Closure (PENDING)
+- 0.13.6 — Documentation & Closure (COMPLETED)
 
-### Compatibility Constraints
+### Compatibility Baseline
 
-- no public HTTP route changes
-- no public request or response payload changes
-- no API versioning changes
-- no business behavior changes
-- no observability implementation in this phase
+External validation confirmed `make build` and `go test ./...` after the 0.13.4 router compatibility fix path. No public HTTP/API behavior change was introduced by the provider consolidation work.
+
+### Documentation Closure Notes
+
+0.13.6 corrected the documentation drift detected after 0.13.5 by removing repeated generic status-only blocks, correcting misplaced roadmap text and evolving each impacted trunk document with contextual Provider Layer content.
 
 ### Next Required Action
 
-Start Phase 0.13.6 by closing Provider Layer Consolidation documentation, preserving the completed compatibility baseline and avoiding new runtime behavior.
-
-
-### 0.13.4 Result
-
-0.13.4 completed application integration for the Provider Layer. Runtime HTTP construction now creates auth handlers from the consolidated provider boundary instead of passing user services, settings services, wallet stores and challenge configuration through router-level handler wiring. This keeps the public HTTP/API surface unchanged while tightening the runtime path toward `HTTP → Provider → Application → Domain → Repository`.
-
-Next required step: 0.13.6 — Documentation & Closure.
-
-### 0.13.5 Result
-
-0.13.5 completed validation and compatibility for Phase 0.13. The provider integration state remains compatible with existing public routes, versioned routes, middleware, auth flows, wallet flows and standardized error behavior. External validation confirmed `go test ./...` after the 0.13.4 router compatibility fix path. No production code changes were introduced by this validation subphase.
-
-Next required step: 0.13.6 — Documentation & Closure.
+Start the next roadmap-defined phase: 0.14 — Contract Hardening & Freeze.

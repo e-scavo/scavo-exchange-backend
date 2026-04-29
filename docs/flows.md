@@ -1270,16 +1270,40 @@ This preserves the current flow behavior while reducing accidental concrete serv
 
 ---
 
-## Phase 0.13 Documentation Update — Provider Layer Consolidation
+## Phase 0.13 — Provider-Oriented Runtime Flow
 
-After the completed Phase 0.12 Read / Write Model Separation, the next roadmap-defined phase is Phase 0.13 — Provider Layer Consolidation.
+Phase 0.13 updates the documented runtime flow after Read / Write Model Separation. The important change is not a new endpoint or response payload; it is the ownership of orchestration between HTTP handlers and module application services.
 
-This update does not change the historical guidance above. It records the current Stage 0 direction: provider boundaries must be inventoried, designed, implemented where required, integrated with handlers/application services and validated without public API drift.
+The target flow is:
 
-The existing observability direction remains valid as an infrastructure concern, but Phase 0.13 is Provider Layer Consolidation rather than Observability & Diagnostics Foundation.
+```text
+HTTP request
+  → router / middleware
+  → HTTP handler
+  → module provider
+  → application service
+  → domain contract
+  → repository / store
+  → mapper-owned read/write model response
+```
 
+### Authenticated flow impact
 
-### Phase 0.13 Subphase State
+For the auth module, handler construction now receives a consolidated provider boundary. Login, bootstrap, authenticated profile/settings and wallet-related handler paths continue to expose the same public behavior, but the handler no longer represents the place where lower-level service/store dependencies are assembled.
+
+### Compatibility flow
+
+Versioned routes, middleware execution, authorization checks and standardized error responses remain part of the existing HTTP flow. Provider consolidation sits behind the handler boundary and therefore must not alter public route naming, JSON payload structure or error envelope shape.
+
+### Validation flow
+
+0.13.5 validated the provider-oriented path after the 0.13.4 integration fix. The externally confirmed validation command remains:
+
+```bash
+go test ./...
+```
+
+### Phase 0.13 subphase state
 
 - 0.13.0 ✔ Definition & Documentation Lock
 - 0.13.1 ✔ Provider Inventory & Classification
@@ -1287,6 +1311,6 @@ The existing observability direction remains valid as an infrastructure concern,
 - 0.13.3 ✔ Provider Implementation
 - 0.13.4 ✔ Application Integration
 - 0.13.5 ✔ Validation & Compatibility
-- 0.13.6 ⬜ Documentation & Closure
+- 0.13.6 ✔ Documentation & Closure
 
-0.13.5 is completed as validation and compatibility. The next step is 0.13.6 — Documentation & Closure.
+Phase 0.13 is complete. Future flow changes must preserve this provider-oriented boundary unless a later phase explicitly redefines it.

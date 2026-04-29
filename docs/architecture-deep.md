@@ -1141,20 +1141,34 @@ The contract alignment sequence confirms that handler-facing request contracts a
 
 ## Phase 0.13 — Provider Layer Consolidation (Deep Architectural Direction)
 
-Phase 0.13 formalizes provider boundaries after the model separation and contract alignment work completed in Phase 0.12.
+Phase 0.13 formalizes provider boundaries after the model separation and contract alignment work completed in Phase 0.12. Its deep architectural purpose is to make provider responsibility explicit without turning the Provider Layer into a second domain layer.
 
-The deep architectural purpose is to make provider responsibility explicit:
+The consolidated direction is:
 
-- handlers should not accumulate domain orchestration logic
-- application services should not hide ambiguous provider contracts
-- provider contracts should remain narrow and module-owned
-- mapper ownership must remain centralized in module-local mapper packages
-- read/write intent must remain visible at the boundary
+```text
+HTTP → Provider → Application → Domain → Repository
+```
 
-The phase is not a redesign of business behavior. It is a consolidation step that prepares the backend for later hardening by reducing implicit access paths and clarifying provider-facing contracts.
+This matters because the previous state still allowed runtime wiring and handlers to know too much about lower-level dependencies. Even when behavior was correct, dependency ownership was not explicit enough: handlers could accumulate orchestration logic, router construction could pass implementation details directly into handlers, and application services could be treated as implicit providers without a documented boundary.
 
+### Deep boundary rules
 
-### Phase 0.13 Subphase State
+- Handlers must not accumulate domain orchestration logic.
+- Providers must expose narrow, module-owned contracts.
+- Application services must continue to express use cases, not transport wiring.
+- Domain interfaces must remain stable and focused.
+- Mapper ownership must remain centralized in module-local mapper packages.
+- Read/write intent must remain visible at the boundary established in Phase 0.12.
+
+### Runtime implication
+
+The auth module now has an explicit provider boundary that can be passed into runtime HTTP construction. That provider boundary composes the existing application and supporting dependencies while preserving the external HTTP contract. This reduces implicit coupling without changing the public API surface.
+
+### Non-goals preserved
+
+Phase 0.13 does not introduce CQRS, event sourcing, observability implementation, public API changes or business behavior changes. It is a consolidation step that prepares the backend for later hardening by reducing implicit access paths and clarifying provider-facing contracts.
+
+### Phase 0.13 subphase state
 
 - 0.13.0 ✔ Definition & Documentation Lock
 - 0.13.1 ✔ Provider Inventory & Classification
@@ -1162,6 +1176,6 @@ The phase is not a redesign of business behavior. It is a consolidation step tha
 - 0.13.3 ✔ Provider Implementation
 - 0.13.4 ✔ Application Integration
 - 0.13.5 ✔ Validation & Compatibility
-- 0.13.6 ⬜ Documentation & Closure
+- 0.13.6 ✔ Documentation & Closure
 
-0.13.5 is completed as validation and compatibility. Build/test compatibility was confirmed externally after the 0.13.4 integration fix path, and no public HTTP/API behavior changes were introduced by this documentation-only validation step.
+Phase 0.13 is complete. The resulting architectural contract is provider-first at the HTTP/application boundary and compatibility-preserving at every public surface.

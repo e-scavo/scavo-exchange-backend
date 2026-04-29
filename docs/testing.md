@@ -1782,16 +1782,35 @@ The final 0.11.5 state was validated with a full passing repository test run aft
 
 ---
 
-## Phase 0.13 Documentation Update — Provider Layer Consolidation
+## Phase 0.13 — Provider Layer Testing Impact
 
-After the completed Phase 0.12 Read / Write Model Separation, the next roadmap-defined phase is Phase 0.13 — Provider Layer Consolidation.
+Phase 0.13 changes the internal boundary that tests must protect. The public API contract remains unchanged, but runtime construction now depends on provider-oriented wiring instead of scattered handler dependency assembly.
 
-This update does not change the historical guidance above. It records the current Stage 0 direction: provider boundaries must be inventoried, designed, implemented where required, integrated with handlers/application services and validated without public API drift.
+### Required validation baseline
 
-The existing observability direction remains valid as an infrastructure concern, but Phase 0.13 is Provider Layer Consolidation rather than Observability & Diagnostics Foundation.
+The primary validation command remains:
 
+```bash
+go test ./...
+```
 
-### Phase 0.13 Subphase State
+External validation for 0.13.4/0.13.5 confirmed that the provider integration path builds and passes the full test suite after updating the router versioning test to construct `RouterParams` through the current provider boundary.
+
+### What tests must continue to protect
+
+- route registration and version-aware routing behavior
+- middleware compatibility
+- standardized error envelopes
+- login/session/bootstrap behavior
+- authenticated profile and settings behavior
+- wallet-related compatibility paths
+- mapper-owned read/write model response shape
+
+### Provider-specific testing direction
+
+Future tests should prefer constructing providers explicitly when validating module orchestration. Handler tests should avoid recreating lower-level service/store dependency graphs unless the test is specifically about compatibility wiring. This keeps tests aligned with the provider boundary introduced by Phase 0.13.
+
+### Phase 0.13 subphase state
 
 - 0.13.0 ✔ Definition & Documentation Lock
 - 0.13.1 ✔ Provider Inventory & Classification
@@ -1799,6 +1818,6 @@ The existing observability direction remains valid as an infrastructure concern,
 - 0.13.3 ✔ Provider Implementation
 - 0.13.4 ✔ Application Integration
 - 0.13.5 ✔ Validation & Compatibility
-- 0.13.6 ⬜ Documentation & Closure
+- 0.13.6 ✔ Documentation & Closure
 
-0.13.5 is completed as validation and compatibility. The next step is 0.13.6 — Documentation & Closure.
+Phase 0.13 is complete. The test strategy now recognizes providers as the stable orchestration boundary behind HTTP handlers.

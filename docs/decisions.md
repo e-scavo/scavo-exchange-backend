@@ -763,21 +763,41 @@ Close Contract Alignment as completed while preserving existing public HTTP rout
 Consequences:
 Phase 0.12 can close with model separation, mapping ownership and contract alignment consistently documented and validated.
 
-## Decision: Start Provider Layer Consolidation After Contract Alignment
+## Decision: Consolidate Provider Layer After Contract Alignment
 
-Phase: 0.13.0
+### Status
 
-Context:
-Phase 0.12 completed Read / Write Model Separation, centralized mapping ownership and internal contract alignment. Provider-like responsibilities still require a dedicated consolidation pass so that handlers and application flows rely on explicit provider boundaries.
+Accepted and completed in Phase 0.13.
 
-Decision:
-Start Phase 0.13 as Provider Layer Consolidation. The phase begins with documentation lock, then inventory, interface design, implementation, application integration, validation and closure.
+### Context
 
-Consequences:
-Provider work must remain internal and compatibility-preserving. Public HTTP routes, request payloads, response payloads, API versioning and business behavior must remain unchanged unless a later explicitly approved phase changes them.
+Phase 0.12 separated read/write models, centralized mapper ownership and aligned internal contracts. After that work, the remaining architectural risk was not public API behavior; it was dependency ownership. Some runtime paths still allowed handlers or router construction to know too much about services, stores and orchestration dependencies.
 
+### Decision
 
-### Phase 0.13 Subphase State
+Consolidate the Provider Layer as the explicit entry point between HTTP handlers and module application/domain responsibilities.
+
+The accepted direction is:
+
+```text
+HTTP → Provider → Application → Domain → Repository
+```
+
+The provider boundary must be module-owned, narrow and compatible with existing public contracts. It may compose application services and supporting dependencies, but it must not introduce business behavior changes, route changes, API versioning changes or mapper ownership drift.
+
+### Consequences
+
+- Router construction can pass provider boundaries instead of scattered service/store dependencies.
+- Handlers retain transport responsibility but delegate orchestration to providers.
+- Application services remain use-case focused.
+- Domain contracts remain explicit and narrow.
+- Phase 0.13 creates a cleaner foundation for later hardening.
+
+### Tradeoffs
+
+The Provider Layer adds one explicit boundary, but it reduces implicit coupling and makes dependency ownership easier to validate. The tradeoff is accepted because it keeps public behavior unchanged while making future implementation phases safer.
+
+### Phase 0.13 subphase state
 
 - 0.13.0 ✔ Definition & Documentation Lock
 - 0.13.1 ✔ Provider Inventory & Classification
@@ -785,6 +805,6 @@ Provider work must remain internal and compatibility-preserving. Public HTTP rou
 - 0.13.3 ✔ Provider Implementation
 - 0.13.4 ✔ Application Integration
 - 0.13.5 ✔ Validation & Compatibility
-- 0.13.6 ⬜ Documentation & Closure
+- 0.13.6 ✔ Documentation & Closure
 
-0.13.5 is completed as validation and compatibility. The accepted next step is 0.13.6 — Documentation & Closure.
+Phase 0.13 is complete. This decision remains the architectural basis for provider-facing work after Stage 0.
