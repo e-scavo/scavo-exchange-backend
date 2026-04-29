@@ -42,14 +42,22 @@ func newVersioningTestRouter(t *testing.T) http.Handler {
 		t.Fatalf("token service init error: %v", err)
 	}
 
+	authProvider := authmod.NewApplication(
+		tokens,
+		24*time.Hour,
+		nil,
+		usersettingsmod.NewService(versioningUserSettingsRepo{}),
+		"https://api.scavo.exchange",
+		5*time.Minute,
+		authmod.NewInMemoryWalletChallengeStore(),
+		authmod.NewInMemoryWalletIdentityStore(),
+	)
+
 	return NewRouter(RouterParams{
-		Log:                 logger.New("test"),
-		Config:              config.Config{Env: "test", Version: "test", Commit: "test", CORSAllowOrigins: []string{"*"}, JWTTTLHrs: 24},
-		TokenService:        tokens,
-		UserSettingsService: usersettingsmod.NewService(versioningUserSettingsRepo{}),
-		ChallengeStore:      authmod.NewInMemoryWalletChallengeStore(),
-		ChallengeTTL:        5 * time.Minute,
-		PublicBaseURL:       "https://api.scavo.exchange",
+		Log:          logger.New("test"),
+		Config:       config.Config{Env: "test", Version: "test", Commit: "test", CORSAllowOrigins: []string{"*"}, JWTTTLHrs: 24},
+		TokenService: tokens,
+		AuthProvider: authProvider,
 	})
 }
 
