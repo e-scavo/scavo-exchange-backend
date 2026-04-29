@@ -1675,11 +1675,11 @@ Phase 0.12 is complete. Continue with the next roadmap-defined phase.
 
 ### Status
 
-⬜ Pending
+🚧 In Progress
 
 ### Latest Completed Subphase
 
-None yet. Phase 0.13.0 is the next required documentation-only lock.
+0.13.0 — Definition & Documentation Lock.
 
 ### Objective
 
@@ -1708,7 +1708,7 @@ Excluded:
 
 | Subphase | Name | Status |
 | --- | --- | --- |
-| 0.13.0 | Definition & Documentation Lock | ⬜ Pending |
+| 0.13.0 | Definition & Documentation Lock | ✅ Completed |
 | 0.13.1 | Provider Inventory & Classification | ⬜ Pending |
 | 0.13.2 | Provider Interface Design | ⬜ Pending |
 | 0.13.3 | Provider Implementation | ⬜ Pending |
@@ -1716,10 +1716,10 @@ Excluded:
 | 0.13.5 | Validation & Compatibility | ⬜ Pending |
 | 0.13.6 | Documentation & Closure | ⬜ Pending |
 
-### 0.13.0 Target
+### 0.13.0 Result
 
-0.13.0 is documentation-only. It locks the Provider Layer Consolidation scope, corrects the roadmap-level Phase 0.13 definition and prepares the repository for provider inventory without changing Go code.
+0.13.0 is completed as a documentation-only lock. It locks the Provider Layer Consolidation scope, corrects the roadmap-level Phase 0.13 definition, expands the full subphase sequence consistently across trunk documentation and prepares the repository for provider inventory without changing Go code.
 
 ### Next
 
-Start 0.13.0 — Definition & Documentation Lock.
+Start 0.13.1 — Provider Inventory & Classification.

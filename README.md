@@ -2911,7 +2911,7 @@ Establish a consistent provider boundary so handlers and application flows do no
 
 ### Phase 0.13 subphases
 
-- **0.13.0 — Definition & Documentation Lock** ⬜ Pending
+- **0.13.0 — Definition & Documentation Lock** ✔ Completed
 - **0.13.1 — Provider Inventory & Classification** ⬜ Pending
 - **0.13.2 — Provider Interface Design** ⬜ Pending
 - **0.13.3 — Provider Implementation** ⬜ Pending
@@ -2921,4 +2921,4 @@ Establish a consistent provider boundary so handlers and application flows do no
 
 ### Current status
 
-Phase 0.13 is pending. Phase 0.13.0 is the next documentation-only lock before implementation begins.
+Phase 0.13 is in progress. Phase 0.13.0 is completed as the documentation-only lock; the next implementation step is 0.13.1 — Provider Inventory & Classification.

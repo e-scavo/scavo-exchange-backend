@@ -249,11 +249,11 @@ Internal subdivision:
 #### Expected outcome
 Phase 0.12 closes with clearer internal model responsibilities, explicit mapping boundaries and unchanged public HTTP/API behavior.
 
-### 0.13 — Provider Layer Consolidation ⬜ Pending
+### 0.13 — Provider Layer Consolidation 🚧 In Progress
 Consolidate the Provider Layer as the explicit entry point to domain services after Read / Write Model Separation.
 
-#### 0.13.0 — Definition & Documentation Lock ⬜ Pending
-Lock the phase definition, correct roadmap consistency and register the subphase plan before code changes.
+#### 0.13.0 — Definition & Documentation Lock ✔ Completed
+Locked the phase definition, corrected roadmap consistency and registered the subphase plan before code changes.
 
 #### 0.13.1 — Provider Inventory & Classification ⬜ Pending
 Identify existing providers, provider-like responsibilities, missing providers and invalid direct access patterns.

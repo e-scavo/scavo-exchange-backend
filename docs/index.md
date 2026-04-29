@@ -42,31 +42,33 @@
 
 ---
 
-## 🚧 Current Phase Focus
-
-* `phase0_11_domain_module_pattern.md`
-* `phase0_12_read_write_model_separation.md`
-* `phase0_13_provider_layer_consolidation.md`
-* `phase0_10_authorization_layer.md`
-  * `0.10.1 — Authorization Model Definition`
-  * `0.10.2 — Authorization Context & Middleware`
-  * `0.10.3 — Policy Evaluation Layer`
-  * `0.10.4 — Endpoint-Level Enforcement`
-  * `0.10.5 — Documentation & Contract Consolidation`
-* `phase0_9_api_versioning_strategy.md`
-  * `0.9.1 — Versioning Policy Definition`
-  * `0.9.2 — Router Versioning Foundation`
-  * `0.9.3 — Authenticated Surface Version Freezing`
-  * `0.9.4 — Version-aware Contract Testing`
-  * `0.9.5 — Documentation Consolidation`
-
 ---
 
 ## 🔄 Handoff
 
 * `handoff/backend-status.md`
 
---- 
+---
+
+## 🚧 Current Phase Focus
+
+Latest completed phase: `0.12 — Read / Write Model Separation`  
+Current phase: `0.13 — Provider Layer Consolidation`  
+Latest completed subphase: `0.13.0 — Definition & Documentation Lock`  
+Next subphase: `0.13.1 — Provider Inventory & Classification`
+
+* `phase0_13_provider_layer_consolidation.md`
+  * `0.13.0 — Definition & Documentation Lock` ✔ Completed
+  * `0.13.1 — Provider Inventory & Classification` ⬜ Pending
+  * `0.13.2 — Provider Interface Design` ⬜ Pending
+  * `0.13.3 — Provider Implementation` ⬜ Pending
+  * `0.13.4 — Application Integration` ⬜ Pending
+  * `0.13.5 — Validation & Compatibility` ⬜ Pending
+  * `0.13.6 — Documentation & Closure` ⬜ Pending
+
+---
+
+## Stage 0 Phase Sequence
 
 ### Phase 0.6 — Authenticated Application Bootstrap Consolidation
 
@@ -82,14 +84,13 @@ Phase 0.6 ✔ Completed
 ### Phase 0.7 — Application Layer Foundation
 
 - 0.7.1 ✔ Application Layer Boundary Definition
-
 - 0.7.2 ✔ Authenticated Surface Use Cases Extraction
-
 - 0.7.3 ✔ Wallet Management Use Cases Consolidation
-
 - 0.7.4 ✔ Handler Simplification & Contract Preservation
 
---- 
+Phase 0.7 ✔ Completed
+
+---
 
 ### Phase 0.8 — Standardized Error Model
 
@@ -124,11 +125,6 @@ Phase 0.9 ✔ Completed
 
 Phase 0.10 ✔ Completed
 
-Latest completed phase: `0.12 — Read / Write Model Separation`  
-Current phase: `0.13 — Provider Layer Consolidation`  
-Latest completed subphase: `0.12.5.6 — Documentation & Closure`
-
-
 ---
 
 ### Phase 0.11 — Domain Module Pattern
@@ -145,9 +141,7 @@ Latest completed subphase: `0.12.5.6 — Documentation & Closure`
   - 0.11.5.4 ✔ Runtime Compatibility Validation
 - 0.11.6 ✔ Documentation & Phase Closure
 
-Phase 0.11 ✔ Completed — next planned phase: 0.12
-
-
+Phase 0.11 ✔ Completed
 
 ---
 
@@ -194,15 +188,14 @@ Phase 0.11 ✔ Completed — next planned phase: 0.12
   - 0.12.5.4 ✔ Handler Contract Adjustment
   - 0.12.5.5 ✔ Validation & Compatibility
   - 0.12.5.6 ✔ Documentation & Closure
-Phase 0.12 is completed. 0.12.0 is completed as the phase-level documentation lock, 0.12.1 is completed as the audit sequence, 0.12.2 is completed as the Read Model Extraction sequence, 0.12.3 is completed as the Write Model Isolation sequence, 0.12.4 is completed as the Mapping Layer Introduction sequence and 0.12.5 is completed as the Contract Alignment sequence.
 
+Phase 0.12 ✔ Completed
 
- 
 ---
 
 ### Phase 0.13 — Provider Layer Consolidation
 
-- 0.13.0 ⬜ Definition & Documentation Lock
+- 0.13.0 ✔ Definition & Documentation Lock
 - 0.13.1 ⬜ Provider Inventory & Classification
 - 0.13.2 ⬜ Provider Interface Design
 - 0.13.3 ⬜ Provider Implementation
@@ -210,9 +203,11 @@ Phase 0.12 is completed. 0.12.0 is completed as the phase-level documentation lo
 - 0.13.5 ⬜ Validation & Compatibility
 - 0.13.6 ⬜ Documentation & Closure
 
-Phase 0.13 ⬜ Pending — next phase after completed Phase 0.12.
+Phase 0.13 🚧 In Progress — next subphase: 0.13.1.
 
 ---
+
+## Dedicated Phase Documents
 
 ### Phase 0.12.1 Dedicated Document
 
@@ -239,7 +234,6 @@ Phase 0.13 ⬜ Pending — next phase after completed Phase 0.12.
 ### Phase 0.12.4 Dedicated Document
 
 - `docs/phase0_12_4_mapping_layer.md` — defines the Mapping Layer Introduction plan, centralized mapper package direction, sub-subphase sequence and compatibility constraints.
-
 - `docs/phase0_12_4_mapping_layer_design.md` — records the centralized mapping layer design.
 - `docs/phase0_12_4_mapping_layer_implementation.md` — records the module-local mapper package implementation.
 - `docs/phase0_12_4_mapping_consolidation.md` — records mapping consolidation into centralized packages.
@@ -260,3 +254,4 @@ Phase 0.13 ⬜ Pending — next phase after completed Phase 0.12.
 ### Phase 0.13 Dedicated Document
 
 - `docs/phase0_13_provider_layer_consolidation.md` — defines the Provider Layer Consolidation plan, scope, subphase sequence, compatibility constraints and documentation lock.
+- `docs/phase0_13_0_documentation_reprocess_report.md` — records the Phase 0.13.0 documentation reprocess and consistency validation.

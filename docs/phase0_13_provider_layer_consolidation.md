@@ -2,9 +2,9 @@
 
 ## Status
 
-Phase 0.13 is **PENDING**.
+Phase 0.13 is **IN PROGRESS**.
 
-Phase 0.13.0 — Definition & Documentation Lock is the documentation-only entry point for the phase.
+Phase 0.13.0 — Definition & Documentation Lock is **COMPLETED** as the documentation-only entry point for the phase.
 
 No Go code is changed by 0.13.0.
 
@@ -66,7 +66,7 @@ The direction is structural. It does not imply that every module must receive a 
 
 | Subphase | Name | Status |
 | --- | --- | --- |
-| 0.13.0 | Definition & Documentation Lock | PENDING |
+| 0.13.0 | Definition & Documentation Lock | COMPLETED |
 | 0.13.1 | Provider Inventory & Classification | PENDING |
 | 0.13.2 | Provider Interface Design | PENDING |
 | 0.13.3 | Provider Implementation | PENDING |
@@ -92,7 +92,11 @@ Document and lock the Phase 0.13 scope before any implementation begins.
 
 ### Compatibility Rule
 
-0.13.0 must not alter runtime behavior, public contracts, routes, middleware, repositories, handlers or application services.
+0.13.0 did not alter runtime behavior, public contracts, routes, middleware, repositories, handlers or application services.
+
+### Result
+
+The phase definition is locked, the subphase plan is expanded consistently and the next step is 0.13.1 — Provider Inventory & Classification.
 
 ---
 

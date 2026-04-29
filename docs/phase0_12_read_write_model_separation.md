@@ -274,4 +274,6 @@ Phase 0.12 closes with read/write model separation, mapper ownership and contrac
 
 The next roadmap-defined phase is Phase 0.13 — Provider Layer Consolidation.
 
+Phase 0.13.0 — Definition & Documentation Lock is completed. The next step is 0.13.1 — Provider Inventory & Classification.
+
 This follow-up phase must use the Phase 0.12 results as its baseline and must preserve public HTTP/API compatibility while consolidating provider boundaries.

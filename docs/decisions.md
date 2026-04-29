@@ -775,3 +775,16 @@ Start Phase 0.13 as Provider Layer Consolidation. The phase begins with document
 
 Consequences:
 Provider work must remain internal and compatibility-preserving. Public HTTP routes, request payloads, response payloads, API versioning and business behavior must remain unchanged unless a later explicitly approved phase changes them.
+
+
+### Phase 0.13 Subphase State
+
+- 0.13.0 ✔ Definition & Documentation Lock
+- 0.13.1 ⬜ Provider Inventory & Classification
+- 0.13.2 ⬜ Provider Interface Design
+- 0.13.3 ⬜ Provider Implementation
+- 0.13.4 ⬜ Application Integration
+- 0.13.5 ⬜ Validation & Compatibility
+- 0.13.6 ⬜ Documentation & Closure
+
+0.13.0 is completed as documentation-only. The accepted next step is 0.13.1 — Provider Inventory & Classification.

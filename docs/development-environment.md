@@ -269,3 +269,16 @@ After the completed Phase 0.12 Read / Write Model Separation, the next roadmap-d
 This update does not change the historical guidance above. It records the current Stage 0 direction: provider boundaries must be inventoried, designed, implemented where required, integrated with handlers/application services and validated without public API drift.
 
 The existing observability direction remains valid as an infrastructure concern, but Phase 0.13 is Provider Layer Consolidation rather than Observability & Diagnostics Foundation.
+
+
+### Phase 0.13 Subphase State
+
+- 0.13.0 ✔ Definition & Documentation Lock
+- 0.13.1 ⬜ Provider Inventory & Classification
+- 0.13.2 ⬜ Provider Interface Design
+- 0.13.3 ⬜ Provider Implementation
+- 0.13.4 ⬜ Application Integration
+- 0.13.5 ⬜ Validation & Compatibility
+- 0.13.6 ⬜ Documentation & Closure
+
+0.13.0 is completed as documentation-only. The next step is 0.13.1 — Provider Inventory & Classification.
