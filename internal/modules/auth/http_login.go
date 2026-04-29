@@ -10,39 +10,10 @@ import (
 	coreauth "github.com/e-scavo/scavo-exchange-backend/internal/core/auth"
 	coreerrs "github.com/e-scavo/scavo-exchange-backend/internal/core/errs"
 	authmappers "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/mappers"
-	authwritemodels "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/writemodels"
 	usermod "github.com/e-scavo/scavo-exchange-backend/internal/modules/user"
-	userreadmodels "github.com/e-scavo/scavo-exchange-backend/internal/modules/user/readmodels"
 	usersettingsmod "github.com/e-scavo/scavo-exchange-backend/internal/modules/usersettings"
 	usersettingsmappers "github.com/e-scavo/scavo-exchange-backend/internal/modules/usersettings/mappers"
-	usersettingsreadmodels "github.com/e-scavo/scavo-exchange-backend/internal/modules/usersettings/readmodels"
 )
-
-type LoginRequest = authwritemodels.AuthLoginWriteModel
-
-type LoginResponse struct {
-	AccessToken string `json:"access_token"`
-	TokenType   string `json:"token_type"`
-	ExpiresIn   int64  `json:"expires_in"`
-	UserID      string `json:"user_id"`
-}
-
-type UpdateMeRequest = authwritemodels.AuthUpdateProfileWriteModel
-
-type MeResponse struct {
-	User    *userreadmodels.UserReadModel `json:"user"`
-	Profile *ProfileView                  `json:"profile,omitempty"`
-}
-
-type SessionResponse struct {
-	Session *SessionView `json:"session"`
-}
-
-type UpdateMeSettingsRequest = authwritemodels.AuthUpdateSettingsWriteModel
-
-type MeSettingsResponse struct {
-	Settings usersettingsreadmodels.UserSettingsReadModel `json:"settings"`
-}
 
 type HTTPHandlers struct {
 	Tokens           *coreauth.TokenService

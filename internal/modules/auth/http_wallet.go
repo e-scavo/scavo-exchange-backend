@@ -7,10 +7,7 @@ import (
 
 	coreauth "github.com/e-scavo/scavo-exchange-backend/internal/core/auth"
 	coreerrs "github.com/e-scavo/scavo-exchange-backend/internal/core/errs"
-	authapp "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/app"
 	authmappers "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/mappers"
-	authreadmodels "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/readmodels"
-	authwritemodels "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/writemodels"
 	usermappers "github.com/e-scavo/scavo-exchange-backend/internal/modules/user/mappers"
 	userreadmodels "github.com/e-scavo/scavo-exchange-backend/internal/modules/user/readmodels"
 )
@@ -18,27 +15,6 @@ import (
 // =====================================================
 // WALLET BOOTSTRAP AUTH (PUBLIC - NO AUTH REQUIRED)
 // =====================================================
-
-type WalletChallengeRequest = authwritemodels.AuthWalletChallengeWriteModel
-
-type WalletChallengeResponse struct {
-	Challenge *authreadmodels.AuthWalletChallengeReadModel `json:"challenge"`
-}
-
-type WalletVerifyRequest = authwritemodels.AuthWalletVerifyWriteModel
-
-type WalletVerifyResponse struct {
-	AccessToken   string                                       `json:"access_token"`
-	TokenType     string                                       `json:"token_type"`
-	ExpiresIn     int64                                        `json:"expires_in"`
-	UserID        string                                       `json:"user_id"`
-	WalletID      string                                       `json:"wallet_id,omitempty"`
-	WalletAddress string                                       `json:"wallet_address"`
-	Chain         string                                       `json:"chain"`
-	AuthMethod    string                                       `json:"auth_method"`
-	User          *userreadmodels.UserReadModel                `json:"user,omitempty"`
-	Challenge     *authreadmodels.AuthWalletChallengeReadModel `json:"challenge,omitempty"`
-}
 
 func (h HTTPHandlers) WalletChallenge(w http.ResponseWriter, r *http.Request) {
 	var req WalletChallengeRequest
@@ -110,36 +86,6 @@ func (h HTTPHandlers) WalletVerify(w http.ResponseWriter, r *http.Request) {
 // =====================================================
 // WALLET MANAGEMENT (AUTHENTICATED)
 // =====================================================
-
-type WalletLinkChallengeRequest = authwritemodels.AuthWalletLinkChallengeWriteModel
-
-type WalletLinkChallengeResponse = authapp.WalletLinkChallengeResponse
-
-type WalletLinkVerifyRequest = authwritemodels.AuthWalletLinkVerifyWriteModel
-
-type WalletLinkVerifyResponse = authapp.WalletLinkVerifyResponse
-
-type WalletAccountMergeVerifyRequest = authwritemodels.AuthWalletAccountMergeVerifyWriteModel
-
-type WalletAccountMergeVerifyResponse = authapp.WalletAccountMergeVerifyResponse
-
-type WalletDetachCheckRequest = authwritemodels.AuthWalletDetachCheckWriteModel
-
-type WalletDetachCheckResponse = authapp.WalletDetachCheckResponse
-
-type WalletDetachExecuteRequest = authwritemodels.AuthWalletDetachExecuteWriteModel
-
-type WalletDetachExecuteResponse = authapp.WalletDetachExecuteResponse
-
-type WalletPrimarySetRequest = authwritemodels.AuthWalletPrimarySetWriteModel
-
-type WalletPrimarySetResponse = authapp.WalletPrimarySetResponse
-
-// (handlers autenticados quedan EXACTAMENTE como los tenías, ya están bien)
-
-type WalletAccountMergeChallengeRequest = authwritemodels.AuthWalletAccountMergeChallengeWriteModel
-
-type WalletAccountMergeChallengeResponse = authapp.WalletAccountMergeChallengeResponse
 
 func (h HTTPHandlers) WalletLinkChallenge(w http.ResponseWriter, r *http.Request) {
 	claims, req, ok := decodeAuthenticatedWalletRequest[WalletLinkChallengeRequest](h, w, r, 4<<10)
