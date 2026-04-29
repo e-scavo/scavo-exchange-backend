@@ -282,7 +282,7 @@ func (h HTTPHandlers) Wallets(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response, err := h.Application().ListWallets(r.Context(), claims.UserID, query)
+	response, err := h.AuthProvider().ListWallets(r.Context(), claims.UserID, query)
 	if err != nil {
 		switch {
 		case errors.Is(err, ErrUnauthorized):

@@ -18,7 +18,7 @@ func (h HTTPHandlers) Bootstrap(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	payload, err := h.Application().GetBootstrap(r.Context(), claims)
+	payload, err := h.AuthProvider().GetBootstrap(r.Context(), claims)
 	if err != nil {
 		switch {
 		case errors.Is(err, ErrUnauthorized), errors.Is(err, usersettingsmod.ErrUserIDRequired):

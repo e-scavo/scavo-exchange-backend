@@ -58,6 +58,27 @@ type SessionResponse struct {
 	Session *SessionView `json:"session"`
 }
 
+type MeSettingsResponse struct {
+	Settings usersettingsreadmodels.UserSettingsReadModel `json:"settings"`
+}
+
+type WalletChallengeResponse struct {
+	Challenge *authreadmodels.AuthWalletChallengeReadModel `json:"challenge"`
+}
+
+type WalletVerifyResponse struct {
+	AccessToken   string                                       `json:"access_token"`
+	TokenType     string                                       `json:"token_type"`
+	ExpiresIn     int64                                        `json:"expires_in"`
+	UserID        string                                       `json:"user_id"`
+	WalletID      string                                       `json:"wallet_id,omitempty"`
+	WalletAddress string                                       `json:"wallet_address"`
+	Chain         string                                       `json:"chain"`
+	AuthMethod    string                                       `json:"auth_method"`
+	User          *userreadmodels.UserReadModel                `json:"user,omitempty"`
+	Challenge     *authreadmodels.AuthWalletChallengeReadModel `json:"challenge,omitempty"`
+}
+
 type BootstrapWalletsView struct {
 	Items []*WalletReadModel `json:"items"`
 	Total int                `json:"total"`

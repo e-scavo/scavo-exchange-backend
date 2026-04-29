@@ -22,4 +22,6 @@ import (
 type UserProvider interface {
 	GetByID(ctx context.Context, userID, email string) (*usermod.User, error)
 	ResolveOrCreateDevUser(ctx context.Context, email string) (*usermod.User, error)
+	ResolveOrCreateWalletUser(ctx context.Context, address string) (*usermod.User, error)
+	UpdateDisplayName(ctx context.Context, userID, displayName string) (*usermod.User, error)
 }

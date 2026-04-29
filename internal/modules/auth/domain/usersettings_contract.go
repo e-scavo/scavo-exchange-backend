@@ -19,4 +19,5 @@ import (
 
 type UserSettingsProvider interface {
 	GetOrDefault(ctx context.Context, userID string) (*usersettingsmod.UserSettings, error)
+	UpdatePreferences(ctx context.Context, userID string, preferences map[string]any) (*usersettingsmod.UserSettings, error)
 }

@@ -12,10 +12,10 @@ import (
 	authmappers "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/mappers"
 	usermod "github.com/e-scavo/scavo-exchange-backend/internal/modules/user"
 	usersettingsmod "github.com/e-scavo/scavo-exchange-backend/internal/modules/usersettings"
-	usersettingsmappers "github.com/e-scavo/scavo-exchange-backend/internal/modules/usersettings/mappers"
 )
 
 type HTTPHandlers struct {
+	Provider         AuthProvider
 	Tokens           *coreauth.TokenService
 	TTL              time.Duration
 	Users            *usermod.Service
@@ -80,7 +80,7 @@ func (h HTTPHandlers) Login(w http.ResponseWriter, r *http.Request) {
 
 	input := authmappers.LoginWriteToDomainInput(req)
 
-	resp, err := h.Application().Login(r.Context(), input.Email, input.Password)
+	resp, err := h.AuthProvider().Login(r.Context(), input.Email, input.Password)
 	if err != nil {
 		switch {
 		case errors.Is(err, ErrInvalidCredentials):
@@ -100,7 +100,7 @@ func (h HTTPHandlers) Me(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp, err := h.Application().GetMe(r.Context(), claims)
+	resp, err := h.AuthProvider().GetMe(r.Context(), claims)
 	if err != nil {
 		switch {
 		case errors.Is(err, ErrUnauthorized):
@@ -119,10 +119,6 @@ func (h HTTPHandlers) UpdateMe(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	if h.Users == nil {
-		writeAppErrorJSON(w, coreerrs.AuthServiceError(nil))
-		return
-	}
 
 	var req UpdateMeRequest
 	if !decodeRequest(w, r, &req, 4<<10) {
@@ -131,7 +127,7 @@ func (h HTTPHandlers) UpdateMe(w http.ResponseWriter, r *http.Request) {
 
 	input := authmappers.ProfileUpdateWriteToDomainInput(req)
 
-	updatedUser, err := h.Users.UpdateDisplayName(r.Context(), claims.UserID, input.DisplayName)
+	resp, err := h.AuthProvider().UpdateProfile(r.Context(), claims, input)
 	if err != nil {
 		switch {
 		case errors.Is(err, usermod.ErrEmptyUserID):
@@ -148,26 +144,11 @@ func (h HTTPHandlers) UpdateMe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	profile, err := buildProfileViewWithUser(r.Context(), claims, updatedUser, h.WalletIdentities)
-	if err != nil {
-		writeAppErrorJSON(w, coreerrs.AuthServiceError(nil))
-		return
-	}
-
-	writeJSON(w, http.StatusOK, MeResponse{
-		User:    profile.User,
-		Profile: profile,
-	})
+	writeJSON(w, http.StatusOK, resp)
 }
-
 func (h HTTPHandlers) UpdateMeSettings(w http.ResponseWriter, r *http.Request) {
 	claims, ok := h.requireClaims(w, r)
 	if !ok {
-		return
-	}
-
-	if h.UserSettings == nil {
-		writeAppErrorJSON(w, coreerrs.AuthServiceError(nil))
 		return
 	}
 
@@ -187,7 +168,7 @@ func (h HTTPHandlers) UpdateMeSettings(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	settings, err := h.UserSettings.UpdatePreferences(r.Context(), claims.UserID, input.Preferences)
+	resp, err := h.AuthProvider().UpdateSettings(r.Context(), claims, input)
 	if err != nil {
 		switch {
 		case errors.Is(err, usersettingsmod.ErrUserIDRequired):
@@ -203,25 +184,15 @@ func (h HTTPHandlers) UpdateMeSettings(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	view := usersettingsmappers.UserSettingsToReadModel(settings)
-
-	writeJSON(w, http.StatusOK, MeSettingsResponse{
-		Settings: view,
-	})
+	writeJSON(w, http.StatusOK, resp)
 }
-
 func (h HTTPHandlers) MeSettings(w http.ResponseWriter, r *http.Request) {
 	claims, ok := h.requireClaims(w, r)
 	if !ok {
 		return
 	}
 
-	if h.UserSettings == nil {
-		writeAppErrorJSON(w, coreerrs.AuthServiceError(nil))
-		return
-	}
-
-	settings, err := h.UserSettings.GetOrDefault(r.Context(), claims.UserID)
+	resp, err := h.AuthProvider().GetSettings(r.Context(), claims)
 	if err != nil {
 		switch {
 		case errors.Is(err, usersettingsmod.ErrUserIDRequired):
@@ -232,20 +203,15 @@ func (h HTTPHandlers) MeSettings(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	view := usersettingsmappers.UserSettingsToReadModel(settings)
-
-	writeJSON(w, http.StatusOK, MeSettingsResponse{
-		Settings: view,
-	})
+	writeJSON(w, http.StatusOK, resp)
 }
-
 func (h HTTPHandlers) Session(w http.ResponseWriter, r *http.Request) {
 	claims, ok := h.requireClaims(w, r)
 	if !ok {
 		return
 	}
 
-	resp, err := h.Application().GetSession(r.Context(), claims)
+	resp, err := h.AuthProvider().GetSession(r.Context(), claims)
 	if err != nil {
 		switch {
 		case errors.Is(err, ErrUnauthorized):

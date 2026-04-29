@@ -261,8 +261,8 @@ Inventoried existing provider-like responsibilities, missing provider boundaries
 #### 0.13.2 — Provider Interface Design ✔ Completed
 Defined narrow provider interfaces aligned with the 0.13.1 inventory findings, read/write model separation and module ownership. No Go code or public API behavior was changed.
 
-#### 0.13.3 — Provider Implementation ⬜ Pending
-Implement provider boundaries incrementally while preserving compatibility.
+#### 0.13.3 — Provider Implementation ✔ Completed
+Implemented provider boundaries incrementally while preserving compatibility.
 
 #### 0.13.4 — Application Integration ⬜ Pending
 Align handlers and application services with consolidated provider boundaries.

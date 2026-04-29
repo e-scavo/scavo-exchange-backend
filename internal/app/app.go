@@ -35,6 +35,7 @@ type App struct {
 	userService          *usermod.Service
 	userSettingsService  *usersettingsmod.Service
 	authService          *authmod.Service
+	authProvider         authmod.AuthProvider
 	walletChallengeStore authmod.WalletChallengeStore
 	walletIdentityStore  authmod.WalletIdentityStore
 }
@@ -93,6 +94,16 @@ func New(cfg config.Config) *App {
 	}
 
 	authService := authmod.NewService(tokens, userService, ttl)
+	authProvider := authmod.NewApplication(
+		tokens,
+		ttl,
+		userService,
+		userSettingsService,
+		cfg.PublicBaseURL,
+		time.Duration(cfg.AuthChallengeTTLMinutes)*time.Minute,
+		walletChallengeStore,
+		walletIdentityStore,
+	)
 	authmod.RegisterWS(dispatcher, authService)
 
 	statusSvc := status.New(
@@ -135,6 +146,7 @@ func New(cfg config.Config) *App {
 		Config:              cfg,
 		TokenService:        tokens,
 		Status:              statusSvc,
+		AuthProvider:        authProvider,
 		UserService:         userService,
 		UserSettingsService: userSettingsService,
 		ChallengeStore:      walletChallengeStore,
@@ -161,6 +173,7 @@ func New(cfg config.Config) *App {
 		userService:          userService,
 		userSettingsService:  userSettingsService,
 		authService:          authService,
+		authProvider:         authProvider,
 		walletChallengeStore: walletChallengeStore,
 		walletIdentityStore:  walletIdentityStore,
 	}

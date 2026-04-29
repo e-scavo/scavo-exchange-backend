@@ -10,6 +10,7 @@ import (
 	coreauth "github.com/e-scavo/scavo-exchange-backend/internal/core/auth"
 	authdomain "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/domain"
 	authmappers "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/mappers"
+	usermod "github.com/e-scavo/scavo-exchange-backend/internal/modules/user"
 	usermappers "github.com/e-scavo/scavo-exchange-backend/internal/modules/user/mappers"
 	usersettingsmappers "github.com/e-scavo/scavo-exchange-backend/internal/modules/usersettings/mappers"
 )
@@ -105,6 +106,196 @@ func (a *Application) GetSession(ctx context.Context, claims *coreauth.Claims) (
 		return SessionResponse{}, err
 	}
 	return SessionResponse{Session: session}, nil
+}
+
+func (a *Application) UpdateProfile(ctx context.Context, claims *coreauth.Claims, input authdomain.ProfileUpdateInput) (MeResponse, error) {
+	if claims == nil {
+		return MeResponse{}, ErrUnauthorized
+	}
+	if a == nil || a.Users == nil {
+		return MeResponse{}, ErrApplicationNotConfigured
+	}
+
+	updatedUser, err := a.Users.UpdateDisplayName(ctx, claims.UserID, input.DisplayName)
+	if err != nil {
+		return MeResponse{}, err
+	}
+
+	profile, err := buildProfileViewWithUser(ctx, claims, updatedUser, a.WalletIdentities)
+	if err != nil {
+		return MeResponse{}, err
+	}
+
+	return MeResponse{
+		User:    profile.User,
+		Profile: profile,
+	}, nil
+}
+
+func (a *Application) GetSettings(ctx context.Context, claims *coreauth.Claims) (MeSettingsResponse, error) {
+	if claims == nil {
+		return MeSettingsResponse{}, ErrUnauthorized
+	}
+	if a == nil || a.UserSettings == nil {
+		return MeSettingsResponse{}, ErrApplicationNotConfigured
+	}
+
+	settings, err := a.UserSettings.GetOrDefault(ctx, claims.UserID)
+	if err != nil {
+		return MeSettingsResponse{}, err
+	}
+
+	return MeSettingsResponse{
+		Settings: usersettingsmappers.UserSettingsToReadModel(settings),
+	}, nil
+}
+
+func (a *Application) UpdateSettings(ctx context.Context, claims *coreauth.Claims, input authdomain.SettingsUpdateInput) (MeSettingsResponse, error) {
+	if claims == nil {
+		return MeSettingsResponse{}, ErrUnauthorized
+	}
+	if a == nil || a.UserSettings == nil {
+		return MeSettingsResponse{}, ErrApplicationNotConfigured
+	}
+
+	settings, err := a.UserSettings.UpdatePreferences(ctx, claims.UserID, input.Preferences)
+	if err != nil {
+		return MeSettingsResponse{}, err
+	}
+
+	return MeSettingsResponse{
+		Settings: usersettingsmappers.UserSettingsToReadModel(settings),
+	}, nil
+}
+
+func (a *Application) CreateWalletChallenge(ctx context.Context, address, chain string) (WalletChallengeResponse, error) {
+	if a == nil {
+		return WalletChallengeResponse{}, ErrApplicationNotConfigured
+	}
+
+	challenge, err := NewWalletChallengeService(a.Challenges, a.PublicBaseURL, a.challengeTTL()).Create(ctx, address, chain)
+	if err != nil {
+		return WalletChallengeResponse{}, err
+	}
+
+	return WalletChallengeResponse{
+		Challenge: authmappers.WalletChallengeToReadModel(challenge),
+	}, nil
+}
+
+func (a *Application) VerifyWallet(ctx context.Context, challengeID, address, signature string) (WalletVerifyResponse, error) {
+	if a == nil || a.Tokens == nil || a.WalletIdentities == nil {
+		return WalletVerifyResponse{}, ErrUnauthorized
+	}
+
+	address = normalizeWalletAddress(address)
+	if !walletEVMAddressRE.MatchString(address) {
+		return WalletVerifyResponse{}, ErrInvalidWalletAddress
+	}
+
+	challengeSvc := NewWalletChallengeService(a.Challenges, a.PublicBaseURL, a.challengeTTL())
+	challenge, err := challengeSvc.Get(ctx, strings.TrimSpace(challengeID))
+	if err != nil {
+		return WalletVerifyResponse{}, err
+	}
+	if challenge == nil {
+		return WalletVerifyResponse{}, ErrWalletChallengeNotFound
+	}
+	if purpose, ok := canonicalWalletChallengePurpose(challenge.Purpose); !ok || purpose != WalletChallengePurposeAuthBootstrap {
+		return WalletVerifyResponse{}, ErrWalletChallengePurpose
+	}
+	if normalizeWalletAddress(challenge.Address) != address {
+		return WalletVerifyResponse{}, ErrInvalidWalletSignature
+	}
+
+	recoveredAddress, err := recoverWalletAddress(challenge.Message, signature)
+	if err != nil {
+		return WalletVerifyResponse{}, err
+	}
+	if normalizeWalletAddress(recoveredAddress) != address {
+		return WalletVerifyResponse{}, ErrInvalidWalletSignature
+	}
+
+	usedAt := time.Now().UTC()
+	challenge, err = challengeSvc.MarkUsed(ctx, challenge.ID, usedAt)
+	if err != nil {
+		return WalletVerifyResponse{}, err
+	}
+
+	identity, err := a.WalletIdentities.GetOrCreate(ctx, address)
+	if err != nil {
+		return WalletVerifyResponse{}, err
+	}
+
+	user, identity, err := a.resolveWalletBootstrapUser(ctx, identity, address)
+	if err != nil {
+		return WalletVerifyResponse{}, err
+	}
+
+	loginSvc := NewService(a.Tokens, a.Users, a.TTL)
+	result, err := loginSvc.LoginWalletForUser(ctx, user, identity.ID, address, challenge.Chain)
+	if err != nil {
+		return WalletVerifyResponse{}, err
+	}
+
+	userID := ""
+	if result.User != nil {
+		userID = result.User.ID
+	}
+
+	return WalletVerifyResponse{
+		AccessToken:   result.AccessToken,
+		TokenType:     result.TokenType,
+		ExpiresIn:     result.ExpiresIn,
+		UserID:        userID,
+		WalletID:      result.WalletID,
+		WalletAddress: result.WalletAddress,
+		Chain:         result.Chain,
+		AuthMethod:    result.AuthMethod,
+		User:          usermappers.UserToReadModel(result.User),
+		Challenge:     authmappers.WalletChallengeToReadModel(challenge),
+	}, nil
+}
+
+func (a *Application) resolveWalletBootstrapUser(ctx context.Context, identity *authdomain.WalletIdentity, address string) (*usermod.User, *authdomain.WalletIdentity, error) {
+	if identity == nil {
+		return nil, nil, ErrUnauthorized
+	}
+
+	if strings.TrimSpace(identity.UserID) != "" {
+		if a.Users == nil {
+			return walletUser(address), identity, nil
+		}
+
+		user, err := a.Users.GetByID(ctx, identity.UserID, walletUserEmail(address))
+		if err == nil {
+			return user, identity, nil
+		}
+		if !errors.Is(err, usermod.ErrUserNotFound) {
+			return nil, nil, err
+		}
+	}
+
+	if a.Users == nil {
+		linked := walletUser(address)
+		identity.UserID = linked.ID
+		now := time.Now().UTC()
+		identity.LinkedAt = &now
+		identity.IsPrimary = true
+		return linked, identity, nil
+	}
+
+	user, err := a.Users.ResolveOrCreateWalletUser(ctx, address)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	identity, err = a.WalletIdentities.AttachUser(ctx, identity.ID, user.ID, true)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return user, identity, nil
 }
 
 func (a *Application) GetBootstrap(ctx context.Context, claims *coreauth.Claims) (BootstrapResponse, error) {

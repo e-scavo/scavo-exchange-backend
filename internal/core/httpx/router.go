@@ -26,6 +26,7 @@ type RouterParams struct {
 	Config     config.Config
 
 	TokenService        *coreauth.TokenService
+	AuthProvider        authmod.AuthProvider
 	Status              *status.Service
 	UserService         *usermod.Service
 	UserSettingsService *usersettingsmod.Service
@@ -91,6 +92,7 @@ func NewRouter(p RouterParams) http.Handler {
 		})
 
 		handlers := authmod.HTTPHandlers{
+			Provider:         p.AuthProvider,
 			Tokens:           p.TokenService,
 			TTL:              time.Duration(p.Config.JWTTTLHrs) * time.Hour,
 			Users:            p.UserService,

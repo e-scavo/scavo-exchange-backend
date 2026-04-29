@@ -50,6 +50,13 @@ func NewApplication(
 	}
 }
 
+func (h HTTPHandlers) AuthProvider() AuthProvider {
+	if h.Provider != nil {
+		return h.Provider
+	}
+	return h.Application()
+}
+
 func (h HTTPHandlers) Application() *Application {
 	return NewApplication(
 		h.Tokens,
@@ -97,6 +104,65 @@ func (a *Application) GetSession(ctx context.Context, claims *coreauth.Claims) (
 
 	return SessionResponse{
 		Session: mapSessionViewFromApp(response.Session),
+	}, nil
+}
+
+func (a *Application) UpdateProfile(ctx context.Context, claims *coreauth.Claims, input authdomain.ProfileUpdateInput) (MeResponse, error) {
+	response, err := a.inner.UpdateProfile(ctx, claims, input)
+	if err != nil {
+		return MeResponse{}, normalizeApplicationError(err)
+	}
+
+	return MeResponse{
+		User:    response.User,
+		Profile: mapProfileViewFromApp(response.Profile),
+	}, nil
+}
+
+func (a *Application) GetSettings(ctx context.Context, claims *coreauth.Claims) (MeSettingsResponse, error) {
+	response, err := a.inner.GetSettings(ctx, claims)
+	if err != nil {
+		return MeSettingsResponse{}, normalizeApplicationError(err)
+	}
+
+	return MeSettingsResponse{Settings: response.Settings}, nil
+}
+
+func (a *Application) UpdateSettings(ctx context.Context, claims *coreauth.Claims, input authdomain.SettingsUpdateInput) (MeSettingsResponse, error) {
+	response, err := a.inner.UpdateSettings(ctx, claims, input)
+	if err != nil {
+		return MeSettingsResponse{}, normalizeApplicationError(err)
+	}
+
+	return MeSettingsResponse{Settings: response.Settings}, nil
+}
+
+func (a *Application) CreateWalletChallenge(ctx context.Context, address, chain string) (WalletChallengeResponse, error) {
+	response, err := a.inner.CreateWalletChallenge(ctx, address, chain)
+	if err != nil {
+		return WalletChallengeResponse{}, normalizeApplicationError(err)
+	}
+
+	return WalletChallengeResponse{Challenge: response.Challenge}, nil
+}
+
+func (a *Application) VerifyWallet(ctx context.Context, challengeID, address, signature string) (WalletVerifyResponse, error) {
+	response, err := a.inner.VerifyWallet(ctx, challengeID, address, signature)
+	if err != nil {
+		return WalletVerifyResponse{}, normalizeApplicationError(err)
+	}
+
+	return WalletVerifyResponse{
+		AccessToken:   response.AccessToken,
+		TokenType:     response.TokenType,
+		ExpiresIn:     response.ExpiresIn,
+		UserID:        response.UserID,
+		WalletID:      response.WalletID,
+		WalletAddress: response.WalletAddress,
+		Chain:         response.Chain,
+		AuthMethod:    response.AuthMethod,
+		User:          response.User,
+		Challenge:     response.Challenge,
 	}, nil
 }
 

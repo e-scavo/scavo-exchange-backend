@@ -3,13 +3,10 @@ package auth
 import (
 	"errors"
 	"net/http"
-	"time"
 
 	coreauth "github.com/e-scavo/scavo-exchange-backend/internal/core/auth"
 	coreerrs "github.com/e-scavo/scavo-exchange-backend/internal/core/errs"
 	authmappers "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/mappers"
-	usermappers "github.com/e-scavo/scavo-exchange-backend/internal/modules/user/mappers"
-	userreadmodels "github.com/e-scavo/scavo-exchange-backend/internal/modules/user/readmodels"
 )
 
 // =====================================================
@@ -22,21 +19,15 @@ func (h HTTPHandlers) WalletChallenge(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	challengeTTL := h.ChallengeTTL
-	if challengeTTL <= 0 {
-		challengeTTL = 5 * time.Minute
-	}
-
 	input := authmappers.WalletChallengeWriteToDomainInput(req)
 
-	svc := NewWalletChallengeService(h.Challenges, h.PublicBaseURL, challengeTTL)
-	challenge, err := svc.Create(r.Context(), input.Address, input.Chain)
+	response, err := h.AuthProvider().CreateWalletChallenge(r.Context(), input.Address, input.Chain)
 	if err != nil {
 		writeWalletChallengeError(w, err)
 		return
 	}
 
-	writeJSON(w, http.StatusOK, WalletChallengeResponse{Challenge: authmappers.WalletChallengeToReadModel(challenge)})
+	writeJSON(w, http.StatusOK, response)
 }
 
 func (h HTTPHandlers) WalletVerify(w http.ResponseWriter, r *http.Request) {
@@ -45,42 +36,15 @@ func (h HTTPHandlers) WalletVerify(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	challengeTTL := h.ChallengeTTL
-	if challengeTTL <= 0 {
-		challengeTTL = 5 * time.Minute
-	}
-
-	challengeSvc := NewWalletChallengeService(h.Challenges, h.PublicBaseURL, challengeTTL)
-	loginSvc := NewService(h.Tokens, h.Users, h.TTL)
-	verifySvc := NewWalletVerificationService(challengeSvc, loginSvc, h.WalletIdentities)
-
 	input := authmappers.WalletVerifyWriteToDomainInput(req)
 
-	result, challenge, err := verifySvc.VerifyAndLogin(r.Context(), input.ChallengeID, input.Address, input.Signature)
+	response, err := h.AuthProvider().VerifyWallet(r.Context(), input.ChallengeID, input.Address, input.Signature)
 	if err != nil {
 		writeWalletVerifyError(w, err)
 		return
 	}
 
-	userID := ""
-	var user *userreadmodels.UserReadModel
-	if result != nil && result.User != nil {
-		userID = result.User.ID
-		user = usermappers.UserToReadModel(result.User)
-	}
-
-	writeJSON(w, http.StatusOK, WalletVerifyResponse{
-		AccessToken:   result.AccessToken,
-		TokenType:     result.TokenType,
-		ExpiresIn:     result.ExpiresIn,
-		UserID:        userID,
-		WalletID:      result.WalletID,
-		WalletAddress: result.WalletAddress,
-		Chain:         result.Chain,
-		AuthMethod:    result.AuthMethod,
-		User:          user,
-		Challenge:     authmappers.WalletChallengeToReadModel(challenge),
-	})
+	writeJSON(w, http.StatusOK, response)
 }
 
 // =====================================================
@@ -95,7 +59,7 @@ func (h HTTPHandlers) WalletLinkChallenge(w http.ResponseWriter, r *http.Request
 
 	input := authmappers.WalletLinkChallengeWriteToDomainInput(req)
 
-	response, err := h.Application().CreateWalletLinkChallenge(r.Context(), claims.UserID, input.Address, input.Chain)
+	response, err := h.AuthProvider().CreateWalletLinkChallenge(r.Context(), claims.UserID, input.Address, input.Chain)
 	if err != nil {
 		writeWalletLinkChallengeError(w, err)
 		return
@@ -112,7 +76,7 @@ func (h HTTPHandlers) WalletLinkVerify(w http.ResponseWriter, r *http.Request) {
 
 	input := authmappers.WalletLinkVerifyWriteToDomainInput(req)
 
-	response, err := h.Application().VerifyWalletLink(r.Context(), claims.UserID, input.ChallengeID, input.Address, input.Signature)
+	response, err := h.AuthProvider().VerifyWalletLink(r.Context(), claims.UserID, input.ChallengeID, input.Address, input.Signature)
 	if err != nil {
 		writeWalletLinkVerifyError(w, err)
 		return
@@ -129,7 +93,7 @@ func (h HTTPHandlers) WalletAccountMergeChallenge(w http.ResponseWriter, r *http
 
 	input := authmappers.WalletAccountMergeChallengeWriteToDomainInput(req)
 
-	response, err := h.Application().CreateWalletAccountMergeChallenge(r.Context(), claims.UserID, input.Address, input.Chain)
+	response, err := h.AuthProvider().CreateWalletAccountMergeChallenge(r.Context(), claims.UserID, input.Address, input.Chain)
 	if err != nil {
 		writeWalletAccountMergeChallengeError(w, err)
 		return
@@ -146,7 +110,7 @@ func (h HTTPHandlers) WalletAccountMergeVerify(w http.ResponseWriter, r *http.Re
 
 	input := authmappers.WalletAccountMergeVerifyWriteToDomainInput(req)
 
-	response, err := h.Application().VerifyWalletAccountMerge(r.Context(), claims.UserID, input.ChallengeID, input.Address, input.Signature)
+	response, err := h.AuthProvider().VerifyWalletAccountMerge(r.Context(), claims.UserID, input.ChallengeID, input.Address, input.Signature)
 	if err != nil {
 		writeWalletAccountMergeVerifyError(w, err)
 		return
@@ -163,7 +127,7 @@ func (h HTTPHandlers) WalletDetachCheck(w http.ResponseWriter, r *http.Request) 
 
 	input := authmappers.WalletDetachCheckWriteToDomainInput(req)
 
-	response, err := h.Application().CheckWalletDetach(r.Context(), claims.UserID, input.Address)
+	response, err := h.AuthProvider().CheckWalletDetach(r.Context(), claims.UserID, input.Address)
 	if err != nil {
 		writeWalletDetachCheckError(w, err)
 		return
@@ -180,7 +144,7 @@ func (h HTTPHandlers) WalletDetach(w http.ResponseWriter, r *http.Request) {
 
 	input := authmappers.WalletDetachExecuteWriteToDomainInput(req)
 
-	response, err := h.Application().ExecuteWalletDetach(r.Context(), claims.UserID, input.Address)
+	response, err := h.AuthProvider().ExecuteWalletDetach(r.Context(), claims.UserID, input.Address)
 	if err != nil {
 		writeWalletDetachError(w, err, response)
 		return
@@ -197,7 +161,7 @@ func (h HTTPHandlers) WalletSetPrimary(w http.ResponseWriter, r *http.Request) {
 
 	input := authmappers.WalletPrimarySetWriteToDomainInput(req)
 
-	response, err := h.Application().SetPrimaryWallet(r.Context(), claims.UserID, input.Address)
+	response, err := h.AuthProvider().SetPrimaryWallet(r.Context(), claims.UserID, input.Address)
 	if err != nil {
 		writeWalletPrimarySetError(w, err)
 		return
