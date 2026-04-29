@@ -1679,7 +1679,7 @@ Phase 0.12 is complete. Continue with the next roadmap-defined phase.
 
 ### Latest Completed Subphase
 
-0.13.0 — Definition & Documentation Lock.
+0.13.1 — Provider Inventory & Classification.
 
 ### Objective
 
@@ -1709,7 +1709,7 @@ Excluded:
 | Subphase | Name | Status |
 | --- | --- | --- |
 | 0.13.0 | Definition & Documentation Lock | ✅ Completed |
-| 0.13.1 | Provider Inventory & Classification | ⬜ Pending |
+| 0.13.1 | Provider Inventory & Classification | ✅ Completed |
 | 0.13.2 | Provider Interface Design | ⬜ Pending |
 | 0.13.3 | Provider Implementation | ⬜ Pending |
 | 0.13.4 | Application Integration | ⬜ Pending |
@@ -1720,6 +1720,10 @@ Excluded:
 
 0.13.0 is completed as a documentation-only lock. It locks the Provider Layer Consolidation scope, corrects the roadmap-level Phase 0.13 definition, expands the full subphase sequence consistently across trunk documentation and prepares the repository for provider inventory without changing Go code.
 
+### 0.13.1 Result
+
+0.13.1 is completed as a documentation-only provider inventory and classification step. It identifies existing provider-like responsibilities, missing provider boundaries, compatibility wiring and risky direct access patterns across the composition root, auth, user, user settings, system and core runtime surfaces. No Go code was modified.
+
 ### Next
 
-Start 0.13.1 — Provider Inventory & Classification.
+Start 0.13.2 — Provider Interface Design.

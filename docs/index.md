@@ -39,6 +39,7 @@
 * `phase0_11_domain_module_pattern.md`
 * `phase0_12_read_write_model_separation.md`
 * `phase0_13_provider_layer_consolidation.md`
+* `phase0_13_1_provider_inventory.md`
 
 ---
 
@@ -54,12 +55,12 @@
 
 Latest completed phase: `0.12 — Read / Write Model Separation`  
 Current phase: `0.13 — Provider Layer Consolidation`  
-Latest completed subphase: `0.13.0 — Definition & Documentation Lock`  
-Next subphase: `0.13.1 — Provider Inventory & Classification`
+Latest completed subphase: `0.13.1 — Provider Inventory & Classification`  
+Next subphase: `0.13.2 — Provider Interface Design`
 
 * `phase0_13_provider_layer_consolidation.md`
   * `0.13.0 — Definition & Documentation Lock` ✔ Completed
-  * `0.13.1 — Provider Inventory & Classification` ⬜ Pending
+  * `0.13.1 — Provider Inventory & Classification` ✔ Completed
   * `0.13.2 — Provider Interface Design` ⬜ Pending
   * `0.13.3 — Provider Implementation` ⬜ Pending
   * `0.13.4 — Application Integration` ⬜ Pending
@@ -196,14 +197,14 @@ Phase 0.12 ✔ Completed
 ### Phase 0.13 — Provider Layer Consolidation
 
 - 0.13.0 ✔ Definition & Documentation Lock
-- 0.13.1 ⬜ Provider Inventory & Classification
+- 0.13.1 ✔ Provider Inventory & Classification
 - 0.13.2 ⬜ Provider Interface Design
 - 0.13.3 ⬜ Provider Implementation
 - 0.13.4 ⬜ Application Integration
 - 0.13.5 ⬜ Validation & Compatibility
 - 0.13.6 ⬜ Documentation & Closure
 
-Phase 0.13 🚧 In Progress — next subphase: 0.13.1.
+Phase 0.13 🚧 In Progress — latest completed subphase: 0.13.1; next subphase: 0.13.2.
 
 ---
 
@@ -255,3 +256,4 @@ Phase 0.13 🚧 In Progress — next subphase: 0.13.1.
 
 - `docs/phase0_13_provider_layer_consolidation.md` — defines the Provider Layer Consolidation plan, scope, subphase sequence, compatibility constraints and documentation lock.
 - `docs/phase0_13_0_documentation_reprocess_report.md` — records the Phase 0.13.0 documentation reprocess and consistency validation.
+- `docs/phase0_13_1_provider_inventory.md` — records the Phase 0.13.1 provider inventory, classification, missing provider boundaries and interface-design recommendations.

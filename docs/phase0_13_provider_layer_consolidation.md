@@ -6,7 +6,9 @@ Phase 0.13 is **IN PROGRESS**.
 
 Phase 0.13.0 — Definition & Documentation Lock is **COMPLETED** as the documentation-only entry point for the phase.
 
-No Go code is changed by 0.13.0.
+Phase 0.13.1 — Provider Inventory & Classification is **COMPLETED** as the documentation-only inventory step.
+
+No Go code was changed by 0.13.0 or 0.13.1.
 
 ---
 
@@ -67,7 +69,7 @@ The direction is structural. It does not imply that every module must receive a 
 | Subphase | Name | Status |
 | --- | --- | --- |
 | 0.13.0 | Definition & Documentation Lock | COMPLETED |
-| 0.13.1 | Provider Inventory & Classification | PENDING |
+| 0.13.1 | Provider Inventory & Classification | COMPLETED |
 | 0.13.2 | Provider Interface Design | PENDING |
 | 0.13.3 | Provider Implementation | PENDING |
 | 0.13.4 | Application Integration | PENDING |
@@ -96,7 +98,7 @@ Document and lock the Phase 0.13 scope before any implementation begins.
 
 ### Result
 
-The phase definition is locked, the subphase plan is expanded consistently and the next step is 0.13.1 — Provider Inventory & Classification.
+The phase definition is locked, the subphase plan is expanded consistently and 0.13.1 completed the provider inventory and classification step.
 
 ---
 
@@ -104,13 +106,26 @@ The phase definition is locked, the subphase plan is expanded consistently and t
 
 Identify current provider boundaries and provider-like responsibilities across modules.
 
-Classify findings as:
+Result: completed as `docs/phase0_13_1_provider_inventory.md`.
 
-- existing provider
-- provider candidate
-- missing provider
-- invalid direct access
-- compatibility wiring that must remain stable
+The inventory classifies findings as:
+
+- `PROVIDER_OK`
+- `PROVIDER_CANDIDATE`
+- `PROVIDER_MISSING`
+- `PROVIDER_INVALID`
+- `COMPATIBILITY_WIRING`
+- `UNKNOWN`
+
+Main findings:
+
+- `auth/app.Application` is the strongest existing provider candidate.
+- `user/app.Service` and `usersettings/app.Service` already act as stable module service boundaries.
+- `auth/domain.UserProvider` and `auth/domain.UserSettingsProvider` are explicit narrow provider contracts.
+- wallet challenge/verification and authenticated profile/settings flows still contain direct handler-level service or store access that should feed 0.13.2 design.
+- composition-root dependency wiring remains compatibility wiring until provider construction is explicitly designed.
+
+Next step: 0.13.2 — Provider Interface Design
 
 ---
 

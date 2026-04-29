@@ -255,11 +255,11 @@ Consolidate the Provider Layer as the explicit entry point to domain services af
 #### 0.13.0 — Definition & Documentation Lock ✔ Completed
 Locked the phase definition, corrected roadmap consistency and registered the subphase plan before code changes.
 
-#### 0.13.1 — Provider Inventory & Classification ⬜ Pending
-Identify existing providers, provider-like responsibilities, missing providers and invalid direct access patterns.
+#### 0.13.1 — Provider Inventory & Classification ✔ Completed
+Inventoried existing provider-like responsibilities, missing provider boundaries, compatibility wiring and direct access patterns without changing Go code.
 
 #### 0.13.2 — Provider Interface Design ⬜ Pending
-Define narrow provider interfaces aligned with read/write model separation and module ownership.
+Define narrow provider interfaces aligned with the 0.13.1 inventory findings, read/write model separation and module ownership.
 
 #### 0.13.3 — Provider Implementation ⬜ Pending
 Implement provider boundaries incrementally while preserving compatibility.

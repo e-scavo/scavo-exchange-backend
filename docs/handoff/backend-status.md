@@ -1128,16 +1128,16 @@ Next planned step: next roadmap-defined phase.
 
 Phase 0.12 is completed. The backend has read/write model separation, centralized mapping ownership and aligned internal contracts.
 
-Phase 0.13 is in progress. 0.13.0 — Definition & Documentation Lock is completed and the next required step is 0.13.1 — Provider Inventory & Classification.
+Phase 0.13 is in progress. 0.13.1 — Provider Inventory & Classification is completed and the next required step is 0.13.2 — Provider Interface Design.
 
 ### Operational Meaning
 
-The next architectural movement is provider boundary consolidation. Handlers and application flows should progressively depend on explicit provider contracts instead of scattered direct access to lower-level responsibilities.
+The next architectural movement is provider boundary consolidation. 0.13.1 confirmed existing provider-like boundaries, missing provider boundaries and compatibility wiring. Handlers and application flows should progressively depend on explicit provider contracts instead of scattered direct access to lower-level responsibilities.
 
 ### Subphase State
 
 - 0.13.0 — Definition & Documentation Lock (COMPLETED)
-- 0.13.1 — Provider Inventory & Classification (PENDING)
+- 0.13.1 — Provider Inventory & Classification (COMPLETED)
 - 0.13.2 — Provider Interface Design (PENDING)
 - 0.13.3 — Provider Implementation (PENDING)
 - 0.13.4 — Application Integration (PENDING)
@@ -1154,4 +1154,4 @@ The next architectural movement is provider boundary consolidation. Handlers and
 
 ### Next Required Action
 
-Start Phase 0.13.1 by inventorying provider boundaries, provider-like responsibilities, missing providers and invalid direct access patterns before interface design or implementation.
+Start Phase 0.13.2 by designing narrow provider interfaces from the completed 0.13.1 inventory before implementation or handler integration.

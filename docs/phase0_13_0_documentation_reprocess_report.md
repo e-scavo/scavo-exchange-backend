@@ -21,7 +21,7 @@ This fix2 corrects the documentation traceability mismatch detected after fix1: 
 ## Phase 0.13 Subphase State
 
 - 0.13.0 ✔ Definition & Documentation Lock
-- 0.13.1 ⬜ Provider Inventory & Classification
+- 0.13.1 ✔ Provider Inventory & Classification
 - 0.13.2 ⬜ Provider Interface Design
 - 0.13.3 ⬜ Provider Implementation
 - 0.13.4 ⬜ Application Integration
@@ -124,3 +124,9 @@ This fix2 corrects that mismatch so the internal report, the ZIP delta, and the 
 ## Code Modification Status
 
 No Go source files, migrations, scripts, module files, or runtime configuration files were intentionally modified by this documentation fix.
+
+## 0.13.1 Follow-Up Consistency Note
+
+During Phase 0.13.1, this report was retained as the Phase 0.13.0 reprocess record and minimally updated only to prevent the Phase 0.13 subphase state from drifting against current trunk documentation.
+
+0.13.1 is now completed and the next subphase is 0.13.2 — Provider Interface Design.
