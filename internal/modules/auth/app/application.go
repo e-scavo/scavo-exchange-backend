@@ -161,7 +161,7 @@ func (a *Application) ListWallets(ctx context.Context, userID string, query Wall
 		wallets = []*authdomain.WalletIdentity{}
 	}
 
-	mapped := mapWalletIdentitiesToReadModels(wallets)
+	mapped := authmappers.WalletIdentitiesToActionableReadModels(wallets)
 	window, total := applyWalletsQuery(mapped, query)
 	return buildWalletsResponse(window, total, query), nil
 }
@@ -189,7 +189,7 @@ func (a *Application) VerifyWalletLink(ctx context.Context, userID, challengeID,
 	}
 	return WalletLinkVerifyResponse{
 		LinkedWallet: authmappers.WalletIdentityToReadModel(result.Linked),
-		Wallets:      mapWalletIdentitiesToReadModels(result.Wallets),
+		Wallets:      authmappers.WalletIdentitiesToActionableReadModels(result.Wallets),
 		Challenge:    authmappers.WalletChallengeToReadModel(result.Challenge),
 	}, nil
 }
@@ -217,7 +217,7 @@ func (a *Application) VerifyWalletAccountMerge(ctx context.Context, userID, chal
 	}
 	return WalletAccountMergeVerifyResponse{
 		MergedWallet: authmappers.WalletIdentityToReadModel(result.MergedWallet),
-		Wallets:      mapWalletIdentitiesToReadModels(result.Wallets),
+		Wallets:      authmappers.WalletIdentitiesToActionableReadModels(result.Wallets),
 		Challenge:    authmappers.WalletChallengeToReadModel(result.Challenge),
 		SourceUserID: result.SourceUserID,
 		TargetUserID: result.TargetUserID,
@@ -235,7 +235,7 @@ func (a *Application) SetPrimaryWallet(ctx context.Context, userID, address stri
 	}
 	return WalletPrimarySetResponse{
 		PrimaryWallet: authmappers.WalletIdentityToReadModel(result.Primary),
-		Wallets:       mapWalletIdentitiesToReadModels(result.Wallets),
+		Wallets:       authmappers.WalletIdentitiesToActionableReadModels(result.Wallets),
 	}, nil
 }
 
@@ -266,7 +266,7 @@ func (a *Application) ExecuteWalletDetach(ctx context.Context, userID, address s
 	response := WalletDetachExecuteResponse{}
 	if result != nil {
 		response.DetachedWallet = authmappers.WalletIdentityToReadModel(result.Detached)
-		response.Wallets = mapWalletIdentitiesToReadModels(result.Wallets)
+		response.Wallets = authmappers.WalletIdentitiesToActionableReadModels(result.Wallets)
 		if result.Check != nil {
 			response.Check = &WalletDetachCheckResponse{
 				WalletAddress:    result.Check.WalletAddress,

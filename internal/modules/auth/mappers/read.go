@@ -62,6 +62,56 @@ func WalletIdentitiesToReadModels(wallets []*authdomain.WalletIdentity) []*authr
 	return out
 }
 
+// WalletIdentitiesToActionableReadModels maps wallet identity domain models into
+// output-only wallet read projections and enriches them with response
+// actionability metadata. This keeps response-oriented mapping concerns inside
+// the module-level mapping layer instead of application orchestration.
+func WalletIdentitiesToActionableReadModels(wallets []*authdomain.WalletIdentity) []*authreadmodels.AuthWalletReadModel {
+	return EnrichWalletReadModelsActionability(WalletIdentitiesToReadModels(wallets))
+}
+
+// EnrichWalletReadModelsActionability applies response actionability metadata to
+// wallet read models. It preserves the existing contract while centralizing the
+// calculation outside handlers and application flows.
+func EnrichWalletReadModelsActionability(wallets []*authreadmodels.AuthWalletReadModel) []*authreadmodels.AuthWalletReadModel {
+	if len(wallets) == 0 {
+		return []*authreadmodels.AuthWalletReadModel{}
+	}
+
+	activeOwnedCount := 0
+	for _, wallet := range wallets {
+		if wallet != nil && wallet.Status == "active" {
+			activeOwnedCount++
+		}
+	}
+
+	for _, wallet := range wallets {
+		if wallet == nil {
+			continue
+		}
+
+		wallet.CanSetPrimary = wallet.Status == "active" && !wallet.IsPrimary
+		wallet.CanDetach = false
+		wallet.DetachBlockReasons = []string{}
+
+		if wallet.Status != "active" {
+			continue
+		}
+
+		if wallet.IsPrimary {
+			wallet.DetachBlockReasons = append(wallet.DetachBlockReasons, authdomain.WalletDetachReasonWalletIsPrimary)
+		}
+		if activeOwnedCount <= 1 {
+			wallet.DetachBlockReasons = append(wallet.DetachBlockReasons, authdomain.WalletDetachReasonUserWouldBeEmpty)
+		}
+		if len(wallet.DetachBlockReasons) == 0 {
+			wallet.CanDetach = true
+		}
+	}
+
+	return wallets
+}
+
 // WalletChallengeToReadModel maps a canonical wallet challenge domain model into
 // its output-only auth wallet challenge projection.
 func WalletChallengeToReadModel(challenge *authdomain.WalletChallenge) *authreadmodels.AuthWalletChallengeReadModel {

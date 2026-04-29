@@ -9,6 +9,7 @@ import (
 
 	coreerrs "github.com/e-scavo/scavo-exchange-backend/internal/core/errs"
 	authapp "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/app"
+	authmappers "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/mappers"
 )
 
 type WalletReadModel = authapp.WalletReadModel
@@ -16,86 +17,15 @@ type WalletsResponse = authapp.WalletsResponse
 type WalletsQuery = authapp.WalletsQuery
 
 func mapWalletIdentityToReadModel(wallet *WalletIdentity) *WalletReadModel {
-	if wallet == nil {
-		return nil
-	}
-
-	status := "unlinked"
-	switch {
-	case wallet.UserID != "":
-		status = "active"
-	case wallet.DetachedAt != nil:
-		status = "detached"
-	}
-
-	return &WalletReadModel{
-		ID:         wallet.ID,
-		Address:    wallet.Address,
-		UserID:     wallet.UserID,
-		LinkedAt:   wallet.LinkedAt,
-		DetachedAt: wallet.DetachedAt,
-		IsPrimary:  wallet.IsPrimary,
-		Status:     status,
-	}
+	return authmappers.WalletIdentityToReadModel(wallet)
 }
 
 func mapWalletIdentitiesToReadModels(wallets []*WalletIdentity) []*WalletReadModel {
-	if len(wallets) == 0 {
-		return []*WalletReadModel{}
-	}
-
-	out := make([]*WalletReadModel, 0, len(wallets))
-	for _, wallet := range wallets {
-		mapped := mapWalletIdentityToReadModel(wallet)
-		if mapped != nil {
-			out = append(out, mapped)
-		}
-	}
-
-	if out == nil {
-		return []*WalletReadModel{}
-	}
-
-	return enrichWalletReadModelsActionability(out)
+	return authmappers.WalletIdentitiesToActionableReadModels(wallets)
 }
 
 func enrichWalletReadModelsActionability(wallets []*WalletReadModel) []*WalletReadModel {
-	if len(wallets) == 0 {
-		return []*WalletReadModel{}
-	}
-
-	activeOwnedCount := 0
-	for _, wallet := range wallets {
-		if wallet != nil && wallet.Status == "active" {
-			activeOwnedCount++
-		}
-	}
-
-	for _, wallet := range wallets {
-		if wallet == nil {
-			continue
-		}
-
-		wallet.CanSetPrimary = wallet.Status == "active" && !wallet.IsPrimary
-		wallet.CanDetach = false
-		wallet.DetachBlockReasons = []string{}
-
-		if wallet.Status != "active" {
-			continue
-		}
-
-		if wallet.IsPrimary {
-			wallet.DetachBlockReasons = append(wallet.DetachBlockReasons, WalletDetachReasonWalletIsPrimary)
-		}
-		if activeOwnedCount <= 1 {
-			wallet.DetachBlockReasons = append(wallet.DetachBlockReasons, WalletDetachReasonUserWouldBeEmpty)
-		}
-		if len(wallet.DetachBlockReasons) == 0 {
-			wallet.CanDetach = true
-		}
-	}
-
-	return wallets
+	return authmappers.EnrichWalletReadModelsActionability(wallets)
 }
 
 func parseWalletsQuery(r *http.Request) (WalletsQuery, string) {

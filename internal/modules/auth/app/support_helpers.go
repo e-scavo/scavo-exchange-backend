@@ -151,7 +151,7 @@ func buildProfileViewWithUser(ctx context.Context, claims *coreauth.Claims, user
 }
 
 func mapWalletIdentityToProfileWallet(wallet *authdomain.WalletIdentity) *ProfileWalletView {
-	mapped := mapWalletIdentityToReadModel(wallet)
+	mapped := authmappers.WalletIdentityToReadModel(wallet)
 	if mapped == nil {
 		return nil
 	}
@@ -179,7 +179,7 @@ func listWalletReadModelsForUser(ctx context.Context, userID string, store authd
 		wallets = []*authdomain.WalletIdentity{}
 	}
 
-	return mapWalletIdentitiesToReadModels(wallets), nil
+	return authmappers.WalletIdentitiesToActionableReadModels(wallets), nil
 }
 
 func buildBootstrapWalletsView(wallets []*WalletReadModel) BootstrapWalletsView {
@@ -191,69 +191,6 @@ func buildBootstrapWalletsView(wallets []*WalletReadModel) BootstrapWalletsView 
 		Items: wallets,
 		Total: len(wallets),
 	}
-}
-
-func mapWalletIdentityToReadModel(wallet *authdomain.WalletIdentity) *WalletReadModel {
-	return authmappers.WalletIdentityToReadModel(wallet)
-}
-
-func mapWalletIdentitiesToReadModels(wallets []*authdomain.WalletIdentity) []*WalletReadModel {
-	if len(wallets) == 0 {
-		return []*WalletReadModel{}
-	}
-
-	out := make([]*WalletReadModel, 0, len(wallets))
-	for _, wallet := range wallets {
-		mapped := mapWalletIdentityToReadModel(wallet)
-		if mapped != nil {
-			out = append(out, mapped)
-		}
-	}
-
-	if out == nil {
-		return []*WalletReadModel{}
-	}
-
-	return enrichWalletReadModelsActionability(out)
-}
-
-func enrichWalletReadModelsActionability(wallets []*WalletReadModel) []*WalletReadModel {
-	if len(wallets) == 0 {
-		return []*WalletReadModel{}
-	}
-
-	activeOwnedCount := 0
-	for _, wallet := range wallets {
-		if wallet != nil && wallet.Status == "active" {
-			activeOwnedCount++
-		}
-	}
-
-	for _, wallet := range wallets {
-		if wallet == nil {
-			continue
-		}
-
-		wallet.CanSetPrimary = wallet.Status == "active" && !wallet.IsPrimary
-		wallet.CanDetach = false
-		wallet.DetachBlockReasons = []string{}
-
-		if wallet.Status != "active" {
-			continue
-		}
-
-		if wallet.IsPrimary {
-			wallet.DetachBlockReasons = append(wallet.DetachBlockReasons, authdomain.WalletDetachReasonWalletIsPrimary)
-		}
-		if activeOwnedCount <= 1 {
-			wallet.DetachBlockReasons = append(wallet.DetachBlockReasons, authdomain.WalletDetachReasonUserWouldBeEmpty)
-		}
-		if len(wallet.DetachBlockReasons) == 0 {
-			wallet.CanDetach = true
-		}
-	}
-
-	return wallets
 }
 
 func filterWalletReadModels(wallets []*WalletReadModel, q WalletsQuery) []*WalletReadModel {
