@@ -184,7 +184,14 @@ Phase 0.11 ✔ Completed — next planned phase: 0.12
   - 0.12.4.4 ✔ Application Refactor
   - 0.12.4.5 ✔ Validation & Compatibility
   - 0.12.4.6 ✔ Documentation & Closure
-- 0.12.5 ✅ Contract Alignment
+- 0.12.5 ✔ Contract Alignment
+  - 0.12.5.0 ✔ Definition & Documentation Lock
+  - 0.12.5.1 ✔ Contract Inventory & Classification
+  - 0.12.5.2 ✔ Contract Normalization Design
+  - 0.12.5.3 ✔ Contract Alignment Implementation
+  - 0.12.5.4 ✔ Handler Contract Adjustment
+  - 0.12.5.5 ✔ Validation & Compatibility
+  - 0.12.5.6 ✔ Documentation & Closure
 - 0.12.6 ⬜ Documentation & Phase Closure
 
 Phase 0.12 is in progress. 0.12.0 is completed as the phase-level documentation lock, 0.12.1 is completed as the audit sequence, 0.12.2 is completed as the Read Model Extraction sequence, 0.12.3 is completed as the Write Model Isolation sequence, 0.12.4 is completed as the Mapping Layer Introduction sequence and 0.12.5 is completed as the Contract Alignment sequence. The current next step is 0.12.6 — Documentation & Phase Closure.
@@ -227,10 +234,10 @@ Phase 0.12 is in progress. 0.12.0 is completed as the phase-level documentation 
 
 ### Phase 0.12.5 Dedicated Document
 
-- `docs/phase0_12_5_contract_alignment.md`
-- `docs/phase0_12_5_contract_inventory.md`
-- `docs/phase0_12_5_contract_normalization_design.md`
-- `docs/phase0_12_5_contract_alignment_implementation.md`
-- `docs/phase0_12_5_handler_contract_adjustment.md`
-- `docs/phase0_12_5_validation_compatibility.md`
-- `docs/phase0_12_5_documentation_closure.md` — defines the Contract Alignment plan, internal sub-subphase sequence, provider contract scope and compatibility constraints.
+- `docs/phase0_12_5_contract_alignment.md` — defines and closes the Contract Alignment plan, subphase sequence, provider contract scope and compatibility constraints.
+- `docs/phase0_12_5_contract_inventory.md` — records contract inventory and classification.
+- `docs/phase0_12_5_contract_normalization_design.md` — records the target normalization design.
+- `docs/phase0_12_5_contract_alignment_implementation.md` — records the implementation-level contract alignment.
+- `docs/phase0_12_5_handler_contract_adjustment.md` — records handler-level contract adjustment.
+- `docs/phase0_12_5_validation_compatibility.md` — records compatibility validation for 0.12.5.
+- `docs/phase0_12_5_documentation_closure.md` — records formal closure of Phase 0.12.5.

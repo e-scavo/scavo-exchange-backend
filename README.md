@@ -2817,7 +2817,14 @@ Phase 0.12 addresses that ambiguity without reopening the public contract.
   - **0.12.4.4 — Application Refactor** ✔ Completed
   - **0.12.4.5 — Validation & Compatibility** ✔ Completed
   - **0.12.4.6 — Documentation & Closure** ✔ Completed
-- **0.12.5 — Contract Alignment** ✅ Completed
+- **0.12.5 — Contract Alignment** ✔ Completed
+  - **0.12.5.0 — Definition & Documentation Lock** ✔ Completed
+  - **0.12.5.1 — Contract Inventory & Classification** ✔ Completed
+  - **0.12.5.2 — Contract Normalization Design** ✔ Completed
+  - **0.12.5.3 — Contract Alignment Implementation** ✔ Completed
+  - **0.12.5.4 — Handler Contract Adjustment** ✔ Completed
+  - **0.12.5.5 — Validation & Compatibility** ✔ Completed
+  - **0.12.5.6 — Documentation & Closure** ✔ Completed
 - **0.12.6 — Documentation & Phase Closure** ⬜ Pending
 
 ### Current result
@@ -2860,3 +2867,19 @@ Phase 0.12.5.0 starts the Contract Alignment sequence after the Mapping Layer In
 The phase focuses on reviewing and aligning internal provider contracts, especially the contracts introduced and stabilized during Phase 0.11, with the read/write model separation and centralized mapping ownership introduced during Phase 0.12.2 through Phase 0.12.4.
 
 No Go code is changed in 0.12.5.0.
+
+## Phase 0.12.5 Closure
+
+Phase 0.12.5 — Contract Alignment is completed. The backend now contains contract inventory documentation, contract normalization design, contract alignment implementation, centralized HTTP contract aliases, handler contract adjustment and validation documentation backed by `go test ./...`.
+
+The completed subphase sequence is:
+
+- **0.12.5.0 — Definition & Documentation Lock** ✔ Completed
+- **0.12.5.1 — Contract Inventory & Classification** ✔ Completed
+- **0.12.5.2 — Contract Normalization Design** ✔ Completed
+- **0.12.5.3 — Contract Alignment Implementation** ✔ Completed
+- **0.12.5.4 — Handler Contract Adjustment** ✔ Completed
+- **0.12.5.5 — Validation & Compatibility** ✔ Completed
+- **0.12.5.6 — Documentation & Closure** ✔ Completed
+
+Next planned step: **0.12.6 — Documentation & Phase Closure**.

@@ -1063,7 +1063,7 @@ The backend is still externally aligned with the completed 0.11 runtime behavior
 
 ### Next Required Action
 
-Start 0.12.5 — Contract Alignment using the completed 0.12.1 audit artifacts, completed 0.12.2 read model extraction, completed 0.12.3 write model isolation and completed 0.12.4 mapping layer introduction as the baseline.
+Start 0.12.6 — Documentation & Phase Closure using the completed 0.12.1 audit artifacts, completed 0.12.2 read model extraction, completed 0.12.3 write model isolation, completed 0.12.4 mapping layer introduction and completed 0.12.5 contract alignment as the baseline.
 
 ### 0.12.1 Audit Closure Summary
 
@@ -1084,9 +1084,9 @@ The next phase must not start by guessing model ownership. It must use these aud
 
 The completed step is 0.12.4.0 — Mapping Layer Introduction Definition & Documentation Lock. The next planned step is 0.12.4.1 — Mapping Layer Design. It must design centralized mapper ownership for the explicit mapping directions introduced in 0.12.2 and 0.12.3 without changing public HTTP contracts.
 
-### 0.12.3.0 Write Model Isolation Definition Lock
+### 0.12.3.6 Write Model Isolation Closure
 
-0.12.3 is completed. It introduced write model packages, domain write inputs, Write → Domain mapping, handler alignment and validation documentation. The next step is 0.12.5 — Contract Alignment.
+0.12.3 is completed. It introduced write model packages, domain write inputs, Write → Domain mapping, handler alignment and validation documentation. The sequence continued through 0.12.4 mapping layer consolidation and 0.12.5 contract alignment.
 
 ### 0.12.4.0 Mapping Layer Introduction Definition Lock
 
