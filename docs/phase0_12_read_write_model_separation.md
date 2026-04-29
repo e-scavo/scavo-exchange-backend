@@ -274,6 +274,6 @@ Phase 0.12 closes with read/write model separation, mapper ownership and contrac
 
 The next roadmap-defined phase is Phase 0.13 — Provider Layer Consolidation.
 
-Phase 0.13.4 — Application Integration is completed. The next step is 0.13.5 — Validation & Compatibility.
+Phase 0.13.5 — Validation & Compatibility is completed. The next step is 0.13.6 — Documentation & Closure.
 
 This follow-up phase must use the Phase 0.12 results as its baseline and must preserve public HTTP/API compatibility while consolidating provider boundaries.

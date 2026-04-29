@@ -1135,11 +1135,11 @@ Next planned step: next roadmap-defined phase.
 
 Phase 0.12 is completed. The backend has read/write model separation, centralized mapping ownership and aligned internal contracts.
 
-Phase 0.13 is in progress. 0.13.4 — Application Integration is completed and the next required step is 0.13.5 — Validation & Compatibility.
+Phase 0.13 is in progress. 0.13.5 — Validation & Compatibility is completed and the next required step is 0.13.6 — Documentation & Closure.
 
 ### Operational Meaning
 
-The next architectural movement is application integration hardening. 0.13.1 confirmed existing provider-like boundaries, missing provider boundaries and compatibility wiring. 0.13.2 locked the target provider interface design and 0.13.3 introduced the concrete provider boundary implementation. 0.13.4 should reduce remaining transitional compatibility wiring and confirm that handlers, router construction and application services are consistently aligned with explicit provider contracts.
+The next architectural movement is documentation closure. 0.13.1 confirmed existing provider-like boundaries, 0.13.2 locked the target provider interface design, 0.13.3 introduced the concrete provider boundary implementation, 0.13.4 integrated providers into application/runtime wiring, and 0.13.5 validated compatibility. 0.13.6 must close the phase documentation without introducing public API, business behavior or runtime changes.
 
 
 
@@ -1155,7 +1155,7 @@ The next architectural movement is application integration hardening. 0.13.1 con
 - 0.13.2 — Provider Interface Design (COMPLETED)
 - 0.13.3 — Provider Implementation (COMPLETED)
 - 0.13.4 — Application Integration (COMPLETED)
-- 0.13.5 — Validation & Compatibility (PENDING)
+- 0.13.5 — Validation & Compatibility (COMPLETED)
 - 0.13.6 — Documentation & Closure (PENDING)
 
 ### Compatibility Constraints
@@ -1168,11 +1168,17 @@ The next architectural movement is application integration hardening. 0.13.1 con
 
 ### Next Required Action
 
-Start Phase 0.13.3 by implementing the provider interfaces locked in 0.13.2, without changing public routes, payloads or business behavior.
+Start Phase 0.13.6 by closing Provider Layer Consolidation documentation, preserving the completed compatibility baseline and avoiding new runtime behavior.
 
 
 ### 0.13.4 Result
 
 0.13.4 completed application integration for the Provider Layer. Runtime HTTP construction now creates auth handlers from the consolidated provider boundary instead of passing user services, settings services, wallet stores and challenge configuration through router-level handler wiring. This keeps the public HTTP/API surface unchanged while tightening the runtime path toward `HTTP → Provider → Application → Domain → Repository`.
 
-Next required step: 0.13.5 — Validation & Compatibility.
+Next required step: 0.13.6 — Documentation & Closure.
+
+### 0.13.5 Result
+
+0.13.5 completed validation and compatibility for Phase 0.13. The provider integration state remains compatible with existing public routes, versioned routes, middleware, auth flows, wallet flows and standardized error behavior. External validation confirmed `go test ./...` after the 0.13.4 router compatibility fix path. No production code changes were introduced by this validation subphase.
+
+Next required step: 0.13.6 — Documentation & Closure.

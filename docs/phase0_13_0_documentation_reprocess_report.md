@@ -12,7 +12,7 @@ This fix2 corrects the documentation traceability mismatch detected after fix1: 
 
 - Phase 0.13 remains `Provider Layer Consolidation`.
 - 0.13.0 — Definition & Documentation Lock is marked as completed.
-- 0.13.3 — Provider Implementation is completed; 0.13.4 — Application Integration is the next step.
+- 0.13.5 — Validation & Compatibility is completed; 0.13.6 — Documentation & Closure is the next step.
 - Phase 0.13 subphases are expanded consistently where Phase 0.13 is documented.
 - No Go code was modified.
 - Markdown reviewed: 65 files.
@@ -24,8 +24,8 @@ This fix2 corrects the documentation traceability mismatch detected after fix1: 
 - 0.13.1 ✔ Provider Inventory & Classification
 - 0.13.2 ✔ Provider Interface Design
 - 0.13.3 ✔ Provider Implementation
-- 0.13.4 ⬜ Application Integration
-- 0.13.5 ⬜ Validation & Compatibility
+- 0.13.4 ✔ Application Integration
+- 0.13.5 ✔ Validation & Compatibility
 - 0.13.6 ⬜ Documentation & Closure
 
 ## Markdown Reviewed
@@ -129,4 +129,4 @@ No Go source files, migrations, scripts, module files, or runtime configuration 
 
 During Phase 0.13.1, this report was retained as the Phase 0.13.0 reprocess record and minimally updated only to prevent the Phase 0.13 subphase state from drifting against current trunk documentation.
 
-0.13.2 is now completed and the next subphase is 0.13.3 — Provider Implementation.
+0.13.5 is now completed and the next subphase is 0.13.6 — Documentation & Closure.

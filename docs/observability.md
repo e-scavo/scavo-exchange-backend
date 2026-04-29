@@ -265,7 +265,7 @@ The existing observability direction remains valid as an infrastructure concern,
 - 0.13.2 ✔ Provider Interface Design
 - 0.13.3 ✔ Provider Implementation
 - 0.13.4 ✔ Application Integration
-- 0.13.5 ⬜ Validation & Compatibility
+- 0.13.5 ✔ Validation & Compatibility
 - 0.13.6 ⬜ Documentation & Closure
 
-0.13.4 is completed as application integration. The next step is 0.13.5 — Validation & Compatibility.
+0.13.5 is completed as validation and compatibility. The next step is 0.13.6 — Documentation & Closure.

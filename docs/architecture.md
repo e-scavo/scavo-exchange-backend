@@ -773,7 +773,7 @@ This phase must preserve the public HTTP/API surface and must not introduce busi
 - 0.13.2 ✔ Provider Interface Design
 - 0.13.3 ✔ Provider Implementation
 - 0.13.4 ✔ Application Integration
-- 0.13.5 ⬜ Validation & Compatibility
+- 0.13.5 ✔ Validation & Compatibility
 - 0.13.6 ⬜ Documentation & Closure
 
-0.13.4 is completed as application integration. Runtime HTTP wiring now consumes the consolidated auth provider boundary directly while preserving public HTTP/API behavior.
+0.13.5 is completed as validation and compatibility. Build/test compatibility was confirmed externally after the 0.13.4 integration fix path, and no public HTTP/API behavior changes were introduced by this documentation-only validation step.

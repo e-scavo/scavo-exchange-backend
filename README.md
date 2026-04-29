@@ -2916,12 +2916,12 @@ Establish a consistent provider boundary so handlers and application flows do no
 - **0.13.2 — Provider Interface Design** ✔ Completed
 - **0.13.3 — Provider Implementation** ✔ Completed
 - **0.13.4 — Application Integration** ✔ Completed
-- **0.13.5 — Validation & Compatibility** ⬜ Pending
+- **0.13.5 — Validation & Compatibility** ✔ Completed
 - **0.13.6 — Documentation & Closure** ⬜ Pending
 
 ### Current status
 
-Phase 0.13 is in progress. Phase 0.13.4 is completed as the application integration step; the next step is 0.13.5 — Validation & Compatibility.
+Phase 0.13 is in progress. Phase 0.13.5 is completed as the validation and compatibility step; the next step is 0.13.6 — Documentation & Closure.
 
 
 ### Phase 0.13.3 result
@@ -2933,3 +2933,6 @@ Provider implementation introduced explicit auth provider interfaces and composi
 
 Application integration aligned runtime HTTP wiring with the Provider Layer boundary. Router construction now creates auth HTTP handlers from the consolidated provider only, removing direct runtime handler wiring of user services, user settings services, wallet challenge stores, wallet identity stores, challenge TTL and public base URL. Compatibility fallback fields remain available only for transitional tests and do not define production wiring.
 
+### Phase 0.13.5 result
+
+Phase 0.13.5 completed the validation and compatibility checkpoint for Provider Layer Consolidation. The validation baseline confirms that the 0.13.4 provider integration path builds and passes `go test ./...` in the project environment after the router test compatibility fix. This subphase does not introduce production code changes.
