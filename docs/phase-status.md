@@ -1668,3 +1668,58 @@ No Go code is changed in 0.12.5.0.
 ### Next
 
 Phase 0.12 is complete. Continue with the next roadmap-defined phase.
+
+---
+
+## 🚧 Phase 0.13 — Provider Layer Consolidation
+
+### Status
+
+⬜ Pending
+
+### Latest Completed Subphase
+
+None yet. Phase 0.13.0 is the next required documentation-only lock.
+
+### Objective
+
+Consolidate the Provider Layer as the explicit, consistent and reusable entry point to domain services.
+
+### Scope
+
+Included:
+
+- provider inventory and classification
+- provider interface design
+- provider implementation where required
+- application and handler integration
+- validation and compatibility checks
+- documentation closure
+
+Excluded:
+
+- public API changes
+- business behavior changes
+- API versioning changes
+- CQRS or event sourcing
+- observability implementation
+
+### Subphase Plan
+
+| Subphase | Name | Status |
+| --- | --- | --- |
+| 0.13.0 | Definition & Documentation Lock | ⬜ Pending |
+| 0.13.1 | Provider Inventory & Classification | ⬜ Pending |
+| 0.13.2 | Provider Interface Design | ⬜ Pending |
+| 0.13.3 | Provider Implementation | ⬜ Pending |
+| 0.13.4 | Application Integration | ⬜ Pending |
+| 0.13.5 | Validation & Compatibility | ⬜ Pending |
+| 0.13.6 | Documentation & Closure | ⬜ Pending |
+
+### 0.13.0 Target
+
+0.13.0 is documentation-only. It locks the Provider Layer Consolidation scope, corrects the roadmap-level Phase 0.13 definition and prepares the repository for provider inventory without changing Go code.
+
+### Next
+
+Start 0.13.0 — Definition & Documentation Lock.

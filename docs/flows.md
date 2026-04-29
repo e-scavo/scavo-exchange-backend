@@ -1267,3 +1267,13 @@ HTTP/root compatibility → auth/app contracts → user/usersettings runtime imp
 ```
 
 This preserves the current flow behavior while reducing accidental concrete service coupling inside the application layer.
+
+---
+
+## Phase 0.13 Documentation Update — Provider Layer Consolidation
+
+After the completed Phase 0.12 Read / Write Model Separation, the next roadmap-defined phase is Phase 0.13 — Provider Layer Consolidation.
+
+This update does not change the historical guidance above. It records the current Stage 0 direction: provider boundaries must be inventoried, designed, implemented where required, integrated with handlers/application services and validated without public API drift.
+
+The existing observability direction remains valid as an infrastructure concern, but Phase 0.13 is Provider Layer Consolidation rather than Observability & Diagnostics Foundation.

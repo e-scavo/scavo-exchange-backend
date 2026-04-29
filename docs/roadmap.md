@@ -249,8 +249,29 @@ Internal subdivision:
 #### Expected outcome
 Phase 0.12 closes with clearer internal model responsibilities, explicit mapping boundaries and unchanged public HTTP/API behavior.
 
-### 0.13 — Observability & Diagnostics Foundation ⬜ Pending
-Introduce structured logging, tracing, and metrics.
+### 0.13 — Provider Layer Consolidation ⬜ Pending
+Consolidate the Provider Layer as the explicit entry point to domain services after Read / Write Model Separation.
+
+#### 0.13.0 — Definition & Documentation Lock ⬜ Pending
+Lock the phase definition, correct roadmap consistency and register the subphase plan before code changes.
+
+#### 0.13.1 — Provider Inventory & Classification ⬜ Pending
+Identify existing providers, provider-like responsibilities, missing providers and invalid direct access patterns.
+
+#### 0.13.2 — Provider Interface Design ⬜ Pending
+Define narrow provider interfaces aligned with read/write model separation and module ownership.
+
+#### 0.13.3 — Provider Implementation ⬜ Pending
+Implement provider boundaries incrementally while preserving compatibility.
+
+#### 0.13.4 — Application Integration ⬜ Pending
+Align handlers and application services with consolidated provider boundaries.
+
+#### 0.13.5 — Validation & Compatibility ⬜ Pending
+Validate public contract preservation and runtime compatibility.
+
+#### 0.13.6 — Documentation & Closure ⬜ Pending
+Record the final provider boundary state and close the phase.
 
 ### 0.14 — Contract Hardening & Freeze ⬜ Pending
 Stabilize and freeze API contracts before feature expansion.

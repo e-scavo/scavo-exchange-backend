@@ -1779,3 +1779,13 @@ go test ./...
 ### Result
 
 The final 0.11.5 state was validated with a full passing repository test run after user and user-settings contract extraction, interface alignment and runtime compatibility validation.
+
+---
+
+## Phase 0.13 Documentation Update — Provider Layer Consolidation
+
+After the completed Phase 0.12 Read / Write Model Separation, the next roadmap-defined phase is Phase 0.13 — Provider Layer Consolidation.
+
+This update does not change the historical guidance above. It records the current Stage 0 direction: provider boundaries must be inventoried, designed, implemented where required, integrated with handlers/application services and validated without public API drift.
+
+The existing observability direction remains valid as an infrastructure concern, but Phase 0.13 is Provider Layer Consolidation rather than Observability & Diagnostics Foundation.

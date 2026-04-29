@@ -750,3 +750,17 @@ The expected direction is:
 ## Phase 0.12.5 Contract Alignment Result
 
 Phase 0.12.5 completed the alignment between HTTP handler contracts, internal write models, domain inputs, read models and centralized mapping ownership. Public HTTP routes, request payload semantics, response payload semantics and API versioning remain unchanged.
+
+## Phase 0.13 Provider Layer Consolidation Boundary
+
+Phase 0.13 follows the completed Read / Write Model Separation phase.
+
+The architectural target is to consolidate provider boundaries as the explicit entry point between transport/application orchestration and domain services.
+
+The intended direction is:
+
+```text
+HTTP → Provider → Application → Domain → Repository
+```
+
+This phase must preserve the public HTTP/API surface and must not introduce business behavior changes. Provider consolidation is an internal boundary clarification built on top of the Phase 0.12 mapper and contract alignment results.

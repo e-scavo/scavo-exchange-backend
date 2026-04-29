@@ -265,3 +265,13 @@ Validation was recorded in 0.12.2.5 using `go test ./...`. The next phase step i
 ## Phase 0.12.5.0 Contract Alignment Definition Lock
 
 0.12.5 is completed. Contract inventory, contract normalization design, contract alignment implementation, handler contract adjustment, validation and documentation closure are now recorded. Public HTTP/API behavior remains unchanged and validation is backed by `go test ./...`. Phase 0.12 is complete.
+
+---
+
+## Follow-Up Phase Alignment
+
+Phase 0.12 closes with read/write model separation, mapper ownership and contract alignment completed.
+
+The next roadmap-defined phase is Phase 0.13 — Provider Layer Consolidation.
+
+This follow-up phase must use the Phase 0.12 results as its baseline and must preserve public HTTP/API compatibility while consolidating provider boundaries.

@@ -1138,3 +1138,17 @@ The phase must preserve compatibility while making contract intent explicit enou
 ## Phase 0.12.5 Contract Alignment Closure
 
 The contract alignment sequence confirms that handler-facing request contracts are centralized, read/write transformation ownership remains in module mapper packages and provider-facing boundaries no longer obscure model direction. This completes the Phase 0.12 contract alignment path without requiring additional runtime contract drift.
+
+## Phase 0.13 — Provider Layer Consolidation (Deep Architectural Direction)
+
+Phase 0.13 formalizes provider boundaries after the model separation and contract alignment work completed in Phase 0.12.
+
+The deep architectural purpose is to make provider responsibility explicit:
+
+- handlers should not accumulate domain orchestration logic
+- application services should not hide ambiguous provider contracts
+- provider contracts should remain narrow and module-owned
+- mapper ownership must remain centralized in module-local mapper packages
+- read/write intent must remain visible at the boundary
+
+The phase is not a redesign of business behavior. It is a consolidation step that prepares the backend for later hardening by reducing implicit access paths and clarifying provider-facing contracts.

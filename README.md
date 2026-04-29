@@ -2881,3 +2881,44 @@ The completed subphase sequence is:
 - **0.12.5.6 — Documentation & Closure** ✔ Completed
 
 Phase 0.12 is complete. Next work must start from the next roadmap-defined phase definition.
+
+## Phase 0.13 — Provider Layer Consolidation
+
+Phase 0.13 starts after the completed Read / Write Model Separation phase.
+
+The phase consolidates the Provider Layer as the explicit entry point to domain services, using the model separation, mapper ownership and contract alignment completed in Phase 0.12 as its baseline.
+
+### Objective
+
+Establish a consistent provider boundary so handlers and application flows do not rely on scattered direct access to domain or repository responsibilities.
+
+### Included scope
+
+- provider inventory and classification
+- provider interface design
+- provider implementation where required
+- application and handler integration
+- compatibility validation
+- accumulated documentation closure
+
+### Excluded scope
+
+- public API changes
+- business behavior changes
+- API versioning changes
+- CQRS or event sourcing
+- observability implementation
+
+### Phase 0.13 subphases
+
+- **0.13.0 — Definition & Documentation Lock** ⬜ Pending
+- **0.13.1 — Provider Inventory & Classification** ⬜ Pending
+- **0.13.2 — Provider Interface Design** ⬜ Pending
+- **0.13.3 — Provider Implementation** ⬜ Pending
+- **0.13.4 — Application Integration** ⬜ Pending
+- **0.13.5 — Validation & Compatibility** ⬜ Pending
+- **0.13.6 — Documentation & Closure** ⬜ Pending
+
+### Current status
+
+Phase 0.13 is pending. Phase 0.13.0 is the next documentation-only lock before implementation begins.

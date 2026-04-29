@@ -762,3 +762,16 @@ Close Contract Alignment as completed while preserving existing public HTTP rout
 
 Consequences:
 Phase 0.12 can close with model separation, mapping ownership and contract alignment consistently documented and validated.
+
+## Decision: Start Provider Layer Consolidation After Contract Alignment
+
+Phase: 0.13.0
+
+Context:
+Phase 0.12 completed Read / Write Model Separation, centralized mapping ownership and internal contract alignment. Provider-like responsibilities still require a dedicated consolidation pass so that handlers and application flows rely on explicit provider boundaries.
+
+Decision:
+Start Phase 0.13 as Provider Layer Consolidation. The phase begins with documentation lock, then inventory, interface design, implementation, application integration, validation and closure.
+
+Consequences:
+Provider work must remain internal and compatibility-preserving. Public HTTP routes, request payloads, response payloads, API versioning and business behavior must remain unchanged unless a later explicitly approved phase changes them.

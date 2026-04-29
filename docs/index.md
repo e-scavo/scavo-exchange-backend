@@ -38,6 +38,7 @@
 * `phase0_10_authorization_layer.md`
 * `phase0_11_domain_module_pattern.md`
 * `phase0_12_read_write_model_separation.md`
+* `phase0_13_provider_layer_consolidation.md`
 
 ---
 
@@ -45,6 +46,7 @@
 
 * `phase0_11_domain_module_pattern.md`
 * `phase0_12_read_write_model_separation.md`
+* `phase0_13_provider_layer_consolidation.md`
 * `phase0_10_authorization_layer.md`
   * `0.10.1 — Authorization Model Definition`
   * `0.10.2 — Authorization Context & Middleware`
@@ -122,9 +124,9 @@ Phase 0.9 ✔ Completed
 
 Phase 0.10 ✔ Completed
 
-Latest completed phase: `0.11 — Domain Module Pattern`  
-Current phase: `0.12 — Read / Write Model Separation`  
-Latest completed subphase: `0.12.4.6 — Mapping Layer Introduction Documentation & Closure`
+Latest completed phase: `0.12 — Read / Write Model Separation`  
+Current phase: `0.13 — Provider Layer Consolidation`  
+Latest completed subphase: `0.12.5.6 — Documentation & Closure`
 
 
 ---
@@ -195,6 +197,21 @@ Phase 0.11 ✔ Completed — next planned phase: 0.12
 Phase 0.12 is completed. 0.12.0 is completed as the phase-level documentation lock, 0.12.1 is completed as the audit sequence, 0.12.2 is completed as the Read Model Extraction sequence, 0.12.3 is completed as the Write Model Isolation sequence, 0.12.4 is completed as the Mapping Layer Introduction sequence and 0.12.5 is completed as the Contract Alignment sequence.
 
 
+ 
+---
+
+### Phase 0.13 — Provider Layer Consolidation
+
+- 0.13.0 ⬜ Definition & Documentation Lock
+- 0.13.1 ⬜ Provider Inventory & Classification
+- 0.13.2 ⬜ Provider Interface Design
+- 0.13.3 ⬜ Provider Implementation
+- 0.13.4 ⬜ Application Integration
+- 0.13.5 ⬜ Validation & Compatibility
+- 0.13.6 ⬜ Documentation & Closure
+
+Phase 0.13 ⬜ Pending — next phase after completed Phase 0.12.
+
 ---
 
 ### Phase 0.12.1 Dedicated Document
@@ -239,3 +256,7 @@ Phase 0.12 is completed. 0.12.0 is completed as the phase-level documentation lo
 - `docs/phase0_12_5_handler_contract_adjustment.md` — records handler-level contract adjustment.
 - `docs/phase0_12_5_validation_compatibility.md` — records compatibility validation for 0.12.5.
 - `docs/phase0_12_5_documentation_closure.md` — records formal closure of Phase 0.12.5.
+
+### Phase 0.13 Dedicated Document
+
+- `docs/phase0_13_provider_layer_consolidation.md` — defines the Provider Layer Consolidation plan, scope, subphase sequence, compatibility constraints and documentation lock.

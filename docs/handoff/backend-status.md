@@ -1119,3 +1119,39 @@ Current contract alignment target:
 0.12.5 is completed. The backend now has contract inventory documentation, contract normalization design, implementation-level contract alignment, centralized HTTP contract aliases, handler contract adjustment and validation documentation backed by `go test ./...`.
 
 Next planned step: next roadmap-defined phase.
+
+---
+
+## Phase 0.13 — Provider Layer Consolidation
+
+### Current State
+
+Phase 0.12 is completed. The backend has read/write model separation, centralized mapping ownership and aligned internal contracts.
+
+Phase 0.13 is pending and must start with 0.13.0 — Definition & Documentation Lock.
+
+### Operational Meaning
+
+The next architectural movement is provider boundary consolidation. Handlers and application flows should progressively depend on explicit provider contracts instead of scattered direct access to lower-level responsibilities.
+
+### Subphase State
+
+- 0.13.0 — Definition & Documentation Lock (PENDING)
+- 0.13.1 — Provider Inventory & Classification (PENDING)
+- 0.13.2 — Provider Interface Design (PENDING)
+- 0.13.3 — Provider Implementation (PENDING)
+- 0.13.4 — Application Integration (PENDING)
+- 0.13.5 — Validation & Compatibility (PENDING)
+- 0.13.6 — Documentation & Closure (PENDING)
+
+### Compatibility Constraints
+
+- no public HTTP route changes
+- no public request or response payload changes
+- no API versioning changes
+- no business behavior changes
+- no observability implementation in this phase
+
+### Next Required Action
+
+Start Phase 0.13.0 by locking documentation and confirming the provider consolidation scope before code changes.
