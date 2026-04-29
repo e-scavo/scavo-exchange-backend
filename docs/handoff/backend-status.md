@@ -1052,6 +1052,13 @@ The backend is still externally aligned with the completed 0.11 runtime behavior
   - ✔ 0.12.4.5 — Validation & Compatibility
   - ✔ 0.12.4.6 — Documentation & Closure
 - ⬜ 0.12.5 — Contract Alignment
+  - ✔ 0.12.5.0 — Definition & Documentation Lock
+  - ⬜ 0.12.5.1 — Contract Inventory & Classification
+  - ⬜ 0.12.5.2 — Contract Normalization Design
+  - ⬜ 0.12.5.3 — Contract Alignment Implementation
+  - ⬜ 0.12.5.4 — Handler Contract Adjustment
+  - ⬜ 0.12.5.5 — Validation & Compatibility
+  - ⬜ 0.12.5.6 — Documentation & Closure
 - ⬜ 0.12.6 — Documentation & Phase Closure
 
 ### Next Required Action
@@ -1092,7 +1099,17 @@ The completed step is 0.12.4.0 — Mapping Layer Introduction Definition & Docum
 
 ### 0.12.5.0 Contract Alignment Definition Lock
 
-0.12.5.0 is completed as a documentation-only step. The backend is now ready to start Contract Inventory for Phase 0.12.5.
+0.12.5.0 is completed as a documentation-only step. The backend is now entering contract alignment after full mapping layer consolidation and is ready to start Contract Inventory for Phase 0.12.5.
+
+Subphase sequence:
+
+- 0.12.5.0 — Definition & Documentation Lock (COMPLETED)
+- 0.12.5.1 — Contract Inventory & Classification (PENDING)
+- 0.12.5.2 — Contract Normalization Design (PENDING)
+- 0.12.5.3 — Contract Alignment Implementation (PENDING)
+- 0.12.5.4 — Handler Contract Adjustment (PENDING)
+- 0.12.5.5 — Validation & Compatibility (PENDING)
+- 0.12.5.6 — Documentation & Closure (PENDING)
 
 Current contract alignment target:
 
