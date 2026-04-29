@@ -8,6 +8,7 @@ import (
 	coreauth "github.com/e-scavo/scavo-exchange-backend/internal/core/auth"
 	coreerrs "github.com/e-scavo/scavo-exchange-backend/internal/core/errs"
 	authapp "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/app"
+	authmappers "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/mappers"
 	authwritemodels "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/writemodels"
 	usermod "github.com/e-scavo/scavo-exchange-backend/internal/modules/user"
 )
@@ -48,7 +49,7 @@ func (h HTTPHandlers) WalletChallenge(w http.ResponseWriter, r *http.Request) {
 		challengeTTL = 5 * time.Minute
 	}
 
-	input := req.ToDomainInput()
+	input := authmappers.WalletChallengeWriteToDomainInput(req)
 
 	svc := NewWalletChallengeService(h.Challenges, h.PublicBaseURL, challengeTTL)
 	challenge, err := svc.Create(r.Context(), input.Address, input.Chain)
@@ -75,7 +76,7 @@ func (h HTTPHandlers) WalletVerify(w http.ResponseWriter, r *http.Request) {
 	loginSvc := NewService(h.Tokens, h.Users, h.TTL)
 	verifySvc := NewWalletVerificationService(challengeSvc, loginSvc, h.WalletIdentities)
 
-	input := req.ToDomainInput()
+	input := authmappers.WalletVerifyWriteToDomainInput(req)
 
 	result, challenge, err := verifySvc.VerifyAndLogin(r.Context(), input.ChallengeID, input.Address, input.Signature)
 	if err != nil {
@@ -144,7 +145,7 @@ func (h HTTPHandlers) WalletLinkChallenge(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	input := req.ToDomainInput()
+	input := authmappers.WalletLinkChallengeWriteToDomainInput(req)
 
 	response, err := h.Application().CreateWalletLinkChallenge(r.Context(), claims.UserID, input.Address, input.Chain)
 	if err != nil {
@@ -161,7 +162,7 @@ func (h HTTPHandlers) WalletLinkVerify(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	input := req.ToDomainInput()
+	input := authmappers.WalletLinkVerifyWriteToDomainInput(req)
 
 	response, err := h.Application().VerifyWalletLink(r.Context(), claims.UserID, input.ChallengeID, input.Address, input.Signature)
 	if err != nil {
@@ -178,7 +179,7 @@ func (h HTTPHandlers) WalletAccountMergeChallenge(w http.ResponseWriter, r *http
 		return
 	}
 
-	input := req.ToDomainInput()
+	input := authmappers.WalletAccountMergeChallengeWriteToDomainInput(req)
 
 	response, err := h.Application().CreateWalletAccountMergeChallenge(r.Context(), claims.UserID, input.Address, input.Chain)
 	if err != nil {
@@ -195,7 +196,7 @@ func (h HTTPHandlers) WalletAccountMergeVerify(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	input := req.ToDomainInput()
+	input := authmappers.WalletAccountMergeVerifyWriteToDomainInput(req)
 
 	response, err := h.Application().VerifyWalletAccountMerge(r.Context(), claims.UserID, input.ChallengeID, input.Address, input.Signature)
 	if err != nil {
@@ -212,7 +213,7 @@ func (h HTTPHandlers) WalletDetachCheck(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	input := req.ToDomainInput()
+	input := authmappers.WalletDetachCheckWriteToDomainInput(req)
 
 	response, err := h.Application().CheckWalletDetach(r.Context(), claims.UserID, input.Address)
 	if err != nil {
@@ -229,7 +230,7 @@ func (h HTTPHandlers) WalletDetach(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	input := req.ToDomainInput()
+	input := authmappers.WalletDetachExecuteWriteToDomainInput(req)
 
 	response, err := h.Application().ExecuteWalletDetach(r.Context(), claims.UserID, input.Address)
 	if err != nil {
@@ -246,7 +247,7 @@ func (h HTTPHandlers) WalletSetPrimary(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	input := req.ToDomainInput()
+	input := authmappers.WalletPrimarySetWriteToDomainInput(req)
 
 	response, err := h.Application().SetPrimaryWallet(r.Context(), claims.UserID, input.Address)
 	if err != nil {

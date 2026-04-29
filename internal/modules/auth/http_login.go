@@ -9,6 +9,7 @@ import (
 
 	coreauth "github.com/e-scavo/scavo-exchange-backend/internal/core/auth"
 	coreerrs "github.com/e-scavo/scavo-exchange-backend/internal/core/errs"
+	authmappers "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/mappers"
 	authwritemodels "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/writemodels"
 	usermod "github.com/e-scavo/scavo-exchange-backend/internal/modules/user"
 	userreadmodels "github.com/e-scavo/scavo-exchange-backend/internal/modules/user/readmodels"
@@ -104,7 +105,7 @@ func (h HTTPHandlers) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	input := req.ToDomainInput()
+	input := authmappers.LoginWriteToDomainInput(req)
 
 	resp, err := h.Application().Login(r.Context(), input.Email, input.Password)
 	if err != nil {
@@ -155,7 +156,7 @@ func (h HTTPHandlers) UpdateMe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	input := req.ToDomainInput()
+	input := authmappers.ProfileUpdateWriteToDomainInput(req)
 
 	updatedUser, err := h.Users.UpdateDisplayName(r.Context(), claims.UserID, input.DisplayName)
 	if err != nil {
@@ -207,7 +208,7 @@ func (h HTTPHandlers) UpdateMeSettings(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	input, err := req.ToDomainInput()
+	input, err := authmappers.SettingsUpdateWriteToDomainInput(req)
 	if err != nil {
 		writeAppErrorJSON(w, coreerrs.SettingsInvalidPayload())
 		return

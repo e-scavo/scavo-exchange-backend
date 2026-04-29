@@ -8,9 +8,9 @@ import (
 
 	coreauth "github.com/e-scavo/scavo-exchange-backend/internal/core/auth"
 	authdomain "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/domain"
-	authreadmodels "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/readmodels"
+	authmappers "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/mappers"
 	usermod "github.com/e-scavo/scavo-exchange-backend/internal/modules/user"
-	userreadmodels "github.com/e-scavo/scavo-exchange-backend/internal/modules/user/readmodels"
+	usermappers "github.com/e-scavo/scavo-exchange-backend/internal/modules/user/mappers"
 )
 
 type authenticatedContextView struct {
@@ -84,7 +84,7 @@ func buildSessionViewWithUser(claims *coreauth.Claims, user *usermod.User) *Sess
 		AuthMethod:    ctxView.AuthMethod,
 		Chain:         ctxView.Chain,
 		ExpiresAt:     expiresAt,
-		User:          userreadmodels.FromUser(user),
+		User:          usermappers.UserToReadModel(user),
 	}
 	if claims != nil {
 		view.Subject = strings.TrimSpace(claims.Subject)
@@ -110,7 +110,7 @@ func buildProfileViewWithUser(ctx context.Context, claims *coreauth.Claims, user
 	ctxView := buildAuthenticatedContextView(claims)
 
 	view := &ProfileView{
-		User:             userreadmodels.FromUser(user),
+		User:             usermappers.UserToReadModel(user),
 		UserID:           ctxView.UserID,
 		AuthMethod:       ctxView.AuthMethod,
 		WalletID:         ctxView.WalletID,
@@ -194,7 +194,7 @@ func buildBootstrapWalletsView(wallets []*WalletReadModel) BootstrapWalletsView 
 }
 
 func mapWalletIdentityToReadModel(wallet *authdomain.WalletIdentity) *WalletReadModel {
-	return authreadmodels.FromWalletIdentity(wallet)
+	return authmappers.WalletIdentityToReadModel(wallet)
 }
 
 func mapWalletIdentitiesToReadModels(wallets []*authdomain.WalletIdentity) []*WalletReadModel {
