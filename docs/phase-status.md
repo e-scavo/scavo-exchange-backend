@@ -1522,7 +1522,7 @@ Excluded:
 | 0.12.2 | Read Model Extraction | ✅ Completed |
 | 0.12.3 | Write Model Isolation | ✅ Completed |
 | 0.12.4 | Mapping Layer Introduction | ✅ Completed |
-| 0.12.5 | Contract Alignment | ⬜ Pending |
+| 0.12.5 | Contract Alignment | 🔄 In Progress |
 | 0.12.6 | Documentation & Phase Closure | ⬜ Pending |
 
 ### 0.12.0 Result
@@ -1643,3 +1643,25 @@ No Go code is changed in 0.12.4.0.
 0.12.4 is completed. The phase introduced module-local `mappers` packages, consolidated read-side and write-side mapping ownership, reduced residual application mapping, preserved public HTTP contracts and recorded validation with `go test ./...`.
 
 Next planned phase: 0.12.5 — Contract Alignment.
+
+### 0.12.5 Internal Sub-Subphase Plan
+
+| Sub-subphase | Name | Status |
+| --- | --- | --- |
+| 0.12.5.0 | Definition & Documentation Lock | ✅ Completed |
+| 0.12.5.1 | Contract Inventory | ⬜ Pending |
+| 0.12.5.2 | Provider Contract Alignment Design | ⬜ Pending |
+| 0.12.5.3 | Provider Contract Implementation | ⬜ Pending |
+| 0.12.5.4 | Compatibility Review | ⬜ Pending |
+| 0.12.5.5 | Validation & Compatibility | ⬜ Pending |
+| 0.12.5.6 | Documentation & Closure | ⬜ Pending |
+
+### 0.12.5.0 Result
+
+0.12.5.0 is documentation-only and is completed in this repository state. It defines the Contract Alignment sequence before code-level contract changes start, records the provider contract scope and requires runtime compatibility with the public HTTP/API surface to remain unchanged.
+
+No Go code is changed in 0.12.5.0.
+
+### Next
+
+0.12.5.1 — Contract Inventory.

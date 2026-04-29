@@ -202,13 +202,24 @@ Internal sequence:
 
 ### 0.12.5 — Contract Alignment
 
-Status: **Pending**.
+Status: **In Progress**.
 
 Purpose:
 
 - revisit 0.11 cross-module contracts
 - align `UserProvider` and `UserSettingsProvider` usage with read/write separation
+- align provider-facing inputs and outputs with centralized mapping ownership
 - preserve runtime compatibility
+
+Internal sequence:
+
+- 0.12.5.0 — Definition & Documentation Lock ✔ Completed
+- 0.12.5.1 — Contract Inventory ⬜ Pending
+- 0.12.5.2 — Provider Contract Alignment Design ⬜ Pending
+- 0.12.5.3 — Provider Contract Implementation ⬜ Pending
+- 0.12.5.4 — Compatibility Review ⬜ Pending
+- 0.12.5.5 — Validation & Compatibility ⬜ Pending
+- 0.12.5.6 — Documentation & Closure ⬜ Pending
 
 ### 0.12.6 — Documentation & Phase Closure
 
@@ -263,3 +274,7 @@ Validation was recorded in 0.12.2.5 using `go test ./...`. The next phase step i
 ## 0.12.4.0 Closure Statement
 
 0.12.4 is completed. Mapping Layer Introduction now has module-local mapper packages, consolidated mapping ownership, application-layer residual mapping reduction and validation documentation. The next phase is 0.12.5 — Contract Alignment.
+
+## Phase 0.12.5.0 Contract Alignment Definition Lock
+
+0.12.5.0 is completed as the documentation lock for Contract Alignment. The next step is 0.12.5.1 — Contract Inventory. No Go code is changed in this subphase.

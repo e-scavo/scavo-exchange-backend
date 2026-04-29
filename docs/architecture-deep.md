@@ -1120,3 +1120,17 @@ The `.0` step is documentation-only. It prevents implementation from starting be
 The mapping layer introduction sequence is completed. The backend now has centralized module-local packages for explicit transformation directions: Write → Domain and Domain → Read. Application-layer helper code delegates to these packages where 0.12.4 targeted consolidation, while compatibility wrappers remain only where they preserve stable public behavior or keep staged refactor risk low.
 
 Validation status: `go test ./...` passed in the developer environment after 0.12.4.5 and remained valid for the closure baseline.
+
+## Phase 0.12.5 Deep Contract Alignment Model
+
+Phase 0.12.5 is the bridge between the model separation work and the contracts introduced during the Domain Module Pattern phase. The purpose is not to redesign business behavior. The purpose is to verify and align internal contracts so that providers, services and application boundaries describe their read/write intent explicitly.
+
+The alignment work must inspect:
+
+- contract interfaces introduced during Phase 0.11
+- provider implementations used by auth, user and usersettings
+- read-side return values that should remain response-compatible
+- write-side inputs that should not leak transport or read-model concerns
+- mapping call sites that should remain owned by module-local mapper packages
+
+The phase must preserve compatibility while making contract intent explicit enough for later hardening.

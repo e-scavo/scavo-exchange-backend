@@ -734,3 +734,15 @@ The definition lock does not move code yet. It records that future implementatio
 ### 0.12.4 Mapping Layer Closure
 
 Phase 0.12.4 completed the transition from distributed mapper ownership to module-local mapper packages under `internal/modules/<module>/mappers/`. The architecture now treats mapping as an explicit boundary between write models, domain inputs, domain state and read models. Public HTTP contracts remain unchanged.
+
+## Phase 0.12.5 Contract Alignment Boundary
+
+Phase 0.12.5 aligns internal provider contracts with the model separation introduced during Phase 0.12. The alignment applies to provider-facing boundaries and must not change public HTTP routes, request payloads, response payloads or API versioning.
+
+The expected direction is:
+
+- provider contracts remain explicit and stable
+- read-side contract outputs use read models or read-oriented views intentionally
+- write-side contract inputs use write models or domain input objects intentionally
+- mapper ownership remains centralized under module-local `mappers` packages
+- application services avoid implicit transformation ownership

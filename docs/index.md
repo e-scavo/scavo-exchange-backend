@@ -184,10 +184,10 @@ Phase 0.11 ✔ Completed — next planned phase: 0.12
   - 0.12.4.4 ✔ Application Refactor
   - 0.12.4.5 ✔ Validation & Compatibility
   - 0.12.4.6 ✔ Documentation & Closure
-- 0.12.5 ⬜ Contract Alignment
+- 0.12.5 🔄 Contract Alignment
 - 0.12.6 ⬜ Documentation & Phase Closure
 
-Phase 0.12 is in progress. 0.12.0 is completed as the phase-level documentation lock, 0.12.1 is completed as the audit sequence, 0.12.2 is completed as the Read Model Extraction sequence, 0.12.3 is completed as the Write Model Isolation sequence, and 0.12.4 is completed as the Mapping Layer Introduction sequence. The next planned step is 0.12.5 — Contract Alignment.
+Phase 0.12 is in progress. 0.12.0 is completed as the phase-level documentation lock, 0.12.1 is completed as the audit sequence, 0.12.2 is completed as the Read Model Extraction sequence, 0.12.3 is completed as the Write Model Isolation sequence, and 0.12.4 is completed as the Mapping Layer Introduction sequence. The current step is 0.12.5.0 — Contract Alignment Definition & Documentation Lock.
 
 
 ---
@@ -224,3 +224,7 @@ Phase 0.12 is in progress. 0.12.0 is completed as the phase-level documentation 
 - `docs/phase0_12_4_application_refactor.md` — records application-layer residual mapping reduction.
 - `docs/phase0_12_4_validation_compatibility.md` — records compatibility validation for 0.12.4.
 - `docs/phase0_12_4_documentation_closure.md` — records formal closure of Phase 0.12.4.
+
+### Phase 0.12.5 Dedicated Document
+
+- `docs/phase0_12_5_contract_alignment.md` — defines the Contract Alignment plan, internal sub-subphase sequence, provider contract scope and compatibility constraints.

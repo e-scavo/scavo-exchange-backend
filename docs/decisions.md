@@ -727,3 +727,25 @@ Close Phase 0.12.4 as completed. The backend will proceed to Phase 0.12.5 — Co
 ### Status
 
 Accepted in 0.12.4.6.
+
+## Decision: Start Contract Alignment After Mapping Layer Consolidation
+
+Status: Accepted  
+Phase: 0.12.5.0
+
+### Context
+
+Phase 0.12.2 introduced read models, Phase 0.12.3 introduced write models and Phase 0.12.4 centralized mapper ownership. The remaining structural risk is that provider contracts may still describe mixed model ownership or allow implicit transformations to remain hidden behind application boundaries.
+
+### Decision
+
+Start Phase 0.12.5 as a dedicated Contract Alignment sequence. The sequence must review internal provider contracts and align them with the established model directions:
+
+- Write → Domain
+- Domain/Application → Read
+- centralized mapper ownership
+- public HTTP/API compatibility preservation
+
+### Consequences
+
+Contract changes must be evidence-driven and incremental. Any implementation step must avoid public API drift, avoid endpoint changes and avoid weakening the compatibility guarantees already validated in Phase 0.12.2 through Phase 0.12.4.

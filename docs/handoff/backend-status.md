@@ -1089,3 +1089,16 @@ The completed step is 0.12.4.0 — Mapping Layer Introduction Definition & Docum
 ### 0.12.4.6 Mapping Layer Introduction Closure
 
 0.12.4 is completed. The repository now contains module-local mapper packages, consolidated read/write mapping ownership, application-layer mapping reduction and validation documentation backed by `go test ./...`. The next planned phase is 0.12.5 — Contract Alignment.
+
+### 0.12.5.0 Contract Alignment Definition Lock
+
+0.12.5.0 is completed as a documentation-only step. The backend is now ready to start Contract Inventory for Phase 0.12.5.
+
+Current contract alignment target:
+
+- inspect provider contracts introduced during Phase 0.11
+- align provider input/output intent with read/write separation
+- preserve public HTTP/API compatibility
+- keep mapper ownership centralized under module-local `mappers` packages
+
+Next planned step: 0.12.5.1 — Contract Inventory.

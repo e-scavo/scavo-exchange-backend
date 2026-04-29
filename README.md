@@ -25,7 +25,7 @@ The backend follows a **wallet-first identity model** that progressively evolves
 **Phase:** 0.12 — Read/Write Model Separation  
 **Latest Completed Subphase:** **0.12.4.6 — Mapping Layer Introduction Documentation & Closure**  
 **Phase Status:** **In Progress**  
-**Next Planned Phase:** **0.12.5 — Contract Alignment**
+**Current Phase:** **0.12.5.0 — Contract Alignment Definition & Documentation Lock**
 
 ---
 
@@ -2817,7 +2817,7 @@ Phase 0.12 addresses that ambiguity without reopening the public contract.
   - **0.12.4.4 — Application Refactor** ✔ Completed
   - **0.12.4.5 — Validation & Compatibility** ✔ Completed
   - **0.12.4.6 — Documentation & Closure** ✔ Completed
-- **0.12.5 — Contract Alignment** ⬜ Pending
+- **0.12.5 — Contract Alignment** 🔄 In Progress
 - **0.12.6 — Documentation & Phase Closure** ⬜ Pending
 
 ### Current result
@@ -2852,3 +2852,11 @@ Phase 0.12 addresses that ambiguity without reopening the public contract.
 ## Phase 0.12.4 Closure
 
 Phase 0.12.4 — Mapping Layer Introduction is completed. The backend now contains module-local mapper packages, consolidated read/write transformation ownership, reduced application-layer mapping residuals and validation documentation backed by `go test ./...`. The next planned phase is 0.12.5 — Contract Alignment.
+
+## Phase 0.12.5.0 — Contract Alignment Definition & Documentation Lock
+
+Phase 0.12.5.0 starts the Contract Alignment sequence after the Mapping Layer Introduction closure. This documentation-only lock defines the contract alignment plan before any provider or runtime contract is changed.
+
+The phase focuses on reviewing and aligning internal provider contracts, especially the contracts introduced and stabilized during Phase 0.11, with the read/write model separation and centralized mapping ownership introduced during Phase 0.12.2 through Phase 0.12.4.
+
+No Go code is changed in 0.12.5.0.
