@@ -180,14 +180,25 @@ Purpose:
 
 ### 0.12.4 — Mapping Layer Introduction
 
-Status: **Pending**.
+Status: **In progress**.
 
 Purpose:
 
-- centralize or localize mapping functions according to real module needs
-- remove implicit transformations
-- make flow of data reviewable
-- preserve public behavior
+- introduce explicit centralized mapping ownership
+- consolidate Write → Domain transformations
+- consolidate Domain/Application → Read transformations
+- remove implicit conversions from application code
+- reduce coupling between models and handlers
+
+Internal sequence:
+
+- 0.12.4.0 — Definition & Documentation Lock ✔ Completed
+- 0.12.4.1 — Mapping Layer Design ⬜ Pending
+- 0.12.4.2 — Mapping Layer Implementation ⬜ Pending
+- 0.12.4.3 — Mapping Consolidation ⬜ Pending
+- 0.12.4.4 — Application Refactor ⬜ Pending
+- 0.12.4.5 — Validation & Compatibility ⬜ Pending
+- 0.12.4.6 — Documentation & Closure ⬜ Pending
 
 ### 0.12.5 — Contract Alignment
 
@@ -249,3 +260,6 @@ Validation was recorded in 0.12.2.5 using `go test ./...`. The next phase step i
 
 0.12.3 is completed. The repository now contains explicit write model packages, domain write input structures, Write → Domain mappers, handler alignment preserving public request payload semantics and validation documentation backed by `go test ./...`. The next planned step is 0.12.4 — Mapping Layer Introduction.
 
+## 0.12.4.0 Closure Statement
+
+0.12.4.0 is completed as a documentation-only subphase. Mapping Layer Introduction is now defined, its internal sequence is locked and the next step is 0.12.4.1 — Mapping Layer Design.

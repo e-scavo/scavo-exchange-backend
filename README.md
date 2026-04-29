@@ -23,9 +23,9 @@ The backend follows a **wallet-first identity model** that progressively evolves
 
 **Stage:** 0 — Foundation  
 **Phase:** 0.12 — Read/Write Model Separation  
-**Latest Completed Subphase:** **0.12.3.6 — Write Model Isolation Documentation & Closure**  
+**Latest Completed Subphase:** **0.12.4.0 — Mapping Layer Introduction Definition & Documentation Lock**  
 **Phase Status:** **In Progress**  
-**Next Planned Phase:** **0.12.4 — Mapping Layer Introduction**
+**Next Planned Phase:** **0.12.4.1 — Mapping Layer Design**
 
 ---
 
@@ -2809,7 +2809,14 @@ Phase 0.12 addresses that ambiguity without reopening the public contract.
   - **0.12.3.4 — Handler Alignment** ✔ Completed
   - **0.12.3.5 — Validation & Compatibility** ✔ Completed
   - **0.12.3.6 — Documentation & Closure** ✔ Completed
-- **0.12.4 — Mapping Layer Introduction** ⬜ Pending
+- **0.12.4 — Mapping Layer Introduction** 🚧 In progress
+  - **0.12.4.0 — Definition & Documentation Lock** ✔ Completed
+  - **0.12.4.1 — Mapping Layer Design** ⬜ Pending
+  - **0.12.4.2 — Mapping Layer Implementation** ⬜ Pending
+  - **0.12.4.3 — Mapping Consolidation** ⬜ Pending
+  - **0.12.4.4 — Application Refactor** ⬜ Pending
+  - **0.12.4.5 — Validation & Compatibility** ⬜ Pending
+  - **0.12.4.6 — Documentation & Closure** ⬜ Pending
 - **0.12.5 — Contract Alignment** ⬜ Pending
 - **0.12.6 — Documentation & Phase Closure** ⬜ Pending
 
@@ -2836,3 +2843,7 @@ Phase 0.12 addresses that ambiguity without reopening the public contract.
 ### Next
 
 0.12.4 — Mapping Layer Introduction
+
+### 0.12.4.0 result
+
+0.12.4.0 is completed as a documentation-only subphase. It locks the Mapping Layer Introduction plan before any Go code changes, defines the centralized mapper package direction and records that existing read/write mapper behavior must remain compatible until consolidation is implemented.

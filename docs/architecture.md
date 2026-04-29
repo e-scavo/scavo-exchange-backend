@@ -718,3 +718,14 @@ HTTP request DTO -> Write Model -> Domain / Application behavior
 ### 0.12.3 Write Model Isolation Closure
 
 The write-side boundary is now explicit for the current authentication-oriented flows. Public handlers continue to accept the same JSON payload semantics, while internal processing can route through write models and domain write inputs. This keeps the read model boundary output-only and prevents read structures from becoming mutation inputs.
+
+### 0.12.4 Mapping Layer Introduction Definition Lock
+
+0.12.4 introduces a centralized mapping layer as an internal architectural boundary. The target location is `internal/modules/<module>/mappers/`, separate from `readmodels`, `writemodels`, `domain` and `app`.
+
+The layer owns explicit transformations in both directions already introduced by 0.12.2 and 0.12.3:
+
+- Write → Domain
+- Domain/Application → Read
+
+The definition lock does not move code yet. It records that future implementation must preserve public HTTP request and response contracts while reducing mapper ownership spread across read model, write model and application packages.

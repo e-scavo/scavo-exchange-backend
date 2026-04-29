@@ -1096,3 +1096,20 @@ The 0.12.2 read model packages remain read-only projection structures. They must
 Phase 0.12.3 completes the write-side counterpart to the read model extraction. The repository now includes `writemodels` packages for `auth`, `user` and `usersettings`, domain write input structures and explicit Write → Domain mappers.
 
 Handler alignment preserves public request payload semantics while introducing an internal input boundary. Read models remain output-only and are not reused as command/input structures. Validation for the completed sequence is recorded in `docs/phase0_12_3_validation_compatibility.md` and confirmed by `go test ./...` in the development environment.
+
+### 0.12.4.0 — Mapping Layer Introduction Definition Lock
+
+After 0.12.2 and 0.12.3, the repository has explicit model separation but mapper ownership is still distributed: read model packages own output projection helpers, write model packages own input-to-domain helpers and some application support code still participates in response assembly.
+
+0.12.4 defines the consolidation path. The target is a dedicated module-local mapping package:
+
+```text
+internal/modules/<module>/mappers/
+```
+
+This package becomes the owner of explicit boundary transformations while model packages remain structural model definitions. The intended directions are:
+
+- Write → Domain for command/input translation
+- Domain/Application → Read for response projection
+
+The `.0` step is documentation-only. It prevents implementation from starting before the ownership rule, compatibility constraints and sub-subphase sequence are locked.

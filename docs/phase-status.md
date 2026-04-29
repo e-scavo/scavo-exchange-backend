@@ -1487,7 +1487,7 @@ In progress.
 
 ### Latest Completed Subphase
 
-0.12.2.0 — Read Model Extraction Definition & Documentation Lock.
+0.12.4.0 — Mapping Layer Introduction Definition & Documentation Lock.
 
 ### Objective
 
@@ -1521,7 +1521,7 @@ Excluded:
 | 0.12.1 | Model Classification Audit | ✅ Completed |
 | 0.12.2 | Read Model Extraction | ✅ Completed |
 | 0.12.3 | Write Model Isolation | ✅ Completed |
-| 0.12.4 | Mapping Layer Introduction | ⬜ Pending |
+| 0.12.4 | Mapping Layer Introduction | 🚧 In progress |
 | 0.12.5 | Contract Alignment | ⬜ Pending |
 | 0.12.6 | Documentation & Phase Closure | ⬜ Pending |
 
@@ -1615,6 +1615,24 @@ No Go code is changed in 0.12.3.0.
 
 0.12.3 is completed. It introduced explicit write model packages for `auth`, `user` and `usersettings`, domain write input structures, Write → Domain mapping functions, handler alignment preserving public request payload semantics and validation documentation backed by `go test ./...`.
 
+### 0.12.4 Internal Sub-Subphase Plan
+
+| Sub-subphase | Name | Status |
+| --- | --- | --- |
+| 0.12.4.0 | Definition & Documentation Lock | ✅ Completed |
+| 0.12.4.1 | Mapping Layer Design | ⬜ Pending |
+| 0.12.4.2 | Mapping Layer Implementation | ⬜ Pending |
+| 0.12.4.3 | Mapping Consolidation | ⬜ Pending |
+| 0.12.4.4 | Application Refactor | ⬜ Pending |
+| 0.12.4.5 | Validation & Compatibility | ⬜ Pending |
+| 0.12.4.6 | Documentation & Closure | ⬜ Pending |
+
+### 0.12.4.0 Result
+
+0.12.4.0 is documentation-only and is completed in this repository state. It defines the centralized Mapping Layer Introduction sequence before code-level design starts, records the mapper ownership target and requires read-side and write-side compatibility to remain unchanged during consolidation.
+
+No Go code is changed in 0.12.4.0.
+
 ### Next
 
-0.12.4 — Mapping Layer Introduction.
+0.12.4.1 — Mapping Layer Design.

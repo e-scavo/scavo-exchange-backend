@@ -667,3 +667,41 @@ Close 0.12.3 with explicit write model packages, domain write input structures, 
 ### Status
 
 Accepted in 0.12.3.6.
+
+## Decision: Centralize Mapping Ownership During Phase 0.12.4
+
+### Context
+
+Phase 0.12.2 introduced explicit read models and Domain/Application → Read mapping. Phase 0.12.3 introduced explicit write models, domain write inputs and Write → Domain mapping. This produced correct separation but left mapper ownership distributed across read model packages, write model packages and application support code.
+
+### Decision
+
+Phase 0.12.4 introduces a centralized module-local mapping layer under:
+
+```text
+internal/modules/<module>/mappers/
+```
+
+The layer will own explicit transformations while preserving all current public HTTP contracts.
+
+The locked internal sequence is:
+
+- 0.12.4.0 — Definition & Documentation Lock
+- 0.12.4.1 — Mapping Layer Design
+- 0.12.4.2 — Mapping Layer Implementation
+- 0.12.4.3 — Mapping Consolidation
+- 0.12.4.4 — Application Refactor
+- 0.12.4.5 — Validation & Compatibility
+- 0.12.4.6 — Documentation & Closure
+
+### Consequences
+
+- model packages remain focused on model definitions
+- mapping ownership becomes explicit
+- application code should stop accumulating transformation logic
+- public endpoints and JSON contracts remain unchanged
+- implementation must proceed incrementally and validate with `go test ./...`
+
+### Status
+
+Accepted in 0.12.4.0.

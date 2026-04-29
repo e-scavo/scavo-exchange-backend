@@ -1043,7 +1043,14 @@ The backend is still externally aligned with the completed 0.11 runtime behavior
   - ✔ 0.12.3.4 — Handler Alignment
   - ✔ 0.12.3.5 — Validation & Compatibility
   - ✔ 0.12.3.6 — Documentation & Closure
-- ⬜ 0.12.4 — Mapping Layer Introduction
+- 🚧 0.12.4 — Mapping Layer Introduction
+  - ✔ 0.12.4.0 — Definition & Documentation Lock
+  - ⬜ 0.12.4.1 — Mapping Layer Design
+  - ⬜ 0.12.4.2 — Mapping Layer Implementation
+  - ⬜ 0.12.4.3 — Mapping Consolidation
+  - ⬜ 0.12.4.4 — Application Refactor
+  - ⬜ 0.12.4.5 — Validation & Compatibility
+  - ⬜ 0.12.4.6 — Documentation & Closure
 - ⬜ 0.12.5 — Contract Alignment
 - ⬜ 0.12.6 — Documentation & Phase Closure
 
@@ -1068,8 +1075,12 @@ The next phase must not start by guessing model ownership. It must use these aud
 
 0.12.2 is completed. It introduced explicit read model packages, Domain/Application → Read mapping functions, response alignment and validation documentation. Public response compatibility remains preserved.
 
-The completed step is 0.12.3 — Write Model Isolation. The next planned step is 0.12.4 — Mapping Layer Introduction. It must consolidate the explicit mapping directions introduced in 0.12.2 and 0.12.3 without changing public HTTP contracts.
+The completed step is 0.12.4.0 — Mapping Layer Introduction Definition & Documentation Lock. The next planned step is 0.12.4.1 — Mapping Layer Design. It must design centralized mapper ownership for the explicit mapping directions introduced in 0.12.2 and 0.12.3 without changing public HTTP contracts.
 
 ### 0.12.3.0 Write Model Isolation Definition Lock
 
 0.12.3 is completed. It introduced write model packages, domain write inputs, Write → Domain mapping, handler alignment and validation documentation. The next step is 0.12.4 — Mapping Layer Introduction.
+
+### 0.12.4.0 Mapping Layer Introduction Definition Lock
+
+0.12.4.0 is completed as a documentation-only subphase. It defines the centralized mapper package direction, locks the 0.12.4 internal sequence and preserves the compatibility rule that public request and response contracts must remain unchanged during mapper consolidation.

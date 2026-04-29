@@ -220,8 +220,18 @@ Internal subdivision:
 - 0.12.3.5 — Validation & Compatibility ✔ Completed
 - 0.12.3.6 — Documentation & Closure ✔ Completed
 
-#### 0.12.4 — Mapping Layer Introduction ⬜ Pending
-Introduce explicit mapping functions for Domain → Read Model and Write Model → Domain transformations.
+#### 0.12.4 — Mapping Layer Introduction 🚧 In progress
+Introduce an explicit centralized mapping layer for Domain → Read Model and Write Model → Domain transformations, consolidating mapper ownership outside read model, write model and application packages.
+
+Internal subdivision:
+
+- 0.12.4.0 — Definition & Documentation Lock ✔ Completed
+- 0.12.4.1 — Mapping Layer Design ⬜ Pending
+- 0.12.4.2 — Mapping Layer Implementation ⬜ Pending
+- 0.12.4.3 — Mapping Consolidation ⬜ Pending
+- 0.12.4.4 — Application Refactor ⬜ Pending
+- 0.12.4.5 — Validation & Compatibility ⬜ Pending
+- 0.12.4.6 — Documentation & Closure ⬜ Pending
 
 #### 0.12.5 — Contract Alignment ⬜ Pending
 Review the 0.11 contracts and align UserProvider/UserSettingsProvider usage with the read/write separation.
