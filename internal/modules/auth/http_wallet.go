@@ -9,8 +9,10 @@ import (
 	coreerrs "github.com/e-scavo/scavo-exchange-backend/internal/core/errs"
 	authapp "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/app"
 	authmappers "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/mappers"
+	authreadmodels "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/readmodels"
 	authwritemodels "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth/writemodels"
-	usermod "github.com/e-scavo/scavo-exchange-backend/internal/modules/user"
+	usermappers "github.com/e-scavo/scavo-exchange-backend/internal/modules/user/mappers"
+	userreadmodels "github.com/e-scavo/scavo-exchange-backend/internal/modules/user/readmodels"
 )
 
 // =====================================================
@@ -20,22 +22,22 @@ import (
 type WalletChallengeRequest = authwritemodels.AuthWalletChallengeWriteModel
 
 type WalletChallengeResponse struct {
-	Challenge *WalletChallenge `json:"challenge"`
+	Challenge *authreadmodels.AuthWalletChallengeReadModel `json:"challenge"`
 }
 
 type WalletVerifyRequest = authwritemodels.AuthWalletVerifyWriteModel
 
 type WalletVerifyResponse struct {
-	AccessToken   string           `json:"access_token"`
-	TokenType     string           `json:"token_type"`
-	ExpiresIn     int64            `json:"expires_in"`
-	UserID        string           `json:"user_id"`
-	WalletID      string           `json:"wallet_id,omitempty"`
-	WalletAddress string           `json:"wallet_address"`
-	Chain         string           `json:"chain"`
-	AuthMethod    string           `json:"auth_method"`
-	User          *usermod.User    `json:"user,omitempty"`
-	Challenge     *WalletChallenge `json:"challenge,omitempty"`
+	AccessToken   string                                       `json:"access_token"`
+	TokenType     string                                       `json:"token_type"`
+	ExpiresIn     int64                                        `json:"expires_in"`
+	UserID        string                                       `json:"user_id"`
+	WalletID      string                                       `json:"wallet_id,omitempty"`
+	WalletAddress string                                       `json:"wallet_address"`
+	Chain         string                                       `json:"chain"`
+	AuthMethod    string                                       `json:"auth_method"`
+	User          *userreadmodels.UserReadModel                `json:"user,omitempty"`
+	Challenge     *authreadmodels.AuthWalletChallengeReadModel `json:"challenge,omitempty"`
 }
 
 func (h HTTPHandlers) WalletChallenge(w http.ResponseWriter, r *http.Request) {
@@ -58,7 +60,7 @@ func (h HTTPHandlers) WalletChallenge(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeJSON(w, http.StatusOK, WalletChallengeResponse{Challenge: challenge})
+	writeJSON(w, http.StatusOK, WalletChallengeResponse{Challenge: authmappers.WalletChallengeToReadModel(challenge)})
 }
 
 func (h HTTPHandlers) WalletVerify(w http.ResponseWriter, r *http.Request) {
@@ -85,10 +87,10 @@ func (h HTTPHandlers) WalletVerify(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userID := ""
-	var user *usermod.User
+	var user *userreadmodels.UserReadModel
 	if result != nil && result.User != nil {
 		userID = result.User.ID
-		user = result.User
+		user = usermappers.UserToReadModel(result.User)
 	}
 
 	writeJSON(w, http.StatusOK, WalletVerifyResponse{
@@ -101,7 +103,7 @@ func (h HTTPHandlers) WalletVerify(w http.ResponseWriter, r *http.Request) {
 		Chain:         result.Chain,
 		AuthMethod:    result.AuthMethod,
 		User:          user,
-		Challenge:     challenge,
+		Challenge:     authmappers.WalletChallengeToReadModel(challenge),
 	})
 }
 

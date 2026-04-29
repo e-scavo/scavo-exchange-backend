@@ -14,6 +14,8 @@ import (
 	usermod "github.com/e-scavo/scavo-exchange-backend/internal/modules/user"
 	userreadmodels "github.com/e-scavo/scavo-exchange-backend/internal/modules/user/readmodels"
 	usersettingsmod "github.com/e-scavo/scavo-exchange-backend/internal/modules/usersettings"
+	usersettingsmappers "github.com/e-scavo/scavo-exchange-backend/internal/modules/usersettings/mappers"
+	usersettingsreadmodels "github.com/e-scavo/scavo-exchange-backend/internal/modules/usersettings/readmodels"
 )
 
 type LoginRequest = authwritemodels.AuthLoginWriteModel
@@ -39,7 +41,7 @@ type SessionResponse struct {
 type UpdateMeSettingsRequest = authwritemodels.AuthUpdateSettingsWriteModel
 
 type MeSettingsResponse struct {
-	Settings usersettingsmod.View `json:"settings"`
+	Settings usersettingsreadmodels.UserSettingsReadModel `json:"settings"`
 }
 
 type HTTPHandlers struct {
@@ -230,7 +232,7 @@ func (h HTTPHandlers) UpdateMeSettings(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	view := usersettingsmod.ToView(settings)
+	view := usersettingsmappers.UserSettingsToReadModel(settings)
 
 	writeJSON(w, http.StatusOK, MeSettingsResponse{
 		Settings: view,
@@ -259,7 +261,7 @@ func (h HTTPHandlers) MeSettings(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	view := usersettingsmod.ToView(settings)
+	view := usersettingsmappers.UserSettingsToReadModel(settings)
 
 	writeJSON(w, http.StatusOK, MeSettingsResponse{
 		Settings: view,
