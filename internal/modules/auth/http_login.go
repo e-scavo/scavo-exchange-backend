@@ -26,6 +26,13 @@ type HTTPHandlers struct {
 	WalletIdentities WalletIdentityStore
 }
 
+// NewHTTPHandlers creates the runtime HTTP handler surface from the provider
+// boundary. Legacy fields remain on HTTPHandlers only for transitional tests and
+// fallback compatibility; production wiring should provide Provider explicitly.
+func NewHTTPHandlers(provider AuthProvider) HTTPHandlers {
+	return HTTPHandlers{Provider: provider}
+}
+
 func writeAppErrorJSON(w http.ResponseWriter, appErr *coreerrs.AppError) {
 	if appErr == nil {
 		appErr = coreerrs.InternalError(nil)

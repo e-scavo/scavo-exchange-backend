@@ -140,19 +140,13 @@ func New(cfg config.Config) *App {
 	)
 
 	r := httpx.NewRouter(httpx.RouterParams{
-		Log:                 lg,
-		Hub:                 hub,
-		Dispatcher:          dispatcher,
-		Config:              cfg,
-		TokenService:        tokens,
-		Status:              statusSvc,
-		AuthProvider:        authProvider,
-		UserService:         userService,
-		UserSettingsService: userSettingsService,
-		ChallengeStore:      walletChallengeStore,
-		WalletIdentityStore: walletIdentityStore,
-		ChallengeTTL:        time.Duration(cfg.AuthChallengeTTLMinutes) * time.Minute,
-		PublicBaseURL:       cfg.PublicBaseURL,
+		Log:          lg,
+		Hub:          hub,
+		Dispatcher:   dispatcher,
+		Config:       cfg,
+		TokenService: tokens,
+		Status:       statusSvc,
+		AuthProvider: authProvider,
 	})
 
 	srv := &http.Server{

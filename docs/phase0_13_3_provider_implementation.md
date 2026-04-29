@@ -214,10 +214,6 @@ go test ./...
 
 ## Result
 
-0.13.3 establishes the first concrete Provider Layer implementation for the auth surface and prepares the repository for:
+0.13.3 established the first concrete Provider Layer implementation for the auth surface and prepared the repository for application integration.
 
-```text
-0.13.4 — Application Integration
-```
-
-0.13.4 should focus on reducing remaining transitional compatibility wiring and confirming that application/provider integration is clean across handlers, router construction and tests.
+0.13.4 has now completed the runtime integration step: router construction consumes the consolidated auth provider directly and avoids carrying service/store implementation details into HTTP handler wiring.

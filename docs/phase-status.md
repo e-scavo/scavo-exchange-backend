@@ -1712,7 +1712,7 @@ Excluded:
 | 0.13.1 | Provider Inventory & Classification | ✅ Completed |
 | 0.13.2 | Provider Interface Design | ✅ Completed |
 | 0.13.3 | Provider Implementation | ✅ Completed |
-| 0.13.4 | Application Integration | ⬜ Pending |
+| 0.13.4 | Application Integration | ✅ Completed |
 | 0.13.5 | Validation & Compatibility | ⬜ Pending |
 | 0.13.6 | Documentation & Closure | ⬜ Pending |
 
@@ -1731,3 +1731,8 @@ Excluded:
 ### Next
 
 Start 0.13.3 — Provider Implementation.
+
+
+### 0.13.4 Result
+
+0.13.4 is completed as the application integration step. Runtime HTTP wiring now consumes the consolidated auth provider boundary directly through router construction. Direct service/store implementation details are no longer passed from the router into HTTP handlers during production wiring. Public routes, middleware, request/response contracts and authorization behavior remain unchanged.

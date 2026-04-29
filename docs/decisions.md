@@ -783,8 +783,8 @@ Provider work must remain internal and compatibility-preserving. Public HTTP rou
 - 0.13.1 ✔ Provider Inventory & Classification
 - 0.13.2 ✔ Provider Interface Design
 - 0.13.3 ✔ Provider Implementation
-- 0.13.4 ⬜ Application Integration
+- 0.13.4 ✔ Application Integration
 - 0.13.5 ⬜ Validation & Compatibility
 - 0.13.6 ⬜ Documentation & Closure
 
-0.13.2 is completed as documentation-only. The accepted next step is 0.13.3 — Provider Implementation.
+0.13.4 is completed as application integration. The accepted next step is 0.13.5 — Validation & Compatibility.

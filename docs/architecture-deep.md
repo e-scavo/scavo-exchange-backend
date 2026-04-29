@@ -1160,8 +1160,8 @@ The phase is not a redesign of business behavior. It is a consolidation step tha
 - 0.13.1 ✔ Provider Inventory & Classification
 - 0.13.2 ✔ Provider Interface Design
 - 0.13.3 ✔ Provider Implementation
-- 0.13.4 ⬜ Application Integration
+- 0.13.4 ✔ Application Integration
 - 0.13.5 ⬜ Validation & Compatibility
 - 0.13.6 ⬜ Documentation & Closure
 
-0.13.2 is completed as documentation-only. Provider interface design is now locked; provider implementation begins in 0.13.3 without changing public HTTP/API behavior.
+0.13.4 is completed as application integration. Runtime HTTP wiring now consumes the consolidated auth provider boundary directly while preserving public HTTP/API behavior.

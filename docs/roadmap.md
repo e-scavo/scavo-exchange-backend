@@ -264,8 +264,8 @@ Defined narrow provider interfaces aligned with the 0.13.1 inventory findings, r
 #### 0.13.3 — Provider Implementation ✔ Completed
 Implemented provider boundaries incrementally while preserving compatibility.
 
-#### 0.13.4 — Application Integration ⬜ Pending
-Align handlers and application services with consolidated provider boundaries.
+#### 0.13.4 — Application Integration ✔ Completed
+Integrated runtime HTTP wiring with the consolidated provider boundary while preserving public contracts and compatibility.
 
 #### 0.13.5 — Validation & Compatibility ⬜ Pending
 Validate public contract preservation and runtime compatibility.

@@ -15,8 +15,6 @@ import (
 	"github.com/e-scavo/scavo-exchange-backend/internal/core/status"
 	"github.com/e-scavo/scavo-exchange-backend/internal/core/ws"
 	authmod "github.com/e-scavo/scavo-exchange-backend/internal/modules/auth"
-	usermod "github.com/e-scavo/scavo-exchange-backend/internal/modules/user"
-	usersettingsmod "github.com/e-scavo/scavo-exchange-backend/internal/modules/usersettings"
 )
 
 type RouterParams struct {
@@ -25,15 +23,9 @@ type RouterParams struct {
 	Dispatcher *ws.Dispatcher
 	Config     config.Config
 
-	TokenService        *coreauth.TokenService
-	AuthProvider        authmod.AuthProvider
-	Status              *status.Service
-	UserService         *usermod.Service
-	UserSettingsService *usersettingsmod.Service
-	ChallengeStore      authmod.WalletChallengeStore
-	WalletIdentityStore authmod.WalletIdentityStore
-	ChallengeTTL        time.Duration
-	PublicBaseURL       string
+	TokenService *coreauth.TokenService
+	AuthProvider authmod.AuthProvider
+	Status       *status.Service
 }
 
 func NewRouter(p RouterParams) http.Handler {
@@ -91,17 +83,7 @@ func NewRouter(p RouterParams) http.Handler {
 			})
 		})
 
-		handlers := authmod.HTTPHandlers{
-			Provider:         p.AuthProvider,
-			Tokens:           p.TokenService,
-			TTL:              time.Duration(p.Config.JWTTTLHrs) * time.Hour,
-			Users:            p.UserService,
-			UserSettings:     p.UserSettingsService,
-			PublicBaseURL:    p.PublicBaseURL,
-			ChallengeTTL:     p.ChallengeTTL,
-			Challenges:       p.ChallengeStore,
-			WalletIdentities: p.WalletIdentityStore,
-		}
+		handlers := authmod.NewHTTPHandlers(p.AuthProvider)
 
 		registerAuthRoutes(r, "", p.TokenService, handlers)
 		registerAuthRoutes(r, "/api/v1", p.TokenService, handlers)

@@ -1135,7 +1135,7 @@ Next planned step: next roadmap-defined phase.
 
 Phase 0.12 is completed. The backend has read/write model separation, centralized mapping ownership and aligned internal contracts.
 
-Phase 0.13 is in progress. 0.13.3 — Provider Implementation is completed and the next required step is 0.13.4 — Application Integration.
+Phase 0.13 is in progress. 0.13.4 — Application Integration is completed and the next required step is 0.13.5 — Validation & Compatibility.
 
 ### Operational Meaning
 
@@ -1169,3 +1169,10 @@ The next architectural movement is application integration hardening. 0.13.1 con
 ### Next Required Action
 
 Start Phase 0.13.3 by implementing the provider interfaces locked in 0.13.2, without changing public routes, payloads or business behavior.
+
+
+### 0.13.4 Result
+
+0.13.4 completed application integration for the Provider Layer. Runtime HTTP construction now creates auth handlers from the consolidated provider boundary instead of passing user services, settings services, wallet stores and challenge configuration through router-level handler wiring. This keeps the public HTTP/API surface unchanged while tightening the runtime path toward `HTTP → Provider → Application → Domain → Repository`.
+
+Next required step: 0.13.5 — Validation & Compatibility.
