@@ -25,7 +25,7 @@ The backend follows a **wallet-first identity model** that progressively evolves
 **Phase:** 0.12 — Read/Write Model Separation  
 **Latest Completed Subphase:** **0.12.4.6 — Mapping Layer Introduction Documentation & Closure**  
 **Phase Status:** **In Progress**  
-**Current Phase:** **0.12.5.0 — Contract Alignment Definition & Documentation Lock**
+**Current Phase:** **0.12.5.6 — Contract Alignment Documentation & Closure**
 
 ---
 
@@ -2817,7 +2817,7 @@ Phase 0.12 addresses that ambiguity without reopening the public contract.
   - **0.12.4.4 — Application Refactor** ✔ Completed
   - **0.12.4.5 — Validation & Compatibility** ✔ Completed
   - **0.12.4.6 — Documentation & Closure** ✔ Completed
-- **0.12.5 — Contract Alignment** 🔄 In Progress
+- **0.12.5 — Contract Alignment** ✅ Completed
 - **0.12.6 — Documentation & Phase Closure** ⬜ Pending
 
 ### Current result

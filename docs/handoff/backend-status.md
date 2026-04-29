@@ -1051,14 +1051,14 @@ The backend is still externally aligned with the completed 0.11 runtime behavior
   - ✔ 0.12.4.4 — Application Refactor
   - ✔ 0.12.4.5 — Validation & Compatibility
   - ✔ 0.12.4.6 — Documentation & Closure
-- ⬜ 0.12.5 — Contract Alignment
+- ✔ 0.12.5 — Contract Alignment
   - ✔ 0.12.5.0 — Definition & Documentation Lock
-  - ⬜ 0.12.5.1 — Contract Inventory & Classification
-  - ⬜ 0.12.5.2 — Contract Normalization Design
-  - ⬜ 0.12.5.3 — Contract Alignment Implementation
-  - ⬜ 0.12.5.4 — Handler Contract Adjustment
-  - ⬜ 0.12.5.5 — Validation & Compatibility
-  - ⬜ 0.12.5.6 — Documentation & Closure
+  - ✔ 0.12.5.1 — Contract Inventory & Classification
+  - ✔ 0.12.5.2 — Contract Normalization Design
+  - ✔ 0.12.5.3 — Contract Alignment Implementation
+  - ✔ 0.12.5.4 — Handler Contract Adjustment
+  - ✔ 0.12.5.5 — Validation & Compatibility
+  - ✔ 0.12.5.6 — Documentation & Closure
 - ⬜ 0.12.6 — Documentation & Phase Closure
 
 ### Next Required Action
@@ -1104,12 +1104,12 @@ The completed step is 0.12.4.0 — Mapping Layer Introduction Definition & Docum
 Subphase sequence:
 
 - 0.12.5.0 — Definition & Documentation Lock (COMPLETED)
-- 0.12.5.1 — Contract Inventory & Classification (PENDING)
-- 0.12.5.2 — Contract Normalization Design (PENDING)
-- 0.12.5.3 — Contract Alignment Implementation (PENDING)
-- 0.12.5.4 — Handler Contract Adjustment (PENDING)
-- 0.12.5.5 — Validation & Compatibility (PENDING)
-- 0.12.5.6 — Documentation & Closure (PENDING)
+- 0.12.5.1 — Contract Inventory & Classification (COMPLETED)
+- 0.12.5.2 — Contract Normalization Design (COMPLETED)
+- 0.12.5.3 — Contract Alignment Implementation (COMPLETED)
+- 0.12.5.4 — Handler Contract Adjustment (COMPLETED)
+- 0.12.5.5 — Validation & Compatibility (COMPLETED)
+- 0.12.5.6 — Documentation & Closure (COMPLETED)
 
 Current contract alignment target:
 
@@ -1118,4 +1118,6 @@ Current contract alignment target:
 - preserve public HTTP/API compatibility
 - keep mapper ownership centralized under module-local `mappers` packages
 
-Next planned step: 0.12.5.1 — Contract Inventory.
+0.12.5 is completed. The backend now has contract inventory documentation, contract normalization design, implementation-level contract alignment, centralized HTTP contract aliases, handler contract adjustment and validation documentation backed by `go test ./...`.
+
+Next planned step: 0.12.6 — Documentation & Phase Closure.

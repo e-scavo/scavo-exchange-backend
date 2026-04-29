@@ -233,18 +233,18 @@ Internal subdivision:
 - 0.12.4.5 — Validation & Compatibility ✔ Completed
 - 0.12.4.6 — Documentation & Closure ✔ Completed
 
-#### 0.12.5 — Contract Alignment 🔄 In Progress
+#### 0.12.5 — Contract Alignment ✔ Completed
 Review the 0.11 contracts and align UserProvider/UserSettingsProvider usage with the read/write separation, write/read model boundaries and centralized mapping ownership.
 
 Internal subdivision:
 
 - 0.12.5.0 — Definition & Documentation Lock ✔ Completed
-- 0.12.5.1 — Contract Inventory ⬜ Pending
-- 0.12.5.2 — Provider Contract Alignment Design ⬜ Pending
-- 0.12.5.3 — Provider Contract Implementation ⬜ Pending
-- 0.12.5.4 — Compatibility Review ⬜ Pending
-- 0.12.5.5 — Validation & Compatibility ⬜ Pending
-- 0.12.5.6 — Documentation & Closure ⬜ Pending
+- 0.12.5.1 — Contract Inventory & Classification ✔ Completed
+- 0.12.5.2 — Contract Normalization Design ✔ Completed
+- 0.12.5.3 — Contract Alignment Implementation ✔ Completed
+- 0.12.5.4 — Handler Contract Adjustment ✔ Completed
+- 0.12.5.5 — Validation & Compatibility ✔ Completed
+- 0.12.5.6 — Documentation & Closure ✔ Completed
 
 #### 0.12.6 — Documentation & Phase Closure ⬜ Pending
 Update trunk documentation cumulatively and close the phase after implementation and validation.

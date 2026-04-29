@@ -290,22 +290,15 @@ The following regressions were specifically avoided:
 
 ---
 
-## Known Documentation Follow-Up
+## Documentation Normalization Follow-Up
 
-A naming difference exists across some documents:
+The naming drift observed during validation is resolved during 0.12.5.6. The canonical name for subphase 0.12.5.2 is:
 
 ```text
 Contract Normalization Design
-Provider Contract Alignment Design
 ```
 
 This does not affect runtime behavior.
-
-It should be normalized during:
-
-```text
-0.12.5.6 — Documentation & Closure
-```
 
 ---
 

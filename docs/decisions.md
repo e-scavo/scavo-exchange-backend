@@ -749,3 +749,16 @@ Start Phase 0.12.5 as a dedicated Contract Alignment sequence. The sequence must
 ### Consequences
 
 Contract changes must be evidence-driven and incremental. Any implementation step must avoid public API drift, avoid endpoint changes and avoid weakening the compatibility guarantees already validated in Phase 0.12.2 through Phase 0.12.4.
+
+## Decision: Close Contract Alignment With Public Contract Preservation
+
+Phase: 0.12.5.6
+
+Context:
+Phase 0.12.5 introduced contract inventory, normalization design, implementation-level alignment, handler contract adjustment and compatibility validation.
+
+Decision:
+Close Contract Alignment as completed while preserving existing public HTTP routes, JSON request fields, JSON response fields and API versioning. Internal contract ownership is now clearer through centralized HTTP contract aliases and mapper-owned transformations.
+
+Consequences:
+Phase 0.12 can proceed to 0.12.6 — Documentation & Phase Closure with model separation, mapping ownership and contract alignment consistently documented and validated.

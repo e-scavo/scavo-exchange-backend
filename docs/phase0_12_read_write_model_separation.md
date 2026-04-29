@@ -202,7 +202,7 @@ Internal sequence:
 
 ### 0.12.5 — Contract Alignment
 
-Status: **In Progress**.
+Status: **Completed**.
 
 Purpose:
 
@@ -214,12 +214,12 @@ Purpose:
 Internal sequence:
 
 - 0.12.5.0 — Definition & Documentation Lock ✔ Completed
-- 0.12.5.1 — Contract Inventory ⬜ Pending
-- 0.12.5.2 — Provider Contract Alignment Design ⬜ Pending
-- 0.12.5.3 — Provider Contract Implementation ⬜ Pending
-- 0.12.5.4 — Compatibility Review ⬜ Pending
-- 0.12.5.5 — Validation & Compatibility ⬜ Pending
-- 0.12.5.6 — Documentation & Closure ⬜ Pending
+- 0.12.5.1 — Contract Inventory & Classification ✔ Completed
+- 0.12.5.2 — Contract Normalization Design ✔ Completed
+- 0.12.5.3 — Contract Alignment Implementation ✔ Completed
+- 0.12.5.4 — Handler Contract Adjustment ✔ Completed
+- 0.12.5.5 — Validation & Compatibility ✔ Completed
+- 0.12.5.6 — Documentation & Closure ✔ Completed
 
 ### 0.12.6 — Documentation & Phase Closure
 
@@ -277,4 +277,4 @@ Validation was recorded in 0.12.2.5 using `go test ./...`. The next phase step i
 
 ## Phase 0.12.5.0 Contract Alignment Definition Lock
 
-0.12.5.0 is completed as the documentation lock for Contract Alignment. The next step is 0.12.5.1 — Contract Inventory. No Go code is changed in this subphase.
+0.12.5 is completed. Contract inventory, contract normalization design, contract alignment implementation, handler contract adjustment, validation and documentation closure are now recorded. Public HTTP/API behavior remains unchanged and validation is backed by `go test ./...`. The next step is 0.12.6 — Documentation & Phase Closure.

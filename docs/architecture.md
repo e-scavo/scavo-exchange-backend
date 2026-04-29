@@ -746,3 +746,7 @@ The expected direction is:
 - write-side contract inputs use write models or domain input objects intentionally
 - mapper ownership remains centralized under module-local `mappers` packages
 - application services avoid implicit transformation ownership
+
+## Phase 0.12.5 Contract Alignment Result
+
+Phase 0.12.5 completed the alignment between HTTP handler contracts, internal write models, domain inputs, read models and centralized mapping ownership. Public HTTP routes, request payload semantics, response payload semantics and API versioning remain unchanged.

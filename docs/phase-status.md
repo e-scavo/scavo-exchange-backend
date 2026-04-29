@@ -1522,7 +1522,7 @@ Excluded:
 | 0.12.2 | Read Model Extraction | ✅ Completed |
 | 0.12.3 | Write Model Isolation | ✅ Completed |
 | 0.12.4 | Mapping Layer Introduction | ✅ Completed |
-| 0.12.5 | Contract Alignment | 🔄 In Progress |
+| 0.12.5 | Contract Alignment | ✅ Completed |
 | 0.12.6 | Documentation & Phase Closure | ⬜ Pending |
 
 ### 0.12.0 Result
@@ -1649,12 +1649,12 @@ Next planned phase: 0.12.5 — Contract Alignment.
 | Sub-subphase | Name | Status |
 | --- | --- | --- |
 | 0.12.5.0 | Definition & Documentation Lock | ✅ Completed |
-| 0.12.5.1 | Contract Inventory | ⬜ Pending |
-| 0.12.5.2 | Provider Contract Alignment Design | ⬜ Pending |
-| 0.12.5.3 | Provider Contract Implementation | ⬜ Pending |
-| 0.12.5.4 | Compatibility Review | ⬜ Pending |
-| 0.12.5.5 | Validation & Compatibility | ⬜ Pending |
-| 0.12.5.6 | Documentation & Closure | ⬜ Pending |
+| 0.12.5.1 | Contract Inventory & Classification | ✅ Completed |
+| 0.12.5.2 | Contract Normalization Design | ✅ Completed |
+| 0.12.5.3 | Contract Alignment Implementation | ✅ Completed |
+| 0.12.5.4 | Handler Contract Adjustment | ✅ Completed |
+| 0.12.5.5 | Validation & Compatibility | ✅ Completed |
+| 0.12.5.6 | Documentation & Closure | ✅ Completed |
 
 ### 0.12.5.0 Result
 
@@ -1662,6 +1662,10 @@ Next planned phase: 0.12.5 — Contract Alignment.
 
 No Go code is changed in 0.12.5.0.
 
+### 0.12.5.6 Result
+
+0.12.5 is completed. It produced the contract inventory, contract normalization design, contract alignment implementation, handler contract adjustment and validation documentation. HTTP contract aliases are centralized, handlers preserve public JSON payloads and validation is recorded with `go test ./...`.
+
 ### Next
 
-0.12.5.1 — Contract Inventory.
+0.12.6 — Documentation & Phase Closure.

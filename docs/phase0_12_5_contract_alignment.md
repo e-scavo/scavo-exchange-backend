@@ -101,9 +101,9 @@ Purpose:
 - preserve compatibility rules before implementation
 - avoid code changes
 
-### 0.12.5.1 — Contract Inventory
+### 0.12.5.1 — Contract Inventory & Classification
 
-Status: Pending.
+Status: Completed.
 
 Purpose:
 
@@ -112,9 +112,9 @@ Purpose:
 - identify read/write/domain usage
 - detect mixed contract responsibilities
 
-### 0.12.5.2 — Provider Contract Alignment Design
+### 0.12.5.2 — Contract Normalization Design
 
-Status: Pending.
+Status: Completed.
 
 Purpose:
 
@@ -123,9 +123,9 @@ Purpose:
 - determine which contracts need explicit read/write/domain alignment
 - define safe migration order
 
-### 0.12.5.3 — Provider Contract Implementation
+### 0.12.5.3 — Contract Alignment Implementation
 
-Status: Pending.
+Status: Completed.
 
 Purpose:
 
@@ -134,9 +134,9 @@ Purpose:
 - preserve public HTTP/API contracts
 - keep mapping ownership centralized
 
-### 0.12.5.4 — Compatibility Review
+### 0.12.5.4 — Handler Contract Adjustment
 
-Status: Pending.
+Status: Completed.
 
 Purpose:
 
@@ -147,7 +147,7 @@ Purpose:
 
 ### 0.12.5.5 — Validation & Compatibility
 
-Status: Pending.
+Status: Completed.
 
 Purpose:
 
@@ -157,7 +157,7 @@ Purpose:
 
 ### 0.12.5.6 — Documentation & Closure
 
-Status: Pending.
+Status: Completed.
 
 Purpose:
 
@@ -182,7 +182,7 @@ After Phase 0.12.5 is completed:
 ## Status
 
 Phase: 0.12.5  
-Subphase: 0.12.5.0  
+Subphase: 0.12.5.6  
 Status: Completed  
-Code impact: None  
-Next: 0.12.5.1 — Contract Inventory
+Code impact: None in closure  
+Next: 0.12.6 — Documentation & Phase Closure
