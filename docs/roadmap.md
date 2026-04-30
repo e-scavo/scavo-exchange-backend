@@ -359,12 +359,178 @@ The final baseline records that successful response payloads remain intentionall
 
 ---
 
-## 👤 Stage 1 — Identity & Wallets
+## 🚀 Stage 1 — Application Surface & Product Capabilities
 
-- User model
-- Authentication
-- Web3 login
-- Wallet linking
+Stage 1 transforms the stable Stage 0 foundation into usable application-level product capabilities.
+
+Stage 0 closed the backend foundation by stabilizing architecture, observability, diagnostics, error shape, provider boundaries, response metadata and contract freeze rules. Stage 1 must not reopen that foundation work. It builds on it by defining real application flows, account-level capabilities, authorization behavior, data interaction patterns, write flows and end-to-end validation.
+
+### Objective
+
+Build product-facing backend capabilities on top of the frozen Stage 0 contracts.
+
+Stage 1 focuses on:
+
+- real application use cases
+- coherent account and identity surfaces
+- wallet management usability
+- permission and ownership behavior
+- data interaction patterns
+- mutation flows
+- end-to-end product validation
+
+### Scope
+
+Included:
+
+- application use-case consolidation
+- account and identity product capabilities
+- authorization and permission model refinement
+- data interaction patterns
+- mutation and write flows
+- system behavior consistency
+- end-to-end validation and closure
+
+Excluded:
+
+- reopening Stage 0 foundation architecture
+- changing frozen Stage 0 contracts without explicit versioning
+- blockchain capability implementation
+- DEX contracts
+- frontend implementation
+- infrastructure overengineering
+
+### Phase 1.1 — Application Use Case Consolidation
+
+Define the real application use cases that Stage 1 must support.
+
+This phase aligns the existing endpoint surface with product flows before expanding functionality.
+
+Focus areas:
+
+- identify real backend-supported application flows
+- map existing endpoints to use cases
+- detect orphaned, unclear or duplicate surfaces
+- define product-level success criteria
+- preserve Stage 0 contracts while clarifying intended usage
+
+### Phase 1.2 — Account & Identity Product Capabilities
+
+Transform the identity infrastructure into a usable product surface while preserving the frozen Stage 0 contracts.
+
+Focus areas:
+
+- complete session lifecycle
+- coherent account surface
+- usable wallet management
+- real user settings behavior
+- end-to-end account flows
+
+#### 1.2.1 — Session Lifecycle Completion
+
+- login → session → validation → refresh → logout
+- session consistency across endpoints
+- expiration and renewal behavior
+
+#### 1.2.2 — Account Surface Consolidation
+
+- `/me`
+- `/profile`
+- `/settings`
+- `/wallets`
+- structural consistency across account endpoints
+- read normalization
+
+#### 1.2.3 — Wallet Management Usability
+
+- wallet listing
+- wallet add/remove flows
+- primary wallet behavior
+- ownership validation
+
+#### 1.2.4 — User Settings Productization
+
+- consistent read behavior
+- real update behavior
+- defaults
+- validations
+
+#### 1.2.5 — Account-Level Authorization Refinement
+
+- endpoint permissions
+- ownership checks
+- session consistency
+
+#### 1.2.6 — End-to-End Flow Validation
+
+- login → bootstrap → update → logout
+- real edge cases
+- functional consistency
+
+#### 1.2.7 — Documentation & Closure
+
+- flow documentation
+- final validation
+- phase closure
+
+### Phase 1.3 — Authorization & Permission Model
+
+Refine authorization from foundational enforcement into product-level permission behavior.
+
+Focus areas:
+
+- roles
+- permissions
+- ownership checks
+- endpoint-level enforcement
+- session-aware permission consistency
+
+### Phase 1.4 — Data Interaction Patterns
+
+Standardize the way product surfaces expose data interaction.
+
+Focus areas:
+
+- pagination
+- filtering
+- sorting
+- response consistency
+- read model behavior
+
+### Phase 1.5 — Mutation & Write Flows
+
+Complete coherent write behavior for product-facing capabilities.
+
+Focus areas:
+
+- create flows
+- update flows
+- delete flows
+- validation behavior
+- write model consistency
+
+### Phase 1.6 — System Behavior Consistency
+
+Validate consistent behavior across product-level flows and edge cases.
+
+Focus areas:
+
+- idempotency where applicable
+- edge cases
+- conflict behavior
+- cross-endpoint consistency
+- contract-preserving behavior under failure
+
+### Phase 1.7 — End-to-End Validation & Closure
+
+Validate Stage 1 as a complete product-capability layer.
+
+Focus areas:
+
+- full flow validation
+- functional tests
+- documentation reconciliation
+- Stage 1 closure readiness
 
 ---
 
