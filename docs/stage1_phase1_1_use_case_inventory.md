@@ -424,3 +424,69 @@ This section reviews boundary risks in and around the current application layer 
 - Cross-module auth/user/usersettings behavior is acceptable only while auth remains an authenticated exposure/orchestration layer and user/settings keep their module-specific semantics.
 
 No boundary risk is corrected in 1.1.2.2. No Go source, tests or configuration changes are authorized by this review.
+
+## 1.1.2.3 Application Consolidation Targets
+
+This section defines future consolidation targets for the application layer derived from the 1.1.2.0 baseline, 1.1.2.1 wiring map and 1.1.2.2 boundary risk review. It is documentary only and does not authorize Go source changes, tests changes, configuration changes, refactors, file moves, function renames, provider changes, route changes, authorization changes or runtime behavior changes.
+
+### Application-Layer Consolidation Target Register
+
+| Target | Type | Affected area | File(s) involved | Source finding(s) | Current problem | Consolidation objective | Allowed scope | Prohibited scope | Risk | Prerequisites | Suggested order | Phase 1.1 or deferred |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| ACT-001 | B) composition root clarification / E) documentation-only follow-up | Runtime composition root | `internal/app/app.go`; `cmd/scavo-server/main.go` | ALB-001, ALB-002, WIR-001, WIR-002, ABR-001, ABR-002 | `internal/app.New` is broad by design and can be misread as product ownership. | Define `cmd` and `internal/app` as process/runtime composition and lifecycle only. | Documentation of owner rules, dependency categories and non-product status. | No extraction, constructor changes, lifecycle changes, config changes or server behavior changes. | Medium if undocumented; low if kept as guardrail. | 1.1.2.0 baseline and 1.1.2.1 wiring map. | 1 | Phase 1.1 documentation target. |
+| ACT-002 | D) dependency isolation / F) deferred to later phase | Runtime fallback dependency choices | `internal/app/app.go`; `internal/modules/user/app/service.go`; `internal/modules/usersettings/app/service.go`; `internal/modules/auth/*store*` | ALB-003, WIR-005, WIR-007, WIR-008, ABR-003 | DB-disabled and invalid-config fallbacks are operational decisions that could be mistaken for product defaults. | Keep fallbacks classified as runtime compatibility and isolate product default discussions from composition wiring. | Documentation of fallback purpose and owner boundaries. | No token fallback change, repository fallback change, nil-backed service change, in-memory store change or contract change. | Medium. | Runtime composition target ACT-001 must be documented first. | 2 | Phase 1.1 documentation; behavior deferred to later runtime/product scope if ever needed. |
+| ACT-003 | C) module boundary clarification / E) documentation-only follow-up | Auth provider and root compatibility boundary | `internal/app/app.go`; `internal/modules/auth/application.go`; `internal/modules/auth/app/application.go`; `internal/modules/auth/provider.go` | ALB-004, WIR-009, ABR-005, DDR-001, UCT-001 | Root `auth.Application` mirrors and adapts inner `auth/app.Application`, so active owner versus compatibility adapter can be confused. | Document `auth/app.Application` as active use-case owner and root `auth.Application` as compatibility/provider adapter. | Naming/ownership documentation, flow-to-provider mapping and adapter notes. | No provider signature change, wrapper removal, method rename, route change, response change or handler rewrite. | Medium. | ACT-001 and existing 1.1.1 ownership mapping. | 3 | Phase 1.1 documentation target; implementation cleanup deferred. |
+| ACT-004 | C) module boundary clarification / F) deferred to later phase | Auth wallet application/support services | `internal/modules/auth/app/application.go`; `internal/modules/auth/app/wallet_services.go`; `internal/modules/auth/domain/contracts.go` | ALB-007, WIR-013, ABR-007, DDR-008, UCT-008 | Wallet challenge/link/merge/primary/detach behavior is centralized in auth application/support services and is high-risk to split without a taxonomy. | Define wallet flow ownership and challenge-purpose taxonomy before any usability or behavior consolidation. | Documentation of purpose-to-flow mapping, service ownership and deferred behavior guardrails. | No service split, function move, challenge purpose rename, signature verification change, store change, route change or response change. | High. | ACT-003 provider owner rule and existing wallet use-case inventory. | 4 | Phase 1.1 documentation target; behavior deferred to Phase 1.2.3 or Phase 1.6. |
+| ACT-005 | C) module boundary clarification / E) documentation-only follow-up | Cross-module account/settings application boundary | `internal/modules/auth/app/application.go`; `internal/modules/auth/domain/user_contract.go`; `internal/modules/auth/domain/usersettings_contract.go`; `internal/modules/user/app/service.go`; `internal/modules/usersettings/app/service.go` | ALB-008, WIR-014, ABR-008, UCT-004, UCT-005 | Auth exposes authenticated profile/settings flows while `user` and `usersettings` own validation, defaults, merge and persistence-facing behavior. | Document auth as authenticated exposure/orchestration and user/settings as behavior owners. | Documentation of dependency direction, field/behavior ownership and deferred productization boundaries. | No account route split, settings schema change, validation change, repository change, mapper change or mutation behavior change. | Medium. | ACT-003 and 1.1.1 ownership mapping. | 5 | Phase 1.1 documentation target; product behavior deferred to Phase 1.2/1.5. |
+| ACT-006 | C) module boundary clarification / F) deferred to later phase | Bootstrap aggregation boundary | `internal/modules/auth/app/application.go`; `internal/modules/auth/app/support_helpers.go`; `internal/modules/user/app/service.go`; `internal/modules/usersettings/app/service.go`; `internal/modules/auth/http_bootstrap.go` | ALB-007, ALB-008, ABR-010, DDR-006, UCT-006 | Bootstrap aggregates session, user/profile, settings and wallets and can hide downstream ownership if expanded. | Define bootstrap as read aggregation with field-level downstream owners. | Documentation of bootstrap fields, source owners and aggregation-only rule. | No payload change, mapper change, provider contract change, aggregation logic change or route change. | Medium. | ACT-005 cross-module owner rule. | 6 | Phase 1.1 documentation target; behavior deferred to Phase 1.2+. |
+| ACT-007 | A) wiring consolidation / C) module boundary clarification / F) deferred to later phase | HTTP versus WebSocket auth/session boundary | `internal/app/app.go`; `internal/core/httpx/router.go`; `internal/core/ws/*`; `internal/modules/auth/ws_handlers.go`; `internal/modules/auth/service.go`; `internal/modules/auth/app/application.go` | ALB-009, WIR-004, ABR-009, DDR-007, UCT-007 | HTTP current-user/session flows use provider/application paths while WS `whoami/session` use WS session/root service paths. | Classify WS auth actions as equivalent flows, reduced realtime views or separate realtime use cases before alignment. | Documentation of intent, differences, dependencies and deferred behavior audit. | No WS payload change, HTTP response change, service rewiring, dispatcher change, token/session change or route change. | Medium. | ACT-003 provider boundary and ACT-006 bootstrap/session mapping. | 7 | Phase 1.1 documentation target; behavior deferred to Phase 1.6. |
+| ACT-008 | D) dependency isolation / F) deferred to later phase | Router authorization and route wiring boundary | `internal/core/httpx/router.go`; `internal/core/authorization/*`; `internal/modules/auth/http_*.go` | ALB-005, ALB-006, WIR-010, WIR-011, ABR-006, ABR-012 | Router owns route/middleware wiring, but selected permission attachments sit close to product surfaces. | Preserve router as transport/versioning/middleware boundary and defer deep permission/product ownership decisions. | Documentation of route-to-provider mapping and authorization deferral boundary. | No permission change, middleware change, route change, authz policy change, error behavior change or test change. | Medium; high if altered outside authorization scope. | ACT-003 provider boundary and Stage 0 contract freeze. | 8 | Phase 1.1 documentation only; authorization implementation deferred to Phase 1.3/1.2.5. |
+| ACT-009 | E) documentation-only follow-up | System WS boundary | `internal/app/app.go`; `internal/modules/system/ws_handlers.go`; `internal/core/ws/*` | ALB-009, WIR-003, ABR-011 | System WS registration is low-risk today but should remain separated from product application flows. | Record `system.ping` as runtime/system transport surface, not application product capability. | Documentation note and no-action classification. | No dispatcher change, WS behavior change, diagnostics expansion or system route change. | Low. | ACT-001 composition root guardrail. | 9 | Phase 1.1 documentation target/no-action guardrail. |
+
+### Target Classification Summary
+
+- A) Wiring consolidation: ACT-007.
+- B) Composition root clarification: ACT-001.
+- C) Module boundary clarification: ACT-003, ACT-004, ACT-005, ACT-006 and ACT-007.
+- D) Dependency isolation: ACT-002 and ACT-008.
+- E) Documentation-only follow-up: ACT-001, ACT-003, ACT-005 and ACT-009.
+- F) Deferred to later phase: ACT-002, ACT-004, ACT-007 and ACT-008 for any behavior or implementation change.
+
+### Phase 1.1 Versus Deferred Targets
+
+Targets executable inside Phase 1.1 as documentation/mapping only:
+
+- ACT-001: clarify `cmd` and `internal/app` as runtime composition/lifecycle only.
+- ACT-002: document runtime fallback decisions as compatibility wiring.
+- ACT-003: document auth provider/root adapter ownership.
+- ACT-004: document wallet flow ownership and challenge-purpose taxonomy.
+- ACT-005: document auth-user-settings boundary.
+- ACT-006: document bootstrap as read aggregation with field-level owners.
+- ACT-007: document HTTP/WS auth/session intent and differences.
+- ACT-008: document router/authz boundary and deferral.
+- ACT-009: document system WS as low-risk runtime/system surface.
+
+Targets that are documentation-only in Phase 1.1:
+
+- All ACT targets in this section are documentation-only during Phase 1.1.
+- No ACT target authorizes code, tests, config, routes, providers, contracts, payloads, mappers, repositories or behavior changes.
+
+Targets deferred to Phase 1.2+ or later for any implementation:
+
+- ACT-002 behavior changes: later runtime/product scope only if explicitly approved.
+- ACT-004 wallet behavior/refactor: Phase 1.2.3 Wallet Management Usability or Phase 1.6 behavior consistency.
+- ACT-005 account/settings product behavior: Phase 1.2 and Phase 1.5.
+- ACT-006 bootstrap behavior or payload changes: Phase 1.2+.
+- ACT-007 HTTP/WS behavior alignment: Phase 1.6.
+- ACT-008 authorization semantics: Phase 1.3 and Phase 1.2.5.
+
+### Recommended Next Order
+
+1. Execute ACT-001 and ACT-002 first as documentation guardrails, because they prevent composition-root and fallback wiring from being mistaken for product ownership.
+2. Execute ACT-003 next to stabilize the provider/root adapter language before documenting flow contracts.
+3. Execute ACT-004, ACT-005 and ACT-006 as the core application-flow boundary targets for wallet, account/settings and bootstrap.
+4. Execute ACT-007 after session/bootstrap mapping is clear, because HTTP/WS comparison depends on the session/current-user intent map.
+5. Execute ACT-008 before any authorization-related Phase 1.3 work begins, strictly as a deferral boundary in Phase 1.1.
+6. Execute ACT-009 as a no-action guardrail during Phase 1.1 contract documentation or closure.
+
+No consolidation target is implemented in 1.1.2.3. No Go source, tests or configuration changes are authorized by this target definition.
