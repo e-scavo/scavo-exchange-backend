@@ -522,3 +522,9 @@ The reconciliation updates:
 ### Observable impact
 
 The documentation set now consistently states that Phase 0.14 is completed and that no active current phase is open until Phase 0.15 is explicitly defined. Historical phase notes remain preserved, but trunk current-state sections no longer point back to Phase 0.12 or partially pending Phase 0.6 subphases.
+
+### Residual historical drift cleanup
+
+A follow-up reconciliation pass corrected remaining historical wording that could still make completed phases appear active. In particular, README historical sections now describe Phase 0.11 and Phase 0.12 in past-tense terms, and the Phase 0.6 documentation no longer leaves later 0.6 subphases listed as pending.
+
+This cleanup does not change runtime behavior or the Phase 0.14 observability implementation. It only preserves documentary consistency after the phase closure.

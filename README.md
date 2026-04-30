@@ -2632,7 +2632,7 @@ Phase 0.10 is complete. The next phase can build on a closed and consistently de
 
 ## Phase 0.11 — Domain Module Pattern
 
-Phase 0.11 is the current structural Stage 0 step. It standardizes how domain-oriented modules are organized internally without changing the public transport contract, the authenticated bootstrap semantics or the already delivered authorization behavior.
+Phase 0.11 was the structural Stage 0 step that standardized how domain-oriented modules are organized internally without changing the public transport contract, the authenticated bootstrap semantics or the already delivered authorization behavior.
 
 ### Why this phase exists
 
@@ -2744,7 +2744,7 @@ Phase 0.11 is **completed**. The repository now has the Domain Module Pattern de
 
 ## Phase 0.12 — Read / Write Model Separation
 
-Phase 0.12 is the current structural Stage 0 step after the completed Domain Module Pattern. It formalizes an explicit separation between models used to read data from the system and models used to write or mutate data into the system.
+Phase 0.12 was the structural Stage 0 step after the completed Domain Module Pattern. It formalized an explicit separation between models used to read data from the system and models used to write or mutate data into the system.
 
 The phase is intentionally internal and compatibility-preserving. It does not introduce a public API version change, does not change business behavior and does not adopt full CQRS or event sourcing.
 

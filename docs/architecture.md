@@ -556,7 +556,7 @@ The architectural value of 0.10.5 is that the code and the trunk documentation n
 
 ## Phase 0.11 — Domain Module Pattern
 
-Phase 0.11 is the current architectural consolidation step after the completed authorization layer. It does not add a new public runtime capability on its own; instead, it standardizes how the current Stage 0 domain-facing modules are structured internally so later work can grow on top of a clearer module model.
+Phase 0.11 was the architectural consolidation step after the completed authorization layer. It does not add a new public runtime capability on its own; instead, it standardizes how the current Stage 0 domain-facing modules are structured internally so later work can grow on top of a clearer module model.
 
 The architectural target is a consistent internal module organization of the form:
 

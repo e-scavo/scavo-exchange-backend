@@ -506,17 +506,16 @@ Instead, it uses the stable authenticated surface they produced and begins the n
 
 ---
 
-## Current Phase 0.6 Status
+## Historical Phase 0.6 Status
+
+Phase 0.6 is historically completed and has been superseded by later structural and architectural phases from 0.7 through 0.14.
 
 ### Completed
 
 * 0.6.1 — Bootstrap Surface Boundary Clarification ✔
-
-### Pending
-
-* 0.6.2 — Authenticated Surface Contract Alignment
-* 0.6.3 — Session-Ready Bootstrap Read Model
-* 0.6.4 — Application Surface Consistency Hardening
+* 0.6.2 — Authenticated Surface Contract Alignment ✔
+* 0.6.3 — Session-Ready Bootstrap Read Model ✔
+* 0.6.4 — Application Surface Consistency Hardening ✔
 
 ---
 
@@ -537,7 +536,7 @@ With 0.6.1 complete:
 * `/auth/me/settings` remains the settings surface
 * `/auth/wallets` remains the wallet inventory surface
 
-This creates the right base for the next subphases of Phase 0.6, where contract alignment and session-ready bootstrap composition can proceed without semantic ambiguity.
+This created the right base for the later subphases of Phase 0.6, where contract alignment and session-ready bootstrap composition proceeded without semantic ambiguity.
 
 ---
 
@@ -612,3 +611,11 @@ Authenticated surface is now:
 ### Next
 
 0.6.4 — Application Surface Consistency Hardening
+
+---
+
+## Phase Closure Note
+
+Phase 0.6 is historically completed and has been superseded by later structural and architectural phases from 0.7 through 0.14.
+
+All Phase 0.6 subphases must be considered closed regardless of their original draft status at the time of writing. This note exists to prevent historical drift and ensure consistency across the documentation corpus.

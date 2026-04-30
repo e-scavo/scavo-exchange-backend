@@ -58,7 +58,7 @@
 
 ---
 
-## 🚧 Current Phase Focus
+## 🚧 Phase Focus
 
 Latest completed phase: `0.14 — Observability & Diagnostics Foundation`  
 Current phase: `None — awaiting Phase 0.15 definition`  
