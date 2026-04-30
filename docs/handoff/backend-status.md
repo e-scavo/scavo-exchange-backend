@@ -16,11 +16,11 @@ It is intended to:
 
 **Stage:** 0 — Foundation
 **Latest Completed Phase:** 0.14 — Observability & Diagnostics Foundation
-**Latest Completed Subphase:** 0.15.2 — Error Contract Alignment
-**Phase Status:** 0.15.2 Completed / 0.15.3 Pending
+**Latest Completed Subphase:** 0.15.3 — Provider Contract Validation
+**Phase Status:** 0.15.3 Completed / 0.15.4 Pending
 **Current Phase:** 0.15 — Contract Hardening & Freeze
-**Current Subphase:** 0.15.3 — Provider Contract Validation
-**Next Planned Subphase:** 0.15.3 — Provider Contract Validation
+**Current Subphase:** 0.15.4 — Response Schema Normalization
+**Next Planned Subphase:** 0.15.4 — Response Schema Normalization
 
 ---
 
@@ -1319,7 +1319,7 @@ Corrected areas:
 
 No Go code changed in this fix.
 
-The next chat or phase must start from: Phase 0.15 active with 0.15.0, 0.15.1 and 0.15.2 completed.
+The next chat or phase must start from: Phase 0.15 active with 0.15.0, 0.15.1, 0.15.2 and 0.15.3 completed.
 
 ---
 
@@ -1384,3 +1384,23 @@ Concrete change: `ResponseError.Details` no longer uses `omitempty`; `NewRespons
 
 Observable impact: frontend consumers and future contract-freeze work can rely on a stable error-envelope shape. The next subphase is **0.15.3 — Provider Contract Validation**.
 
+
+### Phase 0.15.3 Handoff — Provider Contract Validation
+
+0.15.3 completes Provider Contract Validation.
+
+Inherited context: the backend entered this subphase after HTTP contract audit and error contract alignment. The route surface and canonical error envelope were already documented and stable, so provider validation was intentionally limited to internal contract enforcement.
+
+Real problem: the auth module already exposed focused provider interfaces and delegated to application/domain services, but the most important contract seams were enforced implicitly through usage rather than by explicit compile-time declarations.
+
+Decision taken: validate provider ownership at compile time without modifying runtime behavior.
+
+Concrete change: `internal/modules/auth/application.go` now asserts:
+
+- `*Application` satisfies `AuthProvider`
+- `*user.Service` satisfies `authdomain.UserProvider`
+- `*usersettings.Service` satisfies `authdomain.UserSettingsProvider`
+
+Observable impact: future provider drift fails compilation. No HTTP route, response payload, error envelope, status code, domain behavior or repository behavior changed.
+
+Next step after 0.15.3 is **0.15.4 — Response Schema Normalization**.

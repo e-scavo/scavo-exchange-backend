@@ -5,8 +5,8 @@
 ## Status
 
 **Phase:** 0.15 — Contract Hardening & Freeze  
-**Current Subphase:** 0.15.3 — Provider Contract Validation  
-**Status:** 0.15.2 Completed / 0.15.3 Pending  
+**Current Subphase:** 0.15.4 — Response Schema Normalization  
+**Status:** 0.15.3 Completed / 0.15.4 Pending  
 **Type:** Contract hardening and freeze documentation  
 **Code changes in 0.15.1:** No
 
@@ -236,7 +236,7 @@ Silent drift is not allowed.
 - 0.15.0 — Phase Definition & Documentation Lock: **Completed**
 - 0.15.1 — HTTP Contract Audit: **Completed**
 - 0.15.2 — Error Contract Alignment: **Completed**
-- 0.15.3 — Provider Contract Validation: **Pending**
+- 0.15.3 — Provider Contract Validation: **Completed**
 - 0.15.4 — Response Schema Normalization: **Pending**
 - 0.15.5 — Contract Freeze Enforcement: **Pending**
 - 0.15.6 — Validation & Documentation: **Pending**
@@ -320,3 +320,29 @@ The next subphase is Provider Contract Validation.
 It must verify provider inputs, outputs and error propagation responsibilities without changing the public error envelope aligned in 0.15.2.
 
 ## End of Document
+
+## 0.15.3 Concrete Change
+
+0.15.3 validates provider contracts through compile-time assertions at the auth boundary.
+
+Context inherited: 0.15.1 defined the HTTP route baseline and 0.15.2 aligned the public error envelope. Provider validation therefore did not need to change external behavior; it needed to protect the internal seams that feed those external contracts.
+
+Real problem: provider interfaces already existed and were typed, but their satisfaction was mostly implicit. The handler-facing auth provider contract and the cross-module user/usersettings contracts could drift through future edits unless the build explicitly rejected mismatches.
+
+Decision taken: keep runtime behavior unchanged and add compile-time assertions to the existing auth boundary.
+
+Concrete change: `internal/modules/auth/application.go` now asserts that `*Application` implements `AuthProvider`, `*user.Service` implements `authdomain.UserProvider`, and `*usersettings.Service` implements `authdomain.UserSettingsProvider`.
+
+Impact observable: no HTTP response changed, but future provider drift becomes a compile-time failure. This preserves the contract freeze path without introducing new behavior.
+
+## Handoff to 0.15.4
+
+0.15.4 must continue with Response Schema Normalization.
+
+It must use the following validated baselines:
+
+- 0.15.1 HTTP route audit
+- 0.15.2 canonical error envelope alignment
+- 0.15.3 provider boundary compile-time validation
+
+It must not introduce new features, new routes, new business rules or unrelated architecture changes.

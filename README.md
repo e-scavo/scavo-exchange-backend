@@ -23,10 +23,10 @@ The backend follows a **wallet-first identity model** that progressively evolves
 
 **Stage:** 0 — Foundation  
 **Latest Completed Phase:** **0.14 — Observability & Diagnostics Foundation**  
-**Latest Completed Subphase:** **0.15.2 — Error Contract Alignment**  
-**Phase Status:** **0.15.2 Completed / 0.15.3 Pending**  
+**Latest Completed Subphase:** **0.15.3 — Provider Contract Validation**  
+**Phase Status:** **0.15.3 Completed / 0.15.4 Pending**  
 **Current Phase:** **0.15 — Contract Hardening & Freeze**  
-**Current Subphase:** **0.15.3 — Provider Contract Validation**
+**Current Subphase:** **0.15.4 — Response Schema Normalization**
 
 ---
 
@@ -3096,7 +3096,7 @@ Excluded:
 - **0.15.0 — Phase Definition & Documentation Lock** ✅ Completed
 - **0.15.1 — HTTP Contract Audit** ✅ Completed
 - **0.15.2 — Error Contract Alignment** ✅ Completed
-- **0.15.3 — Provider Contract Validation** ⏳ Pending
+- **0.15.3 — Provider Contract Validation** ✅ Completed
 - **0.15.4 — Response Schema Normalization** ⏳ Pending
 - **0.15.5 — Contract Freeze Enforcement** ⏳ Pending
 - **0.15.6 — Validation & Documentation** ⏳ Pending
@@ -3145,3 +3145,17 @@ Concrete change: `internal/core/errs/response_error.go` now always initializes a
 
 Observable impact: frontend consumers can rely on `error.details` being present as an object on canonical HTTP error responses. The next correct step is 0.15.3 — Provider Contract Validation.
 
+
+### 0.15.3 Result
+
+0.15.3 completes Provider Contract Validation with a focused internal-boundary hardening step.
+
+Inherited context: 0.15.1 established the HTTP route baseline and 0.15.2 aligned the public error envelope so provider validation could focus on the internal contract seam instead of response-shape ambiguity.
+
+Real problem: the auth provider boundary already existed through `AuthProvider`, `AuthSessionProvider`, `AuthenticatedAccountProvider` and `AuthWalletProvider`, and the auth application delegated into typed application/domain services. However, the contract was enforced mostly by usage. Cross-module provider dependencies were explicit in domain interfaces, but the build did not yet include a local compile-time guard proving that the concrete application and service types still satisfied those provider contracts.
+
+Decision taken: add compile-time provider contract assertions without changing runtime behavior, route registration, handler logic, error mapping, response schemas or business rules.
+
+Concrete change: `internal/modules/auth/application.go` now asserts that `*Application` satisfies `AuthProvider`, `*user.Service` satisfies `authdomain.UserProvider`, and `*usersettings.Service` satisfies `authdomain.UserSettingsProvider`.
+
+Observable impact: future drift in HTTP-to-provider or auth-to-cross-module provider contracts now fails at compile time instead of surfacing later through handler behavior or frontend-facing responses. The next correct step is 0.15.4 — Response Schema Normalization.

@@ -1906,7 +1906,7 @@ Observable impact at the time of 0.14.6.fix1: Stage 0 documentation had a cohere
 ## Phase 0.15 — Contract Hardening & Freeze
 
 Status: **In Progress**  
-Current subphase: **0.15.3 — Provider Contract Validation**
+Current subphase: **0.15.4 — Response Schema Normalization**
 
 Phase 0.15 starts from the completed Phase 0.14.6.fix3 baseline.
 
@@ -1925,7 +1925,7 @@ Observable impact: Phase 0.15 is no longer pending definition. The current activ
 - 0.15.0 — Phase Definition & Documentation Lock: **Completed**
 - 0.15.1 — HTTP Contract Audit: **Completed**
 - 0.15.2 — Error Contract Alignment: **Completed**
-- 0.15.3 — Provider Contract Validation: **Pending**
+- 0.15.3 — Provider Contract Validation: **Completed**
 - 0.15.4 — Response Schema Normalization: **Pending**
 - 0.15.5 — Contract Freeze Enforcement: **Pending**
 - 0.15.6 — Validation & Documentation: **Pending**
@@ -1970,3 +1970,17 @@ Concrete change: `internal/core/errs/response_error.go` now serializes `details`
 
 Observable impact: canonical HTTP error responses now have a stable `details` object for both detail-free and detail-rich errors. 0.15.3 can validate provider contracts without carrying an unresolved public error-envelope ambiguity.
 
+
+### 0.15.3 Result
+
+0.15.3 completed Provider Contract Validation with a narrow internal contract hardening change.
+
+Context inherited: 0.15.1 documented the HTTP route baseline and 0.15.2 stabilized the public error envelope. That allowed 0.15.3 to focus on provider boundaries instead of mixing response normalization or error-shape work into the same step.
+
+Real problem: the provider architecture was already clean and typed, but the most important internal seams were still validated mostly by usage. The HTTP layer consumed the auth module through `AuthProvider`, while auth consumed user and usersettings through minimal domain provider contracts. A future method-signature drift could break the intended boundary and be discovered only when wiring or tests exercised the affected path.
+
+Decision taken: preserve runtime behavior and add compile-time assertions at the owning boundary.
+
+Concrete change: `internal/modules/auth/application.go` now declares compile-time assertions for `*Application` against `AuthProvider`, for `*user.Service` against `authdomain.UserProvider`, and for `*usersettings.Service` against `authdomain.UserSettingsProvider`.
+
+Observable impact: provider drift is now rejected by compilation. No endpoint, status code, payload, error code, domain rule or repository behavior was changed. 0.15.4 can proceed to response schema normalization on top of a validated provider boundary.

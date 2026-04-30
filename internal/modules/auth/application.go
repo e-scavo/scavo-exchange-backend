@@ -21,6 +21,16 @@ type Application struct {
 	inner *authapp.Application
 }
 
+// Compile-time contract assertions keep the provider boundary explicit. They
+// fail compilation if HTTP handlers can no longer consume Application through
+// AuthProvider or if the cross-module providers used by auth drift from the
+// minimal domain contracts.
+var (
+	_ AuthProvider                    = (*Application)(nil)
+	_ authdomain.UserProvider         = (*usermod.Service)(nil)
+	_ authdomain.UserSettingsProvider = (*usersettingsmod.Service)(nil)
+)
+
 func NewApplication(
 	tokens *coreauth.TokenService,
 	ttl time.Duration,
