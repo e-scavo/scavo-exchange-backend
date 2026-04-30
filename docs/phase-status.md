@@ -1899,4 +1899,42 @@ Decision taken: reconcile only the affected documentation. No code changed and n
 
 Concrete change: the README, documentation index, handoff, Phase 0.14 document and stale Phase 0.6 status entries now align with the completed Phase 0.14 baseline.
 
-Observable impact: Stage 0 documentation now has a coherent current-state handoff: Phase 0.14 completed; Phase 0.15 pending definition.
+Observable impact at the time of 0.14.6.fix1: Stage 0 documentation had a coherent current-state handoff with Phase 0.14 completed and Phase 0.15 still pending definition. Phase 0.15 is now opened separately by 0.15.0 below.
+
+---
+
+## Phase 0.15 — Contract Hardening & Freeze
+
+Status: **In Progress**  
+Current subphase: **0.15.0 — Phase Definition & Documentation Lock**
+
+Phase 0.15 starts from the completed Phase 0.14.6.fix3 baseline.
+
+Context inherited: Phase 0.12 clarified read/write model separation and mapping ownership; Phase 0.13 consolidated the provider layer as the runtime composition boundary; Phase 0.14 made that runtime path observable through request correlation, structured logging, error context enrichment, flow tracing and `/diagnostics`.
+
+Problem addressed: the backend has stable behavior, but its contracts must now be explicitly audited and frozen. Without a contract hardening phase, public HTTP responses, public errors, provider contracts and response schemas can drift silently during future work.
+
+Decision taken: open Phase 0.15 as Contract Hardening & Freeze. The phase must validate and formalize existing contracts only. It must not introduce new features, routes, architecture changes, business behavior or additional observability platforms.
+
+Concrete change: Phase 0.15 is now registered in the trunk documentation with a dedicated phase document and the complete subphase plan from 0.15.0 through 0.15.6.
+
+Observable impact: Phase 0.15 is no longer pending definition. The current active step is documentation lock, and the next implementation step is 0.15.1 HTTP Contract Audit.
+
+### 0.15 Subphase Plan
+
+- 0.15.0 — Phase Definition & Documentation Lock: **In Progress**
+- 0.15.1 — HTTP Contract Audit: **Pending**
+- 0.15.2 — Error Contract Alignment: **Pending**
+- 0.15.3 — Provider Contract Validation: **Pending**
+- 0.15.4 — Response Schema Normalization: **Pending**
+- 0.15.5 — Contract Freeze Enforcement: **Pending**
+- 0.15.6 — Validation & Documentation: **Pending**
+
+### 0.15.0 Result
+
+0.15.0 is a documentation-only phase definition and lock.
+
+No Go source code changes are introduced by this subphase.
+
+The subphase establishes the contract-hardening scope, registers the subphase order and locks the rule that all later 0.15 work must be derived from the real repository state. The HTTP audit in 0.15.1 must not invent endpoints, status codes, payloads or response contracts.
+

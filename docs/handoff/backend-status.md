@@ -17,9 +17,10 @@ It is intended to:
 **Stage:** 0 — Foundation
 **Latest Completed Phase:** 0.14 — Observability & Diagnostics Foundation
 **Latest Completed Subphase:** 0.14.6 — Validation & Documentation
-**Phase Status:** Completed
-**Current Phase:** None — awaiting Phase 0.15 definition
-**Next Planned Phase:** 0.15 — Pending Definition
+**Phase Status:** 0.15.0 In Progress
+**Current Phase:** 0.15 — Contract Hardening & Freeze
+**Current Subphase:** 0.15.0 — Phase Definition & Documentation Lock
+**Next Planned Subphase:** 0.15.1 — HTTP Contract Audit
 
 ---
 
@@ -936,7 +937,7 @@ Phase 0.10 is therefore complete. The next architectural step should build on th
 
 ## Phase 0.11 — Domain Module Pattern
 
-Phase 0.11 is historically completed. It followed the completed authorization layer and standardized the internal organization of the domain-facing modules without changing the public API contract. The current validated state is Phase 0.14 completed, with Phase 0.15 pending definition.
+Phase 0.11 is historically completed. It followed the completed authorization layer and standardized the internal organization of the domain-facing modules without changing the public API contract. The current validated state is Phase 0.15 active at 0.15.0, after the completed Phase 0.14 observability baseline.
 
 ### Current Structural Direction
 
@@ -1318,4 +1319,28 @@ Corrected areas:
 
 No Go code changed in this fix.
 
-The next chat or phase must start from: Phase 0.14 completed, Phase 0.15 pending definition.
+The next chat or phase must start from: Phase 0.14 completed, Phase 0.15 active at 0.15.0 — Phase Definition & Documentation Lock.
+
+---
+
+### Phase 0.15.0 Handoff — Phase Definition & Documentation Lock
+
+0.15.0 opens Phase 0.15 — Contract Hardening & Freeze as a documentation-only lock over the completed 0.14.6.fix3 baseline.
+
+Context inherited: the backend already has read/write model separation, provider-layer consolidation and observability/diagnostics foundations. The runtime path is now structurally clearer and diagnosable.
+
+Problem addressed: Phase 0.15 was still pending definition. Contract work could not safely begin until the documentation established the exact scope, subphase order and freeze discipline.
+
+Decision taken: define Phase 0.15 before code changes. This phase must audit, validate, normalize and freeze existing contracts only. It must not add features, routes, business behavior, architecture changes or additional observability scope.
+
+Concrete change: trunk documentation now records Phase 0.15 as active, creates the dedicated Phase 0.15 document and lists the complete 0.15.0 through 0.15.6 sequence.
+
+Important constraints for the next subphase:
+
+- 0.15.1 must audit the real HTTP route surface from the repository.
+- No endpoint, status code, response payload or error shape may be invented.
+- Any contract finding must be grounded in code and existing documentation.
+- Public behavior must remain stable unless a contract inconsistency is explicitly detected and approved for correction.
+
+Next step: **0.15.1 — HTTP Contract Audit**.
+

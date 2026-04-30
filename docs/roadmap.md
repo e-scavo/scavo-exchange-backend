@@ -308,6 +308,38 @@ Phase 0.14 outcome: the backend remains contract-compatible while gaining an int
 
 ---
 
+### 0.15 — Contract Hardening & Freeze 🔄 In Progress
+Formalize, validate and freeze the existing backend contracts after the completed observability foundation.
+
+Phase 0.15 follows the Observability & Diagnostics Foundation completed in 0.14. Phase 0.12 clarified data direction, Phase 0.13 clarified runtime composition and Phase 0.14 made that runtime path diagnosable. Phase 0.15 now hardens the contracts exposed and consumed along that path so future evolution can remain controlled.
+
+The phase is intentionally limited to contract validation and freeze discipline. It does not introduce new features, new routes, business logic changes, architecture changes or additional observability platforms.
+
+#### 0.15.0 — Phase Definition & Documentation Lock 🔄 In Progress
+Register Phase 0.15 in the trunk documentation, define scope and subphase order and lock the baseline before any code or contract audit changes.
+
+#### 0.15.1 — HTTP Contract Audit ⏳ Pending
+Audit the existing HTTP route surface and validate method, path, status and payload expectations from the real repository.
+
+#### 0.15.2 — Error Contract Alignment ⏳ Pending
+Validate and align public error envelopes around the existing standardized error model: `code`, `message` and `details`.
+
+#### 0.15.3 — Provider Contract Validation ⏳ Pending
+Validate internal HTTP → Provider → Application contracts and confirm that Phase 0.13 provider boundaries remain explicit and stable.
+
+#### 0.15.4 — Response Schema Normalization ⏳ Pending
+Normalize response schemas where actual repository evidence shows uncontrolled drift or ambiguous historical variation.
+
+#### 0.15.5 — Contract Freeze Enforcement ⏳ Pending
+Define the freeze policy that controls what can change, what must be versioned and how future contract drift is detected.
+
+#### 0.15.6 — Validation & Documentation ⏳ Pending
+Validate the full system with `go test ./...`, reconcile trunk documentation and close the phase narratively.
+
+Phase 0.15 expected outcome: explicit, audited and frozen contracts for the current Stage 0 backend surface, preserving public behavior while preparing controlled future evolution.
+
+---
+
 ## 👤 Stage 1 — Identity & Wallets
 
 - User model

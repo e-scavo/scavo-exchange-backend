@@ -24,8 +24,9 @@ The backend follows a **wallet-first identity model** that progressively evolves
 **Stage:** 0 — Foundation  
 **Latest Completed Phase:** **0.14 — Observability & Diagnostics Foundation**  
 **Latest Completed Subphase:** **0.14.6 — Validation & Documentation**  
-**Phase Status:** **Completed**  
-**Current Phase:** **None — awaiting Phase 0.15 definition**
+**Phase Status:** **0.15.0 In Progress**  
+**Current Phase:** **0.15 — Contract Hardening & Freeze**  
+**Current Subphase:** **0.15.0 — Phase Definition & Documentation Lock**
 
 ---
 
@@ -3047,3 +3048,70 @@ go test ./...
 ```
 
 The command completed successfully in the local project environment after 0.14.5 was applied.
+
+---
+
+## Phase 0.15 — Contract Hardening & Freeze
+
+Phase 0.15 starts after the completed Observability & Diagnostics Foundation baseline.
+
+Phase 0.12 clarified read/write model direction and mapping ownership. Phase 0.13 clarified provider-owned runtime composition. Phase 0.14 made that runtime path observable through request correlation, structured logging, safe diagnostic error context, minimal flow tracing and `/diagnostics`.
+
+Phase 0.15 addresses the next Stage 0 risk: contracts are working, but they must now be audited, formalized and frozen so future backend and frontend evolution cannot drift silently.
+
+### Objective
+
+Formalize, validate and freeze the existing backend contracts.
+
+The phase covers:
+
+- HTTP contracts
+- response schemas
+- public error envelopes
+- provider contracts
+- freeze and versioning rules
+
+### Scope
+
+Included:
+
+- HTTP contract audit
+- error contract alignment
+- provider contract validation
+- response schema normalization
+- contract freeze enforcement
+- final validation and documentation reconciliation
+
+Excluded:
+
+- new features
+- new routes
+- business logic changes
+- architecture changes
+- additional observability scope
+- external metrics or dashboard platforms
+
+### Subphases
+
+- **0.15.0 — Phase Definition & Documentation Lock** 🔄 In Progress
+- **0.15.1 — HTTP Contract Audit** ⏳ Pending
+- **0.15.2 — Error Contract Alignment** ⏳ Pending
+- **0.15.3 — Provider Contract Validation** ⏳ Pending
+- **0.15.4 — Response Schema Normalization** ⏳ Pending
+- **0.15.5 — Contract Freeze Enforcement** ⏳ Pending
+- **0.15.6 — Validation & Documentation** ⏳ Pending
+
+### 0.15.0 Result
+
+0.15.0 opens the Contract Hardening & Freeze phase as a documentation-only lock.
+
+Context inherited: the backend is stable after Phase 0.14.6.fix3, with provider composition explicit and runtime observability available.
+
+Problem addressed: Phase 0.15 was pending definition, which prevented controlled contract audit work from starting. Without a phase lock, endpoint, error, provider and response contract work could begin without a shared scope.
+
+Decision taken: define Phase 0.15 before any code changes. The phase is constrained to validating and freezing existing contracts, not adding behavior.
+
+Concrete change: README, roadmap, phase status, documentation index, handoff and the new dedicated Phase 0.15 document now agree on the active phase, subphase order and boundaries.
+
+Observable impact: the next correct step is 0.15.1 — HTTP Contract Audit, based only on the real route surface and existing contracts in the repository.
+

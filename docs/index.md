@@ -47,6 +47,7 @@
 * `phase0_13_6_documentation_closure.md`
 * `phase0_13_6_documentation_reprocess_report.md`
 * `phase0_14_observability_diagnostics_foundation.md`
+* `phase0_15_contract_hardening_freeze.md`
 
 ---
 
@@ -61,8 +62,8 @@
 ## 🚧 Phase Focus
 
 Latest completed phase: `0.14 — Observability & Diagnostics Foundation`  
-Current phase: `None — awaiting Phase 0.15 definition`  
-Next phase: `0.15 — Pending Definition`
+Current phase: `0.15 — Contract Hardening & Freeze`  
+Current subphase: `0.15.0 — Phase Definition & Documentation Lock`
 
 * `phase0_13_provider_layer_consolidation.md`
   * `0.13.0 — Definition & Documentation Lock` ✔ Completed
@@ -81,6 +82,15 @@ Next phase: `0.15 — Pending Definition`
   * `0.14.4 — Flow Tracing Integration` ✅ Completed
   * `0.14.5 — Diagnostics Surface Exposure` ✅ Completed
   * `0.14.6 — Validation & Documentation` ✅ Completed
+
+* `phase0_15_contract_hardening_freeze.md`
+  * `0.15.0 — Phase Definition & Documentation Lock` 🔄 In Progress
+  * `0.15.1 — HTTP Contract Audit` ⏳ Pending
+  * `0.15.2 — Error Contract Alignment` ⏳ Pending
+  * `0.15.3 — Provider Contract Validation` ⏳ Pending
+  * `0.15.4 — Response Schema Normalization` ⏳ Pending
+  * `0.15.5 — Contract Freeze Enforcement` ⏳ Pending
+  * `0.15.6 — Validation & Documentation` ⏳ Pending
 
 ---
 
@@ -239,6 +249,22 @@ The phase continues the Stage 0 narrative by moving from provider-owned runtime 
 
 ---
 
+### Phase 0.15 — Contract Hardening & Freeze
+
+- 0.15.0 🔄 Phase Definition & Documentation Lock
+- 0.15.1 ⏳ HTTP Contract Audit
+- 0.15.2 ⏳ Error Contract Alignment
+- 0.15.3 ⏳ Provider Contract Validation
+- 0.15.4 ⏳ Response Schema Normalization
+- 0.15.5 ⏳ Contract Freeze Enforcement
+- 0.15.6 ⏳ Validation & Documentation
+
+Phase 0.15 🔄 In Progress
+
+The phase continues the Stage 0 narrative by moving from observable runtime execution to explicit contract hardening. It does not add features, routes, business behavior or observability scope; it audits, validates, normalizes and freezes the contracts already present after Phases 0.12, 0.13 and 0.14.
+
+---
+
 ## Dedicated Phase Documents
 
 ### Phase 0.12.1 Dedicated Document
@@ -286,6 +312,7 @@ The phase continues the Stage 0 narrative by moving from provider-owned runtime 
 ### Phase 0.14 Dedicated Document
 
 - `docs/phase0_14_observability_diagnostics_foundation.md` — defines and closes the Observability & Diagnostics Foundation, including request correlation, logging standardization, error context enrichment, flow tracing, diagnostics surface exposure and final validation/documentation closure.
+- `docs/phase0_15_contract_hardening_freeze.md` — defines the active Contract Hardening & Freeze phase, including contract audit scope, error alignment, provider validation, response normalization, freeze enforcement and final validation/documentation closure plan.
 - `docs/observability.md` — records the active observability model and its Stage 0 operational impact.
 
 ### Phase 0.13 Dedicated Document
