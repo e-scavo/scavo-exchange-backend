@@ -515,6 +515,24 @@ Module boundaries:
 - `system`: may be documented as the current system/WebSocket surface; diagnostics, core transport and system behavior changes remain outside Phase 1.1 unless later roadmap work explicitly scopes them.
 
 This boundary definition preserves the frozen Stage 0 baseline, keeps Phase 1.1 focused on consolidation and prepares later Stage 1 phases without implementing them.
+
+##### 1.1.0.3 Agent Execution Contract Result
+
+1.1.0.3 defines the operating contract for VSCode agent work during Phase 1.1.
+
+Execution contract:
+
+- The agent works only on the real repository working tree opened in VSCode and must not assume state outside the repository.
+- The agent must read `docs/roadmap.md` before acting, treat all Markdown files as trunk documentation and use source code only as structural context unless the active sub-subphase explicitly authorizes code changes.
+- The agent must preserve the frozen Stage 0 baseline, stay inside the active sub-subphase and never advance automatically to later control points or Phase 1.2+ work.
+- Chat planning owns stage, phase, subphase and sub-subphase definition, execution prompts and output acceptance.
+- The VSCode agent owns repository reading, authorized incremental edits, required validation commands, modified-file reporting, line-count reporting, test output, diff stat and git status reporting.
+
+Mandatory validation for each sub-subphase: `git status`, `go test ./...` and `git diff --stat`.
+
+Mandatory agent output: files read, files modified, before/after line counts for modified documentation, explicit code-modified or code-not-modified confirmation, test result, diff stat and git status.
+
+Anti-drift rules: the agent must not invent phases, modify Stage 0, reorder the roadmap wholesale, summarize or degrade trunk documentation, touch code during documentary sub-subphases, mix Phase 1.1 with Phase 1.2+ responsibilities or continue past the active sub-subphase without a new prompt.
 #### 1.1.1 — Endpoint Surface Inventory
 
 - inventory existing HTTP and WebSocket surfaces
