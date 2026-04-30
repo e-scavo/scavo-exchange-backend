@@ -454,9 +454,11 @@ Focus areas:
 Internal subdivision:
 
 - 1.1.0.0 — Scope Confirmation: confirm the exact subphase boundary against the roadmap and current repository state.
-- 1.1.0.1 — Trunk Documentation Review: read and validate the relevant trunk Markdown before proposing changes.
-- 1.1.0.2 — Risk & Drift Register: record scope risks, possible contract drift and deferred items before implementation.
-- 1.1.0.3 — Documentation Lock Closure: close the lock with explicit next-step criteria and no code changes unless justified.
+- 1.1.0.1 — Scope Formalization: formalize the exact Phase 1.1 scope, exclusions and deferred Stage 1 work.
+- 1.1.0.2 — Boundary Definition: define the technical layer, module and zone boundaries for Phase 1.1.
+- 1.1.0.3 — Agent Execution Contract: define how VSCode agents must operate during Phase 1.1.
+- 1.1.0.4 — Validation Gate Definition: define mandatory validation gates for documentary and later implementation work.
+- 1.1.0.5 — Close Documentation Lock: close 1.1.0 and authorize the next ordered subphase.
 
 ##### 1.1.0.0 Scope Confirmation Result
 
@@ -547,6 +549,22 @@ Code gates apply only when a later sub-subphase explicitly allows implementation
 Anti-drift gates must confirm that Stage 0 remains frozen, Phase 1.1 does not invade later phases, no phases or subphases were invented, responsibilities were not mixed and the base architecture was not changed without explicit roadmap authorization.
 
 Minimum validation output for this chat: change summary, modified files, `git diff --stat`, `go test ./...` and `git status`.
+
+##### 1.1.0.5 Close Documentation Lock Result
+
+1.1.0 is closed as the Phase Definition & Documentation Lock for Phase 1.1.
+
+Closure confirmation:
+
+- 1.1.0.0 Scope Confirmation defined the starting scope and confirmed Stage 0 frozen / Stage 1 active.
+- 1.1.0.1 Scope Formalization defined Phase 1.1 as Application Use Case Consolidation with explicit inclusions, exclusions and deferred later-phase work.
+- 1.1.0.2 Boundary Definition defined the technical layer, module and zone boundaries for Phase 1.1.
+- 1.1.0.3 Agent Execution Contract defined the operating contract for VSCode agents and the separation between planning chat and repository execution.
+- 1.1.0.4 Validation Gate Definition defined mandatory validation, documentation, future code and anti-drift gates.
+
+Readiness for 1.1.1 is confirmed: Phase 1.1 has scope, boundaries, agent contract and validation gates; Stage 0 remains frozen, Stage 1 remains active and `docs/roadmap.md` remains the governing document.
+
+The next authorized subphase is 1.1.1 — Endpoint Surface Inventory. No Phase 1.2+ work is authorized by this closure.
 #### 1.1.1 — Endpoint Surface Inventory
 
 - inventory existing HTTP and WebSocket surfaces
