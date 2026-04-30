@@ -1753,8 +1753,8 @@ Phase 0.13 is complete. Continue with the corrected next roadmap-defined phase: 
 ## Status
 
 **Phase:** 0.14 — Observability & Diagnostics Foundation  
-**Current subphase:** 0.14.5 — Diagnostics Surface Exposure  
-**Status:** 0.14.5 completed; next subphase is 0.14.6 — Validation & Documentation
+**Current subphase:** 0.14.6 — Validation & Documentation  
+**Status:** Phase 0.14 completed
 
 ## Context
 
@@ -1785,7 +1785,7 @@ This decision replaces the previous placeholder roadmap label for 0.14 with the 
 - 0.14.3 — Error Context Enrichment ✅ Completed
 - 0.14.4 — Flow Tracing Integration ✅ Completed
 - 0.14.5 — Diagnostics Surface Exposure ✅ Completed
-- 0.14.6 — Validation & Documentation ⬜ Pending
+- 0.14.6 — Validation & Documentation ✅ Completed
 
 ## Observable Impact
 
@@ -1844,3 +1844,42 @@ Problem addressed: operators needed a lightweight way to inspect observability r
 Decision taken: expose a minimal `GET /diagnostics` surface through the existing status/httpx path. The payload reports service identity, runtime environment/version/commit and the enabled foundation capabilities: request correlation, structured logging, error context enrichment and flow tracing.
 
 Observable impact: `/diagnostics` now provides a stable foundation-level diagnostic snapshot while existing `/health`, `/readiness`, `/version`, business routes, error envelopes, providers and domain behavior remain unchanged.
+
+### 0.14.6 Result
+
+0.14.6 completed the validation and documentation closure for the Observability & Diagnostics Foundation.
+
+Context inherited from 0.14.5: the backend already had request correlation, standardized structured logging, safe error context enrichment, flow tracing events and a minimal `/diagnostics` surface. The remaining risk was documentary drift: the implementation was correct, but the phase needed final reconciliation so the trunk documents, handoff state, roadmap and phase narrative described the same system.
+
+Problem addressed: Phase 0.14 intentionally used a single phase document instead of creating one dedicated document per subphase. That avoided duplication while the implementation was evolving, but it required a deeper closure pass to preserve the narrative standard established in Phase 0.12 and reinforced in Phase 0.13.
+
+Decision taken: close Phase 0.14 through documentation reconciliation rather than new code. The closure pass preserves the existing documents, updates only the affected trunk references and records the complete subphase narrative in the phase document and observability document.
+
+Concrete change: the phase status, roadmap, index, handoff, README, observability model and Phase 0.14 document now agree that all subphases from 0.14.0 through 0.14.6 are completed.
+
+Validation recorded:
+
+```bash
+go test ./...
+```
+
+The command completed successfully in the local project environment after 0.14.5 was applied.
+
+Observable impact: Phase 0.14 is closed with coherent documentation and no additional code changes. The backend remains behavior-compatible while exposing its internal observability foundation through request IDs, structured logs, enriched errors, flow events and `/diagnostics`.
+
+---
+
+## Phase 0.14 Final State
+
+Phase 0.14 — Observability & Diagnostics Foundation is complete.
+
+The completed capability set is:
+
+- request correlation through the HTTP boundary
+- canonical `request_id` structured logging
+- safe error-context enrichment
+- minimal flow tracing events
+- diagnostics surface exposure through `GET /diagnostics`
+- final validation and documentation reconciliation
+
+No business API contract, authentication contract, provider contract, domain behavior, public error envelope, Prometheus integration, OpenTelemetry integration or dashboard system was introduced.

@@ -320,7 +320,7 @@ HTTP → Provider → Application → Domain → Repository
 - 0.14.3 — Error Context Enrichment ✅ Completed
 - 0.14.4 — Flow Tracing Integration ✅ Completed
 - 0.14.5 — Diagnostics Surface Exposure ✅ Completed
-- 0.14.6 — Validation & Documentation ⬜ Pending
+- 0.14.6 — Validation & Documentation ✅ Completed
 
 ---
 
@@ -410,3 +410,37 @@ Decision taken: expose `GET /diagnostics` through the existing router and status
 Concrete change: `internal/core/status.Service.Diagnostics()` owns the payload, and `internal/core/httpx.NewRouter` registers `/diagnostics` alongside `/health`, `/readiness` and `/version`.
 
 Observable impact: operators now have a lightweight diagnostics snapshot for the observability foundation. No business payloads, auth contracts, provider interfaces, domain logic, external metrics systems, dashboards or tracing backends were introduced.
+
+## Phase 0.14.6 Validation & Documentation Result
+
+0.14.6 closes the Observability & Diagnostics Foundation as a coherent Stage 0 capability.
+
+Context inherited from 0.14.5: request correlation, canonical `request_id` logging, safe error-context enrichment, minimal flow tracing and `/diagnostics` were already implemented. The final work was to reconcile the documentation so the operational model is understandable without reading each code change independently.
+
+Problem addressed: observability is cross-cutting. If the documentation only listed implementation steps, future work could treat correlation, logs, errors, traces and diagnostics as separate features instead of one foundation.
+
+Decision taken: document the completed model as one integrated runtime visibility layer:
+
+```text
+HTTP request → request_id → structured logs → enriched errors → flow_event logs → /diagnostics snapshot
+```
+
+Concrete change: the observability document now records that all 0.14 capabilities are completed and compatible with existing public behavior.
+
+Observable impact: future phases can build on a stable observability baseline without redefining the foundation vocabulary.
+
+### Final 0.14 Observability Baseline
+
+- Request correlation: enabled through `X-Request-Id` and `httpx.RequestIDFromContext`.
+- Structured logging: enabled through canonical `request_id` attributes.
+- Error context enrichment: enabled through safe `AppError` helpers and copied public details.
+- Flow tracing: enabled through `flow_trace` log records and `flow_event` attributes.
+- Diagnostics surface: enabled through `GET /diagnostics`.
+
+Validation recorded:
+
+```bash
+go test ./...
+```
+
+The command completed successfully in the local project environment after the diagnostics surface was applied.

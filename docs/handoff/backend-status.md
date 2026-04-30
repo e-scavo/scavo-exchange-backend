@@ -1274,3 +1274,28 @@ Important runtime facts:
 - No Prometheus, OpenTelemetry, dashboard, counter system or business API contract change was introduced.
 
 This keeps public business behavior stable and prepares 0.14.6 validation and documentation closure with a concrete diagnostics surface to verify.
+
+### Phase 0.14.6 Handoff — Validation & Documentation
+
+0.14.6 has been implemented as the documentation and validation closure for Phase 0.14.
+
+Important runtime facts preserved for the next phase:
+
+- `X-Request-Id` remains the request correlation boundary.
+- `internal/core/httpx.RequestIDFromContext(ctx)` is the supported internal accessor for request IDs.
+- `request_id` is the canonical structured log attribute for correlation.
+- `flow_event` is the canonical structured log attribute for minimal flow tracing.
+- `errs.AppError` supports safe diagnostic enrichment through `WithContext`, `WithRequestID` and copied `PublicDetails`.
+- `GET /diagnostics` exposes the foundation observability capability snapshot.
+- `/health`, `/readiness` and `/version` remain unchanged operational surfaces.
+- No business API response shape, auth contract, provider contract or domain behavior changed during 0.14.
+
+Validation recorded:
+
+```bash
+go test ./...
+```
+
+The command passed in the local project environment after the 0.14.5 implementation.
+
+Phase 0.14 is closed. The next phase must start from this completed observability baseline and must not redefine request correlation, logging keys, error-context helpers, flow-event vocabulary or diagnostics endpoint semantics without an explicit roadmap decision.

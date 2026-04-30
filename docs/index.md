@@ -59,9 +59,9 @@
 
 ## 🚧 Current Phase Focus
 
-Latest completed phase: `0.13 — Provider Layer Consolidation`  
+Latest completed phase: `0.14 — Observability & Diagnostics Foundation`  
 Current phase: `0.14 — Observability & Diagnostics Foundation`  
-Next phase: `0.14 — Observability & Diagnostics Foundation`
+Next phase: `0.15 — Pending Definition`
 
 * `phase0_13_provider_layer_consolidation.md`
   * `0.13.0 — Definition & Documentation Lock` ✔ Completed
@@ -79,7 +79,7 @@ Next phase: `0.14 — Observability & Diagnostics Foundation`
   * `0.14.3 — Error Context Enrichment` ✅ Completed
   * `0.14.4 — Flow Tracing Integration` ✅ Completed
   * `0.14.5 — Diagnostics Surface Exposure` ✅ Completed
-  * `0.14.6 — Validation & Documentation` ⬜ Pending
+  * `0.14.6 — Validation & Documentation` ✅ Completed
 
 ---
 
@@ -230,9 +230,9 @@ Phase 0.13 ✔ Completed
 - 0.14.3 ✅ Error Context Enrichment
 - 0.14.4 ✅ Flow Tracing Integration
 - 0.14.5 ✅ Diagnostics Surface Exposure
-- 0.14.6 ⬜ Validation & Documentation
+- 0.14.6 ✅ Validation & Documentation
 
-Phase 0.14 ⬜ Pending
+Phase 0.14 ✅ Completed
 
 The phase continues the Stage 0 narrative by moving from provider-owned runtime composition to observable runtime execution. It is a diagnostics foundation phase only: request correlation, structured logging, internal error context, flow tracing and minimal diagnostics exposure are introduced without changing public API behavior.
 
@@ -281,6 +281,11 @@ The phase continues the Stage 0 narrative by moving from provider-owned runtime 
 - `docs/phase0_12_5_handler_contract_adjustment.md` — records handler-level contract adjustment.
 - `docs/phase0_12_5_validation_compatibility.md` — records compatibility validation for 0.12.5.
 - `docs/phase0_12_5_documentation_closure.md` — records formal closure of Phase 0.12.5.
+
+### Phase 0.14 Dedicated Document
+
+- `docs/phase0_14_observability_diagnostics_foundation.md` — defines and closes the Observability & Diagnostics Foundation, including request correlation, logging standardization, error context enrichment, flow tracing, diagnostics surface exposure and final validation/documentation closure.
+- `docs/observability.md` — records the active observability model and its Stage 0 operational impact.
 
 ### Phase 0.13 Dedicated Document
 

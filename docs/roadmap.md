@@ -276,7 +276,7 @@ It records compatibility after provider application integration. The validation 
 #### 0.13.6 — Documentation & Closure ✔ Completed
 Closed the phase documentation, removed generic repeated status-only updates, corrected misplaced roadmap text and restored the Phase 0.12 → Phase 0.13 narrative across trunk documentation. The closure records not only that the phase completed, but why Provider Layer Consolidation was the next architectural step after read/write model separation.
 
-### 0.14 — Observability & Diagnostics Foundation ⬜ Pending
+### 0.14 — Observability & Diagnostics Foundation ✅ Completed
 Introduce observability and diagnostics as a Stage 0 foundation capability without changing public API behavior.
 
 Phase 0.14 follows the Provider Layer Consolidation completed in 0.13. The provider boundary made runtime composition explicit; 0.14 now makes the same path diagnosable through request correlation, structured logging, internal error context, flow tracing and a minimal diagnostics surface.
@@ -301,8 +301,10 @@ Instrument key flow transitions across HTTP, provider, application, domain and r
 #### 0.14.5 — Diagnostics Surface Exposure ✅ Completed
 Expose a minimal diagnostics-oriented surface or hook set compatible with the current architecture.
 
-#### 0.14.6 — Validation & Documentation ⬜ Pending
-Validate compatibility with `go test ./...`, confirm no public behavior change and close the phase narratively.
+#### 0.14.6 — Validation & Documentation ✅ Completed
+Validate compatibility with `go test ./...`, confirm no public behavior change and close the phase narratively. Completed after reconciling the Phase 0.14 documentation with the implemented request correlation, logging, error-context, flow-tracing and diagnostics surface work.
+
+Phase 0.14 outcome: the backend remains contract-compatible while gaining an internal observability foundation: request correlation, structured request-scoped logging, safe diagnostic error context, minimal flow tracing events and `GET /diagnostics`.
 
 ---
 

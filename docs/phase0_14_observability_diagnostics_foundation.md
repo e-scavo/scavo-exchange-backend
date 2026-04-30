@@ -145,7 +145,7 @@ Scope:
 - avoid leaking internal implementation details to clients
 - align with the standardized error model introduced earlier in Stage 0
 
-### 0.14.4 — Flow Tracing Integration ⬜ Pending
+### 0.14.4 — Flow Tracing Integration ✅ Completed
 
 Instrument key runtime flow transitions.
 
@@ -167,7 +167,7 @@ Scope:
 - avoid changing existing public API semantics
 - keep the surface minimal and foundation-oriented
 
-### 0.14.6 — Validation & Documentation ⬜ Pending
+### 0.14.6 — Validation & Documentation ✅ Completed
 
 Validate compatibility and close the phase narratively.
 
@@ -425,3 +425,69 @@ No public business API payload, authentication contract, provider interface, dom
 ### Validation note
 
 The code was prepared in standard Go formatting style. Full `go test ./...` could not be completed in this environment because the local Go toolchain is older than the module requirement and automatic toolchain download is unavailable.
+
+---
+
+## 0.14.6 Implementation Result — Validation & Documentation
+
+### Context inherited
+
+0.14.1 established the request correlation seam. 0.14.2 standardized the runtime logging key. 0.14.3 added safe diagnostic enrichment to errors. 0.14.4 introduced minimal flow tracing events. 0.14.5 exposed the foundation state through `/diagnostics`.
+
+By that point, the code-level foundation was complete. The remaining work was documentary: close the phase without losing the narrative continuity established by Phase 0.12 and reinforced in Phase 0.13.
+
+### Problem
+
+Phase 0.14 intentionally concentrated the subphase narrative inside one phase document instead of creating one dedicated document per subphase. That kept the observability story unified while implementation moved quickly, but it also meant the closure pass had to verify that the roadmap, phase status, handoff, README, index and observability document all described the same completed system.
+
+Without this pass, the backend would have been technically correct but documentary weak: some trunk references could still show 0.14 as pending, some subphase lists could remain incomplete, and the observable impact of the phase could be fragmented across implementation notes.
+
+### Decision
+
+0.14.6 performs documentation reconciliation only.
+
+No code is modified in this subphase. The closure updates the trunk documents that own phase state and preserves the rest of the Markdown corpus unchanged unless directly affected by Phase 0.14 status or narrative consistency.
+
+### Concrete change
+
+The following documentation surfaces are reconciled:
+
+- `README.md`
+- `docs/index.md`
+- `docs/roadmap.md`
+- `docs/phase-status.md`
+- `docs/handoff/backend-status.md`
+- `docs/observability.md`
+- `docs/phase0_14_observability_diagnostics_foundation.md`
+
+The reconciled documentation records:
+
+- all 0.14 subphases completed
+- no public API behavior change
+- no provider contract change
+- no error envelope change
+- no external metrics, Prometheus, OpenTelemetry or dashboard integration
+- `GET /diagnostics` as the minimal diagnostics surface
+- `request_id` and `flow_event` as the canonical observability vocabulary introduced in this phase
+
+### Validation
+
+The final local validation command was:
+
+```bash
+go test ./...
+```
+
+The command passed after 0.14.5 was applied.
+
+### Observable impact
+
+Phase 0.14 is now closed as a complete Observability & Diagnostics Foundation.
+
+The backend remains behavior-compatible with the previous public surface, while operators and developers gain a coherent runtime visibility path:
+
+```text
+HTTP request → X-Request-Id/request_id → structured logs → enriched AppError details → flow_event logs → GET /diagnostics
+```
+
+This prepares the next roadmap phase to build on an observable backend baseline instead of re-opening request correlation, logging vocabulary, error-context semantics or diagnostics endpoint ownership.
