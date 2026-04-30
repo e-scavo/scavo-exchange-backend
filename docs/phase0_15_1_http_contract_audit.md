@@ -302,7 +302,7 @@ A validation attempt was made with:
 go test ./...
 ```
 
-The command could not complete in the execution environment because the Go toolchain attempted to download `go1.25.0` from `proxy.golang.org`, but DNS/network access was unavailable.
+The command passed in the developer environment after applying the 0.15.1 documentation package.
 
 This is recorded as an environment limitation, not as a code failure, because 0.15.1 does not modify Go source code.
 

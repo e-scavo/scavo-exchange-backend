@@ -23,10 +23,10 @@ The backend follows a **wallet-first identity model** that progressively evolves
 
 **Stage:** 0 — Foundation  
 **Latest Completed Phase:** **0.14 — Observability & Diagnostics Foundation**  
-**Latest Completed Subphase:** **0.14.6 — Validation & Documentation**  
-**Phase Status:** **0.15.1 Completed**  
+**Latest Completed Subphase:** **0.15.1 — HTTP Contract Audit**  
+**Phase Status:** **0.15.1 Completed / 0.15.2 Pending**  
 **Current Phase:** **0.15 — Contract Hardening & Freeze**  
-**Current Subphase:** **0.15.1 — HTTP Contract Audit**
+**Current Subphase:** **0.15.2 — Error Contract Alignment**
 
 ---
 
@@ -3113,7 +3113,7 @@ Decision taken: define Phase 0.15 before any code changes. The phase is constrai
 
 Concrete change: README, roadmap, phase status, documentation index, handoff and the new dedicated Phase 0.15 document now agree on the active phase, subphase order and boundaries.
 
-Observable impact: the next correct step is 0.15.1 — HTTP Contract Audit, based only on the real route surface and existing contracts in the repository.
+Observable impact: the next correct step after 0.15.0 was 0.15.1 — HTTP Contract Audit, based only on the real route surface and existing contracts in the repository.
 
 
 

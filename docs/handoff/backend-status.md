@@ -16,10 +16,10 @@ It is intended to:
 
 **Stage:** 0 — Foundation
 **Latest Completed Phase:** 0.14 — Observability & Diagnostics Foundation
-**Latest Completed Subphase:** 0.14.6 — Validation & Documentation
-**Phase Status:** 0.15.1 Completed
+**Latest Completed Subphase:** 0.15.1 — HTTP Contract Audit
+**Phase Status:** 0.15.1 Completed / 0.15.2 Pending
 **Current Phase:** 0.15 — Contract Hardening & Freeze
-**Current Subphase:** 0.15.1 — HTTP Contract Audit
+**Current Subphase:** 0.15.2 — Error Contract Alignment
 **Next Planned Subphase:** 0.15.2 — Error Contract Alignment
 
 ---
@@ -1366,6 +1366,6 @@ Observable impact:
 - public error-envelope behavior is confirmed as `{error:{code,message,details}}`.
 - 0.15.2 must now validate and align error contracts against this route baseline.
 
-Validation note: `go test ./...` was attempted but could not complete because the environment attempted to download Go 1.25.0 from `proxy.golang.org` and DNS/network access was unavailable. No Go source code was changed by 0.15.1.
+Validation note: `go test ./...` passed in the developer environment after the 0.15.1 documentation package was applied. No Go source code was changed by 0.15.1.
 
 Next step: **0.15.2 — Error Contract Alignment**.

@@ -63,7 +63,7 @@
 
 Latest completed phase: `0.14 — Observability & Diagnostics Foundation`  
 Current phase: `0.15 — Contract Hardening & Freeze`  
-Current subphase: `0.15.1 — HTTP Contract Audit`
+Current subphase: `0.15.2 — Error Contract Alignment`
 
 * `phase0_13_provider_layer_consolidation.md`
   * `0.13.0 — Definition & Documentation Lock` ✔ Completed

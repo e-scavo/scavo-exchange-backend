@@ -5,9 +5,9 @@
 ## Status
 
 **Phase:** 0.15 — Contract Hardening & Freeze  
-**Current Subphase:** 0.15.1 — HTTP Contract Audit  
-**Status:** In Progress  
-**Type:** Contract inventory and documentation audit  
+**Current Subphase:** 0.15.2 — Error Contract Alignment  
+**Status:** 0.15.1 Completed / 0.15.2 Pending  
+**Type:** Contract hardening and freeze documentation  
 **Code changes in 0.15.1:** No
 
 ---
