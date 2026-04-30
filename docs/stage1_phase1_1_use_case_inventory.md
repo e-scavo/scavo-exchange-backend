@@ -194,6 +194,68 @@ Classification key:
 
 No duplication or dispersion was corrected in 1.1.1.2. No Go source, tests or configuration changes are authorized by this review.
 
+## 1.1.1.3 Use Case Consolidation Targets
+
+This section defines future consolidation targets derived only from the inventory, ownership mapping and 1.1.1.2 duplication/dispersion review. It does not authorize implementation, refactor, route changes, function renames, file moves, test changes or configuration changes.
+
+Target type key:
+
+- A) ownership cleanup
+- B) app/domain alignment
+- C) duplicated responsibility reduction
+- D) boundary clarification
+- E) documentation-only follow-up
+- F) deferred to later phase
+
+| Target | Type | Associated use case(s) | Source finding(s) | Files involved | Current problem | Consolidation objective | Allowed scope | Prohibited scope | Risk | Suggested execution order | Suggested subphase |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| UCT-001 | A, D, E | UC-004 to UC-020, UC-024 | DDR-001 | `internal/modules/auth/application.go`; `internal/modules/auth/app/application.go`; `internal/modules/auth/http_login.go`; `internal/modules/auth/http_wallet.go`; `internal/modules/auth/http_bootstrap.go` | Root `auth.Application` mirrors the `auth/app.Application` use-case surface while preserving compatibility. | Document `auth/app.Application` as the active use-case owner and root `auth.Application` as compatibility/provider adapter unless later implementation proves otherwise. | Phase 1.1 may clarify names, ownership and contract intent in documentation only. | No wrapper removal, method renaming, provider signature changes, route changes or response changes in Phase 1.1. | Future edits may target the wrapper and create drift from app-layer behavior. | 1 | Phase 1.1.5 Use Case Contract Documentation |
+| UCT-002 | C, E | UC-027, UC-028, UC-029 | DDR-002 | `internal/modules/auth/service.go`; `internal/modules/auth/app/service.go`; `internal/modules/auth/ws_handlers.go`; `internal/app/app.go` | Root `auth.Service` delegates to `auth/app.Service` with overlapping login and session method names. | Make the service ownership rule explicit: app service owns login/session support behavior; root service remains compatibility/runtime support while still used by WebSocket wiring. | Phase 1.1 may document active owner, compatibility purpose and call-path expectations. | No service deletion, constructor change, WebSocket wiring change or token/session behavior change. | Ambiguous ownership can cause login/session support fixes to be applied in the wrong layer. | 2 | Phase 1.1.5 Use Case Contract Documentation |
+| UCT-003 | C, F | UC-013, UC-023 | DDR-003 | `internal/modules/auth/http_wallet_list.go`; `internal/modules/auth/app/support_helpers.go`; `internal/modules/auth/app/application.go`; `internal/modules/auth/app/response_types.go` | Wallet list filtering, sorting, pagination and response metadata helpers exist in root auth and auth/app. | Define a future single owner for wallet list query execution while keeping HTTP query parsing as transport concern if confirmed. | Phase 1.1 may document the target owner and mark implementation as deferred. | No helper removal, behavior consolidation, pagination/filtering/sorting contract change or response metadata change in Phase 1.1. | Highest drift risk among current duplication findings because identical query behavior can diverge across copies. | 5 | Phase 1.4.1 Read Surface Inventory, then Phase 1.4.2-1.4.4 |
+| UCT-004 | A, B, F | UC-007, UC-038 | DDR-004 | `internal/modules/auth/http_login.go`; `internal/modules/auth/app/application.go`; `internal/modules/auth/domain/user_contract.go`; `internal/modules/user/app/service.go` | Profile update is exposed through `auth` but validation/persistence belongs to `user`. | Define product-language ownership for authenticated profile update before account surface work: `user` owns user/profile mutation behavior, `auth` owns the current authenticated transport/use-case exposure. | Phase 1.1 may document the boundary and link the use cases. | No endpoint split, route rename, display-name validation change, repository change or account product capability implementation. | If unresolved, Phase 1.2 account work may blur user entity ownership with auth entry-point ownership. | 6 | Phase 1.2.2 Account Surface Consolidation; Phase 1.5.3 for mutation semantics |
+| UCT-005 | A, B, F | UC-008, UC-009, UC-039, UC-040 | DDR-005 | `internal/modules/auth/http_login.go`; `internal/modules/auth/app/application.go`; `internal/modules/auth/domain/usersettings_contract.go`; `internal/modules/usersettings/app/service.go` | Settings read/write are exposed through `auth` while defaults, normalization, merge and validation are owned by `usersettings`. | Define the settings ownership boundary before productization: `usersettings` owns behavior, `auth` owns current authenticated route exposure. | Phase 1.1 may document ownership and dependency direction. | No settings schema change, route change, error mapping change, merge behavior change or validation change in Phase 1.1. | Settings productization could accidentally move behavior into auth handlers or auth application code. | 7 | Phase 1.2.4 User Settings Productization; Phase 1.5.3 for update semantics |
+| UCT-006 | D, E | UC-012, UC-024 | DDR-006 | `internal/modules/auth/app/application.go`; `internal/modules/auth/app/service.go`; `internal/modules/auth/app/support_helpers.go`; `internal/modules/user/app/service.go`; `internal/modules/usersettings/app/service.go`; `internal/modules/auth/http_bootstrap.go` | Bootstrap aggregates session, user/profile, settings and wallets and can be mistaken for domain ownership. | Document bootstrap as a read aggregation/composition use case, with field-level downstream owners for session, user/profile, settings and wallets. | Phase 1.1 may define bootstrap flow boundaries and owner map. | No bootstrap payload change, aggregation logic change, mapper change or provider contract change. | Aggregator growth can hide ownership transfer and make later account/settings/wallet work harder to reason about. | 3 | Phase 1.1.2 Application Flow Mapping; Phase 1.1.5 Use Case Contract Documentation |
+| UCT-007 | D, E, F | UC-005, UC-006, UC-025, UC-026 | DDR-007 | `internal/modules/auth/http_login.go`; `internal/modules/auth/ws_handlers.go`; `internal/modules/auth/service.go`; `internal/core/ws/session.go`; `internal/core/auth/jwt.go` | HTTP current-user/session and WebSocket `auth.whoami`/`auth.session` overlap in intent but use different construction paths and payload shapes. | Classify whether WebSocket actions are alternate transports for the same product intent, reduced realtime session views or separate system/realtime use cases. | Phase 1.1 may map intent and document differences. | No WebSocket payload change, HTTP response change, session model change, token claim change or handler rewrite. | Transport drift can make clients observe inconsistent authenticated identity/session state. | 4 | Phase 1.1.2 Application Flow Mapping; Phase 1.6.1 Cross-Endpoint Behavior Audit |
+| UCT-008 | B, D, F | UC-010, UC-014, UC-016, UC-030, UC-031, UC-032 | DDR-008 | `internal/modules/auth/app/application.go`; `internal/modules/auth/app/wallet_services.go`; `internal/modules/auth/domain/contracts.go` | Wallet challenge mechanics are shared across auth bootstrap, wallet link and account merge through purpose-specific options. | Name the shared challenge capability and map each flow to its challenge purpose without splitting behavior prematurely. | Phase 1.1 may document taxonomy and flow mapping. | No challenge purpose rename, signing message change, store migration, verification rule change or merge/link behavior change. | Renaming or splitting challenge ownership without mapping could break traceability across wallet flows. | 8 | Phase 1.1.2 Application Flow Mapping; implementation-sensitive wallet usability work deferred to Phase 1.2.3 |
+| UCT-009 | E | UC-001, UC-002, UC-003 | DDR-009 | `internal/app/app.go`; `internal/core/httpx/router.go`; `internal/modules/auth/ws_handlers.go`; `internal/modules/system/ws_handlers.go` | Runtime composition touches every module and can be misread as product ownership. | Keep runtime composition and lifecycle explicitly outside product use-case ownership. | Phase 1.1 may retain this as a documentation guardrail. | No runtime wiring change, router change, server lifecycle change or module registration change. | Treating runtime wiring as product ownership would blur later consolidation decisions. | 9 | Phase 1.1.5 Use Case Contract Documentation |
+| UCT-010 | E | UC-035 to UC-040 | DDR-010 | `internal/modules/user/service.go`; `internal/modules/user/app/service.go`; `internal/modules/usersettings/service.go`; `internal/modules/usersettings/app/service.go` | Root `user` and `usersettings` services are aliases/factories, not independent duplicated behavior. | Record that no active consolidation target exists for these aliases unless later code adds root behavior. | Phase 1.1 may document this as no-action/aligned. | No alias removal, package API change, service relocation or repository change. | Over-classifying aliases as duplication could create unnecessary refactor pressure. | 10 | Phase 1.1.5 Use Case Contract Documentation |
+
+### Phase 1.1 Targets
+
+Targets that belong in Phase 1.1 as documentation, mapping, naming, ownership or contract clarification only:
+
+- UCT-001: document active auth application owner versus root compatibility adapter.
+- UCT-002: document auth app service owner versus root compatibility/runtime support service.
+- UCT-006: map bootstrap as aggregation, not domain ownership.
+- UCT-007: classify HTTP and WebSocket identity/session intent.
+- UCT-008: document wallet challenge taxonomy and purpose-to-flow mapping.
+- UCT-009: preserve runtime composition as non-product ownership.
+- UCT-010: record root user/usersettings aliases as aligned/no-action.
+
+Targets that are identified in Phase 1.1 but must not be implemented in Phase 1.1:
+
+- UCT-003: wallet list duplicated query helpers. Phase 1.1 may document the target owner only; behavioral consolidation belongs to Phase 1.4.
+- UCT-004: profile/account ownership cleanup. Phase 1.1 may document the boundary only; account surface and mutation semantics belong to Phase 1.2 and Phase 1.5.
+- UCT-005: settings ownership cleanup. Phase 1.1 may document the boundary only; settings productization and mutation semantics belong to Phase 1.2 and Phase 1.5.
+
+Targets deferred to Phase 1.2+:
+
+- UCT-003 -> Phase 1.4 Data Interaction Patterns.
+- UCT-004 -> Phase 1.2 Account Surface Consolidation and Phase 1.5 Update Flow Consolidation.
+- UCT-005 -> Phase 1.2 User Settings Productization and Phase 1.5 Update Flow Consolidation.
+- UCT-007 -> Phase 1.6 Cross-Endpoint Behavior Audit for behavior consistency after intent mapping.
+- UCT-008 -> Phase 1.2 Wallet Management Usability if wallet challenge behavior or UX is changed later.
+
+### Recommended Next Order
+
+1. Phase 1.1.2 Application Flow Mapping should consume UCT-006, UCT-007 and UCT-008 first, because bootstrap, session/current-user and wallet challenge intent affect flow naming.
+2. Phase 1.1.3 Orphan, Duplicate & Ambiguous Surface Review should reuse UCT-001, UCT-002, UCT-003, UCT-004 and UCT-005 to classify surfaces without correcting them.
+3. Phase 1.1.4 Product Success Criteria Definition should define success criteria only for approved existing flows and should mark UCT-003, UCT-004 and UCT-005 implementation as deferred.
+4. Phase 1.1.5 Use Case Contract Documentation should record the final Phase 1.1 owner/adapter/aggregator rules and explicitly preserve UCT-009 and UCT-010 as no-action guardrails.
+5. Phase 1.1.6 Validation & Closure should verify that the handoff to Phase 1.2+ contains deferred targets without reopening Stage 0 or implementing refactors.
+
+No consolidation target is implemented in 1.1.1.3. No Go source, tests or configuration changes are authorized by this target definition.
+
 ## Baseline Closure
 
 1.1.1.0 establishes the initial existing-use-case baseline only.

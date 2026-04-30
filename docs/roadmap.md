@@ -596,6 +596,12 @@ Ownership mapping for the inventoried use cases is recorded in `docs/stage1_phas
 Duplication and dispersion review for the inventoried use cases is recorded in `docs/stage1_phase1_1_use_case_inventory.md`.
 
 1.1.1.2 is documentary only: it classifies verified duplications, partial overlaps, structural dispersion, ambiguous ownership and aligned/no-problem cases across `internal/app`, `internal/modules/auth`, `internal/modules/user`, `internal/modules/usersettings`, `internal/modules/system` and selected `internal/core` support boundaries; and does not correct, refactor, rename or move any implementation.
+
+##### 1.1.1.3 Use Case Consolidation Targets Result
+
+Consolidation targets derived from the inventory, ownership mapping and duplication/dispersion review are recorded in `docs/stage1_phase1_1_use_case_inventory.md`.
+
+1.1.1.3 is documentary only: it defines future targets, separates Phase 1.1 documentation/mapping work from Phase 1.2+ implementation-sensitive work, recommends the next Phase 1.1 execution order and does not implement, refactor, rename, move or correct any code.
 #### 1.1.2 — Application Flow Mapping
 
 - map endpoints to real application flows
