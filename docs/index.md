@@ -61,9 +61,9 @@
 
 ## 🚧 Phase Focus
 
-Latest completed phase: `0.14 — Observability & Diagnostics Foundation`  
-Current phase: `0.15 — Contract Hardening & Freeze`  
-Current subphase: `0.15.6 — Validation & Documentation`
+Latest completed phase: `0.15 — Contract Hardening & Freeze`  
+Current phase: `Pending definition`  
+Current subphase: `None`
 
 * `phase0_13_provider_layer_consolidation.md`
   * `0.13.0 — Definition & Documentation Lock` ✔ Completed
@@ -88,13 +88,15 @@ Current subphase: `0.15.6 — Validation & Documentation`
 * `phase0_15_2_error_contract_alignment.md`
 * `phase0_15_3_provider_contract_validation.md`
 * `phase0_15_4_response_schema_normalization.md`
+* `phase0_15_5_contract_freeze_enforcement.md`
+* `phase0_15_6_validation_documentation.md`
   * `0.15.0 — Phase Definition & Documentation Lock` ✅ Completed
   * `0.15.1 — HTTP Contract Audit` ✅ Completed
   * `0.15.2 — Error Contract Alignment` ✅ Completed
   * `0.15.3 — Provider Contract Validation` ✅ Completed
   * `0.15.4 — Response Schema Normalization` ✅ Completed
   * `0.15.5 — Contract Freeze Enforcement` ✅ Completed
-  * `0.15.6 — Validation & Documentation` ⏳ Pending
+  * `0.15.6 — Validation & Documentation` ✅ Completed
 
 ---
 
@@ -261,9 +263,9 @@ The phase continues the Stage 0 narrative by moving from provider-owned runtime 
 - 0.15.3 ✅ Provider Contract Validation
 - 0.15.4 ✅ Response Schema Normalization
 - 0.15.5 ✅ Contract Freeze Enforcement
-- 0.15.6 ⏳ Validation & Documentation
+- 0.15.6 ✅ Validation & Documentation
 
-Phase 0.15 🔄 In Progress
+Phase 0.15 ✅ Completed
 
 The phase continues the Stage 0 narrative by moving from observable runtime execution to explicit contract hardening. It does not add features, routes, business behavior or observability scope; it audits, validates, normalizes and freezes the contracts already present after Phases 0.12, 0.13 and 0.14.
 

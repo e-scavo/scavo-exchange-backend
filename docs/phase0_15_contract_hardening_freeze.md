@@ -5,10 +5,10 @@
 ## Status
 
 **Phase:** 0.15 — Contract Hardening & Freeze  
-**Current Subphase:** 0.15.6 — Validation & Documentation  
-**Status:** 0.15.5 Completed / 0.15.6 Pending  
+**Current Subphase:** None  
+**Status:** 0.15 Completed  
 **Type:** Contract hardening and freeze documentation  
-**Code changes in 0.15.1:** No
+**Code changes in 0.15.6:** No
 
 ---
 
@@ -239,7 +239,7 @@ Silent drift is not allowed.
 - 0.15.3 — Provider Contract Validation: **Completed**
 - 0.15.4 — Response Schema Normalization: **Completed**
 - 0.15.5 — Contract Freeze Enforcement: **Completed**
-- 0.15.6 — Validation & Documentation: **Pending**
+- 0.15.6 — Validation & Documentation: **Completed**
 
 ---
 
@@ -319,8 +319,6 @@ The next subphase is Provider Contract Validation.
 
 It must verify provider inputs, outputs and error propagation responsibilities without changing the public error envelope aligned in 0.15.2.
 
-## End of Document
-
 ## 0.15.3 Concrete Change
 
 0.15.3 validates provider contracts through compile-time assertions at the auth boundary.
@@ -386,3 +384,25 @@ Impact observable: public JSON endpoints, protected auth error envelopes, JSON m
 0.15.6 must validate the full system and reconcile all trunk documentation for Phase 0.15 closure.
 
 It must include the local `go test ./...` evidence supplied after applying 0.15.5 and close Phase 0.15 without introducing new behavior.
+
+## 0.15.6 Concrete Change
+
+0.15.6 validates and closes Phase 0.15.
+
+Context inherited: 0.15.1 audited the real HTTP route surface, 0.15.2 aligned the canonical error envelope, 0.15.3 validated provider boundaries, 0.15.4 normalized response serialization metadata and 0.15.5 enforced the contract freeze.
+
+Real problem: after incremental contract-hardening work, the documentation needed final chronological reconciliation and closure-state alignment so the freeze baseline would not remain partially open.
+
+Decision taken: close the phase with documentation-only reconciliation. No Go source code, runtime behavior, route, payload, provider, repository or business logic was changed.
+
+Concrete change: `docs/phase0_15_6_validation_documentation.md` records the final validation evidence and closure narrative. Trunk documentation now marks Phase 0.15 and subphase 0.15.6 as completed.
+
+Impact observable: Phase 0.15 now leaves a complete and frozen contract baseline for future controlled evolution.
+
+## Handoff After 0.15.6
+
+Phase 0.15 is completed.
+
+The next phase is intentionally not defined here. It must be opened explicitly in a later phase definition step, using the frozen 0.15 contract baseline as an input.
+
+## End of Document

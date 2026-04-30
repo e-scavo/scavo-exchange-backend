@@ -308,7 +308,7 @@ Phase 0.14 outcome: the backend remains contract-compatible while gaining an int
 
 ---
 
-### 0.15 — Contract Hardening & Freeze 🔄 In Progress
+### 0.15 — Contract Hardening & Freeze ✅ Completed
 Formalize, validate and freeze the existing backend contracts after the completed observability foundation.
 
 Phase 0.15 follows the Observability & Diagnostics Foundation completed in 0.14. Phase 0.12 clarified data direction, Phase 0.13 clarified runtime composition and Phase 0.14 made that runtime path diagnosable. Phase 0.15 now hardens the contracts exposed and consumed along that path so future evolution can remain controlled.
@@ -342,10 +342,18 @@ Define the freeze policy that controls what can change, what must be versioned a
 
 0.15.5 freezes the audited Stage 0 public HTTP surface, canonical error envelope, provider boundary assertions and response serialization policy. Contract drift is now guarded by dedicated regression tests and by explicit documentation rules for future changes.
 
-#### 0.15.6 — Validation & Documentation ⏳ Pending
+#### 0.15.6 — Validation & Documentation ✅ Completed
 Validate the full system with `go test ./...`, reconcile trunk documentation and close the phase narratively.
 
-Phase 0.15 expected outcome: explicit, audited and frozen contracts for the current Stage 0 backend surface, preserving public behavior while preparing controlled future evolution.
+0.15.6 records the successful developer-environment `go test ./...` validation after 0.15.5 and reconciles the trunk documentation so Phase 0.15 closes with the correct chronological subphase order and no active 0.15 subphase.
+
+Phase 0.15 outcome: explicit, audited and frozen contracts for the current Stage 0 backend surface, preserving public behavior while preparing controlled future evolution.
+
+### Phase 0.15 Closure Note — Contract Hardening & Freeze
+
+Phase 0.15 completed after the validation and documentation closure in 0.15.6.
+
+The final baseline records that successful response payloads remain intentionally unwrapped and compatible, JSON response metadata and defensive error fallback shape are aligned with the canonical contract introduced in 0.15.2, provider boundary expectations are compile-time guarded and representative frozen contracts are covered by regression tests.
 
 ---
 
@@ -415,11 +423,4 @@ Phase 0.15 expected outcome: explicit, audited and frozen contracts for the curr
 - Internal testing
 - Release candidate
 
-
-### Phase 0.15.4 Completion Note — Response Schema Normalization
-
-0.15.4 completed the response schema normalization step without changing endpoint behavior.
-
-The normalized baseline now records that successful response payloads remain intentionally unwrapped and compatible, while JSON response metadata and defensive error fallback shape are aligned with the canonical contract introduced in 0.15.2.
-
-The next roadmap step is **0.15.6 — Validation & Documentation**.
+The next roadmap phase is intentionally not defined by 0.15.6.

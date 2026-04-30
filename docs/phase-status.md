@@ -1905,8 +1905,8 @@ Observable impact at the time of 0.14.6.fix1: Stage 0 documentation had a cohere
 
 ## Phase 0.15 — Contract Hardening & Freeze
 
-Status: **In Progress**  
-Current subphase: **0.15.6 — Validation & Documentation**
+Status: **Completed**  
+Current subphase: **None**
 
 Phase 0.15 starts from the completed Phase 0.14.6.fix3 baseline.
 
@@ -1928,7 +1928,7 @@ Observable impact: Phase 0.15 is no longer pending definition. The current activ
 - 0.15.3 — Provider Contract Validation: **Completed**
 - 0.15.4 — Response Schema Normalization: **Completed**
 - 0.15.5 — Contract Freeze Enforcement: **Completed**
-- 0.15.6 — Validation & Documentation: **Pending**
+- 0.15.6 — Validation & Documentation: **Completed**
 
 ### 0.15.0 Result
 
@@ -2013,3 +2013,20 @@ Decision taken: freeze the current Stage 0 contract surface without introducing 
 Concrete change: `docs/phase0_15_5_contract_freeze_enforcement.md` records freeze rules and evolution policy, while `internal/core/httpx/contract_freeze_test.go` adds regression coverage for frozen core JSON responses and protected auth error envelopes.
 
 Observable impact: future contract changes must be deliberate, versioned where required and reflected in tests plus documentation. The next correct step is 0.15.6 — Validation & Documentation.
+
+### 0.15.6 Result
+
+0.15.6 completed Validation & Documentation and closes Phase 0.15.
+
+Context inherited: 0.15.1 documented the HTTP route baseline, 0.15.2 stabilized the public error envelope, 0.15.3 validated provider contracts through compile-time assertions, 0.15.4 normalized response serialization metadata and 0.15.5 froze the audited contract baseline.
+
+Problem addressed: Phase 0.15 had completed its contract-hardening implementation work, but trunk documentation still needed final chronological reconciliation and closure-state alignment.
+
+Decision taken: close the phase with documentation-only reconciliation and record the local validation evidence supplied after 0.15.5.
+
+Concrete change: Phase 0.15 is now marked completed, 0.15.6 is marked completed and no active 0.15 subphase remains open.
+
+Validation evidence: `go test ./...` passed in the developer environment after applying 0.15.5.
+
+Observable impact: the Stage 0 backend contract baseline is explicit, audited, normalized, frozen and documented for controlled future evolution.
+

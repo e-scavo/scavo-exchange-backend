@@ -15,12 +15,12 @@ It is intended to:
 ## 📌 Current State
 
 **Stage:** 0 — Foundation
-**Latest Completed Phase:** 0.14 — Observability & Diagnostics Foundation
-**Latest Completed Subphase:** 0.15.5 — Contract Freeze Enforcement
-**Phase Status:** 0.15.5 Completed / 0.15.6 Pending
-**Current Phase:** 0.15 — Contract Hardening & Freeze
-**Current Subphase:** 0.15.6 — Validation & Documentation
-**Next Planned Subphase:** 0.15.6 — Validation & Documentation
+**Latest Completed Phase:** 0.15 — Contract Hardening & Freeze
+**Latest Completed Subphase:** 0.15.6 — Validation & Documentation
+**Phase Status:** 0.15 Completed
+**Current Phase:** Pending definition
+**Current Subphase:** None
+**Next Planned Subphase:** Pending explicit definition
 
 ---
 
@@ -1319,7 +1319,7 @@ Corrected areas:
 
 No Go code changed in this fix.
 
-The next chat or phase must start from: Phase 0.15 active with 0.15.0, 0.15.1, 0.15.2 and 0.15.3 completed.
+The next chat or phase must start from: Phase 0.15 completed with 0.15.0 through 0.15.6 completed and no next phase invented by this handoff.
 
 ---
 
@@ -1435,4 +1435,21 @@ Concrete change: a dedicated freeze document now records allowed and forbidden e
 
 Observable impact: future contract changes must be intentional and visible. Silent drift should fail tests or documentation review before reaching frontend consumers.
 
-Next step after 0.15.5 is **0.15.6 — Validation & Documentation**.
+Next step after 0.15.5 was **0.15.6 — Validation & Documentation**. This has now been completed and Phase 0.15 is closed.
+
+### Phase 0.15.6 Handoff — Validation & Documentation
+
+0.15.6 completed Validation & Documentation and closes Phase 0.15.
+
+Inherited context: 0.15.1 audited the HTTP route surface, 0.15.2 aligned the canonical error envelope, 0.15.3 validated provider boundaries, 0.15.4 normalized response serialization and 0.15.5 enforced the contract freeze.
+
+Problem addressed: the final state needed a documentation-only reconciliation step because contract freeze work must not leave trunk documents pointing to an open or out-of-order subphase.
+
+Decision taken: close Phase 0.15 without changing code or inventing Phase 0.16. The next phase must be explicitly defined later.
+
+Concrete change: README, roadmap, phase status, documentation index, handoff and the dedicated Phase 0.15 document now mark 0.15.6 as completed and Phase 0.15 as completed.
+
+Validation evidence: `go test ./...` passed in the developer environment after applying 0.15.5.
+
+Observable impact: the backend now has a closed Contract Hardening & Freeze baseline. Future work must preserve or explicitly version the audited HTTP contracts, canonical error envelope, provider boundaries and response serialization policy.
+

@@ -22,11 +22,11 @@ The backend follows a **wallet-first identity model** that progressively evolves
 ## 🚧 Current Stage
 
 **Stage:** 0 — Foundation  
-**Latest Completed Phase:** **0.14 — Observability & Diagnostics Foundation**  
-**Latest Completed Subphase:** **0.15.5 — Contract Freeze Enforcement**  
-**Phase Status:** **0.15.5 Completed / 0.15.6 Pending**  
-**Current Phase:** **0.15 — Contract Hardening & Freeze**  
-**Current Subphase:** **0.15.6 — Validation & Documentation**
+**Latest Completed Phase:** **0.15 — Contract Hardening & Freeze**  
+**Latest Completed Subphase:** **0.15.6 — Validation & Documentation**  
+**Phase Status:** **0.15 Completed**  
+**Current Phase:** **Pending definition**  
+**Current Subphase:** **None**
 
 ---
 
@@ -3099,7 +3099,7 @@ Excluded:
 - **0.15.3 — Provider Contract Validation** ✅ Completed
 - **0.15.4 — Response Schema Normalization** ✅ Completed
 - **0.15.5 — Contract Freeze Enforcement** ✅ Completed
-- **0.15.6 — Validation & Documentation** ⏳ Pending
+- **0.15.6 — Validation & Documentation** ✅ Completed
 
 ### 0.15.0 Result
 
@@ -3187,3 +3187,18 @@ Decision taken: freeze the current public and internal contract surface without 
 Concrete change: `docs/phase0_15_5_contract_freeze_enforcement.md` defines the freeze policy, and `internal/core/httpx/contract_freeze_test.go` guards core status JSON responses plus protected auth canonical error envelopes.
 
 Observable impact: future changes to frozen contract shape must be explicit, versioned or intentionally updated in tests and documentation. The next correct step is 0.15.6 — Validation & Documentation.
+
+### Phase 0.15.6 Result — Validation & Documentation
+
+0.15.6 completed Validation & Documentation as the final closure step for Contract Hardening & Freeze.
+
+Context inherited: 0.15.1 audited the HTTP route surface, 0.15.2 aligned the canonical error envelope, 0.15.3 validated provider contracts, 0.15.4 normalized response serialization metadata and 0.15.5 froze the audited contract baseline.
+
+Real problem: the remaining risk was documentation drift after incremental subphase updates. Some trunk documents carried correct information but needed final chronological alignment and current-state closure before Phase 0.15 could be treated as complete.
+
+Decision taken: perform a documentation-only reconciliation. No Go source code, runtime behavior, route, payload, provider contract, error code or business rule was changed.
+
+Concrete change: trunk documentation now records Phase 0.15 as completed, latest completed subphase as 0.15.6 and current subphase as none. The final local validation evidence is preserved as `go test ./...` passing in the developer environment after 0.15.5.
+
+Observable impact: Phase 0.15 is closed with explicit, audited and frozen contracts. Future work must treat the current HTTP, error, provider and response contracts as frozen unless deliberately versioned or intentionally evolved.
+
