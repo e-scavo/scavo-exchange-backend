@@ -315,11 +315,13 @@ Phase 0.15 follows the Observability & Diagnostics Foundation completed in 0.14.
 
 The phase is intentionally limited to contract validation and freeze discipline. It does not introduce new features, new routes, business logic changes, architecture changes or additional observability platforms.
 
-#### 0.15.0 — Phase Definition & Documentation Lock 🔄 In Progress
+#### 0.15.0 — Phase Definition & Documentation Lock ✅ Completed
 Register Phase 0.15 in the trunk documentation, define scope and subphase order and lock the baseline before any code or contract audit changes.
 
-#### 0.15.1 — HTTP Contract Audit ⏳ Pending
+#### 0.15.1 — HTTP Contract Audit ✅ Completed
 Audit the existing HTTP route surface and validate method, path, status and payload expectations from the real repository.
+
+0.15.1 records 39 registered HTTP route entries and 22 unique behavior contracts across foundation, diagnostics, WebSocket upgrade and auth/account/wallet surfaces. It confirms that legacy auth routes and `/api/v1` auth routes are active paired contracts backed by the same handler set.
 
 #### 0.15.2 — Error Contract Alignment ⏳ Pending
 Validate and align public error envelopes around the existing standardized error model: `code`, `message` and `details`.

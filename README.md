@@ -24,9 +24,9 @@ The backend follows a **wallet-first identity model** that progressively evolves
 **Stage:** 0 — Foundation  
 **Latest Completed Phase:** **0.14 — Observability & Diagnostics Foundation**  
 **Latest Completed Subphase:** **0.14.6 — Validation & Documentation**  
-**Phase Status:** **0.15.0 In Progress**  
+**Phase Status:** **0.15.1 Completed**  
 **Current Phase:** **0.15 — Contract Hardening & Freeze**  
-**Current Subphase:** **0.15.0 — Phase Definition & Documentation Lock**
+**Current Subphase:** **0.15.1 — HTTP Contract Audit**
 
 ---
 
@@ -3093,8 +3093,8 @@ Excluded:
 
 ### Subphases
 
-- **0.15.0 — Phase Definition & Documentation Lock** 🔄 In Progress
-- **0.15.1 — HTTP Contract Audit** ⏳ Pending
+- **0.15.0 — Phase Definition & Documentation Lock** ✅ Completed
+- **0.15.1 — HTTP Contract Audit** ✅ Completed
 - **0.15.2 — Error Contract Alignment** ⏳ Pending
 - **0.15.3 — Provider Contract Validation** ⏳ Pending
 - **0.15.4 — Response Schema Normalization** ⏳ Pending
@@ -3115,3 +3115,18 @@ Concrete change: README, roadmap, phase status, documentation index, handoff and
 
 Observable impact: the next correct step is 0.15.1 — HTTP Contract Audit, based only on the real route surface and existing contracts in the repository.
 
+
+
+### 0.15.1 Result
+
+0.15.1 completes the HTTP Contract Audit without changing Go source code.
+
+Context inherited from 0.15.0: Phase 0.15 had been opened as Contract Hardening & Freeze after the completed Phase 0.14 observability baseline. Contract work needed to start with the real route surface, not with assumed endpoints or undocumented response expectations.
+
+Problem addressed: HTTP contracts were present in router and handler code, but not yet captured as a dedicated 0.15 route inventory. That made later error alignment and response normalization vulnerable to missing legacy auth paths, `/api/v1` aliases, foundation endpoints or WebSocket-specific behavior.
+
+Decision taken: document the current HTTP surface first. The audit records foundation routes, `/ws`, public auth routes, authenticated account/settings routes and authenticated wallet-management routes. It confirms that legacy auth paths and `/api/v1` auth paths are active paired contracts backed by the same handlers.
+
+Concrete change: `docs/phase0_15_1_http_contract_audit.md` now records the HTTP inventory, status behavior, response families, error-envelope observations and non-blocking contract risks. Trunk documentation marks 0.15.0 and 0.15.1 as completed.
+
+Observable impact: 39 registered HTTP route entries and 22 unique behavior contracts are now explicitly documented. The next correct step is 0.15.2 — Error Contract Alignment, using this audit as the public HTTP baseline.

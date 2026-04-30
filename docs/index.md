@@ -63,7 +63,7 @@
 
 Latest completed phase: `0.14 — Observability & Diagnostics Foundation`  
 Current phase: `0.15 — Contract Hardening & Freeze`  
-Current subphase: `0.15.0 — Phase Definition & Documentation Lock`
+Current subphase: `0.15.1 — HTTP Contract Audit`
 
 * `phase0_13_provider_layer_consolidation.md`
   * `0.13.0 — Definition & Documentation Lock` ✔ Completed
@@ -84,8 +84,9 @@ Current subphase: `0.15.0 — Phase Definition & Documentation Lock`
   * `0.14.6 — Validation & Documentation` ✅ Completed
 
 * `phase0_15_contract_hardening_freeze.md`
-  * `0.15.0 — Phase Definition & Documentation Lock` 🔄 In Progress
-  * `0.15.1 — HTTP Contract Audit` ⏳ Pending
+* `phase0_15_1_http_contract_audit.md`
+  * `0.15.0 — Phase Definition & Documentation Lock` ✅ Completed
+  * `0.15.1 — HTTP Contract Audit` ✅ Completed
   * `0.15.2 — Error Contract Alignment` ⏳ Pending
   * `0.15.3 — Provider Contract Validation` ⏳ Pending
   * `0.15.4 — Response Schema Normalization` ⏳ Pending
@@ -251,8 +252,8 @@ The phase continues the Stage 0 narrative by moving from provider-owned runtime 
 
 ### Phase 0.15 — Contract Hardening & Freeze
 
-- 0.15.0 🔄 Phase Definition & Documentation Lock
-- 0.15.1 ⏳ HTTP Contract Audit
+- 0.15.0 ✅ Phase Definition & Documentation Lock
+- 0.15.1 ✅ HTTP Contract Audit
 - 0.15.2 ⏳ Error Contract Alignment
 - 0.15.3 ⏳ Provider Contract Validation
 - 0.15.4 ⏳ Response Schema Normalization
@@ -313,6 +314,7 @@ The phase continues the Stage 0 narrative by moving from observable runtime exec
 
 - `docs/phase0_14_observability_diagnostics_foundation.md` — defines and closes the Observability & Diagnostics Foundation, including request correlation, logging standardization, error context enrichment, flow tracing, diagnostics surface exposure and final validation/documentation closure.
 - `docs/phase0_15_contract_hardening_freeze.md` — defines the active Contract Hardening & Freeze phase, including contract audit scope, error alignment, provider validation, response normalization, freeze enforcement and final validation/documentation closure plan.
+- `docs/phase0_15_1_http_contract_audit.md` — records the real HTTP route inventory for 0.15.1, including foundation routes, WebSocket upgrade route, legacy auth routes, `/api/v1` auth routes, status behavior, response families and error-envelope observations.
 - `docs/observability.md` — records the active observability model and its Stage 0 operational impact.
 
 ### Phase 0.13 Dedicated Document

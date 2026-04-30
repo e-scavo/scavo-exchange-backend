@@ -1906,7 +1906,7 @@ Observable impact at the time of 0.14.6.fix1: Stage 0 documentation had a cohere
 ## Phase 0.15 — Contract Hardening & Freeze
 
 Status: **In Progress**  
-Current subphase: **0.15.0 — Phase Definition & Documentation Lock**
+Current subphase: **0.15.1 — HTTP Contract Audit**
 
 Phase 0.15 starts from the completed Phase 0.14.6.fix3 baseline.
 
@@ -1922,8 +1922,8 @@ Observable impact: Phase 0.15 is no longer pending definition. The current activ
 
 ### 0.15 Subphase Plan
 
-- 0.15.0 — Phase Definition & Documentation Lock: **In Progress**
-- 0.15.1 — HTTP Contract Audit: **Pending**
+- 0.15.0 — Phase Definition & Documentation Lock: **Completed**
+- 0.15.1 — HTTP Contract Audit: **Completed**
 - 0.15.2 — Error Contract Alignment: **Pending**
 - 0.15.3 — Provider Contract Validation: **Pending**
 - 0.15.4 — Response Schema Normalization: **Pending**
@@ -1938,3 +1938,20 @@ No Go source code changes are introduced by this subphase.
 
 The subphase establishes the contract-hardening scope, registers the subphase order and locks the rule that all later 0.15 work must be derived from the real repository state. The HTTP audit in 0.15.1 must not invent endpoints, status codes, payloads or response contracts.
 
+
+
+### 0.15.1 Result
+
+0.15.1 completes the HTTP Contract Audit without changing source code.
+
+Context inherited from 0.15.0: Phase 0.15 was opened as a contract-hardening and freeze phase after the completed Phase 0.14 observability baseline. The documentation lock required all contract work to be derived from the real repository state.
+
+Problem addressed: the backend route surface existed in code, but the HTTP contract inventory was implicit. Without a dedicated audit, later error alignment, provider validation, response normalization and freeze enforcement could miss legacy routes, duplicate versioned paths or WebSocket-specific behavior.
+
+Decision taken: audit and document the actual route surface first. The audit records foundation routes, the WebSocket upgrade route, public auth routes, authenticated account/settings routes and authenticated wallet-management routes. It also records that auth routes are exposed both as legacy paths and canonical `/api/v1` paths backed by the same handler set.
+
+Concrete change: `docs/phase0_15_1_http_contract_audit.md` now records the HTTP contract inventory, status behavior, response families, error envelope observations and non-blocking risks for later 0.15 subphases. Trunk documentation now marks 0.15.0 and 0.15.1 as completed and keeps 0.15.2 as the next pending step.
+
+Validation note: `go test ./...` was attempted, but the execution environment attempted to download Go 1.25.0 from `proxy.golang.org` and failed because DNS/network access was unavailable. This is recorded as an environment limitation, not a source failure, because 0.15.1 does not modify Go code.
+
+Observable impact: the HTTP route surface is now explicit. The audited baseline contains 39 registered HTTP route entries and 22 unique behavior contracts. Later 0.15 work must use this baseline and must not invent endpoints, status codes, error codes or response shapes.

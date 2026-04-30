@@ -5,10 +5,10 @@
 ## Status
 
 **Phase:** 0.15 — Contract Hardening & Freeze  
-**Current Subphase:** 0.15.0 — Phase Definition & Documentation Lock  
+**Current Subphase:** 0.15.1 — HTTP Contract Audit  
 **Status:** In Progress  
-**Type:** Documentation-only phase definition step  
-**Code changes in 0.15.0:** No
+**Type:** Contract inventory and documentation audit  
+**Code changes in 0.15.1:** No
 
 ---
 
@@ -233,8 +233,8 @@ Silent drift is not allowed.
 
 ## Current Phase State
 
-- 0.15.0 — Phase Definition & Documentation Lock: **In Progress**
-- 0.15.1 — HTTP Contract Audit: **Pending**
+- 0.15.0 — Phase Definition & Documentation Lock: **Completed**
+- 0.15.1 — HTTP Contract Audit: **Completed**
 - 0.15.2 — Error Contract Alignment: **Pending**
 - 0.15.3 — Provider Contract Validation: **Pending**
 - 0.15.4 — Response Schema Normalization: **Pending**
@@ -243,11 +243,41 @@ Silent drift is not allowed.
 
 ---
 
-## Handoff to 0.15.1
+## 0.15.1 Concrete Change
 
-The next subphase must audit the real HTTP route surface from the repository.
+0.15.1 audits the real HTTP route surface from the repository and records the route, method, authentication, success status, response family and error-envelope baseline.
 
-It must not invent endpoints, routes, status codes or response shapes. Any contract inventory must be derived from the current code and validated against the existing documentation.
+The audit confirms:
+
+- `GET /health`, `GET /readiness`, `GET /version`, `GET /diagnostics` and `GET /ws` are the foundation/runtime routes.
+- auth routes are registered both as legacy paths and canonical `/api/v1` paths.
+- both auth route surfaces point to the same handler set.
+- authenticated routes use `RequireAuth(tokens, false)` and authorization hydration.
+- selected user and settings routes also enforce explicit read/update permissions.
+- handler errors use the standardized `{error:{code,message,details}}` envelope.
+
+No source code is changed by 0.15.1.
+
+---
+
+## 0.15.1 Observable Impact
+
+After 0.15.1:
+
+- the HTTP route surface is no longer implicit
+- legacy and canonical route pairing is documented
+- success status families are recorded
+- response families are identified
+- non-blocking risks are preserved for 0.15.2 through 0.15.5
+- the next correct step is Error Contract Alignment
+
+---
+
+## Handoff to 0.15.2
+
+The next subphase must validate the public error envelope across the audited route surface.
+
+It must use `docs/phase0_15_1_http_contract_audit.md` as the HTTP inventory baseline and must not invent endpoints, error codes or response shapes.
 
 ---
 
