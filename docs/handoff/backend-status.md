@@ -936,7 +936,7 @@ Phase 0.10 is therefore complete. The next architectural step should build on th
 
 ## Phase 0.11 — Domain Module Pattern
 
-Phase 0.11 is now the current structural Stage 0 phase. It follows the completed authorization layer and focuses on standardizing the internal organization of the current domain-facing modules without changing the public API contract.
+Phase 0.11 is historically completed. It followed the completed authorization layer and standardized the internal organization of the domain-facing modules without changing the public API contract. The current validated state is Phase 0.14 completed, with Phase 0.15 pending definition.
 
 ### Current Structural Direction
 
