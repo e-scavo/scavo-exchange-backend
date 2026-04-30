@@ -3202,3 +3202,10 @@ Concrete change: trunk documentation now records Phase 0.15 as completed, latest
 
 Observable impact: Phase 0.15 is closed with explicit, audited and frozen contracts. Future work must treat the current HTTP, error, provider and response contracts as frozen unless deliberately versioned or intentionally evolved.
 
+### Stage 1 Start — 1.1.0.0 Scope Confirmation
+
+Stage 1 is now the active roadmap focus, starting with Phase 1.1 — Application Use Case Consolidation.
+
+The initial control point, 1.1.0.0, is documentation-only scope confirmation. It confirms that Stage 0 remains frozen, `docs/roadmap.md` remains the governing document and no functional code, business logic, architecture, Go tests or configuration changes belong to this step.
+
+Stage 1 work uses the shared VSCode working tree as the execution surface: planning and coordination happen in chat, while repository edits and validation are performed by agents against the real working tree.

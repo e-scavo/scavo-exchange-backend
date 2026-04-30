@@ -2030,3 +2030,16 @@ Validation evidence: `go test ./...` passed in the developer environment after a
 
 Observable impact: the Stage 0 backend contract baseline is explicit, audited, normalized, frozen and documented for controlled future evolution.
 
+## Stage 1 — Application Surface & Product Capabilities
+
+### 1.1.0.0 Result
+
+1.1.0.0 completed Scope Confirmation for Phase 1.1 — Application Use Case Consolidation.
+
+Context inherited: Stage 0 closed with Phase 0.15 and remains frozen. The roadmap defines Stage 1 as the active product-capability stage and Phase 1.1 as its first phase.
+
+Decision taken: confirm scope only. No functional code, business logic, architecture, Go tests or configuration changes belong to 1.1.0.0.
+
+Working model: planning and coordination happen in chat; repository edits and validation happen through agents operating on the real VSCode working tree.
+
+Observable impact: Stage 1 is active, Phase 1.1 is open, 1.1.0.0 is closed and the next ordered control point is 1.1.0.1 — Trunk Documentation Review.
