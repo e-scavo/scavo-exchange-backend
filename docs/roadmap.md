@@ -414,6 +414,54 @@ Focus areas:
 - define product-level success criteria
 - preserve Stage 0 contracts while clarifying intended usage
 
+#### 1.1.0 — Phase Definition & Documentation Lock
+
+- register Phase 1.1 scope in trunk documentation
+- confirm Stage 1 starts from the frozen Stage 0 baseline
+- define the audit boundary before touching code
+- avoid feature implementation during phase definition
+
+#### 1.1.1 — Endpoint Surface Inventory
+
+- inventory existing HTTP and WebSocket surfaces
+- classify endpoints by product intent
+- identify current consumers and expected usage
+- preserve frozen Stage 0 contracts during inventory
+
+#### 1.1.2 — Application Flow Mapping
+
+- map endpoints to real application flows
+- define flow entry points and dependencies
+- distinguish bootstrap, account, settings, wallet and system flows
+- identify missing flow documentation without adding features prematurely
+
+#### 1.1.3 — Orphan, Duplicate & Ambiguous Surface Review
+
+- detect endpoints without a clear Stage 1 use case
+- detect duplicate or overlapping surfaces
+- document ambiguous ownership or naming
+- propose safe consolidation paths without breaking compatibility
+
+#### 1.1.4 — Product Success Criteria Definition
+
+- define success criteria per supported flow
+- document expected inputs, outputs and error behavior
+- align criteria with frozen contracts
+- prepare the basis for end-to-end validation
+
+#### 1.1.5 — Use Case Contract Documentation
+
+- document the approved Stage 1 application use cases
+- connect each use case to existing contracts
+- record excluded or deferred use cases
+- prevent scope drift before later Stage 1 phases
+
+#### 1.1.6 — Validation & Closure
+
+- validate documentation coherence
+- run the project test suite when code was touched
+- close Phase 1.1 with explicit handoff to Phase 1.2
+
 ### Phase 1.2 — Account & Identity Product Capabilities
 
 Transform the identity infrastructure into a usable product surface while preserving the frozen Stage 0 contracts.
@@ -425,6 +473,13 @@ Focus areas:
 - usable wallet management
 - real user settings behavior
 - end-to-end account flows
+
+#### 1.2.0 — Phase Definition & Documentation Lock
+
+- register Phase 1.2 scope in trunk documentation
+- preserve the Stage 0 frozen contracts before identity product work
+- define account, session, wallet and settings boundaries
+- avoid implementation before account flows are explicitly scoped
 
 #### 1.2.1 — Session Lifecycle Completion
 
@@ -485,6 +540,54 @@ Focus areas:
 - endpoint-level enforcement
 - session-aware permission consistency
 
+#### 1.3.0 — Phase Definition & Documentation Lock
+
+- register Phase 1.3 scope in trunk documentation
+- define authorization boundaries before implementation
+- preserve Stage 0 authentication and error contracts
+- confirm which account-level capabilities require permission checks
+
+#### 1.3.1 — Permission Surface Inventory
+
+- inventory endpoints requiring authenticated access
+- identify current authorization checks
+- classify account, wallet, settings and system operations
+- detect unauthenticated or under-specified permission boundaries
+
+#### 1.3.2 — Role & Capability Mapping
+
+- define product-level roles or capabilities where applicable
+- map capabilities to endpoint groups
+- document default access expectations
+- avoid introducing roles that are not required by real flows
+
+#### 1.3.3 — Ownership Rule Definition
+
+- define ownership rules for account-level resources
+- document wallet ownership expectations
+- align settings mutations with authenticated account context
+- prevent cross-account access drift
+
+#### 1.3.4 — Enforcement Alignment
+
+- align endpoint checks with documented permission rules
+- preserve existing public contracts
+- normalize authorization failure behavior through the frozen error envelope
+- avoid business logic changes outside permission enforcement
+
+#### 1.3.5 — Authorization Regression Coverage
+
+- add or update tests for permission boundaries
+- cover denied, allowed and ownership-sensitive paths
+- confirm error shape consistency
+- preserve compatibility with existing consumers
+
+#### 1.3.6 — Validation & Closure
+
+- run `go test ./...`
+- reconcile trunk documentation
+- close Phase 1.3 with handoff to data interaction patterns
+
 ### Phase 1.4 — Data Interaction Patterns
 
 Standardize the way product surfaces expose data interaction.
@@ -496,6 +599,54 @@ Focus areas:
 - sorting
 - response consistency
 - read model behavior
+
+#### 1.4.0 — Phase Definition & Documentation Lock
+
+- register Phase 1.4 scope in trunk documentation
+- define data interaction boundaries before code changes
+- preserve existing response compatibility
+- distinguish read patterns from write flows
+
+#### 1.4.1 — Read Surface Inventory
+
+- inventory list and read endpoints
+- identify collection responses and single-resource responses
+- document current query parameters
+- detect undocumented or inconsistent read behavior
+
+#### 1.4.2 — Pagination Contract Definition
+
+- define supported pagination inputs
+- define metadata expectations where applicable
+- document defaults and limits
+- preserve compatibility for existing non-paginated responses
+
+#### 1.4.3 — Filtering Contract Definition
+
+- identify supported filters per surface
+- document unsupported or deferred filters
+- validate error behavior for invalid filters
+- avoid adding generic filtering without product need
+
+#### 1.4.4 — Sorting Contract Definition
+
+- identify sortable fields per collection surface
+- document default ordering
+- validate unsupported sorting behavior
+- preserve deterministic output where required
+
+#### 1.4.5 — Read Model Consistency Validation
+
+- validate read model shape consistency
+- align data interaction responses with Stage 0 response policy
+- add tests where contract drift is likely
+- document compatibility constraints
+
+#### 1.4.6 — Validation & Closure
+
+- run `go test ./...`
+- reconcile trunk documentation
+- close Phase 1.4 with handoff to mutation and write flows
 
 ### Phase 1.5 — Mutation & Write Flows
 
@@ -509,6 +660,54 @@ Focus areas:
 - validation behavior
 - write model consistency
 
+#### 1.5.0 — Phase Definition & Documentation Lock
+
+- register Phase 1.5 scope in trunk documentation
+- define mutation boundaries before implementation
+- preserve Stage 0 error and response contracts
+- distinguish product mutations from infrastructure changes
+
+#### 1.5.1 — Write Surface Inventory
+
+- inventory create, update and delete-capable surfaces
+- document current write models
+- identify missing validation expectations
+- detect unsafe or ambiguous mutation behavior
+
+#### 1.5.2 — Create Flow Consolidation
+
+- define create request expectations
+- document validation and conflict behavior
+- align success responses with frozen response policy
+- preserve ownership and authorization expectations
+
+#### 1.5.3 — Update Flow Consolidation
+
+- define update semantics per resource
+- document partial versus full update behavior where applicable
+- validate immutable fields
+- align errors for invalid or unauthorized updates
+
+#### 1.5.4 — Delete / Disable Flow Consolidation
+
+- define delete, disable or detach semantics per resource
+- document soft-delete versus hard-delete expectations where applicable
+- validate ownership checks
+- align not-found and conflict behavior
+
+#### 1.5.5 — Write Model Validation Coverage
+
+- add or update tests for mutation contracts
+- cover validation, conflict, ownership and authorization cases
+- confirm canonical error envelope consistency
+- preserve existing public behavior unless explicitly versioned
+
+#### 1.5.6 — Validation & Closure
+
+- run `go test ./...`
+- reconcile trunk documentation
+- close Phase 1.5 with handoff to system behavior consistency
+
 ### Phase 1.6 — System Behavior Consistency
 
 Validate consistent behavior across product-level flows and edge cases.
@@ -521,6 +720,54 @@ Focus areas:
 - cross-endpoint consistency
 - contract-preserving behavior under failure
 
+#### 1.6.0 — Phase Definition & Documentation Lock
+
+- register Phase 1.6 scope in trunk documentation
+- define behavior consistency boundaries before code changes
+- preserve Stage 0 frozen contracts
+- focus on behavior guarantees rather than new features
+
+#### 1.6.1 — Cross-Endpoint Behavior Audit
+
+- compare behavior across related endpoints
+- identify inconsistent success, empty, conflict and not-found handling
+- document expected behavior per flow
+- avoid changing business semantics without explicit rationale
+
+#### 1.6.2 — Idempotency & Retry Semantics Review
+
+- identify operations where idempotency matters
+- document retry-safe and non-retry-safe behavior
+- validate duplicate request outcomes
+- preserve compatibility for existing clients
+
+#### 1.6.3 — Conflict & Edge Case Alignment
+
+- define conflict behavior for account, wallet, settings and data operations
+- validate expired, missing, duplicate and invalid resource scenarios
+- align edge-case errors with canonical error envelope
+- document known deferred behavior
+
+#### 1.6.4 — Failure Mode Consistency
+
+- validate defensive fallback behavior
+- confirm request correlation survives failure paths
+- align timeout and internal failure responses
+- preserve diagnostics without leaking internals
+
+#### 1.6.5 — Behavior Regression Coverage
+
+- add tests for cross-endpoint behavior guarantees
+- cover edge cases and failure modes
+- ensure Stage 0 freeze tests remain valid
+- prevent product-level behavior drift
+
+#### 1.6.6 — Validation & Closure
+
+- run `go test ./...`
+- reconcile trunk documentation
+- close Phase 1.6 with handoff to Stage 1 end-to-end validation
+
 ### Phase 1.7 — End-to-End Validation & Closure
 
 Validate Stage 1 as a complete product-capability layer.
@@ -531,6 +778,48 @@ Focus areas:
 - functional tests
 - documentation reconciliation
 - Stage 1 closure readiness
+
+#### 1.7.0 — Phase Definition & Documentation Lock
+
+- register Phase 1.7 scope in trunk documentation
+- define final Stage 1 validation boundaries
+- confirm all prior Stage 1 phases are represented coherently
+- avoid introducing new product scope during closure
+
+#### 1.7.1 — End-to-End Flow Matrix
+
+- document complete Stage 1 flow matrix
+- cover login, bootstrap, account, settings, wallet, authorization and mutation flows
+- define expected success and failure outcomes
+- connect each flow to test and documentation evidence
+
+#### 1.7.2 — Functional Validation Pass
+
+- execute full backend test suite
+- validate representative end-to-end flows
+- confirm frozen Stage 0 contracts remain intact
+- record validation evidence in trunk documentation
+
+#### 1.7.3 — Documentation Reconciliation
+
+- reconcile all trunk Markdown documents
+- ensure Stage 1 phases and subphases are ordered consistently
+- remove stale future references
+- preserve historical narrative without rewriting prior stages
+
+#### 1.7.4 — Stage 1 Closure Assessment
+
+- verify Stage 1 objectives were met
+- document remaining deferred work
+- confirm no unfinished Stage 1 subphase remains active
+- prepare the system for the next stage definition
+
+#### 1.7.5 — Final Validation & Handoff
+
+- run final validation commands
+- close Stage 1 narratively
+- prepare handoff for the next stage without defining it prematurely
+- create a stable historical baseline after acceptance
 
 ---
 
