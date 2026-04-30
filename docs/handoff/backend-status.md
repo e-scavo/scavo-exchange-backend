@@ -1257,3 +1257,20 @@ Important runtime facts:
 - No diagnostics endpoint, metrics backend, OpenTelemetry integration or public API change was introduced.
 
 This keeps public API behavior stable and prepares 0.14.5 diagnostics surface exposure with a consistent internal flow-event vocabulary.
+
+### Phase 0.14.5 Handoff — Diagnostics Surface Exposure
+
+0.14.5 has been implemented as a minimal diagnostics surface over the existing status and HTTP router infrastructure.
+
+Important runtime facts:
+
+- `GET /diagnostics` is now registered in `internal/core/httpx.NewRouter`.
+- `internal/core/status.Service.Diagnostics()` owns the canonical diagnostics payload when a status service is configured.
+- The diagnostics payload reports `ok`, `service`, `env`, `version`, `commit`, `observability` and `time`.
+- `observability.request_correlation` reports the 0.14.1 correlation model as enabled.
+- `observability.structured_logging` reports the 0.14.2 logging standard as enabled.
+- `observability.error_context_enrichment` reports the 0.14.3 error context enrichment layer as enabled.
+- `observability.flow_tracing` reports the 0.14.4 flow tracing convention as enabled.
+- No Prometheus, OpenTelemetry, dashboard, counter system or business API contract change was introduced.
+
+This keeps public business behavior stable and prepares 0.14.6 validation and documentation closure with a concrete diagnostics surface to verify.

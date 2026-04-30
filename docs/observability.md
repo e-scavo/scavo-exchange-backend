@@ -319,7 +319,7 @@ HTTP → Provider → Application → Domain → Repository
 - 0.14.2 — Logging Standardization ✅ Completed
 - 0.14.3 — Error Context Enrichment ✅ Completed
 - 0.14.4 — Flow Tracing Integration ✅ Completed
-- 0.14.5 — Diagnostics Surface Exposure ⬜ Pending
+- 0.14.5 — Diagnostics Surface Exposure ✅ Completed
 - 0.14.6 — Validation & Documentation ⬜ Pending
 
 ---
@@ -385,3 +385,28 @@ Decision taken: flow tracing is represented as structured log records with messa
 Concrete change: HTTP access logging now emits `http_request_start` before handler execution and `http_request_end` after handler execution, preserving method, path, remote address, status, bytes and duration context. Application lifecycle logs now emit `application_start` and `application_stop` through the same flow tracing convention.
 
 Observable impact: operators can now follow request and lifecycle movement through consistent flow events using existing JSON logs. No HTTP response, public API contract, provider behavior, business logic, metrics backend or diagnostics endpoint changed.
+
+## Phase 0.14.5 Diagnostics Surface Exposure Result
+
+0.14.5 exposes a minimal diagnostics-oriented surface for the observability foundation without introducing external metrics infrastructure.
+
+Context inherited: by the end of 0.14.4, request correlation, structured logging, error context enrichment and flow tracing were implemented as internal runtime capabilities. They improved debugging, but there was no HTTP-visible foundation snapshot showing which observability capabilities were active.
+
+Problem addressed: health and readiness answer whether the service is up or ready, while version answers build identity. None of those endpoints described the observability foundation itself.
+
+Decision taken: expose `GET /diagnostics` through the existing router and status service. The endpoint returns service identity plus an `observability` object with the four completed 0.14 capabilities:
+
+```json
+{
+  "observability": {
+    "request_correlation": true,
+    "structured_logging": true,
+    "error_context_enrichment": true,
+    "flow_tracing": true
+  }
+}
+```
+
+Concrete change: `internal/core/status.Service.Diagnostics()` owns the payload, and `internal/core/httpx.NewRouter` registers `/diagnostics` alongside `/health`, `/readiness` and `/version`.
+
+Observable impact: operators now have a lightweight diagnostics snapshot for the observability foundation. No business payloads, auth contracts, provider interfaces, domain logic, external metrics systems, dashboards or tracing backends were introduced.

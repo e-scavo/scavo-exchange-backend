@@ -1753,8 +1753,8 @@ Phase 0.13 is complete. Continue with the corrected next roadmap-defined phase: 
 ## Status
 
 **Phase:** 0.14 — Observability & Diagnostics Foundation  
-**Current subphase:** 0.14.4 — Flow Tracing Integration  
-**Status:** 0.14.4 completed; next subphase is 0.14.5 — Diagnostics Surface Exposure
+**Current subphase:** 0.14.5 — Diagnostics Surface Exposure  
+**Status:** 0.14.5 completed; next subphase is 0.14.6 — Validation & Documentation
 
 ## Context
 
@@ -1784,7 +1784,7 @@ This decision replaces the previous placeholder roadmap label for 0.14 with the 
 - 0.14.2 — Logging Standardization ✅ Completed
 - 0.14.3 — Error Context Enrichment ✅ Completed
 - 0.14.4 — Flow Tracing Integration ✅ Completed
-- 0.14.5 — Diagnostics Surface Exposure ⬜ Pending
+- 0.14.5 — Diagnostics Surface Exposure ✅ Completed
 - 0.14.6 — Validation & Documentation ⬜ Pending
 
 ## Observable Impact
@@ -1832,3 +1832,15 @@ Decision taken: flow tracing is represented through existing structured JSON log
 Concrete change: `internal/core/httpx.AccessLog` now emits `http_request_start` and `http_request_end`; `internal/app.App` emits `application_start` and `application_stop`; logger tests validate flow event attributes.
 
 Observable impact: request and lifecycle movement is now visible through existing logs, correlated by `request_id` where available. Public API behavior, response payloads, provider behavior and business logic remain unchanged.
+
+### 0.14.5 Result
+
+0.14.5 completed the diagnostics surface exposure step of the Observability & Diagnostics Foundation.
+
+Context inherited from 0.14.4: the backend already had request correlation, standardized structured logging, error context enrichment and flow tracing events. Those capabilities were visible in logs, but there was no minimal runtime surface to report whether the observability foundation itself was active.
+
+Problem addressed: operators needed a lightweight way to inspect observability readiness without introducing Prometheus, OpenTelemetry, dashboards or business-contract changes.
+
+Decision taken: expose a minimal `GET /diagnostics` surface through the existing status/httpx path. The payload reports service identity, runtime environment/version/commit and the enabled foundation capabilities: request correlation, structured logging, error context enrichment and flow tracing.
+
+Observable impact: `/diagnostics` now provides a stable foundation-level diagnostic snapshot while existing `/health`, `/readiness`, `/version`, business routes, error envelopes, providers and domain behavior remain unchanged.

@@ -87,3 +87,31 @@ func TestReadiness_AllowsOptionalDependencyToBeDown(t *testing.T) {
 		t.Fatalf("expected readiness ok=true, got payload=%v", payload)
 	}
 }
+
+func TestDiagnostics_ReportsObservabilityCapabilities(t *testing.T) {
+	svc := New("scavo-exchange-backend", "test", "dev", "abc123")
+
+	payload := svc.Diagnostics()
+
+	if ok, _ := payload["ok"].(bool); !ok {
+		t.Fatalf("expected diagnostics ok=true, got payload=%v", payload)
+	}
+	if payload["service"] != "scavo-exchange-backend" {
+		t.Fatalf("unexpected service: got=%v", payload["service"])
+	}
+	observability, ok := payload["observability"].(map[string]any)
+	if !ok {
+		t.Fatalf("expected observability map, got=%T", payload["observability"])
+	}
+
+	for _, key := range []string{
+		"request_correlation",
+		"structured_logging",
+		"error_context_enrichment",
+		"flow_tracing",
+	} {
+		if enabled, _ := observability[key].(bool); !enabled {
+			t.Fatalf("expected observability %s=true, got payload=%v", key, observability)
+		}
+	}
+}

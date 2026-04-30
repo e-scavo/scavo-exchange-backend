@@ -292,13 +292,13 @@ Introduce request correlation and propagate request-scoped trace context through
 #### 0.14.2 — Logging Standardization ✅ Completed
 Define structured logging conventions and apply request context to HTTP and provider-level runtime paths.
 
-#### 0.14.3 — Error Context Enrichment ⬜ Pending
+#### 0.14.3 — Error Context Enrichment ✅ Completed
 Add internal diagnostic metadata to errors while preserving the existing public error contract.
 
-#### 0.14.4 — Flow Tracing Integration ⬜ Pending
+#### 0.14.4 — Flow Tracing Integration ✅ Completed
 Instrument key flow transitions across HTTP, provider, application, domain and repository boundaries.
 
-#### 0.14.5 — Diagnostics Surface Exposure ⬜ Pending
+#### 0.14.5 — Diagnostics Surface Exposure ✅ Completed
 Expose a minimal diagnostics-oriented surface or hook set compatible with the current architecture.
 
 #### 0.14.6 — Validation & Documentation ⬜ Pending

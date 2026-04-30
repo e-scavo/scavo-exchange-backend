@@ -156,7 +156,7 @@ Scope:
 - avoid noisy or duplicated logs
 - keep trace points diagnostic rather than behavioral
 
-### 0.14.5 — Diagnostics Surface Exposure ⬜ Pending
+### 0.14.5 — Diagnostics Surface Exposure ✅ Completed
 
 Expose a minimal diagnostics-oriented surface where compatible with the current architecture.
 
@@ -369,6 +369,58 @@ The logger package owns the reusable flow event key and helper. HTTP remains the
 Existing JSON logs can now describe request and application movement through consistent flow events. This keeps the backend contract stable while making the HTTP lifecycle easier to follow with the previously established `request_id` correlation model.
 
 No public API payload, error envelope, provider contract, business behavior, external metrics system, dashboard or diagnostics endpoint was introduced.
+
+### Validation note
+
+The code was prepared in standard Go formatting style. Full `go test ./...` could not be completed in this environment because the local Go toolchain is older than the module requirement and automatic toolchain download is unavailable.
+
+---
+
+## 0.14.5 Implementation Result — Diagnostics Surface Exposure
+
+### Context inherited
+
+0.14.1 established request correlation through `httpx.RequestIDFromContext(ctx)`. 0.14.2 standardized the runtime log key as `request_id`. 0.14.3 added safe diagnostic enrichment to the error layer. 0.14.4 then introduced flow tracing events over the existing structured logger.
+
+Together, those subphases made observability available internally, but the backend still lacked a minimal runtime surface that could report the active observability foundation capabilities without asking operators to infer them from logs or code.
+
+### Problem
+
+The existing operational endpoints were intentionally narrow:
+
+- `/health` reports service liveness.
+- `/readiness` reports dependency readiness.
+- `/version` reports build identity.
+
+None of them exposed whether request correlation, structured logging, error context enrichment or flow tracing were available. Adding Prometheus, OpenTelemetry, dashboards or counters at this stage would exceed the phase scope.
+
+### Decision
+
+0.14.5 exposes a minimal diagnostics surface:
+
+```http
+GET /diagnostics
+```
+
+The endpoint reports service identity, environment, version, commit, timestamp and a foundation-level `observability` object.
+
+### Concrete change
+
+- `internal/core/status.Service.Diagnostics()` now returns the canonical diagnostics payload.
+- `internal/core/status/service_test.go` validates the observability capability flags.
+- `internal/core/httpx.NewRouter` now registers `GET /diagnostics` alongside the existing operational endpoints.
+- `internal/core/httpx/router_diagnostics_test.go` validates the endpoint response shape.
+
+### Observable impact
+
+The backend now exposes a small diagnostics snapshot confirming the active 0.14 observability capabilities:
+
+- `request_correlation`
+- `structured_logging`
+- `error_context_enrichment`
+- `flow_tracing`
+
+No public business API payload, authentication contract, provider interface, domain behavior, external metrics backend, OpenTelemetry integration or dashboard was introduced.
 
 ### Validation note
 

@@ -83,6 +83,27 @@ func NewRouter(p RouterParams) http.Handler {
 			})
 		})
 
+		r.Get("/diagnostics", func(w http.ResponseWriter, r *http.Request) {
+			if p.Status == nil {
+				WriteJSON(w, http.StatusOK, map[string]any{
+					"ok":      true,
+					"service": "scavo-exchange-backend",
+					"env":     p.Config.Env,
+					"version": p.Config.Version,
+					"commit":  p.Config.Commit,
+					"observability": map[string]any{
+						"request_correlation":      true,
+						"structured_logging":       true,
+						"error_context_enrichment": true,
+						"flow_tracing":             true,
+					},
+					"time": time.Now().UTC().Format(time.RFC3339),
+				})
+				return
+			}
+			WriteJSON(w, http.StatusOK, p.Status.Diagnostics())
+		})
+
 		handlers := authmod.NewHTTPHandlers(p.AuthProvider)
 
 		registerAuthRoutes(r, "", p.TokenService, handlers)

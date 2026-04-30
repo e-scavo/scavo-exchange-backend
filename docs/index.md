@@ -75,10 +75,10 @@ Next phase: `0.14 — Observability & Diagnostics Foundation`
 * `phase0_14_observability_diagnostics_foundation.md`
   * `0.14.0 — Phase Definition & Documentation Lock` ✅ Completed
   * `0.14.1 — Correlation Model (Request ID / Trace)` ✅ Completed
-  * `0.14.2 — Logging Standardization ✅ Completed
-  * `0.14.3 — Error Context Enrichment` ⬜ Pending
-  * `0.14.4 — Flow Tracing Integration` ⬜ Pending
-  * `0.14.5 — Diagnostics Surface Exposure` ⬜ Pending
+  * `0.14.2 — Logging Standardization` ✅ Completed
+  * `0.14.3 — Error Context Enrichment` ✅ Completed
+  * `0.14.4 — Flow Tracing Integration` ✅ Completed
+  * `0.14.5 — Diagnostics Surface Exposure` ✅ Completed
   * `0.14.6 — Validation & Documentation` ⬜ Pending
 
 ---
@@ -224,12 +224,12 @@ Phase 0.13 ✔ Completed
 
 ### Phase 0.14 — Observability & Diagnostics Foundation
 
-- 0.14.0 ⬜ Phase Definition & Documentation Lock
-- 0.14.1 ⬜ Correlation Model (Request ID / Trace)
+- 0.14.0 ✅ Phase Definition & Documentation Lock
+- 0.14.1 ✅ Correlation Model (Request ID / Trace)
 - 0.14.2 ✅ Logging Standardization
-- 0.14.3 ⬜ Error Context Enrichment
-- 0.14.4 ⬜ Flow Tracing Integration
-- 0.14.5 ⬜ Diagnostics Surface Exposure
+- 0.14.3 ✅ Error Context Enrichment
+- 0.14.4 ✅ Flow Tracing Integration
+- 0.14.5 ✅ Diagnostics Surface Exposure
 - 0.14.6 ⬜ Validation & Documentation
 
 Phase 0.14 ⬜ Pending

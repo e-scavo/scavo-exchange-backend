@@ -74,6 +74,23 @@ func (s *Service) Health() map[string]any {
 	}
 }
 
+func (s *Service) Diagnostics() map[string]any {
+	return map[string]any{
+		"ok":      true,
+		"service": s.appName,
+		"env":     s.env,
+		"version": s.version,
+		"commit":  s.commit,
+		"observability": map[string]any{
+			"request_correlation":      true,
+			"structured_logging":       true,
+			"error_context_enrichment": true,
+			"flow_tracing":             true,
+		},
+		"time": time.Now().UTC().Format(time.RFC3339),
+	}
+}
+
 func (s *Service) Readiness(ctx context.Context) (int, map[string]any) {
 	results := make([]DependencyResult, 0, len(s.checkers))
 	ready := true

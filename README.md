@@ -3016,9 +3016,9 @@ Excluded:
 - **0.14.0 — Phase Definition & Documentation Lock** ✅ Completed
 - **0.14.1 — Correlation Model (Request ID / Trace)** ✅ Completed
 - **0.14.2 — Logging Standardization** ✅ Completed
-- **0.14.3 — Error Context Enrichment** ⬜ Pending
-- **0.14.4 — Flow Tracing Integration** ⬜ Pending
-- **0.14.5 — Diagnostics Surface Exposure** ⬜ Pending
+- **0.14.3 — Error Context Enrichment** ✅ Completed
+- **0.14.4 — Flow Tracing Integration** ✅ Completed
+- **0.14.5 — Diagnostics Surface Exposure** ✅ Completed
 - **0.14.6 — Validation & Documentation** ⬜ Pending
 
 ### Compatibility
