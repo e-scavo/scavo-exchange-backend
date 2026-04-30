@@ -3209,3 +3209,11 @@ Stage 1 is now the active roadmap focus, starting with Phase 1.1 — Application
 The initial control point, 1.1.0.0, is documentation-only scope confirmation. It confirms that Stage 0 remains frozen, `docs/roadmap.md` remains the governing document and no functional code, business logic, architecture, Go tests or configuration changes belong to this step.
 
 Stage 1 work uses the shared VSCode working tree as the execution surface: planning and coordination happen in chat, while repository edits and validation are performed by agents against the real working tree.
+
+### Phase 1.1 Scope — 1.1.0.1 Scope Formalization
+
+Phase 1.1 is limited to Application Use Case Consolidation over the existing backend surface.
+
+It includes existing use-case consolidation, app/domain/module alignment, endpoint-to-flow clarification, ambiguous surface review, product success criteria and use-case contract documentation.
+
+It excludes new product features, Stage 0 contract reopening, unversioned public contract changes and implementation of Phase 1.2 through Phase 1.7 work. Later Stage 1 phases remain ordered for account and identity capabilities, authorization and permissions, data interaction patterns, mutation flows, system behavior consistency and end-to-end validation.

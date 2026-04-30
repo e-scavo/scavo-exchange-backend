@@ -469,6 +469,18 @@ No functional code, business logic, architecture, Go tests or configuration chan
 The working model for Stage 1 is explicit: planning and coordination happen in chat, while repository edits and validation happen through agents operating on the real VSCode working tree.
 
 The scope of 1.1.0.0 is closed. The next ordered control point is 1.1.0.1 — Trunk Documentation Review.
+
+##### 1.1.0.1 Scope Formalization Result
+
+1.1.0.1 formalizes Phase 1.1 as Application Use Case Consolidation only.
+
+Phase 1.1 includes consolidation of existing backend-supported use cases, alignment between the application layer, domain layer and existing modules, endpoint-to-flow clarification, orphan/duplicate/ambiguous surface review, product success criteria definition and use-case contract documentation.
+
+Phase 1.1 does not introduce new product features, does not reopen Stage 0 foundation work, does not change frozen Stage 0 contracts unless the roadmap explicitly requires versioned evolution, does not implement Phase 1.2 account and identity capabilities, does not refine authorization beyond consolidation needs, and does not define data interaction, mutation or end-to-end closure behavior that belongs to later Stage 1 phases.
+
+The deferred Stage 1 work remains ordered as follows: Phase 1.2 Account & Identity Product Capabilities, Phase 1.3 Authorization & Permission Model, Phase 1.4 Data Interaction Patterns, Phase 1.5 Mutation & Write Flows, Phase 1.6 System Behavior Consistency and Phase 1.7 End-to-End Validation & Closure.
+
+The scope of 1.1.0.1 is closed. The next ordered control point is 1.1.0.2 — Risk & Drift Register.
 #### 1.1.1 — Endpoint Surface Inventory
 
 - inventory existing HTTP and WebSocket surfaces

@@ -2043,3 +2043,15 @@ Decision taken: confirm scope only. No functional code, business logic, architec
 Working model: planning and coordination happen in chat; repository edits and validation happen through agents operating on the real VSCode working tree.
 
 Observable impact: Stage 1 is active, Phase 1.1 is open, 1.1.0.0 is closed and the next ordered control point is 1.1.0.1 — Trunk Documentation Review.
+
+### 1.1.0.1 Result
+
+1.1.0.1 completed Scope Formalization for Phase 1.1.
+
+Decision taken: Phase 1.1 is limited to Application Use Case Consolidation over existing backend-supported behavior. It may consolidate existing use cases, align application/domain/module boundaries, clarify endpoint-to-flow intent, review orphaned or duplicate surfaces, define success criteria and document use-case contracts.
+
+Explicit exclusions: no new product features, no Stage 0 contract reopening, no unversioned public contract changes, no account and identity implementation, no authorization refinement beyond consolidation needs, no data interaction pattern work, no mutation/write-flow work and no Stage 1 closure work.
+
+Deferred work remains in the roadmap order: Phase 1.2 Account & Identity Product Capabilities, Phase 1.3 Authorization & Permission Model, Phase 1.4 Data Interaction Patterns, Phase 1.5 Mutation & Write Flows, Phase 1.6 System Behavior Consistency and Phase 1.7 End-to-End Validation & Closure.
+
+Observable impact: Phase 1.1 boundaries are formalized and the next ordered control point is 1.1.0.2 — Risk & Drift Register.
