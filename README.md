@@ -22,10 +22,10 @@ The backend follows a **wallet-first identity model** that progressively evolves
 ## 🚧 Current Stage
 
 **Stage:** 0 — Foundation  
-**Phase:** 0.12 — Read/Write Model Separation  
-**Latest Completed Subphase:** **0.12.4.6 — Mapping Layer Introduction Documentation & Closure**  
-**Phase Status:** **In Progress**  
-**Current Phase:** **0.12.5.6 — Contract Alignment Documentation & Closure**
+**Latest Completed Phase:** **0.14 — Observability & Diagnostics Foundation**  
+**Latest Completed Subphase:** **0.14.6 — Validation & Documentation**  
+**Phase Status:** **Completed**  
+**Current Phase:** **None — awaiting Phase 0.15 definition**
 
 ---
 

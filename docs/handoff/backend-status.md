@@ -15,10 +15,11 @@ It is intended to:
 ## 📌 Current State
 
 **Stage:** 0 — Foundation
-**Phase:** 0.12 — Read / Write Model Separation
-**Latest Completed Subphase:** 0.12.1.6 — Audit Consolidation & Closure
-**Phase Status:** In Progress
-**Next Planned Phase:** 0.12.1.1 — Model Inventory Extraction
+**Latest Completed Phase:** 0.14 — Observability & Diagnostics Foundation
+**Latest Completed Subphase:** 0.14.6 — Validation & Documentation
+**Phase Status:** Completed
+**Current Phase:** None — awaiting Phase 0.15 definition
+**Next Planned Phase:** 0.15 — Pending Definition
 
 ---
 
@@ -1299,3 +1300,22 @@ go test ./...
 The command passed in the local project environment after the 0.14.5 implementation.
 
 Phase 0.14 is closed. The next phase must start from this completed observability baseline and must not redefine request correlation, logging keys, error-context helpers, flow-event vocabulary or diagnostics endpoint semantics without an explicit roadmap decision.
+
+
+### Phase 0.14.6.fix1 Handoff — Global Documentation Reconciliation
+
+0.14.6.fix1 reconciles documentation drift found after the initial Phase 0.14 closure.
+
+The implementation and validation of 0.14 remained correct, including request correlation, logging standardization, error context enrichment, flow tracing and `/diagnostics`. The remaining issue was that some trunk current-state sections still referenced older phases or incomplete historical subphase states.
+
+Corrected areas:
+
+- README current stage metadata now points to completed Phase 0.14.
+- Documentation index now lists the Phase 0.14 document in the phase-doc list and marks no active current phase until 0.15 is defined.
+- Phase status historical tables no longer leave completed Phase 0.6 subphases as pending.
+- This handoff now starts from the completed 0.14 baseline instead of the stale 0.12 state.
+- The Phase 0.14 document now records this fix as a documentation-only reconciliation closure.
+
+No Go code changed in this fix.
+
+The next chat or phase must start from: Phase 0.14 completed, Phase 0.15 pending definition.

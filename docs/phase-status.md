@@ -830,8 +830,8 @@ Phase 0.5.5.3 closes the next contract-surface gap in authenticated user setting
 |----------|-------------|--------|
 | 0.6.1 | Bootstrap Surface Boundary Clarification | ✅ Completed |
 | 0.6.2 | Authenticated Surface Contract Alignment | ✅ Completed |
-| 0.6.3 | Session-Ready Bootstrap Read Model | ⬜ Pending |
-| 0.6.4 | Application Surface Consistency Hardening | ⬜ Pending |
+| 0.6.3 | Session-Ready Bootstrap Read Model | ✔ Completed |
+| 0.6.4 | Application Surface Consistency Hardening | ✔ Completed |
 
 ### Phase 0.6 Goal
 
@@ -942,7 +942,7 @@ This positions Phase 0.6 for the next step, where the bootstrap read model can b
 | 0.6.1 | Bootstrap Surface Boundary Clarification | ✔ Completed |
 | 0.6.2 | Authenticated Surface Contract Alignment | ✔ Completed |
 | 0.6.3 | Session-Ready Bootstrap Read Model | ✔ Completed |
-| 0.6.4 | Application Surface Consistency Hardening | ⬜ Pending |
+| 0.6.4 | Application Surface Consistency Hardening | ✔ Completed |
 
 ---
 
@@ -1753,7 +1753,7 @@ Phase 0.13 is complete. Continue with the corrected next roadmap-defined phase: 
 ## Status
 
 **Phase:** 0.14 — Observability & Diagnostics Foundation  
-**Current subphase:** 0.14.6 — Validation & Documentation  
+**Latest completed subphase:** 0.14.6 — Validation & Documentation  
 **Status:** Phase 0.14 completed
 
 ## Context
@@ -1883,3 +1883,20 @@ The completed capability set is:
 - final validation and documentation reconciliation
 
 No business API contract, authentication contract, provider contract, domain behavior, public error envelope, Prometheus integration, OpenTelemetry integration or dashboard system was introduced.
+
+
+---
+
+### 0.14.6.fix1 Result
+
+0.14.6.fix1 completed a documentation-only reconciliation pass after the initial Phase 0.14 closure.
+
+Context inherited: 0.14.6 correctly closed the Observability & Diagnostics Foundation, but follow-up review found older trunk current-state sections and historical subphase tables that still pointed to earlier phases or pending statuses.
+
+Problem addressed: documentation drift could make the repository appear to be simultaneously closed at Phase 0.14 and still in an earlier current phase.
+
+Decision taken: reconcile only the affected documentation. No code changed and no Phase 0.15 work was introduced.
+
+Concrete change: the README, documentation index, handoff, Phase 0.14 document and stale Phase 0.6 status entries now align with the completed Phase 0.14 baseline.
+
+Observable impact: Stage 0 documentation now has a coherent current-state handoff: Phase 0.14 completed; Phase 0.15 pending definition.

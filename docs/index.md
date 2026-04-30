@@ -46,6 +46,7 @@
 * `phase0_13_5_validation_compatibility.md`
 * `phase0_13_6_documentation_closure.md`
 * `phase0_13_6_documentation_reprocess_report.md`
+* `phase0_14_observability_diagnostics_foundation.md`
 
 ---
 
@@ -60,7 +61,7 @@
 ## 🚧 Current Phase Focus
 
 Latest completed phase: `0.14 — Observability & Diagnostics Foundation`  
-Current phase: `0.14 — Observability & Diagnostics Foundation`  
+Current phase: `None — awaiting Phase 0.15 definition`  
 Next phase: `0.15 — Pending Definition`
 
 * `phase0_13_provider_layer_consolidation.md`

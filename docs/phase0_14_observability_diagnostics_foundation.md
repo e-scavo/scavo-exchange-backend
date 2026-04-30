@@ -2,10 +2,10 @@
 
 ## Status
 
-**Current phase:** 0.14 — Observability & Diagnostics Foundation  
-**Initial subphase:** 0.14.0 — Phase Definition & Documentation Lock  
+**Phase:** 0.14 — Observability & Diagnostics Foundation  
+**Latest completed subphase:** 0.14.6 — Validation & Documentation  
 **Stage:** Stage 0 — Foundation  
-**Status:** Pending implementation after documentation lock
+**Status:** Completed
 
 ---
 
@@ -491,3 +491,34 @@ HTTP request → X-Request-Id/request_id → structured logs → enriched AppErr
 ```
 
 This prepares the next roadmap phase to build on an observable backend baseline instead of re-opening request correlation, logging vocabulary, error-context semantics or diagnostics endpoint ownership.
+
+
+---
+
+## 0.14.6.fix1 Documentation Reconciliation Result
+
+### Context inherited
+
+After 0.14.6, the Phase 0.14 narrative and newly added observability documentation were correct, but a second review found that some older trunk sections still described earlier phases as the current operational state. That created a documentation drift risk: the latest observability closure was accurate, while older status blocks could still mislead a future handoff or roadmap continuation.
+
+### Problem addressed
+
+The drift was not a code issue and did not invalidate the 0.14 implementation. The problem was documentary: current-state sections in trunk documents and historical subphase tables needed reconciliation so they would not contradict the completed Stage 0 progression through Phase 0.14.
+
+### Decision taken
+
+0.14.6.fix1 performs a documentation-only reconciliation pass. It does not introduce a new feature, does not reopen Phase 0.14 implementation work, and does not create Phase 0.15. The fix updates only the documents whose current-state or subphase status text contradicted the completed 0.14 baseline.
+
+### Concrete change
+
+The reconciliation updates:
+
+- README current stage metadata
+- documentation index current phase metadata and Phase 0.14 listing
+- handoff current state metadata
+- stale Phase 0.6 status tables inside `docs/phase-status.md`
+- this Phase 0.14 status header and closure narrative
+
+### Observable impact
+
+The documentation set now consistently states that Phase 0.14 is completed and that no active current phase is open until Phase 0.15 is explicitly defined. Historical phase notes remain preserved, but trunk current-state sections no longer point back to Phase 0.12 or partially pending Phase 0.6 subphases.
