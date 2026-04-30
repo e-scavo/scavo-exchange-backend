@@ -84,3 +84,55 @@ func TestAppError_NilToResponseErrorFallsBackToInternal(t *testing.T) {
 		t.Fatalf("unexpected message: %q", resp.Message)
 	}
 }
+
+func TestAppError_WithContext_AddsSingleDetailWithoutMutation(t *testing.T) {
+	base := AuthServiceError(nil).WithDetails(map[string]any{"phase": "0.14.3"})
+	next := base.WithContext("component", "auth")
+
+	if _, ok := base.Details["component"]; ok {
+		t.Fatalf("base details mutated: %#v", base.Details)
+	}
+	if next.Details["phase"] != "0.14.3" || next.Details["component"] != "auth" {
+		t.Fatalf("unexpected enriched details: %#v", next.Details)
+	}
+}
+
+func TestAppError_WithRequestID_UsesStandardRequestIDKey(t *testing.T) {
+	err := AuthServiceError(nil).WithRequestID("req-123")
+
+	if err.Details["request_id"] != "req-123" {
+		t.Fatalf("unexpected request_id detail: %#v", err.Details)
+	}
+}
+
+func TestAppError_WithRequestID_EmptyRequestIDDoesNotMutate(t *testing.T) {
+	base := AuthServiceError(nil).WithDetails(map[string]any{"phase": "0.14.3"})
+	next := base.WithRequestID("")
+
+	if next != base {
+		t.Fatalf("empty request_id should keep original error instance")
+	}
+	if next.Details["phase"] != "0.14.3" {
+		t.Fatalf("unexpected details: %#v", next.Details)
+	}
+}
+
+func TestAppError_PublicDetails_ReturnsCopy(t *testing.T) {
+	err := AuthServiceError(nil).WithDetails(map[string]any{"phase": "0.14.3"})
+	details := err.PublicDetails()
+	details["phase"] = "mutated"
+
+	if err.Details["phase"] != "0.14.3" {
+		t.Fatalf("public details mutation leaked into app error: %#v", err.Details)
+	}
+}
+
+func TestAppError_ToResponseError_UsesPublicDetailsCopy(t *testing.T) {
+	err := AuthServiceError(nil).WithRequestID("req-123")
+	resp := err.ToResponseError()
+	resp.Details["request_id"] = "mutated"
+
+	if err.Details["request_id"] != "req-123" {
+		t.Fatalf("response details mutation leaked into app error: %#v", err.Details)
+	}
+}

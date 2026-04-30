@@ -317,7 +317,7 @@ HTTP → Provider → Application → Domain → Repository
 - 0.14.0 — Phase Definition & Documentation Lock ✅ Completed
 - 0.14.1 — Correlation Model (Request ID / Trace) ✅ Completed
 - 0.14.2 — Logging Standardization ✅ Completed
-- 0.14.3 — Error Context Enrichment ⬜ Pending
+- 0.14.3 — Error Context Enrichment ✅ Completed
 - 0.14.4 — Flow Tracing Integration ⬜ Pending
 - 0.14.5 — Diagnostics Surface Exposure ⬜ Pending
 - 0.14.6 — Validation & Documentation ⬜ Pending
@@ -353,3 +353,19 @@ Decision taken: `request_id` is the canonical log attribute key. The logger pack
 Concrete change: `AccessLog` and `Recoverer` now build attributes with `logger.AttrsWithRequestID(rid)`, and `internal/core/logger/logger_test.go` validates request ID attribute behavior.
 
 Observable impact: logs produced by the HTTP boundary now use `request_id`, making correlation consistent for later error context enrichment and flow tracing. No HTTP contract, response payload or business behavior changed.
+
+---
+
+## Phase 0.14.3 Error Context Enrichment Result
+
+0.14.3 enriched the internal error model with safe diagnostic context while preserving the public error contract established earlier in Stage 0.
+
+Context inherited from 0.14.2: request correlation now uses the canonical `request_id` key in logs, and the logger package owns reusable helpers for request correlation attributes. The next observability gap was the error layer, where diagnostic metadata needed a controlled path before flow tracing could be added.
+
+Problem addressed: `AppError` already carried `Details`, but callers had only coarse map-based enrichment through `WithDetails`, and `ToResponseError()` exposed the same map reference to response construction. That made future diagnostics more likely to mutate shared state accidentally or add ad-hoc metadata without a standard key.
+
+Decision taken: `internal/core/errs` now exposes small, explicit helpers for contextual enrichment. `WithContext` adds one diagnostic detail, `WithRequestID` applies the canonical `request_id` key, and `PublicDetails` returns a safe copy for public serialization.
+
+Concrete change: `ToResponseError()` now uses `PublicDetails()` so public response construction receives a copied details map. Dedicated tests validate request ID enrichment, non-mutating context enrichment and response detail copy behavior.
+
+Observable impact: error diagnostics can now carry request correlation and other controlled metadata safely, while the public error envelope remains unchanged.

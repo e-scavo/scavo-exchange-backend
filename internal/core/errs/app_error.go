@@ -46,10 +46,7 @@ func (e *AppError) WithDetails(details map[string]any) *AppError {
 		return e
 	}
 
-	merged := map[string]any{}
-	for key, value := range e.Details {
-		merged[key] = value
-	}
+	merged := e.PublicDetails()
 	for key, value := range details {
 		merged[key] = value
 	}
@@ -59,11 +56,37 @@ func (e *AppError) WithDetails(details map[string]any) *AppError {
 	return &copy
 }
 
+func (e *AppError) WithContext(key string, value any) *AppError {
+	if e == nil || key == "" {
+		return e
+	}
+	return e.WithDetails(map[string]any{key: value})
+}
+
+func (e *AppError) WithRequestID(requestID string) *AppError {
+	if requestID == "" {
+		return e
+	}
+	return e.WithContext("request_id", requestID)
+}
+
+func (e *AppError) PublicDetails() map[string]any {
+	if e == nil || len(e.Details) == 0 {
+		return nil
+	}
+
+	details := make(map[string]any, len(e.Details))
+	for key, value := range e.Details {
+		details[key] = value
+	}
+	return details
+}
+
 func (e *AppError) ToResponseError() ResponseError {
 	if e == nil {
 		return NewResponseError("INTERNAL_ERROR", "internal server error", nil)
 	}
-	return NewResponseError(e.Code, e.Message, e.Details)
+	return NewResponseError(e.Code, e.Message, e.PublicDetails())
 }
 
 func New(code, message string, status int, category Category) *AppError {

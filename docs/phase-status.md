@@ -1753,8 +1753,8 @@ Phase 0.13 is complete. Continue with the corrected next roadmap-defined phase: 
 ## Status
 
 **Phase:** 0.14 — Observability & Diagnostics Foundation  
-**Current subphase:** 0.14.2 — Logging Standardization  
-**Status:** 0.14.2 completed; next subphase is 0.14.3 — Error Context Enrichment
+**Current subphase:** 0.14.3 — Error Context Enrichment  
+**Status:** 0.14.3 completed; next subphase is 0.14.4 — Flow Tracing Integration
 
 ## Context
 
@@ -1782,7 +1782,7 @@ This decision replaces the previous placeholder roadmap label for 0.14 with the 
 - 0.14.0 — Phase Definition & Documentation Lock ✅ Completed
 - 0.14.1 — Correlation Model (Request ID / Trace) ✅ Completed
 - 0.14.2 — Logging Standardization ✅ Completed
-- 0.14.3 — Error Context Enrichment ⬜ Pending
+- 0.14.3 — Error Context Enrichment ✅ Completed
 - 0.14.4 — Flow Tracing Integration ⬜ Pending
 - 0.14.5 — Diagnostics Surface Exposure ⬜ Pending
 - 0.14.6 — Validation & Documentation ⬜ Pending
@@ -1808,3 +1808,13 @@ The inherited correlation model from 0.14.1 is now reflected in log attributes t
 HTTP access logs and panic recovery logs now emit `request_id` instead of the previous local `rid` attribute. This keeps runtime behavior stable while giving later 0.14 subphases a consistent field for error context enrichment and flow tracing.
 
 Dedicated logger tests were added for request ID attribute construction and request-scoped logger derivation behavior. Full `go test ./...` could not be executed in this environment because the Go toolchain attempted to download Go 1.25.0 from `proxy.golang.org` and DNS/network access was unavailable.
+
+### 0.14.3 Result
+
+0.14.3 completed the error context enrichment step of the Observability & Diagnostics Foundation. The backend already had a stable public error envelope from Phase 0.8, including the `details` field, so this subphase did not replace the error model or alter response shape.
+
+The inherited correlation and logging work from 0.14.1 and 0.14.2 is now reflected in the error layer through safe enrichment helpers on `errs.AppError`. The helpers allow internal code to attach contextual metadata such as `request_id` through a controlled API while preserving immutable-style error handling.
+
+`ToResponseError()` now serializes a copied public details map instead of exposing the internal map directly. This prevents accidental mutation leakage between internal error state and response construction, while preserving the existing public `{ error: { code, message, details } }` contract.
+
+Dedicated error tests were added for context enrichment, request ID enrichment, empty request ID behavior, public details copy behavior and response details copy behavior. Full `go test ./...` could not be executed in this environment because the Go toolchain attempted to download Go 1.25.0 from `proxy.golang.org` and DNS/network access was unavailable.

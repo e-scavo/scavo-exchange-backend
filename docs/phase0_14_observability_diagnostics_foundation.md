@@ -134,7 +134,7 @@ Scope:
 - apply conventions first at HTTP and provider boundaries
 - avoid changing business logic
 
-### 0.14.3 — Error Context Enrichment ⬜ Pending
+### 0.14.3 — Error Context Enrichment ✅ Completed
 
 Improve internal diagnostic metadata while preserving the public error contract.
 
@@ -286,3 +286,46 @@ Runtime logs now have a stable request correlation field name that aligns with t
 ### Validation note
 
 The implementation was formatted with `gofmt`. Full `go test ./...` could not be completed in this environment because the Go toolchain attempted to download Go 1.25.0 from `proxy.golang.org` and DNS/network access was unavailable.
+
+---
+
+## 0.14.3 Implementation Result — Error Context Enrichment
+
+### Context inherited
+
+0.14.1 created a stable request correlation seam through `httpx.RequestIDFromContext(ctx)`. 0.14.2 then standardized the runtime log correlation key as `request_id`. Together, those subphases gave the backend a consistent correlation concept, but the error model still needed a controlled way to carry diagnostic context.
+
+The existing error layer was already stable from Phase 0.8. `AppError` carried `Code`, `Message`, `Status`, `Category`, `Details` and optional `Cause`, and the public envelope was already normalized as `{ error: { code, message, details } }`.
+
+### Problem
+
+The backend needed richer diagnostics without breaking that public contract. Before this subphase, enrichment was possible only through map-level `WithDetails`, and `ToResponseError()` reused the internal details map directly. That was functional, but not ideal for observability because later tracing work could accidentally mutate internal error details through response construction or introduce inconsistent keys for request correlation.
+
+### Decision
+
+0.14.3 keeps the existing error model and adds small, explicit enrichment helpers:
+
+```go
+func (e *AppError) WithContext(key string, value any) *AppError
+func (e *AppError) WithRequestID(requestID string) *AppError
+func (e *AppError) PublicDetails() map[string]any
+```
+
+The canonical request correlation key remains `request_id`. Empty keys or empty request IDs do not add diagnostic data. Public details are copied before response serialization.
+
+### Concrete change
+
+- `internal/core/errs/app_error.go` now exposes `WithContext`.
+- `internal/core/errs/app_error.go` now exposes `WithRequestID`.
+- `internal/core/errs/app_error.go` now exposes `PublicDetails`.
+- `WithDetails` now merges on top of a copied public details map.
+- `ToResponseError` now serializes copied details through `PublicDetails`.
+- `internal/core/errs/app_error_test.go` validates non-mutating context enrichment, request ID enrichment, empty request ID behavior, public details copying and response details copy isolation.
+
+### Observable impact
+
+Errors can now be enriched with request correlation and controlled diagnostic metadata without changing the public JSON envelope, HTTP status behavior, provider behavior or business logic. This prepares 0.14.4 flow tracing integration by giving the flow instrumentation a safe error-context surface.
+
+### Validation note
+
+The implementation was formatted manually in standard Go style. Full `go test ./...` could not be completed in this environment because the Go toolchain attempted to download Go 1.25.0 from `proxy.golang.org` and DNS/network access was unavailable.

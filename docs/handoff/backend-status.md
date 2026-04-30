@@ -1224,3 +1224,19 @@ Important runtime facts:
 - `internal/core/httpx.Recoverer` now emits `request_id` instead of `rid`.
 
 This keeps public API behavior stable and prepares 0.14.3 error context enrichment without introducing a new logging backend or changing response contracts.
+
+### Phase 0.14.3 Handoff — Error Context Enrichment
+
+0.14.3 has been implemented as a minimal error context enrichment layer over the existing Phase 0.8 error contract.
+
+Important runtime facts:
+
+- `internal/core/errs.AppError` remains the internal error type.
+- The public error envelope remains unchanged: `{ "error": { "code", "message", "details" } }`.
+- `AppError.WithContext(key, value)` adds one diagnostic detail without mutating the original error instance.
+- `AppError.WithRequestID(requestID)` adds request correlation using the canonical `request_id` key.
+- Empty request IDs do not alter the error instance.
+- `AppError.PublicDetails()` returns a copy of public details.
+- `AppError.ToResponseError()` now serializes copied details, preventing response-side mutation from leaking into internal error state.
+
+This keeps public API behavior stable and prepares 0.14.4 flow tracing integration without exposing private runtime state or changing error payload shape.
