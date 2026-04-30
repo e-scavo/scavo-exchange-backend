@@ -274,3 +274,50 @@ No new observability behavior is introduced by Phase 0.13. Existing logs, middle
 - 0.13.6 ✔ Documentation & Closure
 
 Phase 0.13 is complete. Any future observability phase should treat provider entry points as natural instrumentation candidates, while preserving public API behavior.
+
+
+
+---
+
+# Phase 0.14 — Observability & Diagnostics Foundation
+
+## Context
+
+The observability document existed before Phase 0.14 as a baseline description of diagnostic expectations. After Phase 0.13, the backend has a consolidated Provider Layer and a cleaner runtime composition path, but the actual execution path still needs stronger request-level visibility.
+
+Phase 0.14 makes observability an explicit Stage 0 foundation concern.
+
+## Problem
+
+The current backend can validate behavior through tests and logs, but the diagnostic path is still fragmented:
+
+- a request cannot yet be followed consistently through all internal boundaries
+- log entries are not standardized around a shared correlation model
+- internal errors do not consistently carry diagnostic context
+- provider/application/domain transitions are not yet visible as a coherent execution flow
+
+## Decision
+
+Phase 0.14 introduces observability without changing behavior.
+
+The phase will focus on request correlation, structured logging, internal error context enrichment, flow tracing and minimal diagnostics exposure. It will not introduce external metrics systems, dashboards, Prometheus, OpenTelemetry or API contract changes.
+
+## Expected Impact
+
+The expected outcome is a backend that keeps the same public contract while becoming easier to debug and operate internally.
+
+The diagnostic path should make the following movement observable:
+
+```text
+HTTP → Provider → Application → Domain → Repository
+```
+
+## 0.14 Subphase Alignment
+
+- 0.14.0 — Phase Definition & Documentation Lock ⬜ Pending
+- 0.14.1 — Correlation Model (Request ID / Trace) ⬜ Pending
+- 0.14.2 — Logging Standardization ⬜ Pending
+- 0.14.3 — Error Context Enrichment ⬜ Pending
+- 0.14.4 — Flow Tracing Integration ⬜ Pending
+- 0.14.5 — Diagnostics Surface Exposure ⬜ Pending
+- 0.14.6 — Validation & Documentation ⬜ Pending

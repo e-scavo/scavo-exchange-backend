@@ -60,8 +60,8 @@
 ## 🚧 Current Phase Focus
 
 Latest completed phase: `0.13 — Provider Layer Consolidation`  
-Current phase: `0.14 — Contract Hardening & Freeze`  
-Next phase: `0.14 — Contract Hardening & Freeze`
+Current phase: `0.14 — Observability & Diagnostics Foundation`  
+Next phase: `0.14 — Observability & Diagnostics Foundation`
 
 * `phase0_13_provider_layer_consolidation.md`
   * `0.13.0 — Definition & Documentation Lock` ✔ Completed
@@ -71,6 +71,15 @@ Next phase: `0.14 — Contract Hardening & Freeze`
   * `0.13.4 — Application Integration` ✔ Completed
   * `0.13.5 — Validation & Compatibility` ✔ Completed
   * `0.13.6 — Documentation & Closure` ✔ Completed
+
+* `phase0_14_observability_diagnostics_foundation.md`
+  * `0.14.0 — Phase Definition & Documentation Lock` ⬜ Pending
+  * `0.14.1 — Correlation Model (Request ID / Trace)` ⬜ Pending
+  * `0.14.2 — Logging Standardization` ⬜ Pending
+  * `0.14.3 — Error Context Enrichment` ⬜ Pending
+  * `0.14.4 — Flow Tracing Integration` ⬜ Pending
+  * `0.14.5 — Diagnostics Surface Exposure` ⬜ Pending
+  * `0.14.6 — Validation & Documentation` ⬜ Pending
 
 ---
 
@@ -210,6 +219,22 @@ Phase 0.12 ✔ Completed
 - 0.13.6 ✔ Documentation & Closure
 
 Phase 0.13 ✔ Completed
+
+---
+
+### Phase 0.14 — Observability & Diagnostics Foundation
+
+- 0.14.0 ⬜ Phase Definition & Documentation Lock
+- 0.14.1 ⬜ Correlation Model (Request ID / Trace)
+- 0.14.2 ⬜ Logging Standardization
+- 0.14.3 ⬜ Error Context Enrichment
+- 0.14.4 ⬜ Flow Tracing Integration
+- 0.14.5 ⬜ Diagnostics Surface Exposure
+- 0.14.6 ⬜ Validation & Documentation
+
+Phase 0.14 ⬜ Pending
+
+The phase continues the Stage 0 narrative by moving from provider-owned runtime composition to observable runtime execution. It is a diagnostics foundation phase only: request correlation, structured logging, internal error context, flow tracing and minimal diagnostics exposure are introduced without changing public API behavior.
 
 ---
 

@@ -276,8 +276,33 @@ It records compatibility after provider application integration. The validation 
 #### 0.13.6 — Documentation & Closure ✔ Completed
 Closed the phase documentation, removed generic repeated status-only updates, corrected misplaced roadmap text and restored the Phase 0.12 → Phase 0.13 narrative across trunk documentation. The closure records not only that the phase completed, but why Provider Layer Consolidation was the next architectural step after read/write model separation.
 
-### 0.14 — Contract Hardening & Freeze ⬜ Pending
-Stabilize and freeze API contracts before feature expansion.
+### 0.14 — Observability & Diagnostics Foundation ⬜ Pending
+Introduce observability and diagnostics as a Stage 0 foundation capability without changing public API behavior.
+
+Phase 0.14 follows the Provider Layer Consolidation completed in 0.13. The provider boundary made runtime composition explicit; 0.14 now makes the same path diagnosable through request correlation, structured logging, internal error context, flow tracing and a minimal diagnostics surface.
+
+The phase is intentionally limited to internal visibility. External metrics platforms, dashboards, Prometheus, OpenTelemetry and public API changes remain out of scope.
+
+#### 0.14.0 — Phase Definition & Documentation Lock ⬜ Pending
+Lock the phase definition, correct the roadmap from the previous placeholder phase name and register the observability subphase plan before code changes.
+
+#### 0.14.1 — Correlation Model (Request ID / Trace) ⬜ Pending
+Introduce request correlation and propagate request-scoped trace context through the backend flow.
+
+#### 0.14.2 — Logging Standardization ⬜ Pending
+Define structured logging conventions and apply request context to HTTP and provider-level runtime paths.
+
+#### 0.14.3 — Error Context Enrichment ⬜ Pending
+Add internal diagnostic metadata to errors while preserving the existing public error contract.
+
+#### 0.14.4 — Flow Tracing Integration ⬜ Pending
+Instrument key flow transitions across HTTP, provider, application, domain and repository boundaries.
+
+#### 0.14.5 — Diagnostics Surface Exposure ⬜ Pending
+Expose a minimal diagnostics-oriented surface or hook set compatible with the current architecture.
+
+#### 0.14.6 — Validation & Documentation ⬜ Pending
+Validate compatibility with `go test ./...`, confirm no public behavior change and close the phase narratively.
 
 ---
 

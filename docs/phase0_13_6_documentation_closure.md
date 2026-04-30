@@ -90,5 +90,5 @@ Phase 0.13 is complete. The documentation now records the actual architectural i
 The next roadmap-defined phase is:
 
 ```text
-0.14 — Contract Hardening & Freeze
+0.14 — Observability & Diagnostics Foundation
 ```

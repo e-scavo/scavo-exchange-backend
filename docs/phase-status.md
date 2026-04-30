@@ -1744,4 +1744,49 @@ Excluded:
 
 ### Next
 
-Phase 0.13 is complete. Continue with the next roadmap-defined phase: 0.14 — Contract Hardening & Freeze.
+Phase 0.13 is complete. Continue with the corrected next roadmap-defined phase: 0.14 — Observability & Diagnostics Foundation.
+
+---
+
+# Phase 0.14 — Observability & Diagnostics Foundation
+
+## Status
+
+**Phase:** 0.14 — Observability & Diagnostics Foundation  
+**Current subphase:** 0.14.0 — Phase Definition & Documentation Lock  
+**Status:** Pending implementation after documentation lock
+
+## Context
+
+Phase 0.12 clarified read/write model direction and mapper ownership. Phase 0.13 then consolidated runtime composition around the Provider Layer. Those phases left the backend with cleaner internal ownership and stable public behavior, but they did not solve runtime visibility.
+
+The next foundation gap is observability: the system needs request correlation, consistent logging context, internal error metadata and traceable flow movement so debugging no longer depends only on manually reading isolated logs.
+
+## Problem
+
+The backend remains operationally opaque in several areas:
+
+- requests are not consistently correlated
+- logs do not uniformly expose request-scoped context
+- internal errors lack enough diagnostic metadata for efficient debugging
+- HTTP → Provider → Application → Domain → Repository flow is not yet observable as one path
+
+## Decision
+
+Phase 0.14 will introduce an Observability & Diagnostics Foundation.
+
+This decision replaces the previous placeholder roadmap label for 0.14 with the actual Phase 0.14 scope defined for this stage. The change is documentation-lock work only and does not modify Go code.
+
+## Subphase Plan
+
+- 0.14.0 — Phase Definition & Documentation Lock ⬜ Pending
+- 0.14.1 — Correlation Model (Request ID / Trace) ⬜ Pending
+- 0.14.2 — Logging Standardization ⬜ Pending
+- 0.14.3 — Error Context Enrichment ⬜ Pending
+- 0.14.4 — Flow Tracing Integration ⬜ Pending
+- 0.14.5 — Diagnostics Surface Exposure ⬜ Pending
+- 0.14.6 — Validation & Documentation ⬜ Pending
+
+## Observable Impact
+
+After the documentation lock, all trunk references to the next phase must point to `0.14 — Observability & Diagnostics Foundation`, and the implementation phase can proceed without ambiguity about scope or sequencing.

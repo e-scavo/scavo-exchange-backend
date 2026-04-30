@@ -2951,3 +2951,83 @@ Phase 0.13.5 completed the validation and compatibility checkpoint for Provider 
 ### Phase 0.13.6 result
 
 Phase 0.13.6 closed Provider Layer Consolidation documentation. The closure removed generic repeated phase-status blocks, corrected misplaced roadmap content, expanded the final subphase state consistently and evolved trunk documentation with the actual provider-layer impact instead of only marking state transitions. No Go code or public API behavior was changed by this closure step.
+
+
+
+---
+
+## Phase 0.14 — Observability & Diagnostics Foundation
+
+Phase 0.14 starts after the completed Provider Layer Consolidation phase.
+
+Phase 0.13 made runtime composition explicit by consolidating the Provider Layer as the controlled entry point into application and domain services. That consolidation reduced orchestration ambiguity, but it did not make the runtime path fully diagnosable.
+
+Phase 0.14 continues the foundation sequence by addressing the next operational gap: observability.
+
+The narrative transition is:
+
+```text
+Phase 0.12: clarify model direction and mapping ownership
+Phase 0.13: clarify orchestration ownership and runtime composition
+Phase 0.14: clarify runtime visibility and diagnostic traceability
+```
+
+### Objective
+
+Introduce observability and diagnostics as an internal foundation capability without changing public API behavior.
+
+### Problem
+
+The backend remains difficult to debug when a request crosses multiple internal layers because:
+
+- request correlation is not yet standardized
+- logs do not consistently carry request-scoped context
+- internal errors do not consistently expose diagnostic metadata
+- the HTTP → Provider → Application → Domain → Repository flow is not yet traceable as a coherent path
+
+### Decision
+
+Phase 0.14 introduces an Observability & Diagnostics Foundation.
+
+The phase is intentionally limited to internal visibility. It does not introduce external metrics platforms, dashboards, Prometheus, OpenTelemetry or API contract changes.
+
+### Scope
+
+Included:
+
+- request correlation
+- request ID / trace propagation
+- structured logging standardization
+- internal error context enrichment
+- flow tracing integration
+- minimal diagnostics surface exposure
+
+Excluded:
+
+- public API behavior changes
+- business logic changes
+- external metrics backends
+- dashboards
+- Prometheus
+- OpenTelemetry
+
+### Subphases
+
+- **0.14.0 — Phase Definition & Documentation Lock** ⬜ Pending
+- **0.14.1 — Correlation Model (Request ID / Trace)** ⬜ Pending
+- **0.14.2 — Logging Standardization** ⬜ Pending
+- **0.14.3 — Error Context Enrichment** ⬜ Pending
+- **0.14.4 — Flow Tracing Integration** ⬜ Pending
+- **0.14.5 — Diagnostics Surface Exposure** ⬜ Pending
+- **0.14.6 — Validation & Documentation** ⬜ Pending
+
+### Compatibility
+
+Phase 0.14 must preserve:
+
+- existing public HTTP/API contracts
+- provider ownership established in Phase 0.13
+- read/write model separation established in Phase 0.12
+- existing behavior of authenticated application surfaces
+- existing test compatibility
+

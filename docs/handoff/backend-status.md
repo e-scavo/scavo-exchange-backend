@@ -1169,4 +1169,25 @@ External validation confirmed `make build` and `go test ./...` after the 0.13.4 
 
 ### Next Required Action
 
-Start the next roadmap-defined phase: 0.14 — Contract Hardening & Freeze.
+Start the corrected next roadmap-defined phase: 0.14 — Observability & Diagnostics Foundation.
+
+The first required step is `0.14.0 — Phase Definition & Documentation Lock`.
+
+This step must remain documentation-only. It corrects the stale placeholder phase label, preserves the Phase 0.12 → Phase 0.13 narrative and registers the observability subphase sequence before any code changes.
+
+### Phase 0.14 Initial Scope
+
+- request correlation
+- structured logging
+- internal error context enrichment
+- flow tracing
+- minimal diagnostics surface
+
+### Phase 0.14 Out of Scope
+
+- external metrics platforms
+- dashboards
+- Prometheus
+- OpenTelemetry
+- public API contract changes
+- business behavior changes
