@@ -255,7 +255,7 @@ The phase continues the Stage 0 narrative by moving from provider-owned runtime 
 
 - 0.15.0 ✅ Phase Definition & Documentation Lock
 - 0.15.1 ✅ HTTP Contract Audit
-- 0.15.2 ⏳ Error Contract Alignment
+- 0.15.2 ✅ Error Contract Alignment
 - 0.15.3 ⏳ Provider Contract Validation
 - 0.15.4 ⏳ Response Schema Normalization
 - 0.15.5 ⏳ Contract Freeze Enforcement
