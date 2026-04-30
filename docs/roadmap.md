@@ -289,7 +289,7 @@ Lock the phase definition, correct the roadmap from the previous placeholder pha
 #### 0.14.1 — Correlation Model (Request ID / Trace) ✅ Completed
 Introduce request correlation and propagate request-scoped trace context through the backend flow.
 
-#### 0.14.2 — Logging Standardization ⬜ Pending
+#### 0.14.2 — Logging Standardization ✅ Completed
 Define structured logging conventions and apply request context to HTTP and provider-level runtime paths.
 
 #### 0.14.3 — Error Context Enrichment ⬜ Pending

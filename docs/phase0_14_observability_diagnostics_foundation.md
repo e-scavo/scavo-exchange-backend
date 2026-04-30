@@ -123,7 +123,7 @@ Scope:
 - integrate correlation at the HTTP boundary
 - preserve public behavior
 
-### 0.14.2 — Logging Standardization ⬜ Pending
+### 0.14.2 — Logging Standardization ✅ Completed
 
 Standardize logging conventions for observable runtime paths.
 
@@ -239,6 +239,49 @@ The context key remains private. Missing or nil contexts return an empty string.
 ### Observable impact
 
 The backend now has a stable internal request correlation seam. Public HTTP/API contracts remain unchanged: `X-Request-Id` behavior is preserved, response payloads are unchanged and no provider/domain behavior was modified.
+
+### Validation note
+
+The implementation was formatted with `gofmt`. Full `go test ./...` could not be completed in this environment because the Go toolchain attempted to download Go 1.25.0 from `proxy.golang.org` and DNS/network access was unavailable.
+
+---
+
+## 0.14.2 Implementation Result — Logging Standardization
+
+### Context inherited
+
+0.14.1 established a stable request correlation seam through `httpx.RequestIDFromContext(ctx)` while preserving the existing `X-Request-Id` behavior. That gave the backend a safe internal way to read correlation metadata without exposing the private HTTP context key.
+
+The next problem was not the absence of JSON logs: the backend already used `slog.JSONHandler` through `internal/core/logger`. The real gap was naming and reuse. HTTP access and panic logs still emitted the request identifier as `rid`, while the rest of the observability plan uses `request_id` as the canonical correlation field.
+
+### Problem
+
+If later subphases continued to emit request correlation manually, log records would drift between `rid`, direct context access and ad-hoc attribute construction. That would make diagnostics harder exactly when 0.14 is supposed to make request movement easier to follow.
+
+### Decision
+
+0.14.2 keeps the existing logger package and JSON handler, but introduces a small standardization layer around request correlation attributes.
+
+The canonical log field is:
+
+```text
+request_id
+```
+
+The logger package now owns the reusable key and helper methods, while HTTP remains the owner of extracting the effective request ID from context.
+
+### Concrete change
+
+- `internal/core/logger/logger.go` now exposes `RequestIDKey`.
+- `internal/core/logger/logger.go` now exposes `AttrsWithRequestID(requestID string)`.
+- `internal/core/logger/logger.go` now exposes `WithRequestID(log, requestID)` for future request-scoped logger derivation.
+- `internal/core/httpx/middleware.go` now emits `request_id` instead of `rid` in access logs.
+- `internal/core/httpx/middleware.go` now emits `request_id` instead of `rid` in panic logs.
+- `internal/core/logger/logger_test.go` validates the standard request ID attribute behavior.
+
+### Observable impact
+
+Runtime logs now have a stable request correlation field name that aligns with the rest of Phase 0.14. This improves grep/searchability and prepares 0.14.3 error context enrichment and 0.14.4 flow tracing without changing HTTP responses, JSON payloads, provider behavior or business logic.
 
 ### Validation note
 

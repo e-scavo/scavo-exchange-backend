@@ -1207,3 +1207,20 @@ Important runtime facts:
 - `AccessLog` and `Recoverer` now use the accessor instead of direct context-key reads.
 
 This keeps public API behavior stable and prepares 0.14.2 logging standardization without exposing the context key or adding a new tracing subsystem prematurely.
+
+### Phase 0.14.2 Handoff — Logging Standardization
+
+0.14.2 has been implemented as a minimal logging standardization layer over the existing `slog` JSON logger.
+
+Important runtime facts:
+
+- `internal/core/logger.New(env)` still owns logger creation.
+- The backend still uses `slog.JSONHandler`.
+- The canonical request correlation log key is now `request_id`.
+- `internal/core/logger.RequestIDKey` exposes the canonical key.
+- `internal/core/logger.AttrsWithRequestID(requestID)` builds reusable request correlation attributes.
+- `internal/core/logger.WithRequestID(log, requestID)` prepares future request-scoped logger derivation without forcing immediate adoption everywhere.
+- `internal/core/httpx.AccessLog` now emits `request_id` instead of `rid`.
+- `internal/core/httpx.Recoverer` now emits `request_id` instead of `rid`.
+
+This keeps public API behavior stable and prepares 0.14.3 error context enrichment without introducing a new logging backend or changing response contracts.

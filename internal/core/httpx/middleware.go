@@ -55,8 +55,7 @@ func AccessLog(log *logger.Logger) func(http.Handler) http.Handler {
 			dur := time.Since(start)
 
 			rid := RequestIDFromContext(r.Context())
-			log.Info("http_request",
-				"rid", rid,
+			attrs := append(logger.AttrsWithRequestID(rid),
 				"method", r.Method,
 				"path", r.URL.Path,
 				"status", ww.status,
@@ -64,6 +63,7 @@ func AccessLog(log *logger.Logger) func(http.Handler) http.Handler {
 				"dur_ms", dur.Milliseconds(),
 				"remote", r.RemoteAddr,
 			)
+			log.Info("http_request", attrs...)
 		})
 	}
 }
@@ -91,11 +91,11 @@ func Recoverer(log *logger.Logger) func(http.Handler) http.Handler {
 			defer func() {
 				if rec := recover(); rec != nil {
 					rid := RequestIDFromContext(r.Context())
-					log.Error("panic",
-						"rid", rid,
+					attrs := append(logger.AttrsWithRequestID(rid),
 						"recover", rec,
 						"stack", string(debug.Stack()),
 					)
+					log.Error("panic", attrs...)
 					WriteAppError(w, coreerrs.InternalError(nil))
 				}
 			}()

@@ -1753,8 +1753,8 @@ Phase 0.13 is complete. Continue with the corrected next roadmap-defined phase: 
 ## Status
 
 **Phase:** 0.14 — Observability & Diagnostics Foundation  
-**Current subphase:** 0.14.1 — Correlation Model (Request ID / Trace)  
-**Status:** 0.14.1 completed; next subphase is 0.14.2 — Logging Standardization
+**Current subphase:** 0.14.2 — Logging Standardization  
+**Status:** 0.14.2 completed; next subphase is 0.14.3 — Error Context Enrichment
 
 ## Context
 
@@ -1781,7 +1781,7 @@ This decision replaces the previous placeholder roadmap label for 0.14 with the 
 
 - 0.14.0 — Phase Definition & Documentation Lock ✅ Completed
 - 0.14.1 — Correlation Model (Request ID / Trace) ✅ Completed
-- 0.14.2 — Logging Standardization ⬜ Pending
+- 0.14.2 — Logging Standardization ✅ Completed
 - 0.14.3 — Error Context Enrichment ⬜ Pending
 - 0.14.4 — Flow Tracing Integration ⬜ Pending
 - 0.14.5 — Diagnostics Surface Exposure ⬜ Pending
@@ -1798,3 +1798,13 @@ After the documentation lock, all trunk references to the next phase must point 
 The backend continues to honor `X-Request-Id` when supplied by a client, generates one when missing, mirrors the effective value in the response header and stores it in request context. `AccessLog` and `Recoverer` now consume that value through `httpx.RequestIDFromContext`, preserving the private context key while allowing future logging, error and flow tracing work to reuse the model safely.
 
 Dedicated tests were added for inherited request IDs, generated request IDs and empty correlation lookup for missing or nil context. Full `go test ./...` could not be executed in this environment because the Go toolchain attempted to download Go 1.25.0 from `proxy.golang.org` and DNS/network access was unavailable.
+
+### 0.14.2 Result
+
+0.14.2 completed the logging standardization step of the Observability & Diagnostics Foundation. The backend already used structured JSON logging through `slog`, so this subphase did not replace the logger implementation.
+
+The inherited correlation model from 0.14.1 is now reflected in log attributes through the canonical `request_id` key. `internal/core/logger` owns the standard key and helper methods, while `internal/core/httpx` remains responsible for reading the effective request ID from request context.
+
+HTTP access logs and panic recovery logs now emit `request_id` instead of the previous local `rid` attribute. This keeps runtime behavior stable while giving later 0.14 subphases a consistent field for error context enrichment and flow tracing.
+
+Dedicated logger tests were added for request ID attribute construction and request-scoped logger derivation behavior. Full `go test ./...` could not be executed in this environment because the Go toolchain attempted to download Go 1.25.0 from `proxy.golang.org` and DNS/network access was unavailable.

@@ -316,7 +316,7 @@ HTTP → Provider → Application → Domain → Repository
 
 - 0.14.0 — Phase Definition & Documentation Lock ✅ Completed
 - 0.14.1 — Correlation Model (Request ID / Trace) ✅ Completed
-- 0.14.2 — Logging Standardization ⬜ Pending
+- 0.14.2 — Logging Standardization ✅ Completed
 - 0.14.3 — Error Context Enrichment ⬜ Pending
 - 0.14.4 — Flow Tracing Integration ⬜ Pending
 - 0.14.5 — Diagnostics Surface Exposure ⬜ Pending
@@ -337,3 +337,19 @@ Decision taken: `internal/core/httpx` now owns a small public accessor, `Request
 Concrete change: `AccessLog` and `Recoverer` now read the request identifier through the accessor instead of reaching directly into the context key. Dedicated middleware tests validate inherited request IDs, generated request IDs and empty results for missing or nil contexts.
 
 Observable impact: the backend now has a stable internal request correlation seam for the next 0.14 subphases. Public API contracts, response payloads and business behavior remain unchanged.
+
+---
+
+## Phase 0.14.2 Logging Standardization Result
+
+0.14.2 standardized the request correlation field used by runtime logs without changing the existing logger backend or public behavior.
+
+Context inherited from 0.14.1: request correlation is owned by `internal/core/httpx`, and the supported read path is `httpx.RequestIDFromContext(ctx)`. The logger already emitted JSON through `slog`, so this subphase did not replace the logging backend.
+
+Problem addressed: HTTP access and panic logs still used `rid`, while Phase 0.14 needs a stable cross-cutting key that future diagnostics can reuse consistently.
+
+Decision taken: `request_id` is the canonical log attribute key. The logger package now exposes the reusable key and helpers, while HTTP middleware continues to extract the effective request ID from context.
+
+Concrete change: `AccessLog` and `Recoverer` now build attributes with `logger.AttrsWithRequestID(rid)`, and `internal/core/logger/logger_test.go` validates request ID attribute behavior.
+
+Observable impact: logs produced by the HTTP boundary now use `request_id`, making correlation consistent for later error context enrichment and flow tracing. No HTTP contract, response payload or business behavior changed.
