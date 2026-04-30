@@ -1191,3 +1191,19 @@ This step must remain documentation-only. It corrects the stale placeholder phas
 - OpenTelemetry
 - public API contract changes
 - business behavior changes
+
+### Phase 0.14.1 Handoff — Correlation Model
+
+0.14.1 has been implemented as a minimal correlation consolidation over the existing HTTP middleware behavior.
+
+Important runtime facts:
+
+- `internal/core/httpx.RequestID()` remains the middleware owner for request correlation.
+- Incoming `X-Request-Id` is preserved when present.
+- A UUID is generated when `X-Request-Id` is absent.
+- The effective request ID is written back to the `X-Request-Id` response header.
+- The request ID is stored in context using the existing private key.
+- `httpx.RequestIDFromContext(ctx)` is now the supported internal accessor.
+- `AccessLog` and `Recoverer` now use the accessor instead of direct context-key reads.
+
+This keeps public API behavior stable and prepares 0.14.2 logging standardization without exposing the context key or adding a new tracing subsystem prematurely.

@@ -314,10 +314,26 @@ HTTP → Provider → Application → Domain → Repository
 
 ## 0.14 Subphase Alignment
 
-- 0.14.0 — Phase Definition & Documentation Lock ⬜ Pending
-- 0.14.1 — Correlation Model (Request ID / Trace) ⬜ Pending
+- 0.14.0 — Phase Definition & Documentation Lock ✅ Completed
+- 0.14.1 — Correlation Model (Request ID / Trace) ✅ Completed
 - 0.14.2 — Logging Standardization ⬜ Pending
 - 0.14.3 — Error Context Enrichment ⬜ Pending
 - 0.14.4 — Flow Tracing Integration ⬜ Pending
 - 0.14.5 — Diagnostics Surface Exposure ⬜ Pending
 - 0.14.6 — Validation & Documentation ⬜ Pending
+
+---
+
+## Phase 0.14.1 Correlation Model Result
+
+0.14.1 consolidated the correlation model that already existed at the HTTP middleware boundary instead of replacing it with a new runtime concept.
+
+Context inherited from 0.14.0: the phase lock established that observability must improve visibility without changing public behavior. The real code already generated or propagated `X-Request-Id`, stored the value in `context.Context` and emitted it from access and panic logs, but that behavior was still implicit and locally coupled to middleware internals.
+
+Problem addressed: request correlation could not be safely reused outside the middleware implementation because the context key remained private and there was no exported accessor. This made future logging standardization, error enrichment and flow tracing more likely to duplicate context access patterns or bypass the correlation boundary.
+
+Decision taken: `internal/core/httpx` now owns a small public accessor, `RequestIDFromContext(ctx context.Context) string`, while keeping the context key private. The middleware continues to accept an incoming `X-Request-Id` header or generate one when absent, echoes the effective value to the response header and attaches it to the request context.
+
+Concrete change: `AccessLog` and `Recoverer` now read the request identifier through the accessor instead of reaching directly into the context key. Dedicated middleware tests validate inherited request IDs, generated request IDs and empty results for missing or nil contexts.
+
+Observable impact: the backend now has a stable internal request correlation seam for the next 0.14 subphases. Public API contracts, response payloads and business behavior remain unchanged.

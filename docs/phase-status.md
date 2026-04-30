@@ -1753,8 +1753,8 @@ Phase 0.13 is complete. Continue with the corrected next roadmap-defined phase: 
 ## Status
 
 **Phase:** 0.14 — Observability & Diagnostics Foundation  
-**Current subphase:** 0.14.0 — Phase Definition & Documentation Lock  
-**Status:** Pending implementation after documentation lock
+**Current subphase:** 0.14.1 — Correlation Model (Request ID / Trace)  
+**Status:** 0.14.1 completed; next subphase is 0.14.2 — Logging Standardization
 
 ## Context
 
@@ -1779,8 +1779,8 @@ This decision replaces the previous placeholder roadmap label for 0.14 with the 
 
 ## Subphase Plan
 
-- 0.14.0 — Phase Definition & Documentation Lock ⬜ Pending
-- 0.14.1 — Correlation Model (Request ID / Trace) ⬜ Pending
+- 0.14.0 — Phase Definition & Documentation Lock ✅ Completed
+- 0.14.1 — Correlation Model (Request ID / Trace) ✅ Completed
 - 0.14.2 — Logging Standardization ⬜ Pending
 - 0.14.3 — Error Context Enrichment ⬜ Pending
 - 0.14.4 — Flow Tracing Integration ⬜ Pending
@@ -1790,3 +1790,11 @@ This decision replaces the previous placeholder roadmap label for 0.14 with the 
 ## Observable Impact
 
 After the documentation lock, all trunk references to the next phase must point to `0.14 — Observability & Diagnostics Foundation`, and the implementation phase can proceed without ambiguity about scope or sequencing.
+
+### 0.14.1 Result
+
+0.14.1 completed the first implementation step of the Observability & Diagnostics Foundation. The existing HTTP request ID behavior was formalized into a reusable correlation accessor without changing the public request/response contract.
+
+The backend continues to honor `X-Request-Id` when supplied by a client, generates one when missing, mirrors the effective value in the response header and stores it in request context. `AccessLog` and `Recoverer` now consume that value through `httpx.RequestIDFromContext`, preserving the private context key while allowing future logging, error and flow tracing work to reuse the model safely.
+
+Dedicated tests were added for inherited request IDs, generated request IDs and empty correlation lookup for missing or nil context. Full `go test ./...` could not be executed in this environment because the Go toolchain attempted to download Go 1.25.0 from `proxy.golang.org` and DNS/network access was unavailable.

@@ -21,6 +21,17 @@ type ctxKey string
 
 const requestIDKey ctxKey = "request_id"
 
+// RequestIDFromContext returns the correlation identifier attached to ctx by the
+// RequestID middleware. An empty string means the request correlation middleware
+// did not run yet or the context does not carry a valid request identifier.
+func RequestIDFromContext(ctx context.Context) string {
+	if ctx == nil {
+		return ""
+	}
+	rid, _ := ctx.Value(requestIDKey).(string)
+	return rid
+}
+
 func RequestID() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -43,7 +54,7 @@ func AccessLog(log *logger.Logger) func(http.Handler) http.Handler {
 			next.ServeHTTP(ww, r)
 			dur := time.Since(start)
 
-			rid, _ := r.Context().Value(requestIDKey).(string)
+			rid := RequestIDFromContext(r.Context())
 			log.Info("http_request",
 				"rid", rid,
 				"method", r.Method,
@@ -79,7 +90,7 @@ func Recoverer(log *logger.Logger) func(http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			defer func() {
 				if rec := recover(); rec != nil {
-					rid, _ := r.Context().Value(requestIDKey).(string)
+					rid := RequestIDFromContext(r.Context())
 					log.Error("panic",
 						"rid", rid,
 						"recover", rec,

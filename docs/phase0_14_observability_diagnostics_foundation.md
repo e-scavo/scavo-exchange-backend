@@ -100,7 +100,7 @@ The phase adds visibility to that path without changing ownership.
 
 ## Subphase Plan
 
-### 0.14.0 — Phase Definition & Documentation Lock ⬜ Pending
+### 0.14.0 — Phase Definition & Documentation Lock ✅ Completed
 
 Lock the phase definition across trunk documentation before code changes.
 
@@ -112,7 +112,7 @@ Scope:
 - preserve the Phase 0.12 → Phase 0.13 → Phase 0.14 narrative
 - perform no Go code changes
 
-### 0.14.1 — Correlation Model (Request ID / Trace) ⬜ Pending
+### 0.14.1 — Correlation Model (Request ID / Trace) ✅ Completed
 
 Introduce a request correlation model.
 
@@ -204,3 +204,42 @@ Every 0.14 documentation update must preserve the inherited narrative:
 5. observable impact
 
 Documentation must remain cumulative and trunk-safe.
+
+---
+
+## 0.14.1 Implementation Result — Correlation Model
+
+### Context inherited
+
+0.14.0 locked the corrected 0.14 direction as Observability & Diagnostics Foundation. The backend entered this subphase after Phase 0.13 had consolidated provider ownership and after the 0.14 lock had clarified that observability work must not change public contracts or business behavior.
+
+The real code already contained an HTTP request correlation seed in `internal/core/httpx`: the request middleware accepted `X-Request-Id`, generated a UUID when absent, echoed the effective value in the response header and attached it to the request context.
+
+### Problem
+
+That behavior was useful but still implicit. The request ID was stored behind a private context key and read directly inside middleware-adjacent code. Without a stable accessor, later 0.14 work would either duplicate direct context access patterns or introduce a parallel correlation concept.
+
+### Decision
+
+0.14.1 keeps request ID ownership inside `internal/core/httpx` and exposes only a safe accessor:
+
+```go
+func RequestIDFromContext(ctx context.Context) string
+```
+
+The context key remains private. Missing or nil contexts return an empty string. This preserves encapsulation while making correlation reusable by later logging, error and tracing subphases.
+
+### Concrete change
+
+- `internal/core/httpx/middleware.go` now exposes `RequestIDFromContext`.
+- `AccessLog` reads the request ID through the accessor.
+- `Recoverer` reads the request ID through the accessor.
+- `internal/core/httpx/middleware_test.go` validates inherited, generated and missing request ID cases.
+
+### Observable impact
+
+The backend now has a stable internal request correlation seam. Public HTTP/API contracts remain unchanged: `X-Request-Id` behavior is preserved, response payloads are unchanged and no provider/domain behavior was modified.
+
+### Validation note
+
+The implementation was formatted with `gofmt`. Full `go test ./...` could not be completed in this environment because the Go toolchain attempted to download Go 1.25.0 from `proxy.golang.org` and DNS/network access was unavailable.

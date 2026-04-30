@@ -283,10 +283,10 @@ Phase 0.14 follows the Provider Layer Consolidation completed in 0.13. The provi
 
 The phase is intentionally limited to internal visibility. External metrics platforms, dashboards, Prometheus, OpenTelemetry and public API changes remain out of scope.
 
-#### 0.14.0 — Phase Definition & Documentation Lock ⬜ Pending
+#### 0.14.0 — Phase Definition & Documentation Lock ✅ Completed
 Lock the phase definition, correct the roadmap from the previous placeholder phase name and register the observability subphase plan before code changes.
 
-#### 0.14.1 — Correlation Model (Request ID / Trace) ⬜ Pending
+#### 0.14.1 — Correlation Model (Request ID / Trace) ✅ Completed
 Introduce request correlation and propagate request-scoped trace context through the backend flow.
 
 #### 0.14.2 — Logging Standardization ⬜ Pending
