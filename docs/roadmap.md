@@ -334,7 +334,7 @@ Validate and align public error envelopes around the existing standardized error
 
 Validate internal HTTP → Provider → Application contracts and confirm that Phase 0.13 provider boundaries remain explicit and stable.
 
-#### 0.15.4 — Response Schema Normalization ⏳ Pending
+#### 0.15.4 — Response Schema Normalization ✅ Completed
 Normalize response schemas where actual repository evidence shows uncontrolled drift or ambiguous historical variation.
 
 #### 0.15.5 — Contract Freeze Enforcement ⏳ Pending
@@ -413,3 +413,11 @@ Phase 0.15 expected outcome: explicit, audited and frozen contracts for the curr
 - Internal testing
 - Release candidate
 
+
+### Phase 0.15.4 Completion Note — Response Schema Normalization
+
+0.15.4 completed the response schema normalization step without changing endpoint behavior.
+
+The normalized baseline now records that successful response payloads remain intentionally unwrapped and compatible, while JSON response metadata and defensive error fallback shape are aligned with the canonical contract introduced in 0.15.2.
+
+The next roadmap step is **0.15.5 — Contract Freeze Enforcement**.

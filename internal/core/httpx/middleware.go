@@ -118,7 +118,7 @@ func Timeout(d time.Duration) func(http.Handler) http.Handler {
 func mustJSON(v any) []byte {
 	b, err := json.Marshal(v)
 	if err != nil {
-		return []byte(`{"error":{"code":"INTERNAL_ERROR","message":"internal server error"}}`)
+		return []byte(`{"error":{"code":"INTERNAL_ERROR","message":"internal server error","details":{}}}`)
 	}
 	return b
 }

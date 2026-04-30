@@ -23,10 +23,10 @@ The backend follows a **wallet-first identity model** that progressively evolves
 
 **Stage:** 0 — Foundation  
 **Latest Completed Phase:** **0.14 — Observability & Diagnostics Foundation**  
-**Latest Completed Subphase:** **0.15.3 — Provider Contract Validation**  
-**Phase Status:** **0.15.3 Completed / 0.15.4 Pending**  
+**Latest Completed Subphase:** **0.15.4 — Response Schema Normalization**  
+**Phase Status:** **0.15.4 Completed / 0.15.5 Pending**  
 **Current Phase:** **0.15 — Contract Hardening & Freeze**  
-**Current Subphase:** **0.15.4 — Response Schema Normalization**
+**Current Subphase:** **0.15.5 — Contract Freeze Enforcement**
 
 ---
 
@@ -3097,7 +3097,7 @@ Excluded:
 - **0.15.1 — HTTP Contract Audit** ✅ Completed
 - **0.15.2 — Error Contract Alignment** ✅ Completed
 - **0.15.3 — Provider Contract Validation** ✅ Completed
-- **0.15.4 — Response Schema Normalization** ⏳ Pending
+- **0.15.4 — Response Schema Normalization** ✅ Completed
 - **0.15.5 — Contract Freeze Enforcement** ⏳ Pending
 - **0.15.6 — Validation & Documentation** ⏳ Pending
 
@@ -3158,4 +3158,18 @@ Decision taken: add compile-time provider contract assertions without changing r
 
 Concrete change: `internal/modules/auth/application.go` now asserts that `*Application` satisfies `AuthProvider`, `*user.Service` satisfies `authdomain.UserProvider`, and `*usersettings.Service` satisfies `authdomain.UserSettingsProvider`.
 
-Observable impact: future drift in HTTP-to-provider or auth-to-cross-module provider contracts now fails at compile time instead of surfacing later through handler behavior or frontend-facing responses. The next correct step is 0.15.4 — Response Schema Normalization.
+Observable impact: future drift in HTTP-to-provider or auth-to-cross-module provider contracts now fails at compile time instead of surfacing later through handler behavior or frontend-facing responses. 0.15.4 has now normalized response serialization metadata and defensive fallback shape; the next correct step is 0.15.5 — Contract Freeze Enforcement.
+
+### Phase 0.15.4 Result — Response Schema Normalization
+
+0.15.4 completed Response Schema Normalization with a narrow compatibility-preserving serialization update.
+
+Context inherited: 0.15.1 documented the HTTP route baseline, 0.15.2 aligned the public error envelope and 0.15.3 validated provider boundaries at compile time.
+
+Real problem: response payload shapes were already compatible, but response serialization policy still had minor drift. Auth error responses used `application/json` while the core JSON writer used `application/json; charset=utf-8`, and the defensive timeout fallback JSON still lacked the mandatory `details` object.
+
+Decision taken: normalize serialization details only. Do not introduce a success envelope, do not change any route, status code, payload field, error code, provider contract, domain rule or repository behavior.
+
+Concrete change: auth error responses now use `application/json; charset=utf-8`, and the defensive timeout fallback keeps `{error:{code,message,details}}` aligned with the 0.15.2 contract.
+
+Observable impact: JSON response metadata is aligned and defensive fallback shape is compatible with the frozen error envelope. The next correct step is 0.15.5 — Contract Freeze Enforcement.

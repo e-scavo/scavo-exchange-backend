@@ -40,7 +40,7 @@ func writeAppErrorJSON(w http.ResponseWriter, appErr *coreerrs.AppError) {
 
 	payload := coreerrs.NewErrorEnvelope(appErr.ToResponseError())
 
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(appErr.Status)
 	_ = json.NewEncoder(w).Encode(payload)
 }

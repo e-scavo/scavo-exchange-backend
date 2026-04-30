@@ -67,6 +67,16 @@ func assertErrorEnvelope(t *testing.T, rec *httptest.ResponseRecorder, wantStatu
 	}
 }
 
+func TestWriteAppErrorJSON_UsesCanonicalJSONContentType(t *testing.T) {
+	rec := httptest.NewRecorder()
+	writeAppErrorJSON(rec, nil)
+
+	want := "application/json; charset=utf-8"
+	if got := rec.Header().Get("Content-Type"); got != want {
+		t.Fatalf("unexpected content-type: got=%q want=%q", got, want)
+	}
+}
+
 func mustTokenService(t *testing.T) *coreauth.TokenService {
 	t.Helper()
 

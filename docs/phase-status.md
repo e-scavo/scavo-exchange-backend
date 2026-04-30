@@ -1906,7 +1906,7 @@ Observable impact at the time of 0.14.6.fix1: Stage 0 documentation had a cohere
 ## Phase 0.15 — Contract Hardening & Freeze
 
 Status: **In Progress**  
-Current subphase: **0.15.4 — Response Schema Normalization**
+Current subphase: **0.15.5 — Contract Freeze Enforcement**
 
 Phase 0.15 starts from the completed Phase 0.14.6.fix3 baseline.
 
@@ -1926,7 +1926,7 @@ Observable impact: Phase 0.15 is no longer pending definition. The current activ
 - 0.15.1 — HTTP Contract Audit: **Completed**
 - 0.15.2 — Error Contract Alignment: **Completed**
 - 0.15.3 — Provider Contract Validation: **Completed**
-- 0.15.4 — Response Schema Normalization: **Pending**
+- 0.15.4 — Response Schema Normalization: **Completed**
 - 0.15.5 — Contract Freeze Enforcement: **Pending**
 - 0.15.6 — Validation & Documentation: **Pending**
 
@@ -1983,4 +1983,19 @@ Decision taken: preserve runtime behavior and add compile-time assertions at the
 
 Concrete change: `internal/modules/auth/application.go` now declares compile-time assertions for `*Application` against `AuthProvider`, for `*user.Service` against `authdomain.UserProvider`, and for `*usersettings.Service` against `authdomain.UserSettingsProvider`.
 
-Observable impact: provider drift is now rejected by compilation. No endpoint, status code, payload, error code, domain rule or repository behavior was changed. 0.15.4 can proceed to response schema normalization on top of a validated provider boundary.
+Observable impact: provider drift is now rejected by compilation. No endpoint, status code, payload, error code, domain rule or repository behavior was changed. 0.15.4 has now completed response schema normalization; 0.15.5 can proceed to freeze enforcement on top of the validated response baseline.
+
+
+### 0.15.4 Result
+
+0.15.4 completed Response Schema Normalization with a narrow serialization-policy alignment.
+
+Context inherited: 0.15.1 documented the HTTP route baseline, 0.15.2 stabilized the canonical error envelope, and 0.15.3 made provider boundary drift fail at compile time.
+
+Real problem: response payload shapes were already compatible, but two serialization details still differed from the frozen contract direction. Auth error responses used `application/json` while the core JSON writer used `application/json; charset=utf-8`, and the defensive timeout fallback JSON still lacked the mandatory `details` object from 0.15.2.
+
+Decision taken: normalize response serialization details only. Do not wrap successful responses, do not rename payload fields, and do not change status codes, routes, provider behavior, domain rules or repository behavior.
+
+Concrete change: auth error responses now use `application/json; charset=utf-8`, the defensive timeout fallback includes `details:{}`, and a regression test confirms the auth error JSON content type.
+
+Observable impact: response serialization is aligned across core and auth handlers, and defensive fallback output remains compatible with the canonical error envelope. The next correct step is 0.15.5 — Contract Freeze Enforcement.

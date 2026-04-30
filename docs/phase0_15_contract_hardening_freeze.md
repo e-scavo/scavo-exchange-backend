@@ -5,8 +5,8 @@
 ## Status
 
 **Phase:** 0.15 — Contract Hardening & Freeze  
-**Current Subphase:** 0.15.4 — Response Schema Normalization  
-**Status:** 0.15.3 Completed / 0.15.4 Pending  
+**Current Subphase:** 0.15.5 — Contract Freeze Enforcement  
+**Status:** 0.15.4 Completed / 0.15.5 Pending  
 **Type:** Contract hardening and freeze documentation  
 **Code changes in 0.15.1:** No
 
@@ -237,7 +237,7 @@ Silent drift is not allowed.
 - 0.15.1 — HTTP Contract Audit: **Completed**
 - 0.15.2 — Error Contract Alignment: **Completed**
 - 0.15.3 — Provider Contract Validation: **Completed**
-- 0.15.4 — Response Schema Normalization: **Pending**
+- 0.15.4 — Response Schema Normalization: **Completed**
 - 0.15.5 — Contract Freeze Enforcement: **Pending**
 - 0.15.6 — Validation & Documentation: **Pending**
 
@@ -346,3 +346,23 @@ It must use the following validated baselines:
 - 0.15.3 provider boundary compile-time validation
 
 It must not introduce new features, new routes, new business rules or unrelated architecture changes.
+
+## 0.15.4 Concrete Change
+
+0.15.4 normalizes response serialization policy without changing external behavior.
+
+Context inherited: 0.15.1 established the real route surface, 0.15.2 stabilized the public error envelope and 0.15.3 validated provider seams.
+
+Real problem: payload structures were compatible, but response serialization still had two narrow divergences. Auth error responses used a different JSON content type than the core writer, and the defensive timeout fallback JSON did not include the mandatory `details` object.
+
+Decision taken: preserve all public payloads and normalize only serialization details.
+
+Concrete change: `internal/modules/auth/http_login.go` now writes auth error JSON as `application/json; charset=utf-8`; `internal/core/httpx/middleware.go` keeps the defensive fallback aligned with `{error:{code,message,details}}`; `internal/modules/auth/http_handlers_test.go` validates the auth error content type.
+
+Impact observable: existing clients keep the same payload shapes, status codes and error codes, while response serialization is now consistent enough to support freeze enforcement.
+
+## Handoff to 0.15.5
+
+0.15.5 must define Contract Freeze Enforcement.
+
+It must use the validated baselines from 0.15.1, 0.15.2, 0.15.3 and 0.15.4. It must document and enforce how contracts can evolve without allowing silent drift.

@@ -16,11 +16,11 @@ It is intended to:
 
 **Stage:** 0 — Foundation
 **Latest Completed Phase:** 0.14 — Observability & Diagnostics Foundation
-**Latest Completed Subphase:** 0.15.3 — Provider Contract Validation
-**Phase Status:** 0.15.3 Completed / 0.15.4 Pending
+**Latest Completed Subphase:** 0.15.4 — Response Schema Normalization
+**Phase Status:** 0.15.4 Completed / 0.15.5 Pending
 **Current Phase:** 0.15 — Contract Hardening & Freeze
-**Current Subphase:** 0.15.4 — Response Schema Normalization
-**Next Planned Subphase:** 0.15.4 — Response Schema Normalization
+**Current Subphase:** 0.15.5 — Contract Freeze Enforcement
+**Next Planned Subphase:** 0.15.5 — Contract Freeze Enforcement
 
 ---
 
@@ -1403,4 +1403,20 @@ Concrete change: `internal/modules/auth/application.go` now asserts:
 
 Observable impact: future provider drift fails compilation. No HTTP route, response payload, error envelope, status code, domain behavior or repository behavior changed.
 
-Next step after 0.15.3 is **0.15.4 — Response Schema Normalization**.
+0.15.4 has completed Response Schema Normalization. Next step after 0.15.4 is **0.15.5 — Contract Freeze Enforcement**.
+
+### Phase 0.15.4 Handoff — Response Schema Normalization
+
+0.15.4 completed Response Schema Normalization.
+
+Inherited context: the backend entered this step after HTTP route audit, error envelope alignment and provider boundary validation. The remaining response-schema risk was not business behavior; it was serialization policy drift.
+
+Real problem: auth error responses did not use the same JSON content type metadata as the core writer, and the defensive timeout fallback did not include the mandatory `details` object required by the 0.15.2 public error contract.
+
+Decision taken: normalize only serialization details. Successful response payloads remain unwrapped and unchanged.
+
+Concrete change: auth error responses now use `application/json; charset=utf-8`; the defensive timeout fallback includes `details:{}`; a regression test covers the auth error content type.
+
+Observable impact: route behavior, status codes, success payloads, error codes, provider contracts and domain behavior remain unchanged, while JSON response serialization is now aligned for freeze enforcement.
+
+Next step after 0.15.4 is **0.15.5 — Contract Freeze Enforcement**.

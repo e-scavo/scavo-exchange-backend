@@ -63,7 +63,7 @@
 
 Latest completed phase: `0.14 — Observability & Diagnostics Foundation`  
 Current phase: `0.15 — Contract Hardening & Freeze`  
-Current subphase: `0.15.4 — Response Schema Normalization`
+Current subphase: `0.15.5 — Contract Freeze Enforcement`
 
 * `phase0_13_provider_layer_consolidation.md`
   * `0.13.0 — Definition & Documentation Lock` ✔ Completed
@@ -86,11 +86,13 @@ Current subphase: `0.15.4 — Response Schema Normalization`
 * `phase0_15_contract_hardening_freeze.md`
 * `phase0_15_1_http_contract_audit.md`
 * `phase0_15_2_error_contract_alignment.md`
+* `phase0_15_3_provider_contract_validation.md`
+* `phase0_15_4_response_schema_normalization.md`
   * `0.15.0 — Phase Definition & Documentation Lock` ✅ Completed
   * `0.15.1 — HTTP Contract Audit` ✅ Completed
   * `0.15.2 — Error Contract Alignment` ✅ Completed
   * `0.15.3 — Provider Contract Validation` ✅ Completed
-  * `0.15.4 — Response Schema Normalization` ⏳ Pending
+  * `0.15.4 — Response Schema Normalization` ✅ Completed
   * `0.15.5 — Contract Freeze Enforcement` ⏳ Pending
   * `0.15.6 — Validation & Documentation` ⏳ Pending
 
@@ -257,7 +259,7 @@ The phase continues the Stage 0 narrative by moving from provider-owned runtime 
 - 0.15.1 ✅ HTTP Contract Audit
 - 0.15.2 ✅ Error Contract Alignment
 - 0.15.3 ✅ Provider Contract Validation
-- 0.15.4 ⏳ Response Schema Normalization
+- 0.15.4 ✅ Response Schema Normalization
 - 0.15.5 ⏳ Contract Freeze Enforcement
 - 0.15.6 ⏳ Validation & Documentation
 
