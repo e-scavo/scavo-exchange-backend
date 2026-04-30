@@ -256,8 +256,40 @@ Targets deferred to Phase 1.2+:
 
 No consolidation target is implemented in 1.1.1.3. No Go source, tests or configuration changes are authorized by this target definition.
 
+## 1.1.1.4 Inventory & Mapping Closure
+
+1.1.1 is closed as a documentary inventory and mapping subphase.
+
+Closure confirmation:
+
+- 1.1.1.0 Use Case Inventory Baseline is documented in the Use Case Inventory table.
+- 1.1.1.1 Use Case Ownership Mapping is documented in the ownership mapping table, ownership class summary and cross-ownership notes.
+- 1.1.1.2 Use Case Duplication & Dispersion Review is documented through classified DDR findings and the 1.1.1.2 summary.
+- 1.1.1.3 Use Case Consolidation Targets is documented through UCT targets, Phase 1.1 inclusion/exclusion boundaries and the recommended next order.
+
+Readiness for the next Phase 1.1 subphase is confirmed:
+
+- A base inventory of existing use cases exists.
+- Ownership mapping exists for the inventoried use cases.
+- Duplication, overlap, dispersion, ambiguous ownership and aligned/no-problem findings are classified from repository evidence.
+- Consolidation targets are derived from those real findings.
+- Phase 1.1-only work is separated from Phase 1.2+ deferred work.
+- Stage 0 remains frozen.
+- `docs/roadmap.md` remains the governing document.
+
+Not resolved in 1.1.1:
+
+- No functions were moved.
+- No use cases were renamed.
+- No duplicated implementation was removed.
+- No handlers, providers, contracts, routes, read models, write models, mappers, repositories or module boundaries were changed.
+- No Go source, tests or configuration files were modified.
+- No Phase 1.2+ product capability was implemented.
+
+The next ordered Phase 1.1 subphase is 1.1.2 — Application Flow Mapping.
+
 ## Baseline Closure
 
-1.1.1.0 establishes the initial existing-use-case baseline only.
+1.1.1 establishes the existing-use-case inventory, ownership mapping, duplication/dispersion review and consolidation-target baseline only.
 
-No code, tests or configuration changes are authorized by this document. No duplicate, doubtful or dispersed behavior is corrected in this sub-subphase.
+No code, tests or configuration changes are authorized by this document. No duplicate, doubtful, dispersed or ambiguous behavior is corrected in this subphase.
