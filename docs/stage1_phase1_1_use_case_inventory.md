@@ -293,3 +293,53 @@ The next ordered Phase 1.1 subphase is 1.1.2 — Application Flow Mapping.
 1.1.1 establishes the existing-use-case inventory, ownership mapping, duplication/dispersion review and consolidation-target baseline only.
 
 No code, tests or configuration changes are authorized by this document. No duplicate, doubtful, dispersed or ambiguous behavior is corrected in this subphase.
+
+## 1.1.2.0 Application Layer Consolidation Baseline
+
+This section defines the real baseline for application-layer consolidation planning, using the closed 1.1.1 inventory as input. It is documentary only and does not authorize code changes, refactors, route changes, file moves, function renames, contract changes, test changes or configuration changes.
+
+### Current Application-Layer Responsibilities
+
+- `cmd/scavo-server/main.go` is the process entrypoint: it loads config, creates `internal/app.App`, starts it, waits for shutdown signals and calls `Stop`.
+- `internal/app/app.go` is the runtime composition root: it builds logger, WebSocket hub/dispatcher, token service, database/cache clients, repositories, module services, wallet stores, auth provider, diagnostics status service, router and HTTP server.
+- `internal/app.App.Start` and `internal/app.App.Stop` own runtime lifecycle only: hub/server startup, flow logging and database/cache/server shutdown.
+- `internal/modules/auth/app.Application` is the auth module application/use-case orchestrator for login, current user, session, bootstrap, settings exposure and wallet flows.
+- `internal/modules/auth.Application` remains the root compatibility/provider adapter around `auth/app.Application`.
+- `internal/core/httpx.NewRouter` owns HTTP router, middleware, versioned route registration and route-level auth/authorization enforcement wiring.
+
+### Current Baseline Findings
+
+| Finding | Area | File(s) | Current responsibility | Current state | Risk | Future recommendation | Phase 1.1 or deferred |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| ALB-001 | Process entrypoint | `cmd/scavo-server/main.go` | Load config, create `app.App`, start runtime, wait for OS signal and stop runtime. | Aligned; entrypoint delegates to `internal/app` and does not carry product behavior. | Low. Product behavior would become harder to locate if future entrypoint code grows orchestration. | Keep process boot/shutdown outside product use cases. | Phase 1.1 documentation guardrail. |
+| ALB-002 | Composition root | `internal/app/app.go` | Compose logger, WS hub/dispatcher, token service, DB/cache clients, repositories, module services, wallet stores, auth provider, status service, router and HTTP server. | Aligned with UC-001 and UCT-009 as runtime composition, not product capability. | Medium. This file necessarily knows many modules and core dependencies; future product logic added here would blur ownership. | Preserve `internal/app` as wiring/lifecycle only; future application-flow naming should point to module app/provider owners, not `internal/app`. | Phase 1.1.2/1.1.5 documentation; implementation changes deferred unless later roadmap-approved. |
+| ALB-003 | Runtime fallback wiring | `internal/app/app.go` | Select Postgres repositories/stores when DB is enabled, otherwise in-memory/nil-backed services and stores. | Operational compatibility behavior exists in composition root. | Medium. Runtime fallback decisions could be mistaken for domain defaults or product behavior. | Document as environment/runtime wiring; do not move domain defaults or repository semantics into `internal/app`. | Phase 1.1 documentation only. |
+| ALB-004 | Auth provider construction | `internal/app/app.go`; `internal/modules/auth/application.go`; `internal/modules/auth/app/application.go`; `internal/modules/auth/provider.go` | Build concrete auth provider from token service, user/settings services, challenge store and identity store. | Provider boundary is explicit and aligned with Stage 0 freeze, but root `auth.Application` remains a compatibility adapter. | Medium. Future consolidation could accidentally bypass provider boundary or edit compatibility adapter as primary owner. | Treat module provider/application boundary as the application-layer entry for auth flows; keep root adapter documented as compatibility. | Phase 1.1.5 contract documentation; no code change in 1.1.2.0. |
+| ALB-005 | HTTP/router setup | `internal/core/httpx/router.go`; `internal/app/app.go` | Build chi router, CORS, request/log/recovery/timeout middleware, WebSocket upgrade route, health/readiness/version/diagnostics routes and auth routes for legacy plus `/api/v1`. | Router setup belongs to core HTTP/runtime wiring, not module application logic. | Medium. Router-level permission wiring is close to product surfaces, so future changes could mix route registration with use-case behavior. | Keep router responsible for transport/middleware/versioning only; application flow mapping should reference provider methods behind routes. | Phase 1.1 documentation; behavior consistency deferred to Phase 1.6 if needed. |
+| ALB-006 | Authorization enforcement wiring | `internal/core/httpx/router.go`; `internal/core/authorization/*` | Attach `RequireAuth`, `HydrateAuthorization` and selected `RequirePermission` middleware to routes. | Route-level enforcement wiring is present and Stage 0-frozen; deep policy semantics remain in core authorization. | Medium. Deep authorization policy changes belong outside application-layer consolidation. | Document current wiring as a boundary; do not alter policy semantics during Phase 1.1 application planning. | Deferred to Phase 1.3 Authorization & Permission Model. |
+| ALB-007 | Auth use-case orchestration | `internal/modules/auth/app/application.go`; `internal/modules/auth/app/service.go`; `internal/modules/auth/app/wallet_services.go` | Coordinate auth/session/bootstrap/profile/settings/wallet flows through services, stores, mappers and cross-module provider contracts. | This is the real module application layer for auth flows, with known duplication/adapter findings from 1.1.1. | High. It is the central place where product flow names, module ownership and duplicated compatibility surfaces can drift. | Use 1.1.2 flow mapping to name entry points and dependencies; defer behavioral changes and duplicate removal. | Phase 1.1 mapping/documentation only; implementation-sensitive changes deferred. |
+| ALB-008 | Cross-module application dependencies | `internal/modules/auth/domain/user_contract.go`; `internal/modules/auth/domain/usersettings_contract.go`; `internal/modules/user/app/service.go`; `internal/modules/usersettings/app/service.go` | Auth consumes user and usersettings through minimal contracts; user/usersettings own their module behavior. | Aligned with 1.1.1 ownership mapping; profile/settings exposure remains cross-module. | Medium. Auth surface could accidentally absorb user/settings behavior during consolidation. | Keep user/profile and settings behavior ownership in their modules; document auth as authenticated exposure/orchestration. | Phase 1.1.2/1.1.5 documentation; product behavior deferred to Phase 1.2/1.5. |
+| ALB-009 | WebSocket application boundary | `internal/app/app.go`; `internal/modules/system/ws_handlers.go`; `internal/modules/auth/ws_handlers.go`; `internal/core/ws/*` | Register system and auth WS actions through dispatcher; auth WS uses root auth service for session resolution. | Existing WS flow is operationally wired in `internal/app`, transported through `core/ws`, and partly overlaps HTTP current-user/session intent. | Medium. WS actions may diverge from HTTP application flows if not mapped explicitly. | Treat WS registration as runtime wiring; classify WS auth actions in 1.1.2 flow mapping before any behavior change. | Phase 1.1.2 documentation; behavior audit deferred to Phase 1.6. |
+| ALB-010 | Module-specific behavior outside `internal/app` | `internal/modules/user/app/service.go`; `internal/modules/usersettings/app/service.go`; `internal/modules/auth/app/wallet_services.go`; repository packages | User validation, settings normalization/merge, wallet challenge/link/merge/primary/detach rules, and persistence operations. | Correctly outside `internal/app`; some behavior lives in module app services rather than pure domain packages. | Medium. Moving these into `internal/app` or router would violate the application-layer boundary. | Keep domain/module-specific behavior in owning module layers; use Phase 1.1 only to document boundaries. | Mostly outside Phase 1.1 implementation; product changes deferred to Phase 1.2/1.5/1.6 as applicable. |
+
+### Responsibilities That Must Stay Outside `internal/app`
+
+- Domain invariants and module-specific business behavior.
+- Repository and store implementation details beyond construction/wiring.
+- Read model and write model transformation ownership, except where module application methods call established mappers.
+- Deep authorization policy semantics and permission model expansion.
+- Wallet signature/challenge/link/merge/primary/detach rules.
+- User profile validation and settings normalization/merge semantics.
+- HTTP payload contract changes, route changes and versioning changes.
+
+### 1.1.2.0 Baseline Summary
+
+The application-layer baseline is stable enough for Phase 1.1 planning:
+
+- `internal/app` is the composition/lifecycle root, not the product use-case owner.
+- `auth/app.Application` and the handler-facing `AuthProvider` are the main auth application/provider boundary.
+- `user/app.Service` and `usersettings/app.Service` own module-specific account/profile and settings behavior.
+- `core/httpx` owns router, middleware, legacy/canonical route projection and route-level enforcement wiring.
+- Cross-module behavior should be mapped and documented in Phase 1.1, while product behavior changes remain deferred to later Stage 1 phases.
+
+No application-layer consolidation is implemented in 1.1.2.0. No Go source, tests or configuration changes are authorized by this baseline.

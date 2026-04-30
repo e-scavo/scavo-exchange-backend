@@ -621,6 +621,12 @@ Internal subdivision:
 - 1.1.2.1 — Current Behavior Alignment: align the definition with existing Stage 0 contracts and current code behavior.
 - 1.1.2.2 — Target Rule Documentation: document the target rule, shape or mapping without introducing hidden behavior.
 - 1.1.2.3 — Compatibility Review: confirm the definition does not break frozen contracts or later phase sequencing.
+
+##### 1.1.2.0 Application Layer Consolidation Baseline Result
+
+The application-layer consolidation baseline is recorded in `docs/stage1_phase1_1_use_case_inventory.md`.
+
+1.1.2.0 is documentary only: it identifies the current composition root, module application/provider boundaries, router/runtime wiring, cross-module dependencies and responsibilities that must remain outside `internal/app`; it does not implement consolidation, refactor application code, move files, rename functions or change contracts.
 #### 1.1.3 — Orphan, Duplicate & Ambiguous Surface Review
 
 - detect endpoints without a clear Stage 1 use case
