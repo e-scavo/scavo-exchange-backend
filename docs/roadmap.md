@@ -627,6 +627,12 @@ Internal subdivision:
 The application-layer consolidation baseline is recorded in `docs/stage1_phase1_1_use_case_inventory.md`.
 
 1.1.2.0 is documentary only: it identifies the current composition root, module application/provider boundaries, router/runtime wiring, cross-module dependencies and responsibilities that must remain outside `internal/app`; it does not implement consolidation, refactor application code, move files, rename functions or change contracts.
+
+##### 1.1.2.1 Application Wiring Responsibility Map Result
+
+The application-layer wiring responsibility map is recorded in `docs/stage1_phase1_1_use_case_inventory.md`.
+
+1.1.2.1 is documentary only: it maps the real entrypoint, composition root, core service initialization, module service construction, provider wiring, router registration, WebSocket registration and lifecycle responsibilities; it classifies wiring as correct, coupled but acceptable, dispersed, at-risk or requiring later review; and it does not modify code, tests, configuration, routes, provider contracts or runtime behavior.
 #### 1.1.3 — Orphan, Duplicate & Ambiguous Surface Review
 
 - detect endpoints without a clear Stage 1 use case
