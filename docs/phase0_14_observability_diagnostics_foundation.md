@@ -329,3 +329,47 @@ Errors can now be enriched with request correlation and controlled diagnostic me
 ### Validation note
 
 The implementation was formatted manually in standard Go style. Full `go test ./...` could not be completed in this environment because the Go toolchain attempted to download Go 1.25.0 from `proxy.golang.org` and DNS/network access was unavailable.
+
+---
+
+## 0.14.4 Implementation Result — Flow Tracing Integration
+
+### Context inherited
+
+0.14.1 established request correlation through `httpx.RequestIDFromContext(ctx)`. 0.14.2 standardized the canonical log key as `request_id`. 0.14.3 then added safe diagnostic enrichment to the error layer without changing the public error envelope.
+
+Together, those subphases made correlation and diagnostic context available, but the runtime flow still lacked explicit lifecycle events. The backend could log an HTTP request after it finished, but it did not yet expose a minimal start/end trace that made request movement observable as a flow.
+
+### Problem
+
+Debugging still required reading isolated log entries and inferring flow order manually. Introducing OpenTelemetry, Prometheus, dashboards or a diagnostics API in this subphase would exceed the defined scope, but leaving the HTTP/application lifecycle without explicit flow markers would postpone the core value of Phase 0.14.
+
+### Decision
+
+0.14.4 introduces a minimal internal flow tracing convention over the existing `slog` JSON logger:
+
+```text
+message: flow_trace
+field: flow_event
+```
+
+The logger package owns the reusable flow event key and helper. HTTP remains the owner of request correlation extraction, and application lifecycle events can use the same helper without a request ID.
+
+### Concrete change
+
+- `internal/core/logger/logger.go` now exposes `FlowEventKey`.
+- `internal/core/logger/logger.go` now exposes `AttrsWithFlowEvent(requestID, event, attrs...)`.
+- `internal/core/logger/logger_test.go` validates flow event attributes with and without request IDs.
+- `internal/core/httpx/middleware.go` now emits `http_request_start` flow traces before handler execution.
+- `internal/core/httpx/middleware.go` now emits `http_request_end` flow traces after handler execution.
+- `internal/app/app.go` now emits `application_start` and `application_stop` flow traces.
+
+### Observable impact
+
+Existing JSON logs can now describe request and application movement through consistent flow events. This keeps the backend contract stable while making the HTTP lifecycle easier to follow with the previously established `request_id` correlation model.
+
+No public API payload, error envelope, provider contract, business behavior, external metrics system, dashboard or diagnostics endpoint was introduced.
+
+### Validation note
+
+The code was prepared in standard Go formatting style. Full `go test ./...` could not be completed in this environment because the local Go toolchain is older than the module requirement and automatic toolchain download is unavailable.

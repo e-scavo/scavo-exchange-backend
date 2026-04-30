@@ -176,12 +176,12 @@ func New(cfg config.Config) *App {
 func (a *App) Start(ctx context.Context) error {
 	go a.hub.Run(ctx)
 
-	a.log.Info("http server starting",
+	a.log.Info("flow_trace", logger.AttrsWithFlowEvent("", "application_start",
 		"addr", a.cfg.HTTPAddr,
 		"env", a.cfg.Env,
 		"postgres_enabled", a.dbClient != nil && a.dbClient.Enabled(),
 		"redis_enabled", a.cacheClient != nil && a.cacheClient.Enabled(),
-	)
+	)...)
 
 	go func() {
 		if err := a.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
@@ -193,7 +193,7 @@ func (a *App) Start(ctx context.Context) error {
 }
 
 func (a *App) Stop(ctx context.Context) error {
-	a.log.Info("http server stopping")
+	a.log.Info("flow_trace", logger.AttrsWithFlowEvent("", "application_stop")...)
 
 	if a.dbClient != nil {
 		a.dbClient.Close()

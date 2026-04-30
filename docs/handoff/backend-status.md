@@ -1240,3 +1240,20 @@ Important runtime facts:
 - `AppError.ToResponseError()` now serializes copied details, preventing response-side mutation from leaking into internal error state.
 
 This keeps public API behavior stable and prepares 0.14.4 flow tracing integration without exposing private runtime state or changing error payload shape.
+
+### Phase 0.14.4 Handoff — Flow Tracing Integration
+
+0.14.4 has been implemented as a minimal flow tracing layer over the existing structured JSON logger.
+
+Important runtime facts:
+
+- `internal/core/logger.FlowEventKey` defines the canonical flow event field: `flow_event`.
+- `internal/core/logger.AttrsWithFlowEvent(requestID, event, attrs...)` builds flow trace attributes.
+- Flow trace records use the log message `flow_trace`.
+- HTTP requests now emit `http_request_start` before handler execution.
+- HTTP requests now emit `http_request_end` after handler execution.
+- HTTP flow traces include `request_id` when the RequestID middleware attached one to context.
+- Application lifecycle now emits `application_start` and `application_stop`.
+- No diagnostics endpoint, metrics backend, OpenTelemetry integration or public API change was introduced.
+
+This keeps public API behavior stable and prepares 0.14.5 diagnostics surface exposure with a consistent internal flow-event vocabulary.

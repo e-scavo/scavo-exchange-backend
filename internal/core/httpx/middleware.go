@@ -50,20 +50,25 @@ func AccessLog(log *logger.Logger) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			start := time.Now()
+			rid := RequestIDFromContext(r.Context())
+			log.Info("flow_trace", logger.AttrsWithFlowEvent(rid, "http_request_start",
+				"method", r.Method,
+				"path", r.URL.Path,
+				"remote", r.RemoteAddr,
+			)...)
+
 			ww := &wrapWriter{ResponseWriter: w, status: 200}
 			next.ServeHTTP(ww, r)
 			dur := time.Since(start)
 
-			rid := RequestIDFromContext(r.Context())
-			attrs := append(logger.AttrsWithRequestID(rid),
+			log.Info("flow_trace", logger.AttrsWithFlowEvent(rid, "http_request_end",
 				"method", r.Method,
 				"path", r.URL.Path,
 				"status", ww.status,
 				"bytes", ww.bytes,
 				"dur_ms", dur.Milliseconds(),
 				"remote", r.RemoteAddr,
-			)
-			log.Info("http_request", attrs...)
+			)...)
 		})
 	}
 }

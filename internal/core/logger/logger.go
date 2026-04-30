@@ -5,7 +5,10 @@ import (
 	"os"
 )
 
-const RequestIDKey = "request_id"
+const (
+	RequestIDKey = "request_id"
+	FlowEventKey = "flow_event"
+)
 
 type Logger struct{ *slog.Logger }
 
@@ -36,4 +39,18 @@ func WithRequestID(log *Logger, requestID string) *Logger {
 		return log
 	}
 	return &Logger{Logger: log.With(RequestIDKey, requestID)}
+}
+
+// AttrsWithFlowEvent returns a standard observability attribute set for flow
+// tracing. The event name is always included when present; request correlation
+// is included only when available. Additional attributes are appended without
+// interpretation so callers keep ownership of their domain-specific context.
+func AttrsWithFlowEvent(requestID string, event string, attrs ...any) []any {
+	base := make([]any, 0, 4+len(attrs))
+	base = append(base, AttrsWithRequestID(requestID)...)
+	if event != "" {
+		base = append(base, FlowEventKey, event)
+	}
+	base = append(base, attrs...)
+	return base
 }

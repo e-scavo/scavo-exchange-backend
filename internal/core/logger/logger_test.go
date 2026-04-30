@@ -44,3 +44,28 @@ func TestWithRequestID_ReturnsDerivedLogger(t *testing.T) {
 		t.Fatalf("expected a derived logger instance")
 	}
 }
+
+func TestAttrsWithFlowEvent_IncludesEventAndRequestID(t *testing.T) {
+	attrs := AttrsWithFlowEvent("request-123", "http_request_start", "method", "GET")
+
+	want := []any{RequestIDKey, "request-123", FlowEventKey, "http_request_start", "method", "GET"}
+	if len(attrs) != len(want) {
+		t.Fatalf("unexpected attrs length: got=%d want=%d", len(attrs), len(want))
+	}
+	for i := range want {
+		if attrs[i] != want[i] {
+			t.Fatalf("unexpected attr at %d: got=%v want=%v", i, attrs[i], want[i])
+		}
+	}
+}
+
+func TestAttrsWithFlowEvent_AllowsMissingRequestID(t *testing.T) {
+	attrs := AttrsWithFlowEvent("", "application_start")
+
+	if len(attrs) != 2 {
+		t.Fatalf("unexpected attrs length: got=%d want=2", len(attrs))
+	}
+	if attrs[0] != FlowEventKey || attrs[1] != "application_start" {
+		t.Fatalf("unexpected attrs: got=%v", attrs)
+	}
+}

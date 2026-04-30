@@ -318,7 +318,7 @@ HTTP → Provider → Application → Domain → Repository
 - 0.14.1 — Correlation Model (Request ID / Trace) ✅ Completed
 - 0.14.2 — Logging Standardization ✅ Completed
 - 0.14.3 — Error Context Enrichment ✅ Completed
-- 0.14.4 — Flow Tracing Integration ⬜ Pending
+- 0.14.4 — Flow Tracing Integration ✅ Completed
 - 0.14.5 — Diagnostics Surface Exposure ⬜ Pending
 - 0.14.6 — Validation & Documentation ⬜ Pending
 
@@ -369,3 +369,19 @@ Decision taken: `internal/core/errs` now exposes small, explicit helpers for con
 Concrete change: `ToResponseError()` now uses `PublicDetails()` so public response construction receives a copied details map. Dedicated tests validate request ID enrichment, non-mutating context enrichment and response detail copy behavior.
 
 Observable impact: error diagnostics can now carry request correlation and other controlled metadata safely, while the public error envelope remains unchanged.
+
+---
+
+## Phase 0.14.4 Flow Tracing Integration Result
+
+0.14.4 integrates a minimal flow tracing convention into the existing structured logging path without introducing a tracing backend or changing public contracts.
+
+Context inherited from 0.14.3: request correlation is available through the canonical `request_id` field, structured logging is centralized through `internal/core/logger`, and errors can carry copied diagnostic context safely. The remaining gap was that runtime movement still appeared mostly as isolated log records instead of lifecycle events that describe where a request or process is in the backend flow.
+
+Problem addressed: the backend needed explicit start/end markers for observable flow movement, but adding external tracing, metrics or diagnostics endpoints at this point would be premature and outside 0.14.4 scope.
+
+Decision taken: flow tracing is represented as structured log records with message `flow_trace` and canonical field `flow_event`. The logger package owns `FlowEventKey` and `AttrsWithFlowEvent`, while HTTP continues to own request correlation extraction.
+
+Concrete change: HTTP access logging now emits `http_request_start` before handler execution and `http_request_end` after handler execution, preserving method, path, remote address, status, bytes and duration context. Application lifecycle logs now emit `application_start` and `application_stop` through the same flow tracing convention.
+
+Observable impact: operators can now follow request and lifecycle movement through consistent flow events using existing JSON logs. No HTTP response, public API contract, provider behavior, business logic, metrics backend or diagnostics endpoint changed.

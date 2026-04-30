@@ -1753,8 +1753,8 @@ Phase 0.13 is complete. Continue with the corrected next roadmap-defined phase: 
 ## Status
 
 **Phase:** 0.14 — Observability & Diagnostics Foundation  
-**Current subphase:** 0.14.3 — Error Context Enrichment  
-**Status:** 0.14.3 completed; next subphase is 0.14.4 — Flow Tracing Integration
+**Current subphase:** 0.14.4 — Flow Tracing Integration  
+**Status:** 0.14.4 completed; next subphase is 0.14.5 — Diagnostics Surface Exposure
 
 ## Context
 
@@ -1783,7 +1783,7 @@ This decision replaces the previous placeholder roadmap label for 0.14 with the 
 - 0.14.1 — Correlation Model (Request ID / Trace) ✅ Completed
 - 0.14.2 — Logging Standardization ✅ Completed
 - 0.14.3 — Error Context Enrichment ✅ Completed
-- 0.14.4 — Flow Tracing Integration ⬜ Pending
+- 0.14.4 — Flow Tracing Integration ✅ Completed
 - 0.14.5 — Diagnostics Surface Exposure ⬜ Pending
 - 0.14.6 — Validation & Documentation ⬜ Pending
 
@@ -1818,3 +1818,17 @@ The inherited correlation and logging work from 0.14.1 and 0.14.2 is now reflect
 `ToResponseError()` now serializes a copied public details map instead of exposing the internal map directly. This prevents accidental mutation leakage between internal error state and response construction, while preserving the existing public `{ error: { code, message, details } }` contract.
 
 Dedicated error tests were added for context enrichment, request ID enrichment, empty request ID behavior, public details copy behavior and response details copy behavior. Full `go test ./...` could not be executed in this environment because the Go toolchain attempted to download Go 1.25.0 from `proxy.golang.org` and DNS/network access was unavailable.
+
+### 0.14.4 Result
+
+0.14.4 completed the flow tracing integration step of the Observability & Diagnostics Foundation.
+
+Context inherited from 0.14.3: the backend already had request correlation, standardized `request_id` logging and safe error-context enrichment. The remaining gap was explicit flow movement: logs could describe outcomes, but not consistently mark request and application lifecycle transitions.
+
+Problem addressed: operators needed a minimal way to follow HTTP request execution and application lifecycle movement without introducing external tracing infrastructure or changing public contracts.
+
+Decision taken: flow tracing is represented through existing structured JSON logs using message `flow_trace` and canonical field `flow_event`. The logger package owns the reusable key and helper, while HTTP keeps responsibility for extracting the request ID from context.
+
+Concrete change: `internal/core/httpx.AccessLog` now emits `http_request_start` and `http_request_end`; `internal/app.App` emits `application_start` and `application_stop`; logger tests validate flow event attributes.
+
+Observable impact: request and lifecycle movement is now visible through existing logs, correlated by `request_id` where available. Public API behavior, response payloads, provider behavior and business logic remain unchanged.
