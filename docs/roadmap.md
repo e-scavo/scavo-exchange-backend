@@ -480,6 +480,14 @@ Phase 1.1 does not introduce new product features, does not reopen Stage 0 found
 
 The deferred Stage 1 work remains ordered as follows: Phase 1.2 Account & Identity Product Capabilities, Phase 1.3 Authorization & Permission Model, Phase 1.4 Data Interaction Patterns, Phase 1.5 Mutation & Write Flows, Phase 1.6 System Behavior Consistency and Phase 1.7 End-to-End Validation & Closure.
 
+Explicit Phase 1.1 boundary:
+
+- Included in Phase 1.1: ordering and naming of existing use cases, consolidation of duplicate or overlapping use-case descriptions, clarification of endpoint-to-flow intent, alignment between app layer, domain layer and modules, and documentation of cross-layer coherence for the existing backend surface.
+- Excluded from Phase 1.1: new product capabilities, new endpoints, deep authorization model changes, write-flow implementation, data interaction contract implementation, Stage 0 contract reopening and any change that would break the frozen Stage 0 baseline.
+- Deferred after Phase 1.1: account and identity capabilities in Phase 1.2, authorization and permission model refinement in Phase 1.3, data patterns in Phase 1.4, write flows in Phase 1.5, system behavior consistency in Phase 1.6 and end-to-end validation in Phase 1.7.
+
+Public contracts remain unchanged during Phase 1.1 unless a critical inconsistency is discovered and explicitly documented against the roadmap before any later, controlled change.
+
 The scope of 1.1.0.1 is closed. The next ordered control point is 1.1.0.2 — Risk & Drift Register.
 #### 1.1.1 — Endpoint Surface Inventory
 
