@@ -400,6 +400,36 @@ Excluded:
 - frontend implementation
 - infrastructure overengineering
 
+### Stage 1 Phase Set Decision
+
+Stage 1 is intentionally bounded to Phase 1.1 through Phase 1.7.
+
+No additional Stage 1 phases are required at this point because the current phase set already covers the complete product-surface progression required after Stage 0:
+
+- use-case consolidation before implementation
+- account and identity product capabilities
+- authorization and ownership behavior
+- data interaction patterns
+- mutation and write flows
+- cross-flow behavior consistency
+- end-to-end validation and closure
+
+Any new work discovered during Stage 1 must be classified in one of three ways before implementation:
+
+1. attach it to the correct existing Stage 1 phase and subphase,
+2. defer it explicitly to Stage 2 or later if it belongs to blockchain, DEX, integrations or advanced operations,
+3. open a new Stage 1 phase only if the roadmap is first amended through a documentation-lock subphase.
+
+This rule prevents Stage 1 from becoming an open-ended backlog while still allowing controlled evolution when real repository evidence requires it.
+
+### Sub-Subphase Control Rule
+
+Stage 1 sub-subphases are documented as operational control points.
+
+They do not require separate branch creation by default. A sub-subphase becomes an independently executed unit only when the real implementation risk, documentation size or code surface justifies isolating it.
+
+Each Stage 1 subphase must still be executed in the documented internal order so scope, implementation, validation and closure remain auditable.
+
 ### Phase 1.1 — Application Use Case Consolidation
 
 Define the real application use cases that Stage 1 must support.
@@ -421,6 +451,12 @@ Focus areas:
 - define the audit boundary before touching code
 - avoid feature implementation during phase definition
 
+Internal subdivision:
+
+- 1.1.0.0 — Scope Confirmation: confirm the exact subphase boundary against the roadmap and current repository state.
+- 1.1.0.1 — Trunk Documentation Review: read and validate the relevant trunk Markdown before proposing changes.
+- 1.1.0.2 — Risk & Drift Register: record scope risks, possible contract drift and deferred items before implementation.
+- 1.1.0.3 — Documentation Lock Closure: close the lock with explicit next-step criteria and no code changes unless justified.
 #### 1.1.1 — Endpoint Surface Inventory
 
 - inventory existing HTTP and WebSocket surfaces
@@ -428,6 +464,12 @@ Focus areas:
 - identify current consumers and expected usage
 - preserve frozen Stage 0 contracts during inventory
 
+Internal subdivision:
+
+- 1.1.1.0 — Inventory Scope Lock: define exactly which files, endpoints, flows or contracts are included.
+- 1.1.1.1 — Real-State Extraction: extract the current repository state without assumptions.
+- 1.1.1.2 — Classification & Gap Mapping: classify findings and identify gaps, duplicates or ambiguous ownership.
+- 1.1.1.3 — Audit Closure & Handoff: document findings and hand off only validated work to the next subphase.
 #### 1.1.2 — Application Flow Mapping
 
 - map endpoints to real application flows
@@ -435,6 +477,12 @@ Focus areas:
 - distinguish bootstrap, account, settings, wallet and system flows
 - identify missing flow documentation without adding features prematurely
 
+Internal subdivision:
+
+- 1.1.2.0 — Definition Scope Lock: freeze the exact decision boundary before implementation.
+- 1.1.2.1 — Current Behavior Alignment: align the definition with existing Stage 0 contracts and current code behavior.
+- 1.1.2.2 — Target Rule Documentation: document the target rule, shape or mapping without introducing hidden behavior.
+- 1.1.2.3 — Compatibility Review: confirm the definition does not break frozen contracts or later phase sequencing.
 #### 1.1.3 — Orphan, Duplicate & Ambiguous Surface Review
 
 - detect endpoints without a clear Stage 1 use case
@@ -442,6 +490,12 @@ Focus areas:
 - document ambiguous ownership or naming
 - propose safe consolidation paths without breaking compatibility
 
+Internal subdivision:
+
+- 1.1.3.0 — Inventory Scope Lock: define exactly which files, endpoints, flows or contracts are included.
+- 1.1.3.1 — Real-State Extraction: extract the current repository state without assumptions.
+- 1.1.3.2 — Classification & Gap Mapping: classify findings and identify gaps, duplicates or ambiguous ownership.
+- 1.1.3.3 — Audit Closure & Handoff: document findings and hand off only validated work to the next subphase.
 #### 1.1.4 — Product Success Criteria Definition
 
 - define success criteria per supported flow
@@ -449,6 +503,12 @@ Focus areas:
 - align criteria with frozen contracts
 - prepare the basis for end-to-end validation
 
+Internal subdivision:
+
+- 1.1.4.0 — Definition Scope Lock: freeze the exact decision boundary before implementation.
+- 1.1.4.1 — Current Behavior Alignment: align the definition with existing Stage 0 contracts and current code behavior.
+- 1.1.4.2 — Target Rule Documentation: document the target rule, shape or mapping without introducing hidden behavior.
+- 1.1.4.3 — Compatibility Review: confirm the definition does not break frozen contracts or later phase sequencing.
 #### 1.1.5 — Use Case Contract Documentation
 
 - document the approved Stage 1 application use cases
@@ -456,12 +516,24 @@ Focus areas:
 - record excluded or deferred use cases
 - prevent scope drift before later Stage 1 phases
 
+Internal subdivision:
+
+- 1.1.5.0 — Definition Scope Lock: freeze the exact decision boundary before implementation.
+- 1.1.5.1 — Current Behavior Alignment: align the definition with existing Stage 0 contracts and current code behavior.
+- 1.1.5.2 — Target Rule Documentation: document the target rule, shape or mapping without introducing hidden behavior.
+- 1.1.5.3 — Compatibility Review: confirm the definition does not break frozen contracts or later phase sequencing.
 #### 1.1.6 — Validation & Closure
 
 - validate documentation coherence
 - run the project test suite when code was touched
 - close Phase 1.1 with explicit handoff to Phase 1.2
 
+Internal subdivision:
+
+- 1.1.6.0 — Implementation Scope Lock: identify the exact implementation or documentation surface to modify.
+- 1.1.6.1 — Incremental Change Application: apply the smallest coherent change that satisfies the subphase objective.
+- 1.1.6.2 — Regression & Contract Validation: validate tests, response shape, error behavior and documented expectations.
+- 1.1.6.3 — Documentation & Handoff Sync: update trunk documentation and hand off to the next ordered subphase.
 ### Phase 1.2 — Account & Identity Product Capabilities
 
 Transform the identity infrastructure into a usable product surface while preserving the frozen Stage 0 contracts.
@@ -481,12 +553,24 @@ Focus areas:
 - define account, session, wallet and settings boundaries
 - avoid implementation before account flows are explicitly scoped
 
+Internal subdivision:
+
+- 1.2.0.0 — Scope Confirmation: confirm the exact subphase boundary against the roadmap and current repository state.
+- 1.2.0.1 — Trunk Documentation Review: read and validate the relevant trunk Markdown before proposing changes.
+- 1.2.0.2 — Risk & Drift Register: record scope risks, possible contract drift and deferred items before implementation.
+- 1.2.0.3 — Documentation Lock Closure: close the lock with explicit next-step criteria and no code changes unless justified.
 #### 1.2.1 — Session Lifecycle Completion
 
 - login → session → validation → refresh → logout
 - session consistency across endpoints
 - expiration and renewal behavior
 
+Internal subdivision:
+
+- 1.2.1.0 — Implementation Scope Lock: identify the exact implementation or documentation surface to modify.
+- 1.2.1.1 — Incremental Change Application: apply the smallest coherent change that satisfies the subphase objective.
+- 1.2.1.2 — Regression & Contract Validation: validate tests, response shape, error behavior and documented expectations.
+- 1.2.1.3 — Documentation & Handoff Sync: update trunk documentation and hand off to the next ordered subphase.
 #### 1.2.2 — Account Surface Consolidation
 
 - `/me`
@@ -496,6 +580,12 @@ Focus areas:
 - structural consistency across account endpoints
 - read normalization
 
+Internal subdivision:
+
+- 1.2.2.0 — Implementation Scope Lock: identify the exact implementation or documentation surface to modify.
+- 1.2.2.1 — Incremental Change Application: apply the smallest coherent change that satisfies the subphase objective.
+- 1.2.2.2 — Regression & Contract Validation: validate tests, response shape, error behavior and documented expectations.
+- 1.2.2.3 — Documentation & Handoff Sync: update trunk documentation and hand off to the next ordered subphase.
 #### 1.2.3 — Wallet Management Usability
 
 - wallet listing
@@ -503,6 +593,12 @@ Focus areas:
 - primary wallet behavior
 - ownership validation
 
+Internal subdivision:
+
+- 1.2.3.0 — Scope Lock: confirm the subphase boundary and repository evidence.
+- 1.2.3.1 — Execution: perform the controlled work required by the subphase.
+- 1.2.3.2 — Validation: validate behavior, documentation and compatibility.
+- 1.2.3.3 — Closure: record the result and hand off to the next subphase.
 #### 1.2.4 — User Settings Productization
 
 - consistent read behavior
@@ -510,24 +606,48 @@ Focus areas:
 - defaults
 - validations
 
+Internal subdivision:
+
+- 1.2.4.0 — Implementation Scope Lock: identify the exact implementation or documentation surface to modify.
+- 1.2.4.1 — Incremental Change Application: apply the smallest coherent change that satisfies the subphase objective.
+- 1.2.4.2 — Regression & Contract Validation: validate tests, response shape, error behavior and documented expectations.
+- 1.2.4.3 — Documentation & Handoff Sync: update trunk documentation and hand off to the next ordered subphase.
 #### 1.2.5 — Account-Level Authorization Refinement
 
 - endpoint permissions
 - ownership checks
 - session consistency
 
+Internal subdivision:
+
+- 1.2.5.0 — Scope Lock: confirm the subphase boundary and repository evidence.
+- 1.2.5.1 — Execution: perform the controlled work required by the subphase.
+- 1.2.5.2 — Validation: validate behavior, documentation and compatibility.
+- 1.2.5.3 — Closure: record the result and hand off to the next subphase.
 #### 1.2.6 — End-to-End Flow Validation
 
 - login → bootstrap → update → logout
 - real edge cases
 - functional consistency
 
+Internal subdivision:
+
+- 1.2.6.0 — Implementation Scope Lock: identify the exact implementation or documentation surface to modify.
+- 1.2.6.1 — Incremental Change Application: apply the smallest coherent change that satisfies the subphase objective.
+- 1.2.6.2 — Regression & Contract Validation: validate tests, response shape, error behavior and documented expectations.
+- 1.2.6.3 — Documentation & Handoff Sync: update trunk documentation and hand off to the next ordered subphase.
 #### 1.2.7 — Documentation & Closure
 
 - flow documentation
 - final validation
 - phase closure
 
+Internal subdivision:
+
+- 1.2.7.0 — Closure Scope Lock: confirm what is being closed and which evidence is required.
+- 1.2.7.1 — Evidence Collection: collect test output, file counts, changed files and remaining risks.
+- 1.2.7.2 — Trunk Reconciliation: synchronize roadmap, status, handoff and phase documentation.
+- 1.2.7.3 — Final Handoff: record the accepted state and next phase without prematurely defining later work.
 ### Phase 1.3 — Authorization & Permission Model
 
 Refine authorization from foundational enforcement into product-level permission behavior.
@@ -547,6 +667,12 @@ Focus areas:
 - preserve Stage 0 authentication and error contracts
 - confirm which account-level capabilities require permission checks
 
+Internal subdivision:
+
+- 1.3.0.0 — Scope Confirmation: confirm the exact subphase boundary against the roadmap and current repository state.
+- 1.3.0.1 — Trunk Documentation Review: read and validate the relevant trunk Markdown before proposing changes.
+- 1.3.0.2 — Risk & Drift Register: record scope risks, possible contract drift and deferred items before implementation.
+- 1.3.0.3 — Documentation Lock Closure: close the lock with explicit next-step criteria and no code changes unless justified.
 #### 1.3.1 — Permission Surface Inventory
 
 - inventory endpoints requiring authenticated access
@@ -554,6 +680,12 @@ Focus areas:
 - classify account, wallet, settings and system operations
 - detect unauthenticated or under-specified permission boundaries
 
+Internal subdivision:
+
+- 1.3.1.0 — Inventory Scope Lock: define exactly which files, endpoints, flows or contracts are included.
+- 1.3.1.1 — Real-State Extraction: extract the current repository state without assumptions.
+- 1.3.1.2 — Classification & Gap Mapping: classify findings and identify gaps, duplicates or ambiguous ownership.
+- 1.3.1.3 — Audit Closure & Handoff: document findings and hand off only validated work to the next subphase.
 #### 1.3.2 — Role & Capability Mapping
 
 - define product-level roles or capabilities where applicable
@@ -561,6 +693,12 @@ Focus areas:
 - document default access expectations
 - avoid introducing roles that are not required by real flows
 
+Internal subdivision:
+
+- 1.3.2.0 — Definition Scope Lock: freeze the exact decision boundary before implementation.
+- 1.3.2.1 — Current Behavior Alignment: align the definition with existing Stage 0 contracts and current code behavior.
+- 1.3.2.2 — Target Rule Documentation: document the target rule, shape or mapping without introducing hidden behavior.
+- 1.3.2.3 — Compatibility Review: confirm the definition does not break frozen contracts or later phase sequencing.
 #### 1.3.3 — Ownership Rule Definition
 
 - define ownership rules for account-level resources
@@ -568,6 +706,12 @@ Focus areas:
 - align settings mutations with authenticated account context
 - prevent cross-account access drift
 
+Internal subdivision:
+
+- 1.3.3.0 — Definition Scope Lock: freeze the exact decision boundary before implementation.
+- 1.3.3.1 — Current Behavior Alignment: align the definition with existing Stage 0 contracts and current code behavior.
+- 1.3.3.2 — Target Rule Documentation: document the target rule, shape or mapping without introducing hidden behavior.
+- 1.3.3.3 — Compatibility Review: confirm the definition does not break frozen contracts or later phase sequencing.
 #### 1.3.4 — Enforcement Alignment
 
 - align endpoint checks with documented permission rules
@@ -575,6 +719,12 @@ Focus areas:
 - normalize authorization failure behavior through the frozen error envelope
 - avoid business logic changes outside permission enforcement
 
+Internal subdivision:
+
+- 1.3.4.0 — Implementation Scope Lock: identify the exact implementation or documentation surface to modify.
+- 1.3.4.1 — Incremental Change Application: apply the smallest coherent change that satisfies the subphase objective.
+- 1.3.4.2 — Regression & Contract Validation: validate tests, response shape, error behavior and documented expectations.
+- 1.3.4.3 — Documentation & Handoff Sync: update trunk documentation and hand off to the next ordered subphase.
 #### 1.3.5 — Authorization Regression Coverage
 
 - add or update tests for permission boundaries
@@ -582,12 +732,24 @@ Focus areas:
 - confirm error shape consistency
 - preserve compatibility with existing consumers
 
+Internal subdivision:
+
+- 1.3.5.0 — Implementation Scope Lock: identify the exact implementation or documentation surface to modify.
+- 1.3.5.1 — Incremental Change Application: apply the smallest coherent change that satisfies the subphase objective.
+- 1.3.5.2 — Regression & Contract Validation: validate tests, response shape, error behavior and documented expectations.
+- 1.3.5.3 — Documentation & Handoff Sync: update trunk documentation and hand off to the next ordered subphase.
 #### 1.3.6 — Validation & Closure
 
 - run `go test ./...`
 - reconcile trunk documentation
 - close Phase 1.3 with handoff to data interaction patterns
 
+Internal subdivision:
+
+- 1.3.6.0 — Implementation Scope Lock: identify the exact implementation or documentation surface to modify.
+- 1.3.6.1 — Incremental Change Application: apply the smallest coherent change that satisfies the subphase objective.
+- 1.3.6.2 — Regression & Contract Validation: validate tests, response shape, error behavior and documented expectations.
+- 1.3.6.3 — Documentation & Handoff Sync: update trunk documentation and hand off to the next ordered subphase.
 ### Phase 1.4 — Data Interaction Patterns
 
 Standardize the way product surfaces expose data interaction.
@@ -607,6 +769,12 @@ Focus areas:
 - preserve existing response compatibility
 - distinguish read patterns from write flows
 
+Internal subdivision:
+
+- 1.4.0.0 — Scope Confirmation: confirm the exact subphase boundary against the roadmap and current repository state.
+- 1.4.0.1 — Trunk Documentation Review: read and validate the relevant trunk Markdown before proposing changes.
+- 1.4.0.2 — Risk & Drift Register: record scope risks, possible contract drift and deferred items before implementation.
+- 1.4.0.3 — Documentation Lock Closure: close the lock with explicit next-step criteria and no code changes unless justified.
 #### 1.4.1 — Read Surface Inventory
 
 - inventory list and read endpoints
@@ -614,6 +782,12 @@ Focus areas:
 - document current query parameters
 - detect undocumented or inconsistent read behavior
 
+Internal subdivision:
+
+- 1.4.1.0 — Inventory Scope Lock: define exactly which files, endpoints, flows or contracts are included.
+- 1.4.1.1 — Real-State Extraction: extract the current repository state without assumptions.
+- 1.4.1.2 — Classification & Gap Mapping: classify findings and identify gaps, duplicates or ambiguous ownership.
+- 1.4.1.3 — Audit Closure & Handoff: document findings and hand off only validated work to the next subphase.
 #### 1.4.2 — Pagination Contract Definition
 
 - define supported pagination inputs
@@ -621,6 +795,12 @@ Focus areas:
 - document defaults and limits
 - preserve compatibility for existing non-paginated responses
 
+Internal subdivision:
+
+- 1.4.2.0 — Definition Scope Lock: freeze the exact decision boundary before implementation.
+- 1.4.2.1 — Current Behavior Alignment: align the definition with existing Stage 0 contracts and current code behavior.
+- 1.4.2.2 — Target Rule Documentation: document the target rule, shape or mapping without introducing hidden behavior.
+- 1.4.2.3 — Compatibility Review: confirm the definition does not break frozen contracts or later phase sequencing.
 #### 1.4.3 — Filtering Contract Definition
 
 - identify supported filters per surface
@@ -628,6 +808,12 @@ Focus areas:
 - validate error behavior for invalid filters
 - avoid adding generic filtering without product need
 
+Internal subdivision:
+
+- 1.4.3.0 — Definition Scope Lock: freeze the exact decision boundary before implementation.
+- 1.4.3.1 — Current Behavior Alignment: align the definition with existing Stage 0 contracts and current code behavior.
+- 1.4.3.2 — Target Rule Documentation: document the target rule, shape or mapping without introducing hidden behavior.
+- 1.4.3.3 — Compatibility Review: confirm the definition does not break frozen contracts or later phase sequencing.
 #### 1.4.4 — Sorting Contract Definition
 
 - identify sortable fields per collection surface
@@ -635,6 +821,12 @@ Focus areas:
 - validate unsupported sorting behavior
 - preserve deterministic output where required
 
+Internal subdivision:
+
+- 1.4.4.0 — Definition Scope Lock: freeze the exact decision boundary before implementation.
+- 1.4.4.1 — Current Behavior Alignment: align the definition with existing Stage 0 contracts and current code behavior.
+- 1.4.4.2 — Target Rule Documentation: document the target rule, shape or mapping without introducing hidden behavior.
+- 1.4.4.3 — Compatibility Review: confirm the definition does not break frozen contracts or later phase sequencing.
 #### 1.4.5 — Read Model Consistency Validation
 
 - validate read model shape consistency
@@ -642,12 +834,24 @@ Focus areas:
 - add tests where contract drift is likely
 - document compatibility constraints
 
+Internal subdivision:
+
+- 1.4.5.0 — Implementation Scope Lock: identify the exact implementation or documentation surface to modify.
+- 1.4.5.1 — Incremental Change Application: apply the smallest coherent change that satisfies the subphase objective.
+- 1.4.5.2 — Regression & Contract Validation: validate tests, response shape, error behavior and documented expectations.
+- 1.4.5.3 — Documentation & Handoff Sync: update trunk documentation and hand off to the next ordered subphase.
 #### 1.4.6 — Validation & Closure
 
 - run `go test ./...`
 - reconcile trunk documentation
 - close Phase 1.4 with handoff to mutation and write flows
 
+Internal subdivision:
+
+- 1.4.6.0 — Implementation Scope Lock: identify the exact implementation or documentation surface to modify.
+- 1.4.6.1 — Incremental Change Application: apply the smallest coherent change that satisfies the subphase objective.
+- 1.4.6.2 — Regression & Contract Validation: validate tests, response shape, error behavior and documented expectations.
+- 1.4.6.3 — Documentation & Handoff Sync: update trunk documentation and hand off to the next ordered subphase.
 ### Phase 1.5 — Mutation & Write Flows
 
 Complete coherent write behavior for product-facing capabilities.
@@ -667,6 +871,12 @@ Focus areas:
 - preserve Stage 0 error and response contracts
 - distinguish product mutations from infrastructure changes
 
+Internal subdivision:
+
+- 1.5.0.0 — Scope Confirmation: confirm the exact subphase boundary against the roadmap and current repository state.
+- 1.5.0.1 — Trunk Documentation Review: read and validate the relevant trunk Markdown before proposing changes.
+- 1.5.0.2 — Risk & Drift Register: record scope risks, possible contract drift and deferred items before implementation.
+- 1.5.0.3 — Documentation Lock Closure: close the lock with explicit next-step criteria and no code changes unless justified.
 #### 1.5.1 — Write Surface Inventory
 
 - inventory create, update and delete-capable surfaces
@@ -674,6 +884,12 @@ Focus areas:
 - identify missing validation expectations
 - detect unsafe or ambiguous mutation behavior
 
+Internal subdivision:
+
+- 1.5.1.0 — Inventory Scope Lock: define exactly which files, endpoints, flows or contracts are included.
+- 1.5.1.1 — Real-State Extraction: extract the current repository state without assumptions.
+- 1.5.1.2 — Classification & Gap Mapping: classify findings and identify gaps, duplicates or ambiguous ownership.
+- 1.5.1.3 — Audit Closure & Handoff: document findings and hand off only validated work to the next subphase.
 #### 1.5.2 — Create Flow Consolidation
 
 - define create request expectations
@@ -681,6 +897,12 @@ Focus areas:
 - align success responses with frozen response policy
 - preserve ownership and authorization expectations
 
+Internal subdivision:
+
+- 1.5.2.0 — Implementation Scope Lock: identify the exact implementation or documentation surface to modify.
+- 1.5.2.1 — Incremental Change Application: apply the smallest coherent change that satisfies the subphase objective.
+- 1.5.2.2 — Regression & Contract Validation: validate tests, response shape, error behavior and documented expectations.
+- 1.5.2.3 — Documentation & Handoff Sync: update trunk documentation and hand off to the next ordered subphase.
 #### 1.5.3 — Update Flow Consolidation
 
 - define update semantics per resource
@@ -688,6 +910,12 @@ Focus areas:
 - validate immutable fields
 - align errors for invalid or unauthorized updates
 
+Internal subdivision:
+
+- 1.5.3.0 — Implementation Scope Lock: identify the exact implementation or documentation surface to modify.
+- 1.5.3.1 — Incremental Change Application: apply the smallest coherent change that satisfies the subphase objective.
+- 1.5.3.2 — Regression & Contract Validation: validate tests, response shape, error behavior and documented expectations.
+- 1.5.3.3 — Documentation & Handoff Sync: update trunk documentation and hand off to the next ordered subphase.
 #### 1.5.4 — Delete / Disable Flow Consolidation
 
 - define delete, disable or detach semantics per resource
@@ -695,6 +923,12 @@ Focus areas:
 - validate ownership checks
 - align not-found and conflict behavior
 
+Internal subdivision:
+
+- 1.5.4.0 — Implementation Scope Lock: identify the exact implementation or documentation surface to modify.
+- 1.5.4.1 — Incremental Change Application: apply the smallest coherent change that satisfies the subphase objective.
+- 1.5.4.2 — Regression & Contract Validation: validate tests, response shape, error behavior and documented expectations.
+- 1.5.4.3 — Documentation & Handoff Sync: update trunk documentation and hand off to the next ordered subphase.
 #### 1.5.5 — Write Model Validation Coverage
 
 - add or update tests for mutation contracts
@@ -702,12 +936,24 @@ Focus areas:
 - confirm canonical error envelope consistency
 - preserve existing public behavior unless explicitly versioned
 
+Internal subdivision:
+
+- 1.5.5.0 — Implementation Scope Lock: identify the exact implementation or documentation surface to modify.
+- 1.5.5.1 — Incremental Change Application: apply the smallest coherent change that satisfies the subphase objective.
+- 1.5.5.2 — Regression & Contract Validation: validate tests, response shape, error behavior and documented expectations.
+- 1.5.5.3 — Documentation & Handoff Sync: update trunk documentation and hand off to the next ordered subphase.
 #### 1.5.6 — Validation & Closure
 
 - run `go test ./...`
 - reconcile trunk documentation
 - close Phase 1.5 with handoff to system behavior consistency
 
+Internal subdivision:
+
+- 1.5.6.0 — Implementation Scope Lock: identify the exact implementation or documentation surface to modify.
+- 1.5.6.1 — Incremental Change Application: apply the smallest coherent change that satisfies the subphase objective.
+- 1.5.6.2 — Regression & Contract Validation: validate tests, response shape, error behavior and documented expectations.
+- 1.5.6.3 — Documentation & Handoff Sync: update trunk documentation and hand off to the next ordered subphase.
 ### Phase 1.6 — System Behavior Consistency
 
 Validate consistent behavior across product-level flows and edge cases.
@@ -727,6 +973,12 @@ Focus areas:
 - preserve Stage 0 frozen contracts
 - focus on behavior guarantees rather than new features
 
+Internal subdivision:
+
+- 1.6.0.0 — Scope Confirmation: confirm the exact subphase boundary against the roadmap and current repository state.
+- 1.6.0.1 — Trunk Documentation Review: read and validate the relevant trunk Markdown before proposing changes.
+- 1.6.0.2 — Risk & Drift Register: record scope risks, possible contract drift and deferred items before implementation.
+- 1.6.0.3 — Documentation Lock Closure: close the lock with explicit next-step criteria and no code changes unless justified.
 #### 1.6.1 — Cross-Endpoint Behavior Audit
 
 - compare behavior across related endpoints
@@ -734,6 +986,12 @@ Focus areas:
 - document expected behavior per flow
 - avoid changing business semantics without explicit rationale
 
+Internal subdivision:
+
+- 1.6.1.0 — Inventory Scope Lock: define exactly which files, endpoints, flows or contracts are included.
+- 1.6.1.1 — Real-State Extraction: extract the current repository state without assumptions.
+- 1.6.1.2 — Classification & Gap Mapping: classify findings and identify gaps, duplicates or ambiguous ownership.
+- 1.6.1.3 — Audit Closure & Handoff: document findings and hand off only validated work to the next subphase.
 #### 1.6.2 — Idempotency & Retry Semantics Review
 
 - identify operations where idempotency matters
@@ -741,6 +999,12 @@ Focus areas:
 - validate duplicate request outcomes
 - preserve compatibility for existing clients
 
+Internal subdivision:
+
+- 1.6.2.0 — Inventory Scope Lock: define exactly which files, endpoints, flows or contracts are included.
+- 1.6.2.1 — Real-State Extraction: extract the current repository state without assumptions.
+- 1.6.2.2 — Classification & Gap Mapping: classify findings and identify gaps, duplicates or ambiguous ownership.
+- 1.6.2.3 — Audit Closure & Handoff: document findings and hand off only validated work to the next subphase.
 #### 1.6.3 — Conflict & Edge Case Alignment
 
 - define conflict behavior for account, wallet, settings and data operations
@@ -748,6 +1012,12 @@ Focus areas:
 - align edge-case errors with canonical error envelope
 - document known deferred behavior
 
+Internal subdivision:
+
+- 1.6.3.0 — Implementation Scope Lock: identify the exact implementation or documentation surface to modify.
+- 1.6.3.1 — Incremental Change Application: apply the smallest coherent change that satisfies the subphase objective.
+- 1.6.3.2 — Regression & Contract Validation: validate tests, response shape, error behavior and documented expectations.
+- 1.6.3.3 — Documentation & Handoff Sync: update trunk documentation and hand off to the next ordered subphase.
 #### 1.6.4 — Failure Mode Consistency
 
 - validate defensive fallback behavior
@@ -755,6 +1025,12 @@ Focus areas:
 - align timeout and internal failure responses
 - preserve diagnostics without leaking internals
 
+Internal subdivision:
+
+- 1.6.4.0 — Scope Lock: confirm the subphase boundary and repository evidence.
+- 1.6.4.1 — Execution: perform the controlled work required by the subphase.
+- 1.6.4.2 — Validation: validate behavior, documentation and compatibility.
+- 1.6.4.3 — Closure: record the result and hand off to the next subphase.
 #### 1.6.5 — Behavior Regression Coverage
 
 - add tests for cross-endpoint behavior guarantees
@@ -762,12 +1038,24 @@ Focus areas:
 - ensure Stage 0 freeze tests remain valid
 - prevent product-level behavior drift
 
+Internal subdivision:
+
+- 1.6.5.0 — Implementation Scope Lock: identify the exact implementation or documentation surface to modify.
+- 1.6.5.1 — Incremental Change Application: apply the smallest coherent change that satisfies the subphase objective.
+- 1.6.5.2 — Regression & Contract Validation: validate tests, response shape, error behavior and documented expectations.
+- 1.6.5.3 — Documentation & Handoff Sync: update trunk documentation and hand off to the next ordered subphase.
 #### 1.6.6 — Validation & Closure
 
 - run `go test ./...`
 - reconcile trunk documentation
 - close Phase 1.6 with handoff to Stage 1 end-to-end validation
 
+Internal subdivision:
+
+- 1.6.6.0 — Implementation Scope Lock: identify the exact implementation or documentation surface to modify.
+- 1.6.6.1 — Incremental Change Application: apply the smallest coherent change that satisfies the subphase objective.
+- 1.6.6.2 — Regression & Contract Validation: validate tests, response shape, error behavior and documented expectations.
+- 1.6.6.3 — Documentation & Handoff Sync: update trunk documentation and hand off to the next ordered subphase.
 ### Phase 1.7 — End-to-End Validation & Closure
 
 Validate Stage 1 as a complete product-capability layer.
@@ -786,6 +1074,12 @@ Focus areas:
 - confirm all prior Stage 1 phases are represented coherently
 - avoid introducing new product scope during closure
 
+Internal subdivision:
+
+- 1.7.0.0 — Scope Confirmation: confirm the exact subphase boundary against the roadmap and current repository state.
+- 1.7.0.1 — Trunk Documentation Review: read and validate the relevant trunk Markdown before proposing changes.
+- 1.7.0.2 — Risk & Drift Register: record scope risks, possible contract drift and deferred items before implementation.
+- 1.7.0.3 — Documentation Lock Closure: close the lock with explicit next-step criteria and no code changes unless justified.
 #### 1.7.1 — End-to-End Flow Matrix
 
 - document complete Stage 1 flow matrix
@@ -793,6 +1087,12 @@ Focus areas:
 - define expected success and failure outcomes
 - connect each flow to test and documentation evidence
 
+Internal subdivision:
+
+- 1.7.1.0 — Inventory Scope Lock: define exactly which files, endpoints, flows or contracts are included.
+- 1.7.1.1 — Real-State Extraction: extract the current repository state without assumptions.
+- 1.7.1.2 — Classification & Gap Mapping: classify findings and identify gaps, duplicates or ambiguous ownership.
+- 1.7.1.3 — Audit Closure & Handoff: document findings and hand off only validated work to the next subphase.
 #### 1.7.2 — Functional Validation Pass
 
 - execute full backend test suite
@@ -800,6 +1100,12 @@ Focus areas:
 - confirm frozen Stage 0 contracts remain intact
 - record validation evidence in trunk documentation
 
+Internal subdivision:
+
+- 1.7.2.0 — Implementation Scope Lock: identify the exact implementation or documentation surface to modify.
+- 1.7.2.1 — Incremental Change Application: apply the smallest coherent change that satisfies the subphase objective.
+- 1.7.2.2 — Regression & Contract Validation: validate tests, response shape, error behavior and documented expectations.
+- 1.7.2.3 — Documentation & Handoff Sync: update trunk documentation and hand off to the next ordered subphase.
 #### 1.7.3 — Documentation Reconciliation
 
 - reconcile all trunk Markdown documents
@@ -807,6 +1113,12 @@ Focus areas:
 - remove stale future references
 - preserve historical narrative without rewriting prior stages
 
+Internal subdivision:
+
+- 1.7.3.0 — Closure Scope Lock: confirm what is being closed and which evidence is required.
+- 1.7.3.1 — Evidence Collection: collect test output, file counts, changed files and remaining risks.
+- 1.7.3.2 — Trunk Reconciliation: synchronize roadmap, status, handoff and phase documentation.
+- 1.7.3.3 — Final Handoff: record the accepted state and next phase without prematurely defining later work.
 #### 1.7.4 — Stage 1 Closure Assessment
 
 - verify Stage 1 objectives were met
@@ -814,6 +1126,12 @@ Focus areas:
 - confirm no unfinished Stage 1 subphase remains active
 - prepare the system for the next stage definition
 
+Internal subdivision:
+
+- 1.7.4.0 — Closure Scope Lock: confirm what is being closed and which evidence is required.
+- 1.7.4.1 — Evidence Collection: collect test output, file counts, changed files and remaining risks.
+- 1.7.4.2 — Trunk Reconciliation: synchronize roadmap, status, handoff and phase documentation.
+- 1.7.4.3 — Final Handoff: record the accepted state and next phase without prematurely defining later work.
 #### 1.7.5 — Final Validation & Handoff
 
 - run final validation commands
@@ -821,6 +1139,12 @@ Focus areas:
 - prepare handoff for the next stage without defining it prematurely
 - create a stable historical baseline after acceptance
 
+Internal subdivision:
+
+- 1.7.5.0 — Implementation Scope Lock: identify the exact implementation or documentation surface to modify.
+- 1.7.5.1 — Incremental Change Application: apply the smallest coherent change that satisfies the subphase objective.
+- 1.7.5.2 — Regression & Contract Validation: validate tests, response shape, error behavior and documented expectations.
+- 1.7.5.3 — Documentation & Handoff Sync: update trunk documentation and hand off to the next ordered subphase.
 ---
 
 ## 🔗 Stage 2 — Blockchain Integration
