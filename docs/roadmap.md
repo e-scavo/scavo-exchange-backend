@@ -533,6 +533,20 @@ Mandatory validation for each sub-subphase: `git status`, `go test ./...` and `g
 Mandatory agent output: files read, files modified, before/after line counts for modified documentation, explicit code-modified or code-not-modified confirmation, test result, diff stat and git status.
 
 Anti-drift rules: the agent must not invent phases, modify Stage 0, reorder the roadmap wholesale, summarize or degrade trunk documentation, touch code during documentary sub-subphases, mix Phase 1.1 with Phase 1.2+ responsibilities or continue past the active sub-subphase without a new prompt.
+
+##### 1.1.0.4 Validation Gate Definition Result
+
+1.1.0.4 defines the mandatory validation gates for Phase 1.1 work.
+
+Mandatory gates for every sub-subphase: `git status`, `git diff --stat` and `go test ./...`.
+
+Documentation gates apply whenever Markdown changes: list modified `.md` files, record before/after line counts, confirm `docs/roadmap.md` remains the central document, preserve trunk documentation without summary/degradation and avoid full-document rewrites unless explicitly justified by the active sub-subphase.
+
+Code gates apply only when a later sub-subphase explicitly allows implementation: list modified Go files, identify affected packages, report tests executed, confirm no out-of-scope changes and confirm no Phase 1.2+ responsibility was invaded.
+
+Anti-drift gates must confirm that Stage 0 remains frozen, Phase 1.1 does not invade later phases, no phases or subphases were invented, responsibilities were not mixed and the base architecture was not changed without explicit roadmap authorization.
+
+Minimum validation output for this chat: change summary, modified files, `git diff --stat`, `go test ./...` and `git status`.
 #### 1.1.1 — Endpoint Surface Inventory
 
 - inventory existing HTTP and WebSocket surfaces
