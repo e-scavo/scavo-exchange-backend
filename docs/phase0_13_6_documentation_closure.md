@@ -19,6 +19,19 @@ make build
 go test ./...
 ```
 
+## Narrative Restoration
+
+The closure also restores the documentation style used through Phase 0.12: each trunk document must explain the system evolution, not only mark subphase state. For Phase 0.13, that means documenting the transition from model/contract clarity to orchestration clarity.
+
+The restored narrative is:
+
+```text
+Phase 0.12 established read/write and mapper ownership.
+Phase 0.13 established provider-owned orchestration boundaries.
+```
+
+This prevents the documentation from becoming a set of repeated completion flags and keeps the architectural story usable for future phases.
+
 ## Corrections Applied
 
 0.13.6 corrects three documentation issues detected after 0.13.5:

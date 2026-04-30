@@ -42,6 +42,10 @@
 * `phase0_13_1_provider_inventory.md`
 * `phase0_13_2_provider_interface_design.md`
 * `phase0_13_3_provider_implementation.md`
+* `phase0_13_4_application_integration.md`
+* `phase0_13_5_validation_compatibility.md`
+* `phase0_13_6_documentation_closure.md`
+* `phase0_13_6_documentation_reprocess_report.md`
 
 ---
 
@@ -55,9 +59,8 @@
 
 ## 🚧 Current Phase Focus
 
-Latest completed phase: `0.12 — Read / Write Model Separation`  
-Current phase: `0.13 — Provider Layer Consolidation`  
 Latest completed phase: `0.13 — Provider Layer Consolidation`  
+Current phase: `0.14 — Contract Hardening & Freeze`  
 Next phase: `0.14 — Contract Hardening & Freeze`
 
 * `phase0_13_provider_layer_consolidation.md`

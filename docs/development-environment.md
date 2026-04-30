@@ -266,6 +266,8 @@ The introduction of `/api/v1` as canonical API requires developers to consider v
 
 Phase 0.13 does not add new local services, environment variables, migrations or infrastructure requirements. The development environment remains the same; the relevant change is how runtime HTTP wiring composes module dependencies internally.
 
+This is intentional: Provider Layer Consolidation is an internal composition change. A developer should not need a new database, queue, cache, service account or environment variable to validate it. The observable requirement is that build and tests continue to pass while constructor wiring moves toward provider-oriented composition.
+
 ### Local validation expectation
 
 After provider-boundary changes, the expected validation commands remain:

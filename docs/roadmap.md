@@ -252,6 +252,8 @@ Phase 0.12 closes with clearer internal model responsibilities, explicit mapping
 ### 0.13 — Provider Layer Consolidation ✔ Completed
 Consolidate the Provider Layer as the explicit entry point to domain services after Read / Write Model Separation.
 
+Phase 0.13 continues the Stage 0 foundation sequence by moving from model/contract clarity to orchestration clarity. The phase does not add public API behavior; it establishes a provider-owned runtime boundary so later hardening can build on a stable composition model.
+
 #### 0.13.0 — Definition & Documentation Lock ✔ Completed
 Locked the phase definition, corrected roadmap consistency and registered the subphase plan before code changes.
 
@@ -272,7 +274,7 @@ Validate public contract preservation and runtime compatibility.
 It records compatibility after provider application integration. The validation baseline confirms that the provider-oriented routing path remains build/test compatible and preserves existing public contracts.
 
 #### 0.13.6 — Documentation & Closure ✔ Completed
-Closed the phase documentation, removed generic repeated status-only updates, corrected misplaced roadmap text and recorded the final provider boundary state across trunk documentation.
+Closed the phase documentation, removed generic repeated status-only updates, corrected misplaced roadmap text and restored the Phase 0.12 → Phase 0.13 narrative across trunk documentation. The closure records not only that the phase completed, but why Provider Layer Consolidation was the next architectural step after read/write model separation.
 
 ### 0.14 — Contract Hardening & Freeze ⬜ Pending
 Stabilize and freeze API contracts before feature expansion.

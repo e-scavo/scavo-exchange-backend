@@ -415,6 +415,8 @@ The introduction of `/api/v1` as canonical API requires developers to consider v
 
 Phase 0.13 establishes the Provider Layer as the development boundary between HTTP handlers and module application/domain responsibilities.
 
+The development impact is evolutionary. Developers should continue using the Phase 0.12 mapper and read/write model rules, but new orchestration work should now start from provider contracts instead of adding dependencies to handlers or router parameter structs. This keeps the codebase from sliding back into implicit composition after the model separation work.
+
 ### Development rule
 
 New handler-facing orchestration should prefer provider contracts over direct handler access to lower-level services, stores or domain dependencies. A handler may decode requests and write responses, but it should not assemble domain orchestration that belongs behind a provider boundary.

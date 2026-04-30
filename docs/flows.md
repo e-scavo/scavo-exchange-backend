@@ -1287,6 +1287,12 @@ HTTP request
   → mapper-owned read/write model response
 ```
 
+### Flow transition from Phase 0.12
+
+Before Provider Layer Consolidation, the documented flow was already safer because Phase 0.12 made read/write model direction explicit. However, a handler could still appear to be the place where orchestration began, especially when constructor wiring exposed services, stores, challenge TTLs or public URL configuration directly.
+
+After Phase 0.13, the handler remains the HTTP edge and the provider becomes the orchestration boundary. That change is intentionally internal: the request path, route names, middleware behavior and response envelopes are preserved, while the internal composition story becomes easier to explain and test.
+
 ### Authenticated flow impact
 
 For the auth module, handler construction now receives a consolidated provider boundary. Login, bootstrap, authenticated profile/settings and wallet-related handler paths continue to expose the same public behavior, but the handler no longer represents the place where lower-level service/store dependencies are assembled.

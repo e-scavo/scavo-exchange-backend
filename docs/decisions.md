@@ -785,6 +785,12 @@ HTTP → Provider → Application → Domain → Repository
 
 The provider boundary must be module-owned, narrow and compatible with existing public contracts. It may compose application services and supporting dependencies, but it must not introduce business behavior changes, route changes, API versioning changes or mapper ownership drift.
 
+### Rationale
+
+The decision follows directly from the Phase 0.12 outcome. Once read models, write models and mapper ownership were clarified, the next risk was no longer payload shape; it was the place where runtime orchestration was assembled. Leaving that orchestration implicit would allow handlers and router construction to grow new dependencies every time a feature crossed module boundaries.
+
+The Provider Layer is accepted because it gives that orchestration an explicit name and owner. It also gives future phases a stable place to harden contracts without reopening transport handlers or duplicating mapper behavior.
+
 ### Consequences
 
 - Router construction can pass provider boundaries instead of scattered service/store dependencies.

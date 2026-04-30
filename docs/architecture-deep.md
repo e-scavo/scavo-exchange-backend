@@ -1143,6 +1143,8 @@ The contract alignment sequence confirms that handler-facing request contracts a
 
 Phase 0.13 formalizes provider boundaries after the model separation and contract alignment work completed in Phase 0.12. Its deep architectural purpose is to make provider responsibility explicit without turning the Provider Layer into a second domain layer.
 
+The missing piece after Phase 0.12 was not a model contract. The read/write split, mapper ownership and contract alignment work had already made data direction visible. The remaining ambiguity lived in composition: handlers and router wiring could still assemble or receive enough concrete dependencies to become accidental orchestration points. Phase 0.13 removes that ambiguity by making provider responsibility explicit and module-owned.
+
 The consolidated direction is:
 
 ```text
@@ -1150,6 +1152,16 @@ HTTP → Provider → Application → Domain → Repository
 ```
 
 This matters because the previous state still allowed runtime wiring and handlers to know too much about lower-level dependencies. Even when behavior was correct, dependency ownership was not explicit enough: handlers could accumulate orchestration logic, router construction could pass implementation details directly into handlers, and application services could be treated as implicit providers without a documented boundary.
+
+### Narrative boundary progression
+
+The Stage 0 progression is intentionally incremental:
+
+- Phase 0.11 moved the backend toward clearer domain modules.
+- Phase 0.12 separated model intent and centralized mapping responsibility.
+- Phase 0.13 consolidates orchestration ownership at the provider boundary.
+
+This sequence matters because Provider Layer Consolidation depends on the previous phases. A provider boundary is only useful if it does not hide unclear models, duplicate mapper behavior or blur domain contracts. For that reason, Phase 0.13 is a continuation of the 0.12 contract story, not a separate redesign.
 
 ### Deep boundary rules
 
@@ -1163,6 +1175,8 @@ This matters because the previous state still allowed runtime wiring and handler
 ### Runtime implication
 
 The auth module now has an explicit provider boundary that can be passed into runtime HTTP construction. That provider boundary composes the existing application and supporting dependencies while preserving the external HTTP contract. This reduces implicit coupling without changing the public API surface.
+
+The practical result is that future work can reason about module orchestration from a named provider contract instead of reverse-engineering it from handler constructors, router parameters and scattered stores. That is the architectural value of the phase.
 
 ### Non-goals preserved
 

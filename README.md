@@ -2888,6 +2888,15 @@ Phase 0.13 starts after the completed Read / Write Model Separation phase.
 
 The phase consolidates the Provider Layer as the explicit entry point to domain services, using the model separation, mapper ownership and contract alignment completed in Phase 0.12 as its baseline.
 
+Phase 0.12 left the system with clearer read/write model ownership, centralized mapper responsibilities and safer internal contracts. Phase 0.13 continues that story by addressing the remaining runtime composition problem: handlers and router construction could still see too many lower-level services and stores even though the public behavior was already stable. The provider layer is therefore introduced as a structural consolidation step, not as a new feature surface.
+
+The narrative transition is:
+
+```text
+Phase 0.12: clarify model direction and mapping ownership
+Phase 0.13: clarify orchestration ownership and runtime composition
+```
+
 ### Objective
 
 Establish a consistent provider boundary so handlers and application flows do not rely on scattered direct access to domain or repository responsibilities.
@@ -2923,6 +2932,7 @@ Establish a consistent provider boundary so handlers and application flows do no
 
 Phase 0.13 is completed. Provider Layer Consolidation is now the documented runtime boundary between HTTP handlers and module application/domain responsibilities.
 
+The concrete outcome is that the backend can now explain how a request crosses the authenticated surface without treating handlers, application services and stores as one mixed composition area. The public API remains unchanged, but the internal ownership story is stronger: transport stays at the edge, orchestration moves behind provider contracts, use cases remain in application services and domain/repository responsibilities stay below that boundary.
 
 ### Phase 0.13.3 result
 

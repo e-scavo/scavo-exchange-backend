@@ -30,6 +30,8 @@ The remaining structural risk is that provider usage and provider responsibiliti
 
 Provider Layer Consolidation exists to make the boundary explicit before later Stage 0 hardening and feature expansion.
 
+The phase is intentionally positioned after Read / Write Model Separation. Without the Phase 0.12 baseline, providers could have become another place where unclear model transformations or implicit contracts were hidden. With that baseline in place, Phase 0.13 can focus on orchestration ownership: who receives HTTP-facing intent, who composes application services and where module-level interaction should be inspected.
+
 ---
 
 ## Included Scope

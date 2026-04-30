@@ -6,17 +6,17 @@ Completed.
 
 ## Source
 
-Reprocessed from the real `scavo-exchange-backend-0.13.5.zip` repository state.
+Reprocessed from the real `scavo-exchange-backend-0.13.6.zip` repository state supplied after the initial 0.13.6 closure.
 
 ## Markdown Reviewed
 
-Source Markdown files reviewed: 70.
+Source Markdown files reviewed: 72.
 
-Final Markdown files after closure: 72.
+Final Markdown files after narrative reinforcement: 72.
 
 ## Files Intervened
 
-Total files intervened or created: 16.
+Total files intervened or updated: 16.
 
 1. `README.md`
 2. `docs/architecture-deep.md`
@@ -41,12 +41,13 @@ Go code modified: no.
 
 ## Contract Corrections
 
-- Removed generic repeated Phase 0.13 status-only blocks from impacted trunk documentation.
-- Corrected roadmap content that had been appended outside the roadmap structure.
-- Updated final Phase 0.13 state to completed across trunk documentation.
-- Added contextual Provider Layer documentation to architecture, deep architecture, flows, decisions, testing, development, development-environment and observability documents.
-- Preserved the rule that all `.md` files are reviewed as trunk documentation; phase-specific documents are intervened only when directly related or inconsistent.
+- Reinforced the rule that all general `.md` files are trunk documentation and must evolve when the phase affects their subject matter.
+- Preserved the rule that phase-specific documents are reviewed but only intervened when directly related or inconsistent.
+- Restored the Phase 0.12 → Phase 0.13 narrative continuity across architecture, deep architecture, flows, testing, decisions, development, environment, observability, status, roadmap and handoff documentation.
+- Corrected the `docs/index.md` current-phase focus after Phase 0.13 completion.
+- Preserved subphase expansion for Phase 0.13 while adding meaningful context so trunk documents do not become status-only mirrors.
+- Confirmed that this reinforcement does not modify Go code, public HTTP/API behavior, route naming, payload contracts or standardized error envelopes.
 
 ## Final Phase State
 
-Phase 0.13 — Provider Layer Consolidation is completed.
+Phase 0.13 — Provider Layer Consolidation is completed with structural consistency and restored narrative continuity.

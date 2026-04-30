@@ -1681,6 +1681,8 @@ Phase 0.12 is complete. Continue with the next roadmap-defined phase.
 
 Consolidate the Provider Layer as the explicit, consistent and reusable entry point to domain services.
 
+Phase 0.13 is the continuation of the Phase 0.12 stabilization line. Phase 0.12 clarified model direction and mapper ownership; Phase 0.13 clarifies orchestration ownership. The completion state therefore means more than a status transition: the backend now has a documented provider-first runtime boundary for authenticated module composition while preserving public contracts.
+
 ### Scope
 
 Included:

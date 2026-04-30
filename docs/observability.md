@@ -253,6 +253,8 @@ The introduction of `/api/v1` as canonical API requires developers to consider v
 
 Phase 0.13 is Provider Layer Consolidation, not an observability implementation phase. The earlier observability direction remains valid as a future infrastructure concern, but this phase intentionally avoids adding logging, tracing, metrics or diagnostics behavior.
 
+This distinction matters because the roadmap previously contained an observability-oriented 0.13 direction before the phase was corrected to Provider Layer Consolidation. The correction does not discard observability as a future concern; it changes the order of work. Provider boundaries first make later instrumentation safer because they identify stable orchestration entry points.
+
 ### Observability implication
 
 Provider consolidation improves future observability readiness because orchestration now has a clearer boundary. Later diagnostics work can attach observations around provider entry points without requiring handlers to expose lower-level service/store dependency details.

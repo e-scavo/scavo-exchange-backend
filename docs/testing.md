@@ -1786,6 +1786,8 @@ The final 0.11.5 state was validated with a full passing repository test run aft
 
 Phase 0.13 changes the internal boundary that tests must protect. The public API contract remains unchanged, but runtime construction now depends on provider-oriented wiring instead of scattered handler dependency assembly.
 
+The testing narrative follows the architecture narrative. Phase 0.12 tests protected model direction and contract alignment. Phase 0.13 tests must protect orchestration ownership: handlers should be thin, providers should be explicit and compatibility tests should construct router parameters through the current provider boundary rather than old lower-level fields.
+
 ### Required validation baseline
 
 The primary validation command remains:

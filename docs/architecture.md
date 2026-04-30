@@ -755,6 +755,8 @@ Phase 0.12.5 completed the alignment between HTTP handler contracts, internal wr
 
 Phase 0.13 closes the boundary work that started after Read / Write Model Separation and contract alignment. The architectural result is not a new business capability; it is a clearer runtime ownership model for authenticated module orchestration.
 
+The important narrative is that Phase 0.12 made model direction explicit, while Phase 0.13 makes orchestration direction explicit. Before this phase, the backend could already preserve public contracts, but runtime wiring still exposed too many lower-level implementation details to router and handler construction. That was not a functional defect; it was an architectural drift risk.
+
 The intended direction is now explicit:
 
 ```text
@@ -762,6 +764,20 @@ HTTP → Provider → Application → Domain → Repository
 ```
 
 In the current backend, the Provider Layer is represented by module-owned provider contracts and concrete provider construction. The auth surface is the first concrete consolidation point because it coordinates session bootstrap, login, authenticated account context, user settings and wallet-related flows. Router-level production wiring now depends on the provider boundary instead of assembling handler dependencies from lower-level services and stores.
+
+### Architectural transition from 0.12 to 0.13
+
+Phase 0.12 answered the question of which model shape belongs at each boundary. Phase 0.13 answers the next question: which layer owns orchestration once those model boundaries are stable.
+
+The transition is deliberate:
+
+- handlers remain close to HTTP and standardized response/error emission
+- providers become the explicit orchestration entry point for module-facing operations
+- application services keep use-case execution responsibilities
+- domain contracts remain independent of transport concerns
+- repositories and stores remain below the domain/application boundary
+
+This preserves the value of Phase 0.12 instead of bypassing it. Provider methods must continue to use the mapper and read/write model boundaries established earlier rather than reintroducing ad-hoc transformations at the handler edge.
 
 ### Architectural ownership after 0.13
 
@@ -786,4 +802,4 @@ The Provider Layer does not replace the Domain or Repository layers. It prevents
 - 0.13.5 ✔ Validation & Compatibility
 - 0.13.6 ✔ Documentation & Closure
 
-Phase 0.13 is complete. The architecture baseline for later Stage 0 work is now a provider-oriented runtime path with unchanged public contracts.
+Phase 0.13 is complete. The architecture baseline for later Stage 0 work is now a provider-oriented runtime path with unchanged public contracts and a clear continuation from the 0.12 model-separation baseline.
