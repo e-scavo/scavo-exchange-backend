@@ -1906,7 +1906,7 @@ Observable impact at the time of 0.14.6.fix1: Stage 0 documentation had a cohere
 ## Phase 0.15 — Contract Hardening & Freeze
 
 Status: **In Progress**  
-Current subphase: **0.15.5 — Contract Freeze Enforcement**
+Current subphase: **0.15.6 — Validation & Documentation**
 
 Phase 0.15 starts from the completed Phase 0.14.6.fix3 baseline.
 
@@ -1927,7 +1927,7 @@ Observable impact: Phase 0.15 is no longer pending definition. The current activ
 - 0.15.2 — Error Contract Alignment: **Completed**
 - 0.15.3 — Provider Contract Validation: **Completed**
 - 0.15.4 — Response Schema Normalization: **Completed**
-- 0.15.5 — Contract Freeze Enforcement: **Pending**
+- 0.15.5 — Contract Freeze Enforcement: **Completed**
 - 0.15.6 — Validation & Documentation: **Pending**
 
 ### 0.15.0 Result
@@ -1999,3 +1999,17 @@ Decision taken: normalize response serialization details only. Do not wrap succe
 Concrete change: auth error responses now use `application/json; charset=utf-8`, the defensive timeout fallback includes `details:{}`, and a regression test confirms the auth error JSON content type.
 
 Observable impact: response serialization is aligned across core and auth handlers, and defensive fallback output remains compatible with the canonical error envelope. The next correct step is 0.15.5 — Contract Freeze Enforcement.
+
+### 0.15.5 Result
+
+0.15.5 completed Contract Freeze Enforcement.
+
+Context inherited: 0.15.1 produced the HTTP route audit, 0.15.2 stabilized the error envelope, 0.15.3 validated provider contracts through compile-time assertions and 0.15.4 normalized JSON response serialization metadata.
+
+Problem addressed: after the audit and normalization passes, the repository still needed an explicit freeze policy and executable guardrails to prevent silent drift in public and internal contracts.
+
+Decision taken: freeze the current Stage 0 contract surface without introducing new behavior. Public routes, response shapes, canonical error envelopes, JSON content type policy, provider boundary assertions and documentation synchronization are now treated as controlled contracts.
+
+Concrete change: `docs/phase0_15_5_contract_freeze_enforcement.md` records freeze rules and evolution policy, while `internal/core/httpx/contract_freeze_test.go` adds regression coverage for frozen core JSON responses and protected auth error envelopes.
+
+Observable impact: future contract changes must be deliberate, versioned where required and reflected in tests plus documentation. The next correct step is 0.15.6 — Validation & Documentation.

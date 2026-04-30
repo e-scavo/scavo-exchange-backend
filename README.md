@@ -23,10 +23,10 @@ The backend follows a **wallet-first identity model** that progressively evolves
 
 **Stage:** 0 — Foundation  
 **Latest Completed Phase:** **0.14 — Observability & Diagnostics Foundation**  
-**Latest Completed Subphase:** **0.15.4 — Response Schema Normalization**  
-**Phase Status:** **0.15.4 Completed / 0.15.5 Pending**  
+**Latest Completed Subphase:** **0.15.5 — Contract Freeze Enforcement**  
+**Phase Status:** **0.15.5 Completed / 0.15.6 Pending**  
 **Current Phase:** **0.15 — Contract Hardening & Freeze**  
-**Current Subphase:** **0.15.5 — Contract Freeze Enforcement**
+**Current Subphase:** **0.15.6 — Validation & Documentation**
 
 ---
 
@@ -3098,7 +3098,7 @@ Excluded:
 - **0.15.2 — Error Contract Alignment** ✅ Completed
 - **0.15.3 — Provider Contract Validation** ✅ Completed
 - **0.15.4 — Response Schema Normalization** ✅ Completed
-- **0.15.5 — Contract Freeze Enforcement** ⏳ Pending
+- **0.15.5 — Contract Freeze Enforcement** ✅ Completed
 - **0.15.6 — Validation & Documentation** ⏳ Pending
 
 ### 0.15.0 Result
@@ -3173,3 +3173,17 @@ Decision taken: normalize serialization details only. Do not introduce a success
 Concrete change: auth error responses now use `application/json; charset=utf-8`, and the defensive timeout fallback keeps `{error:{code,message,details}}` aligned with the 0.15.2 contract.
 
 Observable impact: JSON response metadata is aligned and defensive fallback shape is compatible with the frozen error envelope. The next correct step is 0.15.5 — Contract Freeze Enforcement.
+
+### Phase 0.15.5 Result — Contract Freeze Enforcement
+
+0.15.5 completed Contract Freeze Enforcement with explicit freeze rules and regression coverage for the currently audited Stage 0 contracts.
+
+Context inherited: 0.15.1 documented the real HTTP route surface, 0.15.2 made the public error envelope stable, 0.15.3 added compile-time provider assertions and 0.15.4 normalized response serialization metadata.
+
+Real problem: the contracts were audited and normalized, but future work still needed a concrete enforcement baseline. Without freeze rules and tests, route response shape, error envelope fields, content type policy or provider assumptions could drift silently.
+
+Decision taken: freeze the current public and internal contract surface without adding behavior. Freeze enforcement is represented by documentation policy and regression tests that fail if core JSON endpoints or canonical auth error envelopes lose required fields or metadata.
+
+Concrete change: `docs/phase0_15_5_contract_freeze_enforcement.md` defines the freeze policy, and `internal/core/httpx/contract_freeze_test.go` guards core status JSON responses plus protected auth canonical error envelopes.
+
+Observable impact: future changes to frozen contract shape must be explicit, versioned or intentionally updated in tests and documentation. The next correct step is 0.15.6 — Validation & Documentation.

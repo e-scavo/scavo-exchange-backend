@@ -337,8 +337,10 @@ Validate internal HTTP → Provider → Application contracts and confirm that P
 #### 0.15.4 — Response Schema Normalization ✅ Completed
 Normalize response schemas where actual repository evidence shows uncontrolled drift or ambiguous historical variation.
 
-#### 0.15.5 — Contract Freeze Enforcement ⏳ Pending
+#### 0.15.5 — Contract Freeze Enforcement ✅ Completed
 Define the freeze policy that controls what can change, what must be versioned and how future contract drift is detected.
+
+0.15.5 freezes the audited Stage 0 public HTTP surface, canonical error envelope, provider boundary assertions and response serialization policy. Contract drift is now guarded by dedicated regression tests and by explicit documentation rules for future changes.
 
 #### 0.15.6 — Validation & Documentation ⏳ Pending
 Validate the full system with `go test ./...`, reconcile trunk documentation and close the phase narratively.
@@ -420,4 +422,4 @@ Phase 0.15 expected outcome: explicit, audited and frozen contracts for the curr
 
 The normalized baseline now records that successful response payloads remain intentionally unwrapped and compatible, while JSON response metadata and defensive error fallback shape are aligned with the canonical contract introduced in 0.15.2.
 
-The next roadmap step is **0.15.5 — Contract Freeze Enforcement**.
+The next roadmap step is **0.15.6 — Validation & Documentation**.

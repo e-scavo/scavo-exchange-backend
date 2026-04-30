@@ -5,8 +5,8 @@
 ## Status
 
 **Phase:** 0.15 — Contract Hardening & Freeze  
-**Current Subphase:** 0.15.5 — Contract Freeze Enforcement  
-**Status:** 0.15.4 Completed / 0.15.5 Pending  
+**Current Subphase:** 0.15.6 — Validation & Documentation  
+**Status:** 0.15.5 Completed / 0.15.6 Pending  
 **Type:** Contract hardening and freeze documentation  
 **Code changes in 0.15.1:** No
 
@@ -238,7 +238,7 @@ Silent drift is not allowed.
 - 0.15.2 — Error Contract Alignment: **Completed**
 - 0.15.3 — Provider Contract Validation: **Completed**
 - 0.15.4 — Response Schema Normalization: **Completed**
-- 0.15.5 — Contract Freeze Enforcement: **Pending**
+- 0.15.5 — Contract Freeze Enforcement: **Completed**
 - 0.15.6 — Validation & Documentation: **Pending**
 
 ---
@@ -366,3 +366,23 @@ Impact observable: existing clients keep the same payload shapes, status codes a
 0.15.5 must define Contract Freeze Enforcement.
 
 It must use the validated baselines from 0.15.1, 0.15.2, 0.15.3 and 0.15.4. It must document and enforce how contracts can evolve without allowing silent drift.
+
+## 0.15.5 Concrete Change
+
+0.15.5 defines and enforces the Stage 0 contract freeze.
+
+Context inherited: 0.15.1 audited the HTTP route surface, 0.15.2 aligned the canonical error envelope, 0.15.3 validated provider contracts and 0.15.4 normalized response serialization.
+
+Real problem: the backend had explicit contract baselines but no final policy that explained what is frozen, what may evolve only through versioning and what must fail fast during future drift.
+
+Decision taken: freeze the current contract surface without changing runtime behavior.
+
+Concrete change: the freeze policy is documented in `docs/phase0_15_5_contract_freeze_enforcement.md`, and representative frozen contracts are guarded by `internal/core/httpx/contract_freeze_test.go`.
+
+Impact observable: public JSON endpoints, protected auth error envelopes, JSON metadata and provider assertions now have a clear freeze baseline. Future contract evolution must be deliberate and documented.
+
+## Handoff to 0.15.6
+
+0.15.6 must validate the full system and reconcile all trunk documentation for Phase 0.15 closure.
+
+It must include the local `go test ./...` evidence supplied after applying 0.15.5 and close Phase 0.15 without introducing new behavior.

@@ -16,11 +16,11 @@ It is intended to:
 
 **Stage:** 0 — Foundation
 **Latest Completed Phase:** 0.14 — Observability & Diagnostics Foundation
-**Latest Completed Subphase:** 0.15.4 — Response Schema Normalization
-**Phase Status:** 0.15.4 Completed / 0.15.5 Pending
+**Latest Completed Subphase:** 0.15.5 — Contract Freeze Enforcement
+**Phase Status:** 0.15.5 Completed / 0.15.6 Pending
 **Current Phase:** 0.15 — Contract Hardening & Freeze
-**Current Subphase:** 0.15.5 — Contract Freeze Enforcement
-**Next Planned Subphase:** 0.15.5 — Contract Freeze Enforcement
+**Current Subphase:** 0.15.6 — Validation & Documentation
+**Next Planned Subphase:** 0.15.6 — Validation & Documentation
 
 ---
 
@@ -1403,7 +1403,7 @@ Concrete change: `internal/modules/auth/application.go` now asserts:
 
 Observable impact: future provider drift fails compilation. No HTTP route, response payload, error envelope, status code, domain behavior or repository behavior changed.
 
-0.15.4 has completed Response Schema Normalization. Next step after 0.15.4 is **0.15.5 — Contract Freeze Enforcement**.
+0.15.4 has completed Response Schema Normalization. Next step after 0.15.4 was **0.15.5 — Contract Freeze Enforcement**.
 
 ### Phase 0.15.4 Handoff — Response Schema Normalization
 
@@ -1419,4 +1419,20 @@ Concrete change: auth error responses now use `application/json; charset=utf-8`;
 
 Observable impact: route behavior, status codes, success payloads, error codes, provider contracts and domain behavior remain unchanged, while JSON response serialization is now aligned for freeze enforcement.
 
-Next step after 0.15.4 is **0.15.5 — Contract Freeze Enforcement**.
+Next step after 0.15.4 was **0.15.5 — Contract Freeze Enforcement**.
+
+### Phase 0.15.5 Handoff — Contract Freeze Enforcement
+
+0.15.5 completed Contract Freeze Enforcement.
+
+Inherited context: 0.15.1 established the HTTP contract baseline, 0.15.2 aligned canonical errors, 0.15.3 validated provider boundaries and 0.15.4 normalized response serialization policy.
+
+Real problem: the backend had audited and normalized contracts, but there was not yet an explicit rule set explaining what is frozen, what requires versioning and how future drift is detected.
+
+Decision taken: freeze the current Stage 0 contract surface without changing behavior. The freeze covers public HTTP route shape, canonical error envelopes, JSON content type policy, provider boundary assertions and documentation synchronization.
+
+Concrete change: a dedicated freeze document now records allowed and forbidden evolution paths, and regression tests guard representative frozen JSON and auth error contracts.
+
+Observable impact: future contract changes must be intentional and visible. Silent drift should fail tests or documentation review before reaching frontend consumers.
+
+Next step after 0.15.5 is **0.15.6 — Validation & Documentation**.
