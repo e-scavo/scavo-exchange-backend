@@ -14,6 +14,27 @@ type envelope struct {
 	Error coreerrs.ResponseError `json:"error"`
 }
 
+func TestWriteAppError_IncludesEmptyDetailsObject(t *testing.T) {
+	rec := httptest.NewRecorder()
+	WriteAppError(rec, coreerrs.AuthUnauthorized())
+
+	var raw map[string]map[string]any
+	if err := json.NewDecoder(rec.Body).Decode(&raw); err != nil {
+		t.Fatalf("decode error: %v", err)
+	}
+	errorPayload, ok := raw["error"]
+	if !ok {
+		t.Fatalf("missing error payload: %#v", raw)
+	}
+	details, ok := errorPayload["details"].(map[string]any)
+	if !ok {
+		t.Fatalf("details must be present as an object: %#v", errorPayload)
+	}
+	if len(details) != 0 {
+		t.Fatalf("unexpected details: %#v", details)
+	}
+}
+
 func TestWriteAppError_UsesCanonicalEnvelope(t *testing.T) {
 	rec := httptest.NewRecorder()
 	WriteAppError(rec, coreerrs.AuthUnauthorized())

@@ -5,6 +5,26 @@ import (
 	"testing"
 )
 
+func TestNewResponseError_AlwaysIncludesDetailsObject(t *testing.T) {
+	resp := NewResponseError("BAD_REQUEST", "invalid request payload", nil)
+	if resp.Details == nil {
+		t.Fatalf("details must be an initialized empty object")
+	}
+	if len(resp.Details) != 0 {
+		t.Fatalf("unexpected details: %#v", resp.Details)
+	}
+}
+
+func TestNewResponseError_CopiesDetailsWithoutMutation(t *testing.T) {
+	details := map[string]any{"request_id": "req-123"}
+	resp := NewResponseError("AUTH_UNAUTHORIZED", "authentication required", details)
+	details["request_id"] = "mutated"
+
+	if resp.Details["request_id"] != "req-123" {
+		t.Fatalf("response details mutation leaked from input map: %#v", resp.Details)
+	}
+}
+
 func TestNormalizeLegacyAuthError_KnownMappings(t *testing.T) {
 	tests := []struct {
 		name       string

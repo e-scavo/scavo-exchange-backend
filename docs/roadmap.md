@@ -323,8 +323,10 @@ Audit the existing HTTP route surface and validate method, path, status and payl
 
 0.15.1 records 39 registered HTTP route entries and 22 unique behavior contracts across foundation, diagnostics, WebSocket upgrade and auth/account/wallet surfaces. It confirms that legacy auth routes and `/api/v1` auth routes are active paired contracts backed by the same handler set.
 
-#### 0.15.2 — Error Contract Alignment ⏳ Pending
+#### 0.15.2 — Error Contract Alignment ✅ Completed
 Validate and align public error envelopes around the existing standardized error model: `code`, `message` and `details`.
+
+0.15.2 hardens the canonical error envelope by making `error.details` a required JSON object. Detail-free errors now serialize `details: {}` instead of omitting the field, while existing codes, messages, statuses and handler decisions remain unchanged.
 
 #### 0.15.3 — Provider Contract Validation ⏳ Pending
 Validate internal HTTP → Provider → Application contracts and confirm that Phase 0.13 provider boundaries remain explicit and stable.

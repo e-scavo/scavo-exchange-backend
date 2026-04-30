@@ -16,11 +16,11 @@ It is intended to:
 
 **Stage:** 0 — Foundation
 **Latest Completed Phase:** 0.14 — Observability & Diagnostics Foundation
-**Latest Completed Subphase:** 0.15.1 — HTTP Contract Audit
-**Phase Status:** 0.15.1 Completed / 0.15.2 Pending
+**Latest Completed Subphase:** 0.15.2 — Error Contract Alignment
+**Phase Status:** 0.15.2 Completed / 0.15.3 Pending
 **Current Phase:** 0.15 — Contract Hardening & Freeze
-**Current Subphase:** 0.15.2 — Error Contract Alignment
-**Next Planned Subphase:** 0.15.2 — Error Contract Alignment
+**Current Subphase:** 0.15.3 — Provider Contract Validation
+**Next Planned Subphase:** 0.15.3 — Provider Contract Validation
 
 ---
 
@@ -1319,7 +1319,7 @@ Corrected areas:
 
 No Go code changed in this fix.
 
-The next chat or phase must start from: Phase 0.15 active with 0.15.0 completed and 0.15.1 HTTP Contract Audit completed.
+The next chat or phase must start from: Phase 0.15 active with 0.15.0, 0.15.1 and 0.15.2 completed.
 
 ---
 
@@ -1368,4 +1368,19 @@ Observable impact:
 
 Validation note: `go test ./...` passed in the developer environment after the 0.15.1 documentation package was applied. No Go source code was changed by 0.15.1.
 
-Next step: **0.15.2 — Error Contract Alignment**.
+Next step after 0.15.1 was **0.15.2 — Error Contract Alignment**. This has now been completed; the next step is **0.15.3 — Provider Contract Validation**.
+
+### Phase 0.15.2 Handoff — Error Contract Alignment
+
+0.15.2 completes the Error Contract Alignment step with a narrow public-envelope hardening change.
+
+Context inherited: 0.15.1 documented the real HTTP route surface and confirmed the standardized error-envelope baseline. Phase 0.8 had already introduced the canonical error model, and Phase 0.14.3 had already made error details safe for diagnostic context.
+
+Problem addressed: detail-free errors could still serialize without `error.details`, even though the documented public contract describes `{error:{code,message,details}}`.
+
+Decision taken: require `error.details` to always be present as a JSON object. When no public details exist, the value is `{}`. Existing error codes, messages, statuses and handler decisions remain unchanged.
+
+Concrete change: `ResponseError.Details` no longer uses `omitempty`; `NewResponseError()` initializes and copies details; contract tests cover empty details and details-map copy behavior.
+
+Observable impact: frontend consumers and future contract-freeze work can rely on a stable error-envelope shape. The next subphase is **0.15.3 — Provider Contract Validation**.
+

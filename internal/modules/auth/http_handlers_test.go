@@ -24,7 +24,7 @@ type errorPayload struct {
 type errorBody struct {
 	Code    string         `json:"code"`
 	Message string         `json:"message"`
-	Details map[string]any `json:"details,omitempty"`
+	Details map[string]any `json:"details"`
 }
 
 type stubUserSettingsRepo struct {
@@ -2124,7 +2124,7 @@ type walletDetachConflictPayload struct {
 		Message string `json:"message"`
 		Details struct {
 			Check *WalletDetachCheckResponse `json:"check,omitempty"`
-		} `json:"details,omitempty"`
+		} `json:"details"`
 	} `json:"error"`
 }
 

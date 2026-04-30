@@ -5,8 +5,8 @@
 ## Status
 
 **Phase:** 0.15 — Contract Hardening & Freeze  
-**Current Subphase:** 0.15.2 — Error Contract Alignment  
-**Status:** 0.15.1 Completed / 0.15.2 Pending  
+**Current Subphase:** 0.15.3 — Provider Contract Validation  
+**Status:** 0.15.2 Completed / 0.15.3 Pending  
 **Type:** Contract hardening and freeze documentation  
 **Code changes in 0.15.1:** No
 
@@ -235,7 +235,7 @@ Silent drift is not allowed.
 
 - 0.15.0 — Phase Definition & Documentation Lock: **Completed**
 - 0.15.1 — HTTP Contract Audit: **Completed**
-- 0.15.2 — Error Contract Alignment: **Pending**
+- 0.15.2 — Error Contract Alignment: **Completed**
 - 0.15.3 — Provider Contract Validation: **Pending**
 - 0.15.4 — Response Schema Normalization: **Pending**
 - 0.15.5 — Contract Freeze Enforcement: **Pending**
@@ -275,10 +275,48 @@ After 0.15.1:
 
 ## Handoff to 0.15.2
 
-The next subphase must validate the public error envelope across the audited route surface.
+The public error envelope has now been validated and aligned in 0.15.2. The next subphase must validate provider contracts against the current route and error-contract baselines.
 
-It must use `docs/phase0_15_1_http_contract_audit.md` as the HTTP inventory baseline and must not invent endpoints, error codes or response shapes.
+It must use `docs/phase0_15_1_http_contract_audit.md` and `docs/phase0_15_2_error_contract_alignment.md` as baselines and must not invent provider responsibilities or response shapes.
 
 ---
+
+
+## 0.15.2 Concrete Change
+
+0.15.2 aligns the public error envelope with the documented `{error:{code,message,details}}` contract.
+
+The subphase confirms that the remaining divergence was not an error-code or handler-decision issue. The divergence was structural: `details` could be omitted for detail-free errors.
+
+The implementation now requires `error.details` to serialize as a JSON object. Empty public details serialize as `{}`.
+
+Changed code:
+
+- `internal/core/errs/response_error.go`
+- `internal/core/errs/app_error_test.go`
+- `internal/core/httpx/error_test.go`
+- `internal/core/httpx/router_versioning_test.go`
+- `internal/modules/auth/http_handlers_test.go`
+
+No route, status code, error code, message, provider contract, domain behavior or success payload changed.
+
+---
+
+## 0.15.2 Observable Impact
+
+After 0.15.2:
+
+- canonical HTTP error responses always expose `error.details`
+- clients can treat `details` as a stable object
+- diagnostic details remain safe and copied
+- the error envelope is ready for provider validation, response normalization and freeze enforcement
+
+---
+
+## Handoff to 0.15.3
+
+The next subphase is Provider Contract Validation.
+
+It must verify provider inputs, outputs and error propagation responsibilities without changing the public error envelope aligned in 0.15.2.
 
 ## End of Document

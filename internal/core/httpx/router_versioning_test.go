@@ -20,7 +20,7 @@ type versionedErrorEnvelope struct {
 	Error struct {
 		Code    string         `json:"code"`
 		Message string         `json:"message"`
-		Details map[string]any `json:"details,omitempty"`
+		Details map[string]any `json:"details"`
 	} `json:"error"`
 }
 

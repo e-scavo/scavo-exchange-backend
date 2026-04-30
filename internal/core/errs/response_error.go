@@ -3,7 +3,7 @@ package errs
 type ResponseError struct {
 	Code    string         `json:"code"`
 	Message string         `json:"message"`
-	Details map[string]any `json:"details,omitempty"`
+	Details map[string]any `json:"details"`
 }
 
 type ErrorEnvelope struct {
@@ -11,14 +11,16 @@ type ErrorEnvelope struct {
 }
 
 func NewResponseError(code, message string, details map[string]any) ResponseError {
-	err := ResponseError{
+	publicDetails := make(map[string]any, len(details))
+	for key, value := range details {
+		publicDetails[key] = value
+	}
+
+	return ResponseError{
 		Code:    code,
 		Message: message,
+		Details: publicDetails,
 	}
-	if len(details) > 0 {
-		err.Details = details
-	}
-	return err
 }
 
 func NewErrorEnvelope(err ResponseError) ErrorEnvelope {

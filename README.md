@@ -23,10 +23,10 @@ The backend follows a **wallet-first identity model** that progressively evolves
 
 **Stage:** 0 — Foundation  
 **Latest Completed Phase:** **0.14 — Observability & Diagnostics Foundation**  
-**Latest Completed Subphase:** **0.15.1 — HTTP Contract Audit**  
-**Phase Status:** **0.15.1 Completed / 0.15.2 Pending**  
+**Latest Completed Subphase:** **0.15.2 — Error Contract Alignment**  
+**Phase Status:** **0.15.2 Completed / 0.15.3 Pending**  
 **Current Phase:** **0.15 — Contract Hardening & Freeze**  
-**Current Subphase:** **0.15.2 — Error Contract Alignment**
+**Current Subphase:** **0.15.3 — Provider Contract Validation**
 
 ---
 
@@ -3095,7 +3095,7 @@ Excluded:
 
 - **0.15.0 — Phase Definition & Documentation Lock** ✅ Completed
 - **0.15.1 — HTTP Contract Audit** ✅ Completed
-- **0.15.2 — Error Contract Alignment** ⏳ Pending
+- **0.15.2 — Error Contract Alignment** ✅ Completed
 - **0.15.3 — Provider Contract Validation** ⏳ Pending
 - **0.15.4 — Response Schema Normalization** ⏳ Pending
 - **0.15.5 — Contract Freeze Enforcement** ⏳ Pending
@@ -3130,3 +3130,18 @@ Decision taken: document the current HTTP surface first. The audit records found
 Concrete change: `docs/phase0_15_1_http_contract_audit.md` now records the HTTP inventory, status behavior, response families, error-envelope observations and non-blocking contract risks. Trunk documentation marks 0.15.0 and 0.15.1 as completed.
 
 Observable impact: 39 registered HTTP route entries and 22 unique behavior contracts are now explicitly documented. The next correct step is 0.15.2 — Error Contract Alignment, using this audit as the public HTTP baseline.
+
+### 0.15.2 Result
+
+0.15.2 completes Error Contract Alignment with a narrow contract-hardening change.
+
+Context inherited from 0.15.1: the HTTP route surface was explicitly audited and the public error-envelope baseline was documented before error alignment started.
+
+Problem addressed: the standardized error model required `{error:{code,message,details}}`, but detail-free errors could omit `details` because the response error field used `omitempty` and the constructor did not initialize an empty details object.
+
+Decision taken: keep the existing error envelope, error codes, messages, statuses and handler decisions, but make `error.details` a required JSON object. Detail-free errors now serialize `details: {}`.
+
+Concrete change: `internal/core/errs/response_error.go` now always initializes and serializes `details`; `internal/core/errs/app_error_test.go` and `internal/core/httpx/error_test.go` add contract coverage for empty details and details-map copy behavior.
+
+Observable impact: frontend consumers can rely on `error.details` being present as an object on canonical HTTP error responses. The next correct step is 0.15.3 — Provider Contract Validation.
+

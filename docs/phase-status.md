@@ -1906,7 +1906,7 @@ Observable impact at the time of 0.14.6.fix1: Stage 0 documentation had a cohere
 ## Phase 0.15 — Contract Hardening & Freeze
 
 Status: **In Progress**  
-Current subphase: **0.15.2 — Error Contract Alignment**
+Current subphase: **0.15.3 — Provider Contract Validation**
 
 Phase 0.15 starts from the completed Phase 0.14.6.fix3 baseline.
 
@@ -1924,7 +1924,7 @@ Observable impact: Phase 0.15 is no longer pending definition. The current activ
 
 - 0.15.0 — Phase Definition & Documentation Lock: **Completed**
 - 0.15.1 — HTTP Contract Audit: **Completed**
-- 0.15.2 — Error Contract Alignment: **Pending**
+- 0.15.2 — Error Contract Alignment: **Completed**
 - 0.15.3 — Provider Contract Validation: **Pending**
 - 0.15.4 — Response Schema Normalization: **Pending**
 - 0.15.5 — Contract Freeze Enforcement: **Pending**
@@ -1955,3 +1955,18 @@ Concrete change: `docs/phase0_15_1_http_contract_audit.md` now records the HTTP 
 Validation note: `go test ./...` passed in the developer environment after applying the 0.15.1 documentation package. No Go source code was changed by 0.15.1.
 
 Observable impact: the HTTP route surface is now explicit. The audited baseline contains 39 registered HTTP route entries and 22 unique behavior contracts. Later 0.15 work must use this baseline and must not invent endpoints, status codes, error codes or response shapes.
+
+### 0.15.2 Result
+
+0.15.2 completed Error Contract Alignment with a targeted code and test update.
+
+Context inherited from 0.15.1: the HTTP route surface and public error-envelope baseline were already documented, including the expectation that handler failures use `{error:{code,message,details}}`.
+
+Problem addressed: the implementation allowed `error.details` to be omitted for detail-free errors because `ResponseError.Details` used `omitempty` and `NewResponseError()` returned nil details when no details were provided.
+
+Decision taken: align implementation with the documented public contract by requiring `error.details` as a JSON object. No error code, message, status mapping, route behavior, auth behavior, provider behavior or business logic changed.
+
+Concrete change: `internal/core/errs/response_error.go` now serializes `details` without `omitempty`, initializes an empty details map and copies caller-provided details. Contract tests were added in `internal/core/errs/app_error_test.go` and `internal/core/httpx/error_test.go`.
+
+Observable impact: canonical HTTP error responses now have a stable `details` object for both detail-free and detail-rich errors. 0.15.3 can validate provider contracts without carrying an unresolved public error-envelope ambiguity.
+
