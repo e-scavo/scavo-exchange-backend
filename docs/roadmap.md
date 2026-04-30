@@ -633,6 +633,12 @@ The application-layer consolidation baseline is recorded in `docs/stage1_phase1_
 The application-layer wiring responsibility map is recorded in `docs/stage1_phase1_1_use_case_inventory.md`.
 
 1.1.2.1 is documentary only: it maps the real entrypoint, composition root, core service initialization, module service construction, provider wiring, router registration, WebSocket registration and lifecycle responsibilities; it classifies wiring as correct, coupled but acceptable, dispersed, at-risk or requiring later review; and it does not modify code, tests, configuration, routes, provider contracts or runtime behavior.
+
+##### 1.1.2.2 Application Boundary Risk Review Result
+
+The application-layer boundary risk review is recorded in `docs/stage1_phase1_1_use_case_inventory.md`.
+
+1.1.2.2 is documentary only: it classifies boundary risks across `cmd/scavo-server`, `internal/app`, `internal/core`, `auth`, `user`, `usersettings` and `system`; it records which risks affect Phase 1.1 as documentation guardrails and which must be deferred to Phase 1.2+, Phase 1.3 or Phase 1.6; and it does not correct risks, refactor code, move responsibilities, change configuration, alter tests or modify runtime behavior.
 #### 1.1.3 — Orphan, Duplicate & Ambiguous Surface Review
 
 - detect endpoints without a clear Stage 1 use case
