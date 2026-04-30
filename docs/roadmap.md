@@ -590,6 +590,12 @@ The initial existing-use-case baseline is recorded in `docs/stage1_phase1_1_use_
 Ownership mapping for the inventoried use cases is recorded in `docs/stage1_phase1_1_use_case_inventory.md`.
 
 1.1.1.1 is documentary only: it classifies current ownership as clear, partially clear, dispersed or doubtful using repository evidence; records cross-ownership between `auth`, `user`, `usersettings`, `system`, `internal/app` and `internal/core`; and does not resolve or refactor any ownership boundary.
+
+##### 1.1.1.2 Use Case Duplication & Dispersion Review Result
+
+Duplication and dispersion review for the inventoried use cases is recorded in `docs/stage1_phase1_1_use_case_inventory.md`.
+
+1.1.1.2 is documentary only: it classifies verified duplications, partial overlaps, structural dispersion, ambiguous ownership and aligned/no-problem cases across `internal/app`, `internal/modules/auth`, `internal/modules/user`, `internal/modules/usersettings`, `internal/modules/system` and selected `internal/core` support boundaries; and does not correct, refactor, rename or move any implementation.
 #### 1.1.2 — Application Flow Mapping
 
 - map endpoints to real application flows
