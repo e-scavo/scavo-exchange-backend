@@ -1453,3 +1453,14 @@ Validation evidence: `go test ./...` passed in the developer environment after a
 
 Observable impact: the backend now has a closed Contract Hardening & Freeze baseline. Future work must preserve or explicitly version the audited HTTP contracts, canonical error envelope, provider boundaries and response serialization policy.
 
+### Stage 1 Handoff — 1.1.0.0 Scope Confirmation
+
+1.1.0.0 completed Scope Confirmation for Phase 1.1 — Application Use Case Consolidation.
+
+Inherited context: Stage 0 is closed and frozen after Phase 0.15. The governing roadmap now makes Stage 1 the active focus, with Phase 1.1 as the first Stage 1 phase.
+
+Decision taken: confirm the boundary only. This step is documentation and validation work; it does not implement features, change business logic, change architecture, modify Go tests or alter configuration.
+
+Working model: planning and coordination happen in chat; repository edits and validation happen through agents operating on the real VSCode working tree.
+
+Next step: 1.1.0.1 — Trunk Documentation Review.

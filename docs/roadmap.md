@@ -457,6 +457,18 @@ Internal subdivision:
 - 1.1.0.1 — Trunk Documentation Review: read and validate the relevant trunk Markdown before proposing changes.
 - 1.1.0.2 — Risk & Drift Register: record scope risks, possible contract drift and deferred items before implementation.
 - 1.1.0.3 — Documentation Lock Closure: close the lock with explicit next-step criteria and no code changes unless justified.
+
+##### 1.1.0.0 Scope Confirmation Result
+
+1.1.0.0 confirms that Stage 0 is frozen and that Stage 1 is the active roadmap focus.
+
+Phase 1.1 is the first Stage 1 phase, and 1.1.0.0 is limited to scope confirmation against the real repository state and this roadmap.
+
+No functional code, business logic, architecture, Go tests or configuration changes belong to 1.1.0.0.
+
+The working model for Stage 1 is explicit: planning and coordination happen in chat, while repository edits and validation happen through agents operating on the real VSCode working tree.
+
+The scope of 1.1.0.0 is closed. The next ordered control point is 1.1.0.1 — Trunk Documentation Review.
 #### 1.1.1 — Endpoint Surface Inventory
 
 - inventory existing HTTP and WebSocket surfaces
