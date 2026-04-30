@@ -1403,7 +1403,7 @@ Concrete change: `internal/modules/auth/application.go` now asserts:
 
 Observable impact: future provider drift fails compilation. No HTTP route, response payload, error envelope, status code, domain behavior or repository behavior changed.
 
-0.15.4 has completed Response Schema Normalization. Next step after 0.15.4 was **0.15.5 — Contract Freeze Enforcement**.
+This provider validation result handed off to **0.15.4 — Response Schema Normalization**, which later completed successfully.
 
 ### Phase 0.15.4 Handoff — Response Schema Normalization
 
@@ -1419,7 +1419,7 @@ Concrete change: auth error responses now use `application/json; charset=utf-8`;
 
 Observable impact: route behavior, status codes, success payloads, error codes, provider contracts and domain behavior remain unchanged, while JSON response serialization is now aligned for freeze enforcement.
 
-Next step after 0.15.4 was **0.15.5 — Contract Freeze Enforcement**.
+This response normalization result handed off to **0.15.5 — Contract Freeze Enforcement**, which later completed successfully.
 
 ### Phase 0.15.5 Handoff — Contract Freeze Enforcement
 

@@ -3158,7 +3158,7 @@ Decision taken: add compile-time provider contract assertions without changing r
 
 Concrete change: `internal/modules/auth/application.go` now asserts that `*Application` satisfies `AuthProvider`, `*user.Service` satisfies `authdomain.UserProvider`, and `*usersettings.Service` satisfies `authdomain.UserSettingsProvider`.
 
-Observable impact: future drift in HTTP-to-provider or auth-to-cross-module provider contracts now fails at compile time instead of surfacing later through handler behavior or frontend-facing responses. 0.15.4 has now normalized response serialization metadata and defensive fallback shape; the next correct step is 0.15.5 — Contract Freeze Enforcement.
+Observable impact: future drift in HTTP-to-provider or auth-to-cross-module provider contracts now fails at compile time instead of surfacing later through handler behavior or frontend-facing responses. This established the provider-contract baseline that 0.15.4 later used for response schema normalization.
 
 ### Phase 0.15.4 Result — Response Schema Normalization
 
@@ -3172,7 +3172,7 @@ Decision taken: normalize serialization details only. Do not introduce a success
 
 Concrete change: auth error responses now use `application/json; charset=utf-8`, and the defensive timeout fallback keeps `{error:{code,message,details}}` aligned with the 0.15.2 contract.
 
-Observable impact: JSON response metadata is aligned and defensive fallback shape is compatible with the frozen error envelope. The next correct step is 0.15.5 — Contract Freeze Enforcement.
+Observable impact: JSON response metadata is aligned and defensive fallback shape is compatible with the frozen error envelope. This established the response baseline that 0.15.5 later used for Contract Freeze Enforcement.
 
 ### Phase 0.15.5 Result — Contract Freeze Enforcement
 

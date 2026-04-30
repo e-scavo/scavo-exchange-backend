@@ -330,9 +330,9 @@ Validate and align public error envelopes around the existing standardized error
 
 #### 0.15.3 — Provider Contract Validation ✅ Completed
 
-0.15.3 validates the internal provider boundary without changing runtime behavior. Compile-time assertions now prove that `*auth.Application` satisfies the handler-facing `AuthProvider` contract and that the concrete user and usersettings services satisfy the minimal cross-module provider contracts consumed by auth.
-
 Validate internal HTTP → Provider → Application contracts and confirm that Phase 0.13 provider boundaries remain explicit and stable.
+
+0.15.3 validates the internal provider boundary without changing runtime behavior. Compile-time assertions now prove that `*auth.Application` satisfies the handler-facing `AuthProvider` contract and that the concrete user and usersettings services satisfy the minimal cross-module provider contracts consumed by auth.
 
 #### 0.15.4 — Response Schema Normalization ✅ Completed
 Normalize response schemas where actual repository evidence shows uncontrolled drift or ambiguous historical variation.

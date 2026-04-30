@@ -1983,7 +1983,7 @@ Decision taken: preserve runtime behavior and add compile-time assertions at the
 
 Concrete change: `internal/modules/auth/application.go` now declares compile-time assertions for `*Application` against `AuthProvider`, for `*user.Service` against `authdomain.UserProvider`, and for `*usersettings.Service` against `authdomain.UserSettingsProvider`.
 
-Observable impact: provider drift is now rejected by compilation. No endpoint, status code, payload, error code, domain rule or repository behavior was changed. 0.15.4 has now completed response schema normalization; 0.15.5 can proceed to freeze enforcement on top of the validated response baseline.
+Observable impact: provider drift is now rejected by compilation. No endpoint, status code, payload, error code, domain rule or repository behavior was changed. This established the provider-contract baseline that 0.15.4 later used for response schema normalization.
 
 
 ### 0.15.4 Result
@@ -1998,7 +1998,7 @@ Decision taken: normalize response serialization details only. Do not wrap succe
 
 Concrete change: auth error responses now use `application/json; charset=utf-8`, the defensive timeout fallback includes `details:{}`, and a regression test confirms the auth error JSON content type.
 
-Observable impact: response serialization is aligned across core and auth handlers, and defensive fallback output remains compatible with the canonical error envelope. The next correct step is 0.15.5 — Contract Freeze Enforcement.
+Observable impact: response serialization is aligned across core and auth handlers, and defensive fallback output remains compatible with the canonical error envelope. This established the response baseline that 0.15.5 later used for Contract Freeze Enforcement.
 
 ### 0.15.5 Result
 

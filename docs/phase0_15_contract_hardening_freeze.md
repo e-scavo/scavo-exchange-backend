@@ -359,11 +359,11 @@ Concrete change: `internal/modules/auth/http_login.go` now writes auth error JSO
 
 Impact observable: existing clients keep the same payload shapes, status codes and error codes, while response serialization is now consistent enough to support freeze enforcement.
 
-## Handoff to 0.15.5
+## Historical Handoff Fulfilled by 0.15.5
 
-0.15.5 must define Contract Freeze Enforcement.
+0.15.5 defined Contract Freeze Enforcement.
 
-It must use the validated baselines from 0.15.1, 0.15.2, 0.15.3 and 0.15.4. It must document and enforce how contracts can evolve without allowing silent drift.
+It used the validated baselines from 0.15.1, 0.15.2, 0.15.3 and 0.15.4 to document and enforce how contracts can evolve without allowing silent drift.
 
 ## 0.15.5 Concrete Change
 
