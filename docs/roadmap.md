@@ -489,6 +489,32 @@ Explicit Phase 1.1 boundary:
 Public contracts remain unchanged during Phase 1.1 unless a critical inconsistency is discovered and explicitly documented against the roadmap before any later, controlled change.
 
 The scope of 1.1.0.1 is closed. The next ordered control point is 1.1.0.2 — Risk & Drift Register.
+
+##### 1.1.0.2 Boundary Definition Result
+
+1.1.0.2 defines the technical boundaries for Phase 1.1 against the real repository structure: `cmd/scavo-server`, `internal/app`, `internal/core/*` and `internal/modules/*`.
+
+Layer boundaries:
+
+- App layer: Phase 1.1 may document and align existing use-case orchestration and endpoint-to-flow naming across `internal/app` and module `app` packages, but must not break application wiring, runtime bootstrap, provider contracts or public route behavior.
+- Domain layer: Phase 1.1 may align terminology and document how existing domain concepts support use cases in module `domain` packages, but must not change domain invariants, write inputs, ownership semantics or business behavior.
+- Core layer: `internal/core/*` remains stable during Phase 1.1. It is not a target except for documenting a critical inconsistency that would otherwise threaten the frozen Stage 0 contract baseline.
+- Module layer: `auth`, `user`, `usersettings` and `system` may be compared and documented for naming, flow ownership, duplicate surfaces and cross-layer coherence, but their handlers, repositories, mappers, read models, write models and tests are not implementation targets during 1.1.0.2.
+
+Zone classification for Phase 1.1:
+
+- Enabled zones: documentation of existing flows, use-case names, app/domain/module responsibility maps, endpoint-to-flow intent, module ownership notes and deferred follow-up boundaries.
+- Restricted zones: handler contracts, provider interfaces, read/write model shape, mappers, repositories and authorization references may be inspected and documented, but not changed without a later roadmap-approved implementation subphase.
+- Prohibited zones: Go source changes, test changes, configuration changes, new endpoints, new product capabilities, core infrastructure changes, Stage 0 contract reopening and any work belonging to Phase 1.2 or later.
+
+Module boundaries:
+
+- `auth`: may be documented as the current authentication, session, bootstrap and wallet-facing module; wallet usability changes, session lifecycle expansion and authorization refinement remain deferred to later Stage 1 phases.
+- `user`: may be documented as the current account/profile user module; account product capability changes remain deferred to Phase 1.2.
+- `usersettings`: may be documented as the current settings module; settings productization and mutation behavior remain deferred to Phase 1.2 and Phase 1.5 as applicable.
+- `system`: may be documented as the current system/WebSocket surface; diagnostics, core transport and system behavior changes remain outside Phase 1.1 unless later roadmap work explicitly scopes them.
+
+This boundary definition preserves the frozen Stage 0 baseline, keeps Phase 1.1 focused on consolidation and prepares later Stage 1 phases without implementing them.
 #### 1.1.1 — Endpoint Surface Inventory
 
 - inventory existing HTTP and WebSocket surfaces
