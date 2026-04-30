@@ -353,6 +353,8 @@ Phase 0.15 outcome: explicit, audited and frozen contracts for the current Stage
 
 Phase 0.15 completed after the validation and documentation closure in 0.15.6.
 
+The next roadmap phase is intentionally not defined by 0.15.6.
+
 The final baseline records that successful response payloads remain intentionally unwrapped and compatible, JSON response metadata and defensive error fallback shape are aligned with the canonical contract introduced in 0.15.2, provider boundary expectations are compile-time guarded and representative frozen contracts are covered by regression tests.
 
 ---
@@ -423,4 +425,3 @@ The final baseline records that successful response payloads remain intentionall
 - Internal testing
 - Release candidate
 
-The next roadmap phase is intentionally not defined by 0.15.6.

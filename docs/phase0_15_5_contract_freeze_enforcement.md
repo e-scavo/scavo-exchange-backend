@@ -151,12 +151,12 @@ After 0.15.5:
 - representative drift is test-detectable
 - documentation explains future evolution rules
 - no runtime behavior changes were introduced
-- Phase 0.15 is ready for 0.15.6 validation and documentation closure
+- Phase 0.15 was ready for 0.15.6 validation and documentation closure, which has now been completed
 
 ---
 
-## Handoff to 0.15.6
+## Historical Handoff Fulfilled by 0.15.6
 
-0.15.6 must validate the full repository with `go test ./...`, reconcile all trunk documentation and close Phase 0.15 narratively.
+0.15.6 validated the repository using the supplied local `go test ./...` evidence, reconciled trunk documentation and closed Phase 0.15 narratively.
 
-It must not introduce new features or unrelated refactors.
+It did not introduce new features or unrelated refactors.

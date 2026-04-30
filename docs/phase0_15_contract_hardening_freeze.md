@@ -379,11 +379,11 @@ Concrete change: the freeze policy is documented in `docs/phase0_15_5_contract_f
 
 Impact observable: public JSON endpoints, protected auth error envelopes, JSON metadata and provider assertions now have a clear freeze baseline. Future contract evolution must be deliberate and documented.
 
-## Handoff to 0.15.6
+## Historical Handoff Fulfilled by 0.15.6
 
-0.15.6 must validate the full system and reconcile all trunk documentation for Phase 0.15 closure.
+0.15.6 validated the full system state through the supplied local `go test ./...` evidence and reconciled trunk documentation for Phase 0.15 closure.
 
-It must include the local `go test ./...` evidence supplied after applying 0.15.5 and close Phase 0.15 without introducing new behavior.
+It closed Phase 0.15 without introducing new behavior.
 
 ## 0.15.6 Concrete Change
 

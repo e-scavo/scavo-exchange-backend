@@ -3186,7 +3186,7 @@ Decision taken: freeze the current public and internal contract surface without 
 
 Concrete change: `docs/phase0_15_5_contract_freeze_enforcement.md` defines the freeze policy, and `internal/core/httpx/contract_freeze_test.go` guards core status JSON responses plus protected auth canonical error envelopes.
 
-Observable impact: future changes to frozen contract shape must be explicit, versioned or intentionally updated in tests and documentation. The next correct step is 0.15.6 — Validation & Documentation.
+Observable impact: future changes to frozen contract shape must be explicit, versioned or intentionally updated in tests and documentation. The 0.15.6 validation and documentation closure has now fulfilled this handoff and closed Phase 0.15.
 
 ### Phase 0.15.6 Result — Validation & Documentation
 

@@ -937,7 +937,7 @@ Phase 0.10 is therefore complete. The next architectural step should build on th
 
 ## Phase 0.11 — Domain Module Pattern
 
-Phase 0.11 is historically completed. It followed the completed authorization layer and standardized the internal organization of the domain-facing modules without changing the public API contract. The current validated state is Phase 0.15 active at 0.15.0, after the completed Phase 0.14 observability baseline.
+Phase 0.11 is historically completed. It followed the completed authorization layer and standardized the internal organization of the domain-facing modules without changing the public API contract. The current validated state is Phase 0.15 completed at 0.15.6, after the completed Phase 0.14 observability baseline and the completed contract hardening/freeze sequence.
 
 ### Current Structural Direction
 
@@ -1333,7 +1333,7 @@ Problem addressed: Phase 0.15 was still pending definition. Contract work could 
 
 Decision taken: define Phase 0.15 before code changes. This phase must audit, validate, normalize and freeze existing contracts only. It must not add features, routes, business behavior, architecture changes or additional observability scope.
 
-Concrete change: trunk documentation now records Phase 0.15 as active, creates the dedicated Phase 0.15 document and lists the complete 0.15.0 through 0.15.6 sequence.
+Concrete change: trunk documentation opened Phase 0.15, created the dedicated Phase 0.15 document and listed the complete 0.15.0 through 0.15.6 sequence. The phase is now closed by 0.15.6.
 
 Important constraints for the next subphase:
 

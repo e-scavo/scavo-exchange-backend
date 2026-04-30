@@ -2012,7 +2012,7 @@ Decision taken: freeze the current Stage 0 contract surface without introducing 
 
 Concrete change: `docs/phase0_15_5_contract_freeze_enforcement.md` records freeze rules and evolution policy, while `internal/core/httpx/contract_freeze_test.go` adds regression coverage for frozen core JSON responses and protected auth error envelopes.
 
-Observable impact: future contract changes must be deliberate, versioned where required and reflected in tests plus documentation. The next correct step is 0.15.6 — Validation & Documentation.
+Observable impact: future contract changes must be deliberate, versioned where required and reflected in tests plus documentation. The 0.15.6 validation and documentation closure has now fulfilled this handoff and closed Phase 0.15.
 
 ### 0.15.6 Result
 
