@@ -81,6 +81,84 @@ The inventory records existing use cases only. Doubtful ownership, duplication a
 - Repository-backed wallet stores and mappers support use cases but should not be counted as product use cases unless a later subphase explicitly classifies persistence operations.
 - Settings read/write ownership is split between `auth` exposure and `usersettings` implementation and should be mapped before consolidation.
 
+## 1.1.1.1 Ownership Mapping
+
+Ownership classification uses only current repository evidence:
+
+- Clear: one module and one primary layer own the use case, with dependencies acting as support.
+- Partially clear: the primary owner is visible, but the use case relies on another module or compatibility surface for essential behavior.
+- Dispersed: multiple files, layers or compatibility surfaces currently share meaningful ownership.
+- Doubtful / requires later review: the current code supports the behavior, but its product or architectural owner is not settled by the code alone.
+
+| ID | Current owner module | Owner layer | Owner file | Main owner function or method | Relevant dependencies | Ownership class |
+| --- | --- | --- | --- | --- | --- | --- |
+| UC-001 | `internal/app` | runtime composition | `internal/app/app.go` | `New` | `core/auth`, `core/db`, `core/cache`, `core/httpx`, `core/ws`, `auth`, `user`, `usersettings`, `system` | Partially clear |
+| UC-002 | `internal/app` | runtime lifecycle | `internal/app/app.go` | `Start` | `core/ws.Hub`, HTTP server, logger | Clear |
+| UC-003 | `internal/app` | runtime lifecycle | `internal/app/app.go` | `Stop` | HTTP server, database client, cache client | Clear |
+| UC-004 | `auth` | app layer | `internal/modules/auth/app/application.go` | `Application.Login` | `auth/app.Service.LoginDev`, `core/auth.TokenService`, `auth/mappers`, `user` provider | Partially clear |
+| UC-005 | `auth` | app layer | `internal/modules/auth/app/application.go` | `Application.GetMe` | `core/auth.Claims`, `user` provider, wallet identity store, profile helpers | Partially clear |
+| UC-006 | `auth` | app layer | `internal/modules/auth/app/application.go` | `Application.GetSession` | `auth/app.Service.ResolveSessionClaims`, `core/auth.Claims`, `user` provider | Partially clear |
+| UC-007 | `auth` and `user` | app layer | `internal/modules/auth/app/application.go`; `internal/modules/user/app/service.go` | `Application.UpdateProfile`; `Service.UpdateDisplayName` | `auth/domain.ProfileUpdateInput`, `user` provider, user repository | Dispersed |
+| UC-008 | `auth` and `usersettings` | app layer | `internal/modules/auth/app/application.go`; `internal/modules/usersettings/app/service.go` | `Application.GetSettings`; `Service.GetOrDefault` | `core/auth.Claims`, usersettings provider, usersettings mapper/repository | Dispersed |
+| UC-009 | `auth` and `usersettings` | app layer | `internal/modules/auth/app/application.go`; `internal/modules/usersettings/app/service.go` | `Application.UpdateSettings`; `Service.UpdatePreferences` | `auth/domain.SettingsUpdateInput`, usersettings provider, usersettings repository | Dispersed |
+| UC-010 | `auth` | app service | `internal/modules/auth/app/application.go`; `internal/modules/auth/app/wallet_services.go` | `Application.CreateWalletChallenge`; `WalletChallengeService.Create` | wallet challenge store, public base URL, challenge TTL | Partially clear |
+| UC-011 | `auth` with `user` dependency | app layer | `internal/modules/auth/app/application.go` | `Application.VerifyWallet` | wallet challenge service, wallet identity store, signature recovery, `user.ResolveOrCreateWalletUser`, token service | Partially clear |
+| UC-012 | `auth` aggregator | app layer | `internal/modules/auth/app/application.go` | `Application.GetBootstrap` | auth session service, `user` provider, `usersettings` provider, wallet identity store, read mappers | Dispersed |
+| UC-013 | `auth` | app layer | `internal/modules/auth/app/application.go` | `Application.ListWallets` | wallet identity store, auth mappers, query application helpers | Partially clear |
+| UC-014 | `auth` | app layer/app service | `internal/modules/auth/app/application.go`; `internal/modules/auth/app/wallet_services.go` | `Application.CreateWalletLinkChallenge`; `WalletLinkingService.CreateChallenge` | wallet challenge service, wallet identity store | Partially clear |
+| UC-015 | `auth` | app layer/app service | `internal/modules/auth/app/application.go`; `internal/modules/auth/app/wallet_services.go` | `Application.VerifyWalletLink`; `WalletLinkingService.VerifyAndLink` | challenge store, wallet identity store, signature recovery | Partially clear |
+| UC-016 | `auth` | app layer/app service | `internal/modules/auth/app/application.go`; `internal/modules/auth/app/wallet_services.go` | `Application.CreateWalletAccountMergeChallenge`; `WalletAccountMergeService.CreateChallenge` | wallet challenge service, wallet identity store | Doubtful / requires later review |
+| UC-017 | `auth` | app layer/app service | `internal/modules/auth/app/application.go`; `internal/modules/auth/app/wallet_services.go` | `Application.VerifyWalletAccountMerge`; `WalletAccountMergeService.VerifyAndMerge` | challenge store, wallet identity store, signature recovery | Doubtful / requires later review |
+| UC-018 | `auth` | app layer/app service | `internal/modules/auth/app/application.go`; `internal/modules/auth/app/wallet_services.go` | `Application.SetPrimaryWallet`; `WalletPrimaryService.SetPrimary` | wallet identity store | Partially clear |
+| UC-019 | `auth` | app layer/app service | `internal/modules/auth/app/application.go`; `internal/modules/auth/app/wallet_services.go` | `Application.CheckWalletDetach`; `WalletDetachService.CheckEligibility` | wallet identity store, detach reason constants | Partially clear |
+| UC-020 | `auth` | app layer/app service | `internal/modules/auth/app/application.go`; `internal/modules/auth/app/wallet_services.go` | `Application.ExecuteWalletDetach`; `WalletDetachService.Execute` | wallet identity store, eligibility check | Partially clear |
+| UC-021 | `auth` | transport | `internal/modules/auth/http_login.go` | HTTP handler methods | `AuthProvider`, `core/auth.Claims`, `core/errs`, auth/user/usersettings mappers | Clear |
+| UC-022 | `auth` | transport | `internal/modules/auth/http_wallet.go` | Wallet HTTP handler methods | `AuthProvider`, `core/auth.Claims`, `core/errs`, wallet write inputs | Clear |
+| UC-023 | `auth` | transport | `internal/modules/auth/http_wallet_list.go` | `HTTPHandlers.Wallets` | `AuthProvider.ListWallets`, query parsing helpers | Partially clear |
+| UC-024 | `auth` | transport | `internal/modules/auth/http_bootstrap.go` | `HTTPHandlers.Bootstrap` | `AuthProvider.GetBootstrap`, `core/auth.Claims` | Clear |
+| UC-025 | `auth` | WebSocket transport | `internal/modules/auth/ws_handlers.go` | `WSHandlers.whoami` | `core/ws.Client.Session` | Doubtful / requires later review |
+| UC-026 | `auth` | WebSocket transport | `internal/modules/auth/ws_handlers.go` | `WSHandlers.session` | root `auth.Service`, `core/ws.Client.Session`, `core/auth.Claims` | Partially clear |
+| UC-027 | `auth` | app service | `internal/modules/auth/app/service.go` | `Service.LoginDev` | `core/auth.TokenService`, `user` provider | Partially clear |
+| UC-028 | `auth` | app service | `internal/modules/auth/app/service.go` | `Service.LoginWallet`; `Service.LoginWalletForUser` | `core/auth.TokenService`, wallet user fallback helpers | Partially clear |
+| UC-029 | `auth` | app service | `internal/modules/auth/app/service.go` | `ResolveCurrentUser*`; `ResolveSession*` | `core/auth.TokenService`, `core/auth.Claims`, `user` provider | Partially clear |
+| UC-030 | `auth` | app service/repository support | `internal/modules/auth/app/wallet_services.go` | `WalletChallengeService.Create`, `CreateWithOptions`, `Get`, `MarkUsed` | `auth/domain.WalletChallengeStore`, challenge purpose helpers | Partially clear |
+| UC-031 | `auth` | app service | `internal/modules/auth/app/wallet_services.go` | `WalletLinkingService.CreateChallenge`; `VerifyAndLink` | wallet challenge service, wallet identity store, signature recovery | Clear |
+| UC-032 | `auth` | app service | `internal/modules/auth/app/wallet_services.go` | `WalletAccountMergeService.CreateChallenge`; `VerifyAndMerge` | wallet challenge service, wallet identity store, signature recovery | Doubtful / requires later review |
+| UC-033 | `auth` | app service | `internal/modules/auth/app/wallet_services.go` | `WalletPrimaryService.SetPrimary` | wallet identity store | Clear |
+| UC-034 | `auth` | app service | `internal/modules/auth/app/wallet_services.go` | `WalletDetachService.CheckEligibility`; `Execute` | wallet identity store, detach reason constants | Partially clear |
+| UC-035 | `user` | app service | `internal/modules/user/app/service.go` | `Service.ResolveOrCreateDevUser` | user domain repository, fallback user construction | Partially clear |
+| UC-036 | `user` | app service | `internal/modules/user/app/service.go` | `Service.ResolveOrCreateWalletUser` | user domain repository, wallet-derived identity helpers | Partially clear |
+| UC-037 | `user` | app service | `internal/modules/user/app/service.go` | `Service.GetByID` | user domain repository, fallback user construction | Partially clear |
+| UC-038 | `user` | app service | `internal/modules/user/app/service.go` | `Service.UpdateDisplayName` | user domain repository, validation helpers | Clear |
+| UC-039 | `usersettings` | app service | `internal/modules/usersettings/app/service.go` | `Service.GetOrDefault` | usersettings domain repository, default settings, preference normalization | Clear |
+| UC-040 | `usersettings` | app service | `internal/modules/usersettings/app/service.go` | `Service.UpdatePreferences` | usersettings domain repository, normalization, merge and validation helpers | Clear |
+| UC-041 | `system` | WebSocket transport | `internal/modules/system/ws_handlers.go` | `ping` | `core/ws.Dispatcher`, `core/ws.Client`, time source | Clear |
+
+### Ownership Class Summary
+
+- Clear: UC-002, UC-003, UC-021, UC-022, UC-024, UC-031, UC-033, UC-038, UC-039, UC-040, UC-041.
+- Partially clear: UC-001, UC-004, UC-005, UC-006, UC-010, UC-011, UC-013, UC-014, UC-015, UC-018, UC-019, UC-020, UC-023, UC-026, UC-027, UC-028, UC-029, UC-030, UC-034, UC-035, UC-036, UC-037.
+- Dispersed: UC-007, UC-008, UC-009, UC-012.
+- Doubtful / requires later review: UC-016, UC-017, UC-025, UC-032.
+
+### Cross-Ownership Detected
+
+- `auth` -> `user`: login, wallet bootstrap, current-user/session resolution and profile update depend on user ownership through the `auth/domain.UserProvider` contract.
+- `auth` -> `usersettings`: settings read/write and bootstrap aggregation depend on the `auth/domain.UserSettingsProvider` contract.
+- `auth` -> `core/auth`: login, wallet login, session and authenticated account flows depend on token and claims ownership in `internal/core/auth`.
+- `auth` -> `core/ws`: WebSocket auth actions are owned by auth handlers but transported through `internal/core/ws`.
+- `system` -> `core/ws`: `system.ping` is owned by the system module but exists only as a WebSocket action registered in the core dispatcher.
+- `internal/app` -> all runtime modules: runtime composition owns wiring, not product behavior, while it directly constructs module providers and core services.
+
+### Consolidation Risks For Later Phase 1.1 Work
+
+- Root compatibility surfaces in `auth`, `user` and `usersettings` can obscure the active owner when reading call sites.
+- `auth` currently exposes account/profile/settings surfaces whose business behavior is owned partly by `user` and `usersettings`.
+- Bootstrap aggregates session, profile, settings and wallets; future consolidation must avoid turning the aggregator into the owner of those domains.
+- Wallet challenge ownership is shared across auth bootstrap, wallet linking and account merge flows; renaming or splitting it later could break traceability if not mapped first.
+- WebSocket current-user/session actions may diverge from HTTP current-user/session behavior if ownership is not normalized in later mapping.
+- `internal/app` owns construction and lifecycle only; using it as a product owner would blur the Phase 1.1 boundary.
+
 ## Baseline Closure
 
 1.1.1.0 establishes the initial existing-use-case baseline only.

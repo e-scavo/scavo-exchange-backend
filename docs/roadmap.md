@@ -584,6 +584,12 @@ Internal subdivision:
 The initial existing-use-case baseline is recorded in `docs/stage1_phase1_1_use_case_inventory.md`.
 
 1.1.1.0 is documentary only: it inventories current use cases across `internal/app`, `internal/modules/auth`, `internal/modules/user`, `internal/modules/usersettings` and `internal/modules/system`; records duplication, dispersion and doubtful ownership; preserves Stage 0 frozen; and does not authorize code, test, configuration, contract or Phase 1.2+ changes.
+
+##### 1.1.1.1 Use Case Ownership Mapping Result
+
+Ownership mapping for the inventoried use cases is recorded in `docs/stage1_phase1_1_use_case_inventory.md`.
+
+1.1.1.1 is documentary only: it classifies current ownership as clear, partially clear, dispersed or doubtful using repository evidence; records cross-ownership between `auth`, `user`, `usersettings`, `system`, `internal/app` and `internal/core`; and does not resolve or refactor any ownership boundary.
 #### 1.1.2 — Application Flow Mapping
 
 - map endpoints to real application flows
