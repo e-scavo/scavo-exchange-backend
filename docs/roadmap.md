@@ -578,6 +578,12 @@ Internal subdivision:
 - 1.1.1.1 — Real-State Extraction: extract the current repository state without assumptions.
 - 1.1.1.2 — Classification & Gap Mapping: classify findings and identify gaps, duplicates or ambiguous ownership.
 - 1.1.1.3 — Audit Closure & Handoff: document findings and hand off only validated work to the next subphase.
+
+##### 1.1.1.0 Use Case Inventory Baseline Result
+
+The initial existing-use-case baseline is recorded in `docs/stage1_phase1_1_use_case_inventory.md`.
+
+1.1.1.0 is documentary only: it inventories current use cases across `internal/app`, `internal/modules/auth`, `internal/modules/user`, `internal/modules/usersettings` and `internal/modules/system`; records duplication, dispersion and doubtful ownership; preserves Stage 0 frozen; and does not authorize code, test, configuration, contract or Phase 1.2+ changes.
 #### 1.1.2 — Application Flow Mapping
 
 - map endpoints to real application flows
@@ -1311,4 +1317,3 @@ Internal subdivision:
 - Integration tests
 - Internal testing
 - Release candidate
-
