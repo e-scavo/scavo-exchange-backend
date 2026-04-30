@@ -47,6 +47,9 @@ func (e *AppError) WithDetails(details map[string]any) *AppError {
 	}
 
 	merged := e.PublicDetails()
+	if merged == nil {
+		merged = make(map[string]any, len(details))
+	}
 	for key, value := range details {
 		merged[key] = value
 	}
