@@ -490,3 +490,48 @@ Targets deferred to Phase 1.2+ or later for any implementation:
 6. Execute ACT-009 as a no-action guardrail during Phase 1.1 contract documentation or closure.
 
 No consolidation target is implemented in 1.1.2.3. No Go source, tests or configuration changes are authorized by this target definition.
+
+## 1.1.2.4 Application Layer Planning Closure
+
+1.1.2 is closed as a documentary application-layer consolidation planning subphase.
+
+Closure confirmation:
+
+- 1.1.2.0 Application Layer Consolidation Baseline is documented through the current responsibility baseline, ALB findings, responsibilities excluded from `internal/app` and baseline summary.
+- 1.1.2.1 Application Wiring Responsibility Map is documented through WIR findings, wiring classification summary and wiring risk notes.
+- 1.1.2.2 Application Boundary Risk Review is documented through ABR findings, boundary risk summary and the Phase 1.1 boundary decision.
+- 1.1.2.3 Application Consolidation Targets is documented through ACT targets, target classification, Phase 1.1 versus deferred boundaries and recommended next order.
+
+Readiness for the next Phase 1.1 subphase is confirmed:
+
+- The application layer has a documented baseline.
+- The current process, runtime, provider, router, WebSocket and module wiring is mapped.
+- Boundary risks are classified by severity and deferral scope.
+- Application-layer consolidation targets derive from real ALB, WIR, ABR, DDR and UCT findings.
+- Phase 1.1 documentation-only work is separated from Phase 1.2+, Phase 1.3 and Phase 1.6 implementation-sensitive work.
+- Stage 0 remains frozen.
+- `docs/roadmap.md` remains the governing document.
+- No code changes or refactors were performed during 1.1.2.
+
+Not resolved in 1.1.2:
+
+- No files were moved.
+- No functions were renamed.
+- No wiring was reordered.
+- No composition root behavior was modified.
+- No provider, handler, route, middleware, WebSocket dispatcher or service constructor was changed.
+- No module boundary was altered.
+- No core authorization, HTTP, WebSocket, error, status, database, cache or token behavior was altered.
+- No duplicated compatibility wrappers or helper functions were removed.
+- No boundary risk was corrected.
+- No application consolidation target was implemented.
+- No Phase 1.2+ product capability was implemented.
+- No Go source, tests or configuration files were modified.
+
+The next ordered Phase 1.1 subphase is 1.1.3 — Orphan, Duplicate & Ambiguous Surface Review.
+
+## Application Layer Planning Baseline Closure
+
+1.1.2 establishes the application-layer baseline, wiring map, boundary risk classification and future consolidation-target register only.
+
+No refactor, behavior change, code movement, route change, provider change, module alteration or core alteration is authorized by this closure. Any later implementation must be executed only through a future roadmap-approved subphase with its own validation gate.
