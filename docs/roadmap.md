@@ -454,9 +454,11 @@ Focus areas:
 Internal subdivision:
 
 - 1.1.0.0 — Scope Confirmation: confirm the exact subphase boundary against the roadmap and current repository state.
-- 1.1.0.1 — Trunk Documentation Review: read and validate the relevant trunk Markdown before proposing changes.
-- 1.1.0.2 — Risk & Drift Register: record scope risks, possible contract drift and deferred items before implementation.
-- 1.1.0.3 — Documentation Lock Closure: close the lock with explicit next-step criteria and no code changes unless justified.
+- 1.1.0.1 — Scope Formalization: formalize the exact Phase 1.1 scope, exclusions and deferred Stage 1 work.
+- 1.1.0.2 — Boundary Definition: define the technical layer, module and zone boundaries for Phase 1.1.
+- 1.1.0.3 — Agent Execution Contract: define how VSCode agents must operate during Phase 1.1.
+- 1.1.0.4 — Validation Gate Definition: define mandatory validation gates for documentary and later implementation work.
+- 1.1.0.5 — Close Documentation Lock: close 1.1.0 and authorize the next ordered subphase.
 
 ##### 1.1.0.0 Scope Confirmation Result
 
@@ -469,6 +471,100 @@ No functional code, business logic, architecture, Go tests or configuration chan
 The working model for Stage 1 is explicit: planning and coordination happen in chat, while repository edits and validation happen through agents operating on the real VSCode working tree.
 
 The scope of 1.1.0.0 is closed. The next ordered control point is 1.1.0.1 — Trunk Documentation Review.
+
+##### 1.1.0.1 Scope Formalization Result
+
+1.1.0.1 formalizes Phase 1.1 as Application Use Case Consolidation only.
+
+Phase 1.1 includes consolidation of existing backend-supported use cases, alignment between the application layer, domain layer and existing modules, endpoint-to-flow clarification, orphan/duplicate/ambiguous surface review, product success criteria definition and use-case contract documentation.
+
+Phase 1.1 does not introduce new product features, does not reopen Stage 0 foundation work, does not change frozen Stage 0 contracts unless the roadmap explicitly requires versioned evolution, does not implement Phase 1.2 account and identity capabilities, does not refine authorization beyond consolidation needs, and does not define data interaction, mutation or end-to-end closure behavior that belongs to later Stage 1 phases.
+
+The deferred Stage 1 work remains ordered as follows: Phase 1.2 Account & Identity Product Capabilities, Phase 1.3 Authorization & Permission Model, Phase 1.4 Data Interaction Patterns, Phase 1.5 Mutation & Write Flows, Phase 1.6 System Behavior Consistency and Phase 1.7 End-to-End Validation & Closure.
+
+Explicit Phase 1.1 boundary:
+
+- Included in Phase 1.1: ordering and naming of existing use cases, consolidation of duplicate or overlapping use-case descriptions, clarification of endpoint-to-flow intent, alignment between app layer, domain layer and modules, and documentation of cross-layer coherence for the existing backend surface.
+- Excluded from Phase 1.1: new product capabilities, new endpoints, deep authorization model changes, write-flow implementation, data interaction contract implementation, Stage 0 contract reopening and any change that would break the frozen Stage 0 baseline.
+- Deferred after Phase 1.1: account and identity capabilities in Phase 1.2, authorization and permission model refinement in Phase 1.3, data patterns in Phase 1.4, write flows in Phase 1.5, system behavior consistency in Phase 1.6 and end-to-end validation in Phase 1.7.
+
+Public contracts remain unchanged during Phase 1.1 unless a critical inconsistency is discovered and explicitly documented against the roadmap before any later, controlled change.
+
+The scope of 1.1.0.1 is closed. The next ordered control point is 1.1.0.2 — Risk & Drift Register.
+
+##### 1.1.0.2 Boundary Definition Result
+
+1.1.0.2 defines the technical boundaries for Phase 1.1 against the real repository structure: `cmd/scavo-server`, `internal/app`, `internal/core/*` and `internal/modules/*`.
+
+Layer boundaries:
+
+- App layer: Phase 1.1 may document and align existing use-case orchestration and endpoint-to-flow naming across `internal/app` and module `app` packages, but must not break application wiring, runtime bootstrap, provider contracts or public route behavior.
+- Domain layer: Phase 1.1 may align terminology and document how existing domain concepts support use cases in module `domain` packages, but must not change domain invariants, write inputs, ownership semantics or business behavior.
+- Core layer: `internal/core/*` remains stable during Phase 1.1. It is not a target except for documenting a critical inconsistency that would otherwise threaten the frozen Stage 0 contract baseline.
+- Module layer: `auth`, `user`, `usersettings` and `system` may be compared and documented for naming, flow ownership, duplicate surfaces and cross-layer coherence, but their handlers, repositories, mappers, read models, write models and tests are not implementation targets during 1.1.0.2.
+
+Zone classification for Phase 1.1:
+
+- Enabled zones: documentation of existing flows, use-case names, app/domain/module responsibility maps, endpoint-to-flow intent, module ownership notes and deferred follow-up boundaries.
+- Restricted zones: handler contracts, provider interfaces, read/write model shape, mappers, repositories and authorization references may be inspected and documented, but not changed without a later roadmap-approved implementation subphase.
+- Prohibited zones: Go source changes, test changes, configuration changes, new endpoints, new product capabilities, core infrastructure changes, Stage 0 contract reopening and any work belonging to Phase 1.2 or later.
+
+Module boundaries:
+
+- `auth`: may be documented as the current authentication, session, bootstrap and wallet-facing module; wallet usability changes, session lifecycle expansion and authorization refinement remain deferred to later Stage 1 phases.
+- `user`: may be documented as the current account/profile user module; account product capability changes remain deferred to Phase 1.2.
+- `usersettings`: may be documented as the current settings module; settings productization and mutation behavior remain deferred to Phase 1.2 and Phase 1.5 as applicable.
+- `system`: may be documented as the current system/WebSocket surface; diagnostics, core transport and system behavior changes remain outside Phase 1.1 unless later roadmap work explicitly scopes them.
+
+This boundary definition preserves the frozen Stage 0 baseline, keeps Phase 1.1 focused on consolidation and prepares later Stage 1 phases without implementing them.
+
+##### 1.1.0.3 Agent Execution Contract Result
+
+1.1.0.3 defines the operating contract for VSCode agent work during Phase 1.1.
+
+Execution contract:
+
+- The agent works only on the real repository working tree opened in VSCode and must not assume state outside the repository.
+- The agent must read `docs/roadmap.md` before acting, treat all Markdown files as trunk documentation and use source code only as structural context unless the active sub-subphase explicitly authorizes code changes.
+- The agent must preserve the frozen Stage 0 baseline, stay inside the active sub-subphase and never advance automatically to later control points or Phase 1.2+ work.
+- Chat planning owns stage, phase, subphase and sub-subphase definition, execution prompts and output acceptance.
+- The VSCode agent owns repository reading, authorized incremental edits, required validation commands, modified-file reporting, line-count reporting, test output, diff stat and git status reporting.
+
+Mandatory validation for each sub-subphase: `git status`, `go test ./...` and `git diff --stat`.
+
+Mandatory agent output: files read, files modified, before/after line counts for modified documentation, explicit code-modified or code-not-modified confirmation, test result, diff stat and git status.
+
+Anti-drift rules: the agent must not invent phases, modify Stage 0, reorder the roadmap wholesale, summarize or degrade trunk documentation, touch code during documentary sub-subphases, mix Phase 1.1 with Phase 1.2+ responsibilities or continue past the active sub-subphase without a new prompt.
+
+##### 1.1.0.4 Validation Gate Definition Result
+
+1.1.0.4 defines the mandatory validation gates for Phase 1.1 work.
+
+Mandatory gates for every sub-subphase: `git status`, `git diff --stat` and `go test ./...`.
+
+Documentation gates apply whenever Markdown changes: list modified `.md` files, record before/after line counts, confirm `docs/roadmap.md` remains the central document, preserve trunk documentation without summary/degradation and avoid full-document rewrites unless explicitly justified by the active sub-subphase.
+
+Code gates apply only when a later sub-subphase explicitly allows implementation: list modified Go files, identify affected packages, report tests executed, confirm no out-of-scope changes and confirm no Phase 1.2+ responsibility was invaded.
+
+Anti-drift gates must confirm that Stage 0 remains frozen, Phase 1.1 does not invade later phases, no phases or subphases were invented, responsibilities were not mixed and the base architecture was not changed without explicit roadmap authorization.
+
+Minimum validation output for this chat: change summary, modified files, `git diff --stat`, `go test ./...` and `git status`.
+
+##### 1.1.0.5 Close Documentation Lock Result
+
+1.1.0 is closed as the Phase Definition & Documentation Lock for Phase 1.1.
+
+Closure confirmation:
+
+- 1.1.0.0 Scope Confirmation defined the starting scope and confirmed Stage 0 frozen / Stage 1 active.
+- 1.1.0.1 Scope Formalization defined Phase 1.1 as Application Use Case Consolidation with explicit inclusions, exclusions and deferred later-phase work.
+- 1.1.0.2 Boundary Definition defined the technical layer, module and zone boundaries for Phase 1.1.
+- 1.1.0.3 Agent Execution Contract defined the operating contract for VSCode agents and the separation between planning chat and repository execution.
+- 1.1.0.4 Validation Gate Definition defined mandatory validation, documentation, future code and anti-drift gates.
+
+Readiness for 1.1.1 is confirmed: Phase 1.1 has scope, boundaries, agent contract and validation gates; Stage 0 remains frozen, Stage 1 remains active and `docs/roadmap.md` remains the governing document.
+
+The next authorized subphase is 1.1.1 — Endpoint Surface Inventory. No Phase 1.2+ work is authorized by this closure.
 #### 1.1.1 — Endpoint Surface Inventory
 
 - inventory existing HTTP and WebSocket surfaces
@@ -482,6 +578,36 @@ Internal subdivision:
 - 1.1.1.1 — Real-State Extraction: extract the current repository state without assumptions.
 - 1.1.1.2 — Classification & Gap Mapping: classify findings and identify gaps, duplicates or ambiguous ownership.
 - 1.1.1.3 — Audit Closure & Handoff: document findings and hand off only validated work to the next subphase.
+
+##### 1.1.1.0 Use Case Inventory Baseline Result
+
+The initial existing-use-case baseline is recorded in `docs/stage1_phase1_1_use_case_inventory.md`.
+
+1.1.1.0 is documentary only: it inventories current use cases across `internal/app`, `internal/modules/auth`, `internal/modules/user`, `internal/modules/usersettings` and `internal/modules/system`; records duplication, dispersion and doubtful ownership; preserves Stage 0 frozen; and does not authorize code, test, configuration, contract or Phase 1.2+ changes.
+
+##### 1.1.1.1 Use Case Ownership Mapping Result
+
+Ownership mapping for the inventoried use cases is recorded in `docs/stage1_phase1_1_use_case_inventory.md`.
+
+1.1.1.1 is documentary only: it classifies current ownership as clear, partially clear, dispersed or doubtful using repository evidence; records cross-ownership between `auth`, `user`, `usersettings`, `system`, `internal/app` and `internal/core`; and does not resolve or refactor any ownership boundary.
+
+##### 1.1.1.2 Use Case Duplication & Dispersion Review Result
+
+Duplication and dispersion review for the inventoried use cases is recorded in `docs/stage1_phase1_1_use_case_inventory.md`.
+
+1.1.1.2 is documentary only: it classifies verified duplications, partial overlaps, structural dispersion, ambiguous ownership and aligned/no-problem cases across `internal/app`, `internal/modules/auth`, `internal/modules/user`, `internal/modules/usersettings`, `internal/modules/system` and selected `internal/core` support boundaries; and does not correct, refactor, rename or move any implementation.
+
+##### 1.1.1.3 Use Case Consolidation Targets Result
+
+Consolidation targets derived from the inventory, ownership mapping and duplication/dispersion review are recorded in `docs/stage1_phase1_1_use_case_inventory.md`.
+
+1.1.1.3 is documentary only: it defines future targets, separates Phase 1.1 documentation/mapping work from Phase 1.2+ implementation-sensitive work, recommends the next Phase 1.1 execution order and does not implement, refactor, rename, move or correct any code.
+
+##### 1.1.1.4 Inventory & Mapping Closure Result
+
+Inventory and mapping closure for 1.1.1 is recorded in `docs/stage1_phase1_1_use_case_inventory.md`.
+
+1.1.1.4 is documentary only: it confirms that the use-case inventory, ownership mapping, duplication/dispersion review and consolidation targets are documented; confirms readiness for 1.1.2 Application Flow Mapping; records what remains unresolved; and does not implement, refactor, rename, move, delete or correct any code.
 #### 1.1.2 — Application Flow Mapping
 
 - map endpoints to real application flows
@@ -495,6 +621,36 @@ Internal subdivision:
 - 1.1.2.1 — Current Behavior Alignment: align the definition with existing Stage 0 contracts and current code behavior.
 - 1.1.2.2 — Target Rule Documentation: document the target rule, shape or mapping without introducing hidden behavior.
 - 1.1.2.3 — Compatibility Review: confirm the definition does not break frozen contracts or later phase sequencing.
+
+##### 1.1.2.0 Application Layer Consolidation Baseline Result
+
+The application-layer consolidation baseline is recorded in `docs/stage1_phase1_1_use_case_inventory.md`.
+
+1.1.2.0 is documentary only: it identifies the current composition root, module application/provider boundaries, router/runtime wiring, cross-module dependencies and responsibilities that must remain outside `internal/app`; it does not implement consolidation, refactor application code, move files, rename functions or change contracts.
+
+##### 1.1.2.1 Application Wiring Responsibility Map Result
+
+The application-layer wiring responsibility map is recorded in `docs/stage1_phase1_1_use_case_inventory.md`.
+
+1.1.2.1 is documentary only: it maps the real entrypoint, composition root, core service initialization, module service construction, provider wiring, router registration, WebSocket registration and lifecycle responsibilities; it classifies wiring as correct, coupled but acceptable, dispersed, at-risk or requiring later review; and it does not modify code, tests, configuration, routes, provider contracts or runtime behavior.
+
+##### 1.1.2.2 Application Boundary Risk Review Result
+
+The application-layer boundary risk review is recorded in `docs/stage1_phase1_1_use_case_inventory.md`.
+
+1.1.2.2 is documentary only: it classifies boundary risks across `cmd/scavo-server`, `internal/app`, `internal/core`, `auth`, `user`, `usersettings` and `system`; it records which risks affect Phase 1.1 as documentation guardrails and which must be deferred to Phase 1.2+, Phase 1.3 or Phase 1.6; and it does not correct risks, refactor code, move responsibilities, change configuration, alter tests or modify runtime behavior.
+
+##### 1.1.2.3 Application Consolidation Targets Result
+
+Application-layer consolidation targets are recorded in `docs/stage1_phase1_1_use_case_inventory.md`.
+
+1.1.2.3 is documentary only: it defines future targets derived from the application baseline, wiring map and boundary risk review; it separates Phase 1.1 documentation/mapping targets from implementation-sensitive work deferred to Phase 1.2+, Phase 1.3 and Phase 1.6; and it does not implement consolidation, refactor code, move files, rename functions, change provider contracts, alter routes, modify configuration or change runtime behavior.
+
+##### 1.1.2.4 Application Layer Planning Closure Result
+
+Application-layer planning closure for 1.1.2 is recorded in `docs/stage1_phase1_1_use_case_inventory.md`.
+
+1.1.2.4 is documentary only: it confirms that the application-layer baseline, wiring responsibility map, boundary risk review and application consolidation targets are documented; confirms readiness for 1.1.3 Orphan, Duplicate & Ambiguous Surface Review; records what remains unresolved; and does not implement, refactor, rename, move, rewire, alter modules, alter core or modify code.
 #### 1.1.3 — Orphan, Duplicate & Ambiguous Surface Review
 
 - detect endpoints without a clear Stage 1 use case
@@ -1215,4 +1371,3 @@ Internal subdivision:
 - Integration tests
 - Internal testing
 - Release candidate
-

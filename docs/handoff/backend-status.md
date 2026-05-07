@@ -1464,3 +1464,15 @@ Decision taken: confirm the boundary only. This step is documentation and valida
 Working model: planning and coordination happen in chat; repository edits and validation happen through agents operating on the real VSCode working tree.
 
 Next step: 1.1.0.1 — Trunk Documentation Review.
+
+### Stage 1 Handoff — 1.1.0.1 Scope Formalization
+
+1.1.0.1 completed Scope Formalization for Phase 1.1.
+
+Boundary confirmed: Phase 1.1 is Application Use Case Consolidation over existing backend-supported behavior. It may align application layer, domain layer and existing modules around real use cases, clarify endpoint-to-flow intent, review orphaned or duplicate surfaces and document success criteria plus use-case contracts.
+
+Out of scope: new features, Stage 0 contract reopening, unversioned public contract changes, account and identity capability implementation, authorization model refinement beyond consolidation needs, data interaction pattern work, mutation/write-flow work and Stage 1 closure work.
+
+Deferred sequence: 1.2 Account & Identity Product Capabilities, 1.3 Authorization & Permission Model, 1.4 Data Interaction Patterns, 1.5 Mutation & Write Flows, 1.6 System Behavior Consistency and 1.7 End-to-End Validation & Closure.
+
+Next step: 1.1.0.2 — Risk & Drift Register.

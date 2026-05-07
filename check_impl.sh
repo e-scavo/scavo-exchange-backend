@@ -1,0 +1,3 @@
+git diff --stat
+go test ./...
+git status
